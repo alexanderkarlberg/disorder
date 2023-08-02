@@ -1,0 +1,102 @@
+% =========================================================================
+% SciPost LaTeX template
+% Version 2021-08
+%
+% Submissions to SciPost Journals should make use of this template.
+%
+% INSTRUCTIONS: simply look for the `TODO:' tokens and adapt your file.
+%
+% You can also make use of our empty "skeleton" templates for each Journal,
+% e.g. SciPostPhys_skeleton.tex
+% =========================================================================
+\documentclass[submission, PhysCodeb]{SciPost}
+
+% Prevent all line breaks in inline equations.
+\binoppenalty=10000
+\relpenalty=10000
+
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
+\usepackage[bitstream-charter]{mathdesign}
+\urlstyle{sf}
+
+% Fix \cal and \mathcal characters look (so it's not the same as \mathscr)
+\DeclareSymbolFont{usualmathcal}{OMS}{cmsy}{m}{n}
+\DeclareSymbolFontAlphabet{\mathcal}{usualmathcal}
+
+\newcommand{\hoppet}{{\tt HOPPET}}
+\newcommand{\disent}{{\tt disent}}
+\newcommand{\provbfh}{{\tt proVBFH}}
+\newcommand{\disaster}{{\tt disaster++}}
+\newcommand{\nlojet}{{\tt nlojet}}
+
+\begin{document}
+
+\begin{center}{\Large \textbf{
+disorder: deep inelastic scattering at high orders\\
+}}\end{center}
+
+\begin{center}
+Alexander Karlberg
+\end{center}
+
+\begin{center}
+CERN, Theoretical Physics Department, CH-1211 Geneva 23, Switzerland
+\\
+{\small \sf alexander.karlberg@cern.ch}
+\end{center}
+
+\begin{center}
+\today
+\end{center}
+
+% For convenience during refereeing (optional),
+% you can turn on line numbers by uncommenting the next line:
+%\linenumbers
+% You should run LaTeX twice in order for the line numbers to appear.
+
+\section*{Abstract}
+{\bf
+% TODO: write your abstract here.
+We present a fortran 95 code capable of computing QCD corrections in deep inelastic scattering.
+}
+
+
+% TODO: include a table of contents (optional)
+% Guideline: if your paper is longer that 6 pages, include a TOC
+% To remove the TOC, simply cut the following block
+\vspace{10pt}
+\noindent\rule{\textwidth}{1pt}
+\tableofcontents\thispagestyle{fancy}
+\noindent\rule{\textwidth}{1pt}
+\vspace{10pt}
+
+
+\section{Introduction}
+\label{sec:intro}
+Some references: \hoppet{}~\cite{Salam:2008qg}, NNLO coefficient functions~\cite{vanNeerven:1999ca,vanNeerven:2000uj}, N3LO coefficient functions~\cite{Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}, \provbfh{}~\cite{Cacciari:2015jma}, \disent{}~\cite{Catani:1996vz} with bug fix fromRefs.~\cite{Borsa:2020ulb,Borsa:2020yxh}, \nlojet{}~\cite{Nagy:2001xb}, \disaster{}~\cite{Graudenz:1997gv}
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+\section*{Acknowledgements}
+The author is grateful for discussions with Gavin Salam regarding {\tt disent}. 
+
+
+\begin{appendix}
+
+  \section{An appendix}
+
+\end{appendix}
+
+\bibliography{bibliography.bib}
+
+\nolinenumbers
+
+\end{document}
