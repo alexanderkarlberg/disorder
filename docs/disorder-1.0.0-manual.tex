@@ -34,13 +34,14 @@
 \newcommand{\provbfh}{{\tt proVBFH}}
 \newcommand{\disaster}{{\tt disaster++}}
 \newcommand{\nlojet}{{\tt nlojet}}
+\newcommand{\as}{\alpha_{\mathrm{s}}}
 
 \begin{document}
 \begin{flushright}
 CERN-TH-2023-???
 \end{flushright}
 \begin{center}{\Large \textbf{
-disorder: deep inelastic scattering at high orders\\
+disorder: Deep inelastic scattering at high orders\\
 }}\end{center}
 
 \begin{center}
@@ -65,8 +66,21 @@ CERN, Theoretical Physics Department, CH-1211 Geneva 23, Switzerland
 \section*{Abstract}
 {\bf
 % TODO: write your abstract here.
-We present a fortran 95 code capable of computing QCD corrections in deep inelastic scattering.
-}
+We present a Fortran 77/95 code capable of computing QCD corrections
+in deep inelastic scattering (DIS). The code uses the
+projection-to-Born method to combine an exclusive DIS + 1 jet
+calculation with the inclusive DIS structure functions, thereby
+obtaining fully differential DIS predictions at $\mathcal{O}(\as^2)$
+in QCD. The code is lightweight and fast, and yet includes the most
+common functionalities found in typical perturbative QCD programs,
+like automatic renormalisation and factorisation scale uncertainties,
+options to run and combine multiple seeds, and interfaces to {\tt
+  fastjet} and {\tt LHAPDF}. Due to the underlying exclusive DIS + 1
+jet code, the program also provides stable results in the infrared,
+relevant for extracting logarithmic coefficients for analytic
+resummations. As a by-product the code also provides access to the DIS
+structure functions and (reduced) cross sections up to
+$\mathcal{O}(\as^3)$.}
 
 
 % TODO: include a table of contents (optional)
