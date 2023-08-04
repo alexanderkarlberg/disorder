@@ -33,7 +33,7 @@
 \newcommand{\disent}{{\tt disent}}
 \newcommand{\provbfh}{{\tt proVBFH}}
 \newcommand{\disaster}{{\tt disaster++}}
-\newcommand{\nlojet}{{\tt nlojet}}
+\newcommand{\nlojet}{{\tt nlojet++}}
 \newcommand{\as}{\alpha_{\mathrm{s}}}
 
 \begin{document}
@@ -70,16 +70,16 @@ We present a Fortran 77/95 code capable of computing QCD corrections
 in deep inelastic scattering (DIS). The code uses the
 projection-to-Born method to combine an exclusive DIS + 1 jet
 calculation with the inclusive DIS structure functions, thereby
-obtaining fully differential DIS predictions at $\mathcal{O}(\as^2)$
-in QCD. The code is lightweight and fast, and yet includes the most
-common functionalities found in typical perturbative QCD programs,
-like automatic renormalisation and factorisation scale uncertainties,
-options to run and combine multiple seeds, and interfaces to {\tt
-  fastjet} and {\tt LHAPDF}. Due to the underlying exclusive DIS + 1
-jet code, the program also provides stable results in the infrared,
-relevant for extracting logarithmic coefficients for analytic
-resummations. As a by-product the code also provides access to the DIS
-structure functions and (reduced) cross sections up to
+obtaining fully differential DIS predictions at
+$\mathcal{O}(\as^2)$. The code is lightweight and fast, and yet
+includes the most common functionalities found in typical perturbative
+QCD programs, like automatic renormalisation and factorisation scale
+uncertainties, options to run and combine multiple seeds, and
+interfaces to {\tt fastjet} and {\tt LHAPDF}. Due to the underlying
+exclusive DIS + 1 jet code, the program also provides stable results
+in the infrared, relevant for extracting logarithmic coefficients for
+analytic resummations. As a by-product the code provides access
+to the DIS structure functions and (reduced) cross sections up to
 $\mathcal{O}(\as^3)$.}
 
 
@@ -97,6 +97,14 @@ $\mathcal{O}(\as^3)$.}
 \label{sec:intro}
 Some references: \hoppet{}~\cite{Salam:2008qg}, NNLO coefficient functions~\cite{vanNeerven:1999ca,vanNeerven:2000uj}, N3LO coefficient functions~\cite{Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz}, \provbfh{}~\cite{Cacciari:2015jma}, \disent{}~\cite{Catani:1996vz} with bug fix fromRefs.~\cite{Borsa:2020ulb,Borsa:2020yxh}, \nlojet{}~\cite{Nagy:2001xb}, \disaster{}~\cite{Graudenz:1997gv}
 
+\section{The DIS process}
+\label{sed:dis}
+
+\section{Running the program}
+\label{sec:running}
+
+\section{Benchmarks and results}
+\label{sec:benchmarks}
 
 \section{Conclusion}
 \label{sec:conclusion}
