@@ -335,7 +335,7 @@ C---  CONSTRUCT MOMENTA (IN THE BREIT FRAME, AS IT HAPPENS)
 C---CALCULATE WEIGHT
       W=Y/(16*PI*Q2**2)*QJAC*YJAC
 C---  AB-return x*dsigma/dx, same as NLOJET++
-      if (xmax==xmin) w=w*y
+!      if (xmax==xmin) w=w*y
       END
 C-----------------------------------------------------------------------
       SUBROUTINE GENTHR(P,W,*)
