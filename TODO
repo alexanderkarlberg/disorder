@@ -1,0 +1,12 @@
+Items to be done before release/publication of v1.0:
+
+*) Modify the histogramming/analysis routines so that they
+   1) Handle multiple weights properly when doing scale uncert
+   2) Print header information (need a header class somehwere to store all the info)
+
+*) Modify disent so it can pass an array of weights when doing scale variation
+
+*) cmake?
+
+*) Clean up code
+

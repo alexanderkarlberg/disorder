@@ -12,23 +12,24 @@ module parameters
   real(dp), parameter, public :: gev2pb = 389379660.0_dp
   real(dp), parameter, public :: gev2nb = 389379.66_dp
   real(dp), parameter, public :: eps    = 1.0e-14_dp
-  real(dp), parameter, public :: scales_mur(1:9) = &
+  integer, parameter, public :: maxscales = 9
+  real(dp), parameter, public :: scales_mur(1:maxscales) = &
        & (/1.0_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 2.0_dp, 0.5_dp, 0.25_dp, 4.0_dp/)
-  real(dp), parameter, public :: scales_muf(1:9) = &
+  real(dp), parameter, public :: scales_muf(1:maxscales) = &
        & (/1.0_dp, 2.0_dp, 0.5_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 0.25_dp, 4.0_dp/)
   real(dp), public :: xmuf, xmur, Qmin
   real(dp), public :: sin_thw, mw, mz, w_width, z_width
   real(dp), public :: sqrts, S, Q0_cut_sq
   integer,  public :: order_min, order_max, iseed, scale_choice
-  integer,  public :: nflav, ipdf, it1, itmx1, itmx2, ncall1, ncall2
+  integer,  public :: nflav, ipdf, it1, itmx1, itmx2, ncall1, ncall2, nscales
   character * 4, public :: seedstr
   character * 17, public :: scalestr(9)
   character(len=50), public :: pdfname
   integer, public :: nmempdf, outdev
   logical, public :: pdfuncert, scaleuncert3, scaleuncert7, scaleuncert9, fillplots&
-       &, p2b, gluon_only, noZ, positron, Zonly, intonly
+       &, p2b, gluon_only, noZ, positron, Zonly, intonly, scaleuncert, new_scaleuncert
   real(dp), public :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
-       & Eh, El
+       & Eh, El, sigma_all_scales(maxscales)
   character (len=4), private :: order
   real(dp), private :: Q, x, y
   real(dp), public :: pbornlab(0:3,2+2), preallab(0:3,2+3), prreallab(0:3,2+4)
@@ -121,6 +122,19 @@ contains
     scaleuncert3 = log_val_opt ("-3scaleuncert")
     scaleuncert7 = log_val_opt ("-7scaleuncert")
     scaleuncert9 = log_val_opt ("-9scaleuncert")
+    new_scaleuncert = log_val_opt ("-new-scaleuncert")
+    if(new_scaleuncert) scale_choice = 2
+    scaleuncert = scaleuncert3.or.scaleuncert7.or.scaleuncert9
+    if(scaleuncert9) then
+       Nscales = 9
+    elseif(scaleuncert3) then
+       Nscales = 3
+    elseif(scaleuncert7) then
+       Nscales = 7
+    else
+       Nscales = 1
+    endif
+     
     p2b = .false.
     p2b = log_val_opt("-p2b")
     if(.not.noZ.and.p2b) stop 'Cannot do Z in p2b yet'
@@ -243,6 +257,8 @@ contains
     scalestr(9) = '_μR_4.0_μF_4.0_'
 
     Qmin = 1.0_dp
+
+    sigma_all_scales = 0.0_dp
 
     !outdev = idev_open_opt("-out")
 

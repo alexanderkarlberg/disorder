@@ -16,8 +16,8 @@ program disorder
   real(dp) :: integ, error_int, proba, tini, tfin
   real(dp) :: sigma_tot, error_tot, region(1:2*ndim)
   real(dp) :: res(0:nmempdfMAX), central, errminus, errplus, errsymm
-  real(dp) :: res_scales(1:9),maxscale,minscale
-  integer :: iscales,Nscales
+  real(dp) :: res_scales(1:maxscales),maxscale,minscale
+  integer :: iscales
   character * 100 :: analysis_name, histo_name, scale_string
   character * 3 :: pdf_string
 
@@ -69,17 +69,6 @@ program disorder
      imempdf = nmempdf
      nmempdf_start = nmempdf
      
-     if(scaleuncert9) then
-        Nscales = 9
-     elseif(scaleuncert3) then
-        Nscales = 3
-     elseif(scaleuncert7) then
-        Nscales = 7
-     else
-        Nscales = 1
-     endif
-     
-
      write(6,*) "PDF member:",imempdf
      call InitPDF(imempdf)
      call getQ2min(0,Qmin)
@@ -93,7 +82,7 @@ program disorder
      endif
      
      do iscales = 1,Nscales
-        call StartStrFct(sqrts, order_max, nflav, xmur*scales_mur(iscales), &
+        call StartStrFct(sqrts*max(scales_mur(iscales),scales_muf(iscales)), order_max, nflav, xmur*scales_mur(iscales), &
              & xmuf*scales_muf(iscales), scale_choice, mz, .true., Qmin, mw, mz)
         call read_PDF()
         call InitStrFct(order_max, separate_orders = .true.)
@@ -181,16 +170,6 @@ program disorder
 
   if (nmempdf_end .gt. nmempdfMAX) stop "ERROR: increase nmempdfMAX"
 
-  if(scaleuncert9) then
-     Nscales = 9
-  elseif(scaleuncert3) then
-     Nscales = 3
-  elseif(scaleuncert7) then
-     Nscales = 7
-  else
-     Nscales = 1
-  endif
-
   do imempdf = nmempdf_start,nmempdf_end
      write(6,*) "PDF member:",imempdf
      call InitPDF(imempdf)
@@ -203,7 +182,54 @@ program disorder
         print*, 'But running with input value of: ', sqrt(Q2min)
         stop
      endif
+     if(new_scaleuncert) then
+        call StartStrFct(sqrts, order_max, nflav, one, &
+             & one, scale_choice, mz, .true., Qmin, mw, mz)
+        call read_PDF()
+        call InitStrFct(order_max, separate_orders = .true.)
 
+        region(1:ndim)        = 0.0_dp
+        region(ndim+1:2*ndim) = 1.0_dp
+        sigma_tot = 0.0_dp
+        error_tot = 0.0_dp
+        
+        
+        ! vegas warmup call
+        if(ncall1.gt.0.and.itmx1.gt.0) then 
+           ! Skip grid generation if grid is being read from file
+           writeout=.true.
+           fillplots = .false.
+           scaleuncert = .false.
+           call vegas(region,ndim,dsigma,0,ncall1,itmx1,0,integ,error_int,proba)
+           scaleuncert = .true.
+           writeout=.false.
+           ! set random seed to current idum value
+           saveseed = idum
+        elseif (imempdf.eq.nmempdf_start) then
+           ! if reading in grids from first loop iteration, make sure
+           ! saveseed is initialized to correct value
+           saveseed = iseed
+        endif
+
+        if(ncall2.lt.1) return
+        if(itmx2.lt.1) return
+        ! vegas main call
+        ! set random seed to saved value 
+        idum     = -saveseed
+        fillplots = .true.
+        call vegas(region,ndim,dsigma,1,ncall2,itmx2,0,integ,error_int,proba)
+        readin = .true.
+        ! add integral to the total cross section
+        sigma_tot = sigma_tot + integ
+        error_tot = error_tot + error_int**2
+        
+        res(imempdf) = integ
+        res_scales(1:nscales) = sigma_all_scales(1:nscales) 
+        print*, 'sigma_tot', integ
+        print*, 'res_scales', res_scales(1:nscales)
+        
+!        stop 'GOOD'
+     else
      do iscales = 1,Nscales
         ! initialise hoppet, for now with fixed scale_choice = 1 (meaning photon virtuality)
 !        call StartStrFct(sqrts, order_max, nflav, xmur*scales_mur(iscales), &
@@ -274,6 +300,7 @@ program disorder
         call resethists
   
      enddo
+     endif
      if(imempdf.eq.nmempdf_start) then ! First PDF, this is where we compute scale uncertainties
         maxscale = maxval(res_scales(1:Nscales)) 
         minscale = minval(res_scales(1:Nscales))
@@ -319,10 +346,10 @@ program disorder
      write(11,'(a)') ''
      write(11,'(a)') ''
      write(11,'(a)') '# Summary:'
-     write(11,'(a,f10.5,a)') '# sigma =', central,' pb'
-     write(11,'(a,f9.5,a,a,f9.3,a)') '# QCD scale uncertainty (+) =', maxscale-central, ' pb', &
+     write(11,'(a,f16.5,a)') '# sigma =', central,' pb'
+     write(11,'(a,f16.5,a,a,f9.3,a)') '# QCD scale uncertainty (+) =', maxscale-central, ' pb', &
           & ' (', ((maxscale-central)/central)*100.0_dp, ' %)'
-     write(11,'(a,f9.5,a,a,f9.3,a)') '# QCD scale uncertainty (-) =', minscale-central, ' pb', &
+     write(11,'(a,f16.5,a,a,f9.3,a)') '# QCD scale uncertainty (-) =', minscale-central, ' pb', &
           & ' (', ((minscale-central)/central)*100.0_dp, ' %)'
      write(11,'(a,f10.3,a)') '# MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
   elseif(.not.scaleuncert3.and..not.scaleuncert7.and..not.scaleuncert9) then
@@ -453,7 +480,7 @@ contains
       X=ETA*Q2/(2*DOT(P,1,5))
       Y=DOT(P,1,5)/DOT(P,1,6)
       
-      as2pi = alphasPDF(xmur*scales_mur(iscales)*Qval)/pi * 0.5d0
+      as2pi = alphasPDF(xmur*scales_mur(iscales)*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
       call p2bmomenta(x,y,Q2,p2bbreit,p2blab)
       Qlab(:) = p2blab(:,1) - p2blab(:,3)
       recompute = .false.
