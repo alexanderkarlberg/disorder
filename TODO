@@ -4,9 +4,13 @@ Items to be done before release/publication of v1.0:
    1) Handle multiple weights properly when doing scale uncert
    2) Print header information (need a header class somehwere to store all the info)
 
-*) Modify disent so it can pass an array of weights when doing scale variation
+*) Modify disent so it can pass an array of weights when doing scale
+ variation (virtwo, virthr, colthr and colfor seem to be the issue
+ here. They all call KPFUNS which is where the scale variation takes
+ place)
 
 *) cmake?
 
-*) Clean up code
+*) Clean up code (e.g. gluon only)
 
+*) write paper

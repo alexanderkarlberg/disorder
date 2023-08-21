@@ -23,7 +23,7 @@ module parameters
   integer,  public :: order_min, order_max, iseed, scale_choice
   integer,  public :: nflav, ipdf, it1, itmx1, itmx2, ncall1, ncall2, nscales
   character * 4, public :: seedstr
-  character * 17, public :: scalestr(9)
+  character * 17, public :: scalestr(maxscales)
   character(len=50), public :: pdfname
   integer, public :: nmempdf, outdev
   logical, public :: pdfuncert, scaleuncert3, scaleuncert7, scaleuncert9, fillplots&

@@ -11,7 +11,7 @@ include Makefile.inc
 # main program and modules to be compiled
 MAIN = disorder
 #MODULES = types consts integration phase_space parameters io_utils lcl_dec matrix_element histo mod_dsigma
-MODULES = integration phase_space parameters io_utils lcl_dec matrix_element mod_dsigma structure_functions_gluon_only disent-lib
+MODULES = integration phase_space parameters io_utils lcl_dec matrix_element mod_dsigma structure_functions_gluon_only disent-lib mod_analysis
 ANALYSIS = fastjetfortran pwhg_bookhist-multi 
 ANALYSIS += sigmaR
 #ANALYSIS += analysis_caesar
@@ -39,7 +39,7 @@ OBJ=$(PWD)/obj
 ANA=$(PWD)/analysis
 VPATH=./:$(SRC):/$(OBJ):/$(ANA)
 
-FFLAGS= -O3 -ffixed-line-length-132 
+FFLAGS= -O3 -ffixed-line-length-132
 FFLAGS+= $(shell $(HPEXEC) --fflags)
 INCLUDE= -I$(ANA) -I$(SRC) $(wildcard *.h)
 FFLAGS+= $(INCLUDE) -J$(OBJ)
@@ -79,7 +79,7 @@ parameters.o: io_utils.o lcl_dec.o integration.o
 matrix_element.o: parameters.o structure_functions_gluon_only.o
 #histo.o: types.o consts.o
 analysis.o: parameters.o
-
+mod_analysis.o: parameters.o
 # make clean
 clean:
 	rm -f $(OBJ)/*.o $(OBJ)/*.mod *~ *.log fort* $(MAIN)

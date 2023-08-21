@@ -3,35 +3,39 @@
       INTEGER NEV, NFL, USD1, USD2, ORDER
       DOUBLE PRECISION S, CF, CA, TR, SCALE, NPOW1, NPOW2, CUTOFF, SCL
       EXTERNAL USER, CUTS
+      LOGICAL SCALE_VAR
 
       CF = 4d0/3d0
       CA = 3d0
       TR = 0.5d0
       NPOW1 = 2D0
       NPOW2 = 4D0
-      CUTOFF = 1d-8      
+      CUTOFF = 1d-8
+      SCALE_VAR = .false.
 
       CALL DISENTFULL(NEV,S,NFL,USER,CUTS,USD1,USD2,NPOW1,NPOW2,CUTOFF
-     $     ,SCALE,ORDER,CF,CA,TR)
+     $     ,SCALE,ORDER,CF,CA,TR,SCALE_VAR)
       END
 
       SUBROUTINE DISENTEXTENDED(NEV,S,NFL,USER,CUTS,USD1,USD2,ORDER
-     $     ,SCALE,CF,CA,TR)
+     $     ,SCALE,CF,CA,TR,SCALE_VAR)
       IMPLICIT NONE
       INTEGER NEV, NFL, USD1, USD2, ORDER
       DOUBLE PRECISION S, CF, CA, TR, SCALE, NPOW1, NPOW2, CUTOFF
       EXTERNAL USER, CUTS
+      LOGICAL SCALE_VAR
 
       NPOW1 = 2D0
       NPOW2 = 4D0
-      CUTOFF = 1d-8      
+      CUTOFF = 1d-8
+      SCALE_VAR = .false.
 
       CALL DISENTFULL(NEV,S,NFL,USER,CUTS,USD1,USD2,NPOW1,NPOW2,CUTOFF
-     $     ,SCALE,ORDER,CF,CA,TR)
+     $     ,SCALE,ORDER,CF,CA,TR,SCALE_VAR)
       END
       
       SUBROUTINE DISENTFULL(NEV,S, NFL,USER,CUTS,USD1,USD2,NPOW1,NPOW2
-     $     ,CUTOFF_IN, SCALE_in,ORDER,CF_in,CA_in,TR_in)
+     $     ,CUTOFF_IN, SCALE_in,ORDER,CF_in,CA_in,TR_in,SCALE_VAR_in)
       IMPLICIT NONE
 C---CALCULATE DIS EVENT FEATURES TO NEXT-TO-LEADING ORDER
 C   ACCORDING TO THE METHOD OF CATANI AND SEYMOUR NPB485 (1997) 291
@@ -97,6 +101,10 @@ C
       COMMON  /SAMPLE/ XPOW,NPOW
       EXTERNAL USER,CUTS
       DATA ZERO/13*0/
+!     AK: Scale variations
+      LOGICAL SCALE_VAR, SCALE_VAR_in
+      DOUBLE PRECISION SCL_WEIGHT(3)
+      COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
 C---PRINT OPENING MESSAGE
       WRITE (6,'(/2A)')  ' This is DISENT, a program for calculating',
      $     ' jet quantities in'
@@ -147,6 +155,7 @@ C---SCHEME IS 0 FOR MSbar AND OTHERWISE FOR DIS
 C---SCALE IS FACTORIZATION SCALE**2/Q**2
 c~       SCALE=2
       SCALE=SCALE_in
+      SCALE_VAR = SCALE_VAR_in
 !     AK: This converts to picobarn
       NRM=3.8937966d8
 C---PARAMETERS RELATED TO IMPORTANCE SAMPLING
@@ -794,8 +803,9 @@ C-----------------------------------------------------------------------
       IMPLICIT NONE
 C---CALCULATE THE THREE-PARTON MATRIX-ELEMENT AT NEXT-TO-LEADING ORDER
       INTEGER I
-      DOUBLE PRECISION S,P(4,7),V(-6:6),M(-6:6),X,XJAC,XMIN,
-     $     QQ,GQ,QG,GG,KQF,KGF,PQF,PGF,L12,L13,L23,DOT,ERTV,LEIV,EMSQ
+      DOUBLE PRECISION S,P(4,7),V(-6:6),M(-6:6),X,XJAC,XMIN, QQ,GQ,QG,GG
+     $     ,KQF,KGF,PQF,PGF,L12,L13,L23,DOT,ERTV,LEIV,EMSQ,QQscl(3)
+     $     ,GQscl(3),QGscl(3),GGscl(3)
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
@@ -834,8 +844,17 @@ C---CALCULATE THE COLLINEAR COUNTERTERM
       KGF=1.5
       PQF=-((CF-CA/2)*L12+CA/2*L13)/CF
       PGF=-(L12+L13)/2
+      QQscl = QQ
+      GQscl = GQ
+      QGscl = QG
+      GGscl = GG
       CALL KPFUNS(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
-C---THE TOTAL
+      print*, 'QQ,GQ,QG,GG',QQ,GQ,QG,GG
+      CALL KPFUNS_SCL_VAR(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQscl,GQscl,QGscl
+     $     ,GGscl)
+      print*, 'QQscl,GQscl,QGscl,GGscl',QQscl,GQscl,QGscl,GGscl
+      stop
+C---  THE TOTAL
       V(0)=V(0)+GG*M(0)
       DO I=-6,6
         IF (I.NE.0) THEN
@@ -1010,6 +1029,64 @@ C---THE SMOOTH FUNCTIONS
         GQ=GQ+XJAC*TR*((Z**2+(1-Z)**2)*(L-LOG(SCALE)-PQF)+2*Z*(1-Z))
         QG=QG+XJAC*CF*((1+(1-Z)**2)/Z*(L-LOG(SCALE)-PGF)+Z)
         GG=GG+XJAC*CA*((1-Z)/Z-1+Z*(1-Z))*2*(L-LOG(SCALE)-PGF)
+        IF (SCHEME.NE.0) THEN
+          DIS=XJAC*TR*((Z**2+(1-Z)**2)*L+8*Z*(1-Z)-1)
+          GQ=GQ-DIS
+          GG=GG+2*NF*DIS
+        ENDIF
+      ENDIF
+      END
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+      SUBROUTINE KPFUNS_SCL_VAR(X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
+      IMPLICIT NONE
+C---EVALUATE THE SUM OF THE K AND P FUNCTIONS.
+C   IF X<0, RETURN THE DELTA-FUNCTION AND `PLUS' SUBTRACTIONS FOR -X
+C   KQF=-SUM_I T_I.T_Q/T_I.T_I GAMMA_I/C_Q
+C   PQF=-SUM_I T_I.T_Q/T_Q.T_Q*LOG(Q^2/2P_I.P_Q)
+C   WHERE Q IS AN EXTERNALLY AGREED RENORMALIZATION POINT
+C   AND LIKEWISE KGF AND PGF
+      DOUBLE PRECISION X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ(3),GQ(3),QG(3)
+     $     ,GG(3),Z,L,S,DIS,DILOG,D,LM
+      INTEGER SCHEME,NF
+      DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
+      COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
+      LOGICAL SCALE_VAR
+      DOUBLE PRECISION SCL_WEIGHT(3)
+      COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
+      DOUBLE PRECISION MUF(3)
+      DATA MUF /0.25d0, 1d0, 4.0d0/
+      Z=ABS(X)
+      S=1
+      IF (X.LE.0) S=-1
+      L=LOG((1-Z)/Z)
+C---THE PLUS DISTRIBUTIONS
+      QQ=QQ+S*XJAC*CF*2/(1-Z)*(L-KQF/2)
+     $     -S*XJAC*CF*(1+Z**2)/(1-Z)*(LOG(MUF)+PQF)
+      GG=GG+S*XJAC*CA*2/(1-Z)*(L-KGF/2)
+     $     -S*XJAC*CA*2/(1-Z)*(LOG(MUF)+PGF)
+      IF (SCHEME.NE.0) THEN
+        DIS=S*XJAC*CF*((1+Z**2)/(1-Z)*(L-0.75)+0.25*(9+5*Z))
+        QQ=QQ-DIS
+        QG=QG+DIS
+      ENDIF
+      IF (X.LE.0) THEN
+C---THE DELTA FUNCTIONS
+        D=DILOG(1-XMIN)
+        LM=LOG(1-XMIN)
+        QQ=QQ-CF*(5-PISQ+KQF+PISQ/3-LM**2-2*D+KQF*LM
+     $       +(2*LM+XMIN+XMIN**2/2)*PQF)
+        QQ=QQ-CF*(2*LM+XMIN+XMIN**2/2)*LOG(MUF)
+        GG=GG-CA*(50D0/9-PISQ+KGF+PISQ/3-LM**2-2*D+KGF*LM
+     $       +2*LM*(LOG(MUF)+PGF))+TR*NF*16D0/9
+     $       -(11D0/6*CA-2D0/3*NF*TR)*PGF
+        GG=GG-(11D0/6*CA-2D0/3*NF*TR)*LOG(MUF)
+      ELSE
+C---THE SMOOTH FUNCTIONS
+        QQ=QQ+XJAC*CF*(-(1+Z)*L+(1-Z))
+        GQ=GQ+XJAC*TR*((Z**2+(1-Z)**2)*(L-LOG(MUF)-PQF)+2*Z*(1-Z))
+        QG=QG+XJAC*CF*((1+(1-Z)**2)/Z*(L-LOG(MUF)-PGF)+Z)
+        GG=GG+XJAC*CA*((1-Z)/Z-1+Z*(1-Z))*2*(L-LOG(MUF)-PGF)
         IF (SCHEME.NE.0) THEN
           DIS=XJAC*TR*((Z**2+(1-Z)**2)*L+8*Z*(1-Z)-1)
           GQ=GQ-DIS

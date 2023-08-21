@@ -190,7 +190,7 @@ contains
              endif
           end do
           
-          res(iscale) = (                  x * yDIS**2 * F1 &
+          res(iscale) = (           x * yDIS**2 * F1 &
                +                   (one - yDIS) * F2 &
                + x * yDIS * (one - half * yDIS) * F3)
           
