@@ -11,13 +11,13 @@ include Makefile.inc
 # main program and modules to be compiled
 MAIN = disorder
 #MODULES = types consts integration phase_space parameters io_utils lcl_dec matrix_element histo mod_dsigma
-MODULES = integration phase_space parameters io_utils lcl_dec matrix_element mod_dsigma structure_functions_gluon_only disent-lib mod_analysis
+MODULES = integration phase_space parameters io_utils lcl_dec matrix_element mod_dsigma disent-lib mod_analysis
 ANALYSIS = fastjetfortran pwhg_bookhist-multi 
-ANALYSIS += sigmaR
+#ANALYSIS += sigmaR
 #ANALYSIS += analysis_caesar
 #ANALYSIS += analysis_H1_2006
 #ANALYSIS += analysis_EvShpTest
-#ANALYSIS += jets_in_the_lab_frame 
+ANALYSIS += jets_in_the_lab_frame 
 #ANALYSIS += vbf_analysis
 #ANALYSIS += analysis_event_shapes
 FASTJET_CONFIG=$(shell which fastjet-config)

@@ -27,7 +27,7 @@
       jacborn = jac(1)
 !     skip phase space points with vanishing jacobian or with Q < Qmin
       if (.not.(jac(1).ne.0d0).and.(Qsq.gt.(Qmin**2))) return
-      if(scaleuncert.and.new_scaleuncert) then
+      if(scaleuncert) then
          dsigma_all_scales = eval_matrix_element_scale_variation(order_min,order_max, x, y, Qsq, nscales)
          dsigma_all_scales = dsigma_all_scales * gev2pb * jacborn 
          dsigma = dsigma_all_scales(1)
@@ -36,6 +36,7 @@
       else
          dsigma = eval_matrix_element(order_min,order_max, x, y, Qsq)
          dsigma = dsigma * gev2pb * jacborn
+         dsigma_all_scales = dsigma * vegas_weight
       endif
       
 !     remove the rare outliers where we get dsigma = NaN
@@ -44,7 +45,7 @@
          dsigma_all_scales = 0d0
       endif
       if(fillplots) then
-         call user_analysis(4,dsigma*vegas_ncall*vegas_weight,x,y,Qsq)
+         call user_analysis(4,dsigma_all_scales*vegas_ncall,x,y,Qsq)
          call pwhgaccumup
       endif
       end function dsigma

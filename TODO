@@ -1,16 +1,21 @@
 Items to be done before release/publication of v1.0:
 
 *) Modify the histogramming/analysis routines so that they
-   1) Handle multiple weights properly when doing scale uncert
+   1) Handle multiple weights properly when doing scale uncert [DONE]
    2) Print header information (need a header class somehwere to store all the info)
-
-*) Modify disent so it can pass an array of weights when doing scale
- variation (virtwo, virthr, colthr and colfor seem to be the issue
- here. They all call KPFUNS which is where the scale variation takes
- place)
 
 *) cmake?
 
 *) Clean up code (e.g. gluon only)
 
 *) write paper
+
+*) Fix pdf interface so it uses fixed nf in the coupling as
+ well. Check consistency between disent and hoppet
+
+*) Add NPOW, CUTOFF etc to input
+
+*) COLFOR has a weird feature that W(0) is set to zero in a very
+ complicated way. Check against results from Alex.
+
+*) Do check with Alex at LO/NLO/NNLO

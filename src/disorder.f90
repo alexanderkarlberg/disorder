@@ -8,7 +8,6 @@ program disorder
   use integration
   use types
   use mod_dsigma
-  use structure_functions_gluon_only
   implicit none
   integer, parameter :: ndim = 7 ! dimension for vegas integration
   integer, parameter :: nmempdfMAX = 200 ! max number of pdfs
@@ -17,9 +16,9 @@ program disorder
   real(dp) :: sigma_tot, error_tot, region(1:2*ndim)
   real(dp) :: res(0:nmempdfMAX), central, errminus, errplus, errsymm
   real(dp) :: res_scales(1:maxscales),maxscale,minscale
-  integer :: iscales
   character * 100 :: analysis_name, histo_name, scale_string
   character * 3 :: pdf_string
+  logical :: scaleuncert_lcl
 
   call cpu_time(tini)
 
@@ -31,20 +30,173 @@ program disorder
   ! Initialise PDF
   call initPDFSetByName(pdfname)
 
-  if(run_disent.and.(.not.p2b)) then
-     print*, 'Calling DISENT with'
-     print*, 'NF  = ', nflav
-     print*, 'NEV = ', ncall2
-
-     call InitPDF(0)
+  if(inclusive) then
+     if (pdfuncert) then
+        nmempdf_start = 0
+        call numberPDF(nmempdf_end)
+     else
+        nmempdf_start = nmempdf
+        nmempdf_end   = nmempdf
+     endif
      
-     ! Careful, it seems disent runs with μR = μF
-!     if(xmur.ne.xmuf.and.(order_max.ge.3)) stop 'With DISENT we must run with μR = μF'
-     call DISENT(ncall2,S,nflav,user,dis_cuts,12345+iseed-1,67890+iseed-1,order_max-1,xmuf**2)
-     call finalise_histograms('disent')
-
-     call exit()
-  elseif(run_disent.and.p2b) then
+     if (nmempdf_end .gt. nmempdfMAX) stop "ERROR: increase nmempdfMAX"
+     
+     do imempdf = nmempdf_start,nmempdf_end
+        write(6,*) "PDF member:",imempdf
+        call InitPDF(imempdf)
+        call getQ2min(0,Qmin)
+        Qmin = sqrt(Qmin)
+        print*, 'Qmin', Qmin
+        
+        if(Qmin.gt.sqrt(Q2min)) then
+           print*, 'WARNING: PDF Qmin = ', Qmin
+           print*, 'But running with input value of: ', sqrt(Q2min)
+           stop
+        endif
+        
+        scaleuncert_lcl = scaleuncert
+        
+        call StartStrFct(sqrts, order_max, nflav, one, &
+             & one, scale_choice, mz, .true., Qmin, mw, mz)
+        call read_PDF()
+        call InitStrFct(order_max, separate_orders = .true.)
+        
+        region(1:ndim)        = 0.0_dp
+        region(ndim+1:2*ndim) = 1.0_dp
+        sigma_tot = 0.0_dp
+        error_tot = 0.0_dp
+        
+        
+        ! vegas warmup call
+        if(ncall1.gt.0.and.itmx1.gt.0) then 
+           ! Skip grid generation if grid is being read from file
+           writeout=.true.
+           fillplots = .false.
+           scaleuncert = .false.
+           call vegas(region,ndim,dsigma,0,ncall1,itmx1,0,integ,error_int,proba)
+           scaleuncert = scaleuncert_lcl
+           writeout=.false.
+           ! set random seed to current idum value
+           saveseed = idum
+        elseif (imempdf.eq.nmempdf_start) then
+           ! if reading in grids from first loop iteration, make sure
+           ! saveseed is initialized to correct value
+           saveseed = iseed
+        endif
+        
+        if(ncall2.lt.1) return
+        if(itmx2.lt.1) return
+        ! vegas main call
+        ! set random seed to saved value 
+        idum     = -saveseed
+        fillplots = .true.
+        call vegas(region,ndim,dsigma,1,ncall2,itmx2,0,integ,error_int,proba)
+        readin = .true.
+        ! add integral to the total cross section
+        sigma_tot = sigma_tot + integ
+        error_tot = error_tot + error_int**2
+        
+        res(imempdf) = integ
+        res_scales(1:nscales) = sigma_all_scales(1:nscales) 
+        
+        ! print total cross section and error into file  
+        ! construct name of output file
+        call pwhgsetout
+        write(pdf_string,"(I3.3)") imempdf
+        scale_string = "_pdfmem_"//trim(pdf_string)
+        if (order_max.eq.1) then
+           histo_name="histo_lo_seed"//seedstr//scale_string//".dat"
+        else if (order_max.eq.2) then
+           histo_name="histo_nlo_seed"//seedstr//scale_string//".dat"
+        else if (order_max.eq.3) then
+           histo_name="histo_nnlo_seed"//seedstr//scale_string//".dat"
+        else if (order_max.eq.4) then
+           histo_name="histo_n3lo_seed"//seedstr//scale_string//".dat"
+        endif
+        print*, 'Outputting: ', histo_name
+        call pwhgtopout(histo_name)
+        call resethists
+        if(imempdf.eq.nmempdf_start) then ! First PDF, this is where we compute scale uncertainties
+           maxscale = maxval(res_scales(1:Nscales)) 
+           minscale = minval(res_scales(1:Nscales))
+           Nscales = 1
+           res(imempdf) = res_scales(1) ! Copy central scale
+        endif
+        ! end loop over pdfs
+     enddo
+     analysis_name='xsct'
+     if (order_max.eq.1) then
+        analysis_name="xsct_lo_seed"//seedstr//".dat"
+     else if (order_max.eq.2) then
+        analysis_name="xsct_nlo_seed"//seedstr//".dat"
+     else if (order_max.eq.3) then
+        analysis_name="xsct_nnlo_seed"//seedstr//".dat"
+     else if (order_max.eq.4) then
+        analysis_name="xsct_n3lo_seed"//seedstr//".dat"
+     endif
+     !------------------------------------------------------------
+     ! output results
+     OPEN(UNIT=11, FILE=analysis_name, ACTION="write")
+     write(11,'(a)',advance='no') '# '
+     call time_stamp(11)
+     write(11,'(a)') '# '//trim(command_line())
+     if (order_max.eq.1) then 
+        write(11,'(a,es13.6,a,es13.6,a)') '# Total LO cross-section (pb)'
+     else if (order_max.eq.2) then 
+        write(11,'(a,es13.6,a,es13.6,a)') '# Total NLO cross-section (pb)'
+     else if (order_max.eq.3) then 
+        write(11,'(a,es13.6,a,es13.6,a)') '# Total NNLO cross-section (pb)'
+     else if (order_max.eq.4) then 
+        write(11,'(a)') '# Total N3LO cross-section (pb)'
+     endif
+     
+     if (nmempdf_start.eq.nmempdf_end.and..not.scaleuncert) then
+        write(11,'(a)') '# central     MC_error'
+        write(11,'(es13.6,es13.6)') sigma_tot, sqrt(error_tot)
+     elseif(nmempdf_start.eq.nmempdf_end) then
+        central = res(0)
+        write(11,'(a)') '# central     max          min          MC_error'
+        write(11,'(7(es13.6))') central, maxscale, minscale,sqrt(error_tot)
+        write(11,'(a)') ''
+        write(11,'(a)') ''
+        write(11,'(a)') '# Summary:'
+        write(11,'(a,f16.5,a)') '# sigma =', central,' pb'
+        write(11,'(a,f16.5,a,a,f9.3,a)') '# QCD scale uncertainty (+) =', maxscale-central, ' pb', &
+             & ' (', ((maxscale-central)/central)*100.0_dp, ' %)'
+        write(11,'(a,f16.5,a,a,f9.3,a)') '# QCD scale uncertainty (-) =', minscale-central, ' pb', &
+             & ' (', ((minscale-central)/central)*100.0_dp, ' %)'
+        write(11,'(a,f10.3,a)') '# MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
+     elseif(.not.scaleuncert) then
+        call getpdfuncertainty(res(nmempdf_start:nmempdf_end),central,errplus,errminus,errsymm)
+        write(11,'(a)') '# central     max          min          MC_error'
+        write(11,'(7(es13.6))') central, maxscale, minscale,sqrt(error_tot)
+        write(11,'(a)') ''
+        write(11,'(a)') ''
+        write(11,'(a)') '# Summary:'
+        write(11,'(a,f10.5,a)') '# sigma =', central,' pb'
+        write(11,'(a,f10.3,a)') '# MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
+        write(11,'(a,f10.3,a)') '# PDF symmetric uncertainty* =', errsymm/central*100.0_dp, ' %'
+        write(11,'(a)') '# (*PDF uncertainty contains alphas uncertainty if using a'
+        write(11,'(a)') '#   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas))'
+     else
+        call getpdfuncertainty(res(nmempdf_start:nmempdf_end),central,errplus,errminus,errsymm)
+        write(11,'(a)') '# central     max          min          MC_error     PDF_err_plus PDF_err_min  PDF_err_symm'
+        write(11,'(7(es13.6))') central, maxscale, minscale,sqrt(error_tot), errplus, errminus, errsymm
+        write(11,'(a)') ''
+        write(11,'(a)') ''
+        write(11,'(a)') '# Summary:'
+        write(11,'(a,f10.5,a)') '# sigma =', central,' pb'
+        write(11,'(a,f9.5,a,a,f9.3,a)') '# QCD scale uncertainty (+) =', maxscale-central, ' pb', &
+             & ' (', ((maxscale-central)/central)*100.0_dp, ' %)'
+        write(11,'(a,f9.5,a,a,f9.3,a)') '# QCD scale uncertainty (-) =', minscale-central, ' pb', &
+             & ' (', ((minscale-central)/central)*100.0_dp, ' %)'
+        write(11,'(a,f10.3,a)') '# MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
+        write(11,'(a,f10.3,a)') '# PDF symmetric uncertainty* =', errsymm/central*100.0_dp, ' %'
+        write(11,'(a)') '# (*PDF uncertainty contains alphas uncertainty if using a'
+        write(11,'(a)') '#   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas))'
+     endif
+     
+  else
      call InitPDF(0)
      
      imempdf = nmempdf
@@ -61,311 +213,87 @@ program disorder
         print*, 'But running with input value of: ', sqrt(Q2min)
         stop
      endif
+
+     scaleuncert_lcl = scaleuncert 
+
+     call StartStrFct(sqrts, order_max, nflav, xmur, xmuf,&
+          & scale_choice, mz, .true., Qmin, mw, mz)
+     call read_PDF()
+     call InitStrFct(order_max, separate_orders = .true.)
      
-     do iscales = 1,Nscales
-        call StartStrFct(sqrts*max(scales_mur(iscales),scales_muf(iscales)), order_max, nflav, xmur*scales_mur(iscales), &
-             & xmuf*scales_muf(iscales), scale_choice, mz, .true., Qmin, mw, mz)
-        call read_PDF()
-        call InitStrFct(order_max, separate_orders = .true.)
-        
-        region(1:ndim)        = 0.0_dp
-        region(ndim+1:2*ndim) = 1.0_dp
-        sigma_tot = 0.0_dp
-        error_tot = 0.0_dp
-        
-        
-        ! vegas warmup call
-        if(ncall1.gt.0.and.itmx1.gt.0) then 
-           ! Skip grid generation if grid is being read from file
-           writeout=.true.
-           fillplots = .false.
-           call vegas(region,ndim,dsigma,0,ncall1,itmx1,0,integ,error_int,proba)
-           writeout=.false.
+     region(1:ndim)        = 0.0_dp
+     region(ndim+1:2*ndim) = 1.0_dp
+     sigma_tot = 0.0_dp
+     error_tot = 0.0_dp
+     
+     ! vegas warmup call
+     if(ncall1.gt.0.and.itmx1.gt.0) then 
+        ! Skip grid generation if grid is being read from file
+        writeout=.true.
+        fillplots = .false.
+        scaleuncert = .false.
+        call vegas(region,ndim,dsigma,0,ncall1,itmx1,0,integ,error_int,proba)
+        scaleuncert = scaleuncert_lcl
+        writeout=.false.
         ! set random seed to current idum value
-           saveseed = idum
-        else
-           ! if reading in grids from first loop iteration, make sure
-           ! saveseed is initialized to correct value
-           saveseed = iseed
-        endif
-        
-        ! Return if we are doing warm-up
-        if(ncall2.lt.1) return
-        if(itmx2.lt.1) return
-
-        if(order_max.gt.1) then
-           ! Then do the disent run
-!           call DISENT(ncall2,S,nflav,user,dis_cuts,12345+iseed-1,67890+iseed-1,order_max-1,(xmuf*scales_muf(iscales))**2)
-           call DISENTEXTENDED(ncall2,S,nflav,user,dis_cuts,12345&
-                &+iseed-1,67890+iseed-1,order_max-1,(xmuf*scales_muf(iscales))**2,cflcl&
-                &,calcl,trlcl,new_scaleuncert)
-           ! Store disent result
-           call pwhgaddout
-        endif
-        
-        ! The inclusive code has much faster convergence, so we reduce
-        ! the number of calls here
-        ncall2 = ncall2/10
-        
-        ! vegas main call
-        ! set random seed to saved value 
-        idum     = -saveseed
-        fillplots = .true.
-        call vegas(region,ndim,dsigma,1,ncall2,itmx2,0,integ,error_int,proba)
-        ! reset ncall2
-        ncall2 = ncall2 * 10
-        readin = .true.
-        ! add integral to the total cross section
-        sigma_tot = sigma_tot + integ
-        error_tot = error_tot + error_int**2
-        
-        res(imempdf) = sigma_tot
-        res_scales(iscales) = sigma_tot
-
-        ! print total cross section and error into file  
-        ! construct name of output file
-        call pwhgaddout
-        write(pdf_string,"(I3.3)") imempdf
-        scale_string = scalestr(iscales)//"pdfmem_"//trim(pdf_string)
-        if (order_max.eq.1) then
-           histo_name="disorder_lo_seed"//seedstr//scale_string//".dat"
-        else if (order_max.eq.2) then
-           histo_name="disorder_nlo_seed"//seedstr//scale_string//".dat"
-        else if (order_max.eq.3) then
-           histo_name="disorder_nnlo_seed"//seedstr//scale_string//".dat"
-        else if (order_max.eq.4) then
-           histo_name="disorder_n3lo_seed"//seedstr//scale_string//".dat"
-        endif
-        print*, 'Outputting: ', histo_name
-        call pwhgtopout(histo_name)
-        call resethists
-!        call finalise_histograms('disorder')
-     enddo
-     call exit()
-  endif
-
-  if (pdfuncert) then
-     nmempdf_start = 0
-     call numberPDF(nmempdf_end)
-  else
-     nmempdf_start = nmempdf
-     nmempdf_end   = nmempdf
-  endif
-
-  if (nmempdf_end .gt. nmempdfMAX) stop "ERROR: increase nmempdfMAX"
-
-  do imempdf = nmempdf_start,nmempdf_end
-     write(6,*) "PDF member:",imempdf
-     call InitPDF(imempdf)
-     call getQ2min(0,Qmin)
-     Qmin = sqrt(Qmin)
-     print*, 'Qmin', Qmin
-     
-     if(Qmin.gt.sqrt(Q2min)) then
-        print*, 'WARNING: PDF Qmin = ', Qmin
-        print*, 'But running with input value of: ', sqrt(Q2min)
-        stop
-     endif
-     if(new_scaleuncert) then
-        call StartStrFct(sqrts, order_max, nflav, one, &
-             & one, scale_choice, mz, .true., Qmin, mw, mz)
-        call read_PDF()
-        call InitStrFct(order_max, separate_orders = .true.)
-
-        region(1:ndim)        = 0.0_dp
-        region(ndim+1:2*ndim) = 1.0_dp
-        sigma_tot = 0.0_dp
-        error_tot = 0.0_dp
-        
-        
-        ! vegas warmup call
-        if(ncall1.gt.0.and.itmx1.gt.0) then 
-           ! Skip grid generation if grid is being read from file
-           writeout=.true.
-           fillplots = .false.
-           scaleuncert = .false.
-           call vegas(region,ndim,dsigma,0,ncall1,itmx1,0,integ,error_int,proba)
-           scaleuncert = .true.
-           writeout=.false.
-           ! set random seed to current idum value
-           saveseed = idum
-        elseif (imempdf.eq.nmempdf_start) then
-           ! if reading in grids from first loop iteration, make sure
-           ! saveseed is initialized to correct value
-           saveseed = iseed
-        endif
-
-        if(ncall2.lt.1) return
-        if(itmx2.lt.1) return
-        ! vegas main call
-        ! set random seed to saved value 
-        idum     = -saveseed
-        fillplots = .true.
-        call vegas(region,ndim,dsigma,1,ncall2,itmx2,0,integ,error_int,proba)
-        readin = .true.
-        ! add integral to the total cross section
-        sigma_tot = sigma_tot + integ
-        error_tot = error_tot + error_int**2
-        
-        res(imempdf) = integ
-        res_scales(1:nscales) = sigma_all_scales(1:nscales) 
-        print*, 'sigma_tot', integ
-        print*, 'res_scales', res_scales(1:nscales)
-        
-!        stop 'GOOD'
+        saveseed = idum
      else
-     do iscales = 1,Nscales
-        ! initialise hoppet, for now with fixed scale_choice = 1 (meaning photon virtuality)
-!        call StartStrFct(sqrts, order_max, nflav, xmur*scales_mur(iscales), &
-!             & xmuf*scales_muf(iscales), scale_choice, mh, .true., Qmin, mw, mz)
-        call StartStrFct(sqrts, order_max, nflav, xmur*scales_mur(iscales), &
-             & xmuf*scales_muf(iscales), scale_choice, mz, .true., Qmin, mw, mz)
-        call read_PDF()
-        call InitStrFct(order_max, separate_orders = .true.)
-      if(gluon_only) then
-        call StartStrFct_gluon_only(sqrts, order_max, nflav, xmur*scales_mur(iscales), &
-             & xmuf*scales_muf(iscales), scale_choice, mz, .true., Qmin, mw, mz)
-        call read_PDF()
-        call InitStrFct_gluon_only(order_max, separate_orders = .true.)
-      endif  
+        ! if reading in grids from first loop iteration, make sure
+        ! saveseed is initialized to correct value
+        saveseed = iseed
+     endif
+     
+     ! Return if we are doing warm-up
+     if(ncall2.lt.1) return
+     if(itmx2.lt.1) return
+     
+     if(order_max.gt.1) then
+        ! Then do the disent run
+        call DISENTEXTENDED(ncall2,S,nflav,user,dis_cuts,12345&
+             &+iseed-1,67890+iseed-1,order_max-1,1d0,cflcl&
+             &,calcl,trlcl,scaleuncert)
+        ! Store disent result
+        call pwhgaddout
+     endif
         
-        region(1:ndim)        = 0.0_dp
-        region(ndim+1:2*ndim) = 1.0_dp
-        sigma_tot = 0.0_dp
-        error_tot = 0.0_dp
-        
-        
-        ! vegas warmup call
-        if(ncall1.gt.0.and.itmx1.gt.0) then 
-           ! Skip grid generation if grid is being read from file
-           writeout=.true.
-           fillplots = .false.
-           call vegas(region,ndim,dsigma,0,ncall1,itmx1,0,integ,error_int,proba)
-           writeout=.false.
-           ! set random seed to current idum value
-           saveseed = idum
-        elseif (imempdf.eq.nmempdf_start) then
-           ! if reading in grids from first loop iteration, make sure
-           ! saveseed is initialized to correct value
-           saveseed = iseed
-        endif
-
-        if(ncall2.lt.1) return
-        if(itmx2.lt.1) return
-        ! vegas main call
-        ! set random seed to saved value 
-        idum     = -saveseed
-        fillplots = .true.
-        call vegas(region,ndim,dsigma,1,ncall2,itmx2,0,integ,error_int,proba)
-        readin = .true.
-        ! add integral to the total cross section
-        sigma_tot = sigma_tot + integ
-        error_tot = error_tot + error_int**2
-        
-        res(imempdf) = sigma_tot
-        res_scales(iscales) = sigma_tot
-        
-        ! print total cross section and error into file  
-        ! construct name of output file
-        call pwhgsetout
-        write(pdf_string,"(I3.3)") imempdf
-        scale_string = scalestr(iscales)//"pdfmem_"//trim(pdf_string)
-        if (order_max.eq.1) then
-           histo_name="histo_lo_seed"//seedstr//scale_string//".dat"
-        else if (order_max.eq.2) then
-           histo_name="histo_nlo_seed"//seedstr//scale_string//".dat"
-        else if (order_max.eq.3) then
-           histo_name="histo_nnlo_seed"//seedstr//scale_string//".dat"
-        else if (order_max.eq.4) then
-           histo_name="histo_n3lo_seed"//seedstr//scale_string//".dat"
-        endif
-        print*, 'Outputting: ', histo_name
-        call pwhgtopout(histo_name)
-        call resethists
+     ! The inclusive code has much faster convergence, so we reduce
+     ! the number of calls here
+     ncall2 = ncall2/10
+     
+     ! vegas main call
+     ! set random seed to saved value 
+     idum     = -saveseed
+     fillplots = .true.
+     call vegas(region,ndim,dsigma,1,ncall2,itmx2,0,integ,error_int,proba)
+     ! reset ncall2
+     ncall2 = ncall2 * 10
+     readin = .true.
+     ! add integral to the total cross section
+     sigma_tot = sigma_tot + integ
+     error_tot = error_tot + error_int**2
+     
+     res(imempdf) = sigma_tot
+     
+     ! print total cross section and error into file  
+     ! construct name of output file
+     call pwhgaddout
+     write(pdf_string,"(I3.3)") imempdf
+     scale_string = "_pdfmem"//trim(pdf_string)
+     if (order_max.eq.1) then
+        histo_name="disorder_lo_seed"//seedstr//scale_string//".dat"
+     else if (order_max.eq.2) then
+        histo_name="disorder_nlo_seed"//seedstr//scale_string//".dat"
+     else if (order_max.eq.3) then
+        histo_name="disorder_nnlo_seed"//seedstr//scale_string//".dat"
+     else if (order_max.eq.4) then
+        histo_name="disorder_n3lo_seed"//seedstr//scale_string//".dat"
+     endif
+     print*, 'Outputting: ', histo_name
+     call pwhgtopout(histo_name)
+     call resethists
+     !        call finalise_histograms('disorder')
+  endif ! inclusive
   
-     enddo
-     endif
-     if(imempdf.eq.nmempdf_start) then ! First PDF, this is where we compute scale uncertainties
-        maxscale = maxval(res_scales(1:Nscales)) 
-        minscale = minval(res_scales(1:Nscales))
-        Nscales = 1
-        res(imempdf) = res_scales(1) ! Copy central scale
-     endif
-     ! end loop over pdfs
- enddo
-
- analysis_name='xsct'
- if (order_max.eq.1) then
-    analysis_name="xsct_lo_seed"//seedstr//".dat"
- else if (order_max.eq.2) then
-    analysis_name="xsct_nlo_seed"//seedstr//".dat"
- else if (order_max.eq.3) then
-    analysis_name="xsct_nnlo_seed"//seedstr//".dat"
- else if (order_max.eq.4) then
-    analysis_name="xsct_n3lo_seed"//seedstr//".dat"
- endif
- !------------------------------------------------------------
-  ! output results
-  OPEN(UNIT=11, FILE=analysis_name, ACTION="write")
-  write(11,'(a)',advance='no') '# '
-  call time_stamp(11)
-  write(11,'(a)') '# '//trim(command_line())
-  if (order_max.eq.1) then 
-     write(11,'(a,es13.6,a,es13.6,a)') '# Total LO cross-section (pb)'
-  else if (order_max.eq.2) then 
-     write(11,'(a,es13.6,a,es13.6,a)') '# Total NLO cross-section (pb)'
-  else if (order_max.eq.3) then 
-     write(11,'(a,es13.6,a,es13.6,a)') '# Total NNLO cross-section (pb)'
-  else if (order_max.eq.4) then 
-     write(11,'(a)') '# Total N3LO cross-section (pb)'
-  endif
-
-  if (nmempdf_start.eq.nmempdf_end.and..not.scaleuncert3.and..not.scaleuncert7.and..not.scaleuncert9) then
-     write(11,'(a)') '# central     MC_error'
-     write(11,'(es13.6,es13.6)') sigma_tot, sqrt(error_tot)
-  elseif(nmempdf_start.eq.nmempdf_end) then
-     central = res(0)
-     write(11,'(a)') '# central     max          min          MC_error'
-     write(11,'(7(es13.6))') central, maxscale, minscale,sqrt(error_tot)
-     write(11,'(a)') ''
-     write(11,'(a)') ''
-     write(11,'(a)') '# Summary:'
-     write(11,'(a,f16.5,a)') '# sigma =', central,' pb'
-     write(11,'(a,f16.5,a,a,f9.3,a)') '# QCD scale uncertainty (+) =', maxscale-central, ' pb', &
-          & ' (', ((maxscale-central)/central)*100.0_dp, ' %)'
-     write(11,'(a,f16.5,a,a,f9.3,a)') '# QCD scale uncertainty (-) =', minscale-central, ' pb', &
-          & ' (', ((minscale-central)/central)*100.0_dp, ' %)'
-     write(11,'(a,f10.3,a)') '# MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
-  elseif(.not.scaleuncert3.and..not.scaleuncert7.and..not.scaleuncert9) then
-     call getpdfuncertainty(res(nmempdf_start:nmempdf_end),central,errplus,errminus,errsymm)
-     write(11,'(a)') '# central     max          min          MC_error'
-     write(11,'(7(es13.6))') central, maxscale, minscale,sqrt(error_tot)
-     write(11,'(a)') ''
-     write(11,'(a)') ''
-     write(11,'(a)') '# Summary:'
-     write(11,'(a,f10.5,a)') '# sigma =', central,' pb'
-     write(11,'(a,f10.3,a)') '# MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
-     write(11,'(a,f10.3,a)') '# PDF symmetric uncertainty* =', errsymm/central*100.0_dp, ' %'
-     write(11,'(a)') '# (*PDF uncertainty contains alphas uncertainty if using a'
-     write(11,'(a)') '#   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas))'
-  else
-     call getpdfuncertainty(res(nmempdf_start:nmempdf_end),central,errplus,errminus,errsymm)
-     write(11,'(a)') '# central     max          min          MC_error     PDF_err_plus PDF_err_min  PDF_err_symm'
-     write(11,'(7(es13.6))') central, maxscale, minscale,sqrt(error_tot), errplus, errminus, errsymm
-     write(11,'(a)') ''
-     write(11,'(a)') ''
-     write(11,'(a)') '# Summary:'
-     write(11,'(a,f10.5,a)') '# sigma =', central,' pb'
-     write(11,'(a,f9.5,a,a,f9.3,a)') '# QCD scale uncertainty (+) =', maxscale-central, ' pb', &
-          & ' (', ((maxscale-central)/central)*100.0_dp, ' %)'
-     write(11,'(a,f9.5,a,a,f9.3,a)') '# QCD scale uncertainty (-) =', minscale-central, ' pb', &
-          & ' (', ((minscale-central)/central)*100.0_dp, ' %)'
-     write(11,'(a,f10.3,a)') '# MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
-     write(11,'(a,f10.3,a)') '# PDF symmetric uncertainty* =', errsymm/central*100.0_dp, ' %'
-     write(11,'(a)') '# (*PDF uncertainty contains alphas uncertainty if using a'
-     write(11,'(a)') '#   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas))'
-  endif
-
   call cpu_time(tfin)
   write(6,'(a)')
   write(6,'(a,es9.2,a)') '==================== TOTAL TIME : ', &
@@ -454,7 +382,7 @@ contains
    ! few times, so it is worth recomputing eta (which is cheap) and
    ! saving the pdfs (since they are more expensive to recompute).
    ETA=2*DOT(P,1,6)/S
-   if(new_scaleuncert) then
+   if(scaleuncert) then
       ! First we transfer the 3 weights from DISENT (muF variations
       ! into the full array)
       !real(dp), parameter, public :: scales_muf(1:maxscales) = &
@@ -516,19 +444,6 @@ contains
          dsig(:) = dsig(:) * as2pi(:)**NA
       endif
       dsig = dsig * ncall2
-!      print*, 'N,NA,NT', N,NA,NT
-!      print*, 'dsig', dsig
-!      print*, 'weight', weight
-!      print*, 'wgt_array1', wgt_array(1,:)
-!      print*, 'wgt_array2', wgt_array(2,:)
-!      print*, 'wgt_array3', wgt_array(3,:)
-!      print*, 'wgt_array4', wgt_array(4,:)
-!      print*, 'wgt_array5', wgt_array(5,:)
-!      print*, 'wgt_array6', wgt_array(6,:)
-!      print*, 'wgt_array7', wgt_array(7,:)
-!      print*, 'pdfs', pdfs
-!      print*, 'as2pi', as2pi
-!      stop
    else
       if(recompute) then
          ! get x and Q2
@@ -537,7 +452,7 @@ contains
          X=ETA*Q2/(2*DOT(P,1,5))
          Y=DOT(P,1,5)/DOT(P,1,6)
          
-         as2pi(1) = alphasPDF(xmur*scales_mur(iscales)*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
+         as2pi(1) = alphasPDF(xmur*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
          call p2bmomenta(x,y,Q2,p2bbreit,p2blab)
          Qlab(:) = p2blab(:,1) - p2blab(:,3)
          recompute = .false.
@@ -545,7 +460,7 @@ contains
       
       if(eta.ne.etasave) then
          etasave = eta
-         call evolvePDF(eta,xmuf*scales_muf(iscales)*Qval,pdfs(1,:))
+         call evolvePDF(eta,xmuf*Qval,pdfs(1,:))
       endif
       
       if(order_max.eq.3.and.NA.eq.1) then ! Doing NLO in DISENT and this is the LO term. Include scale compensation.
@@ -588,12 +503,12 @@ contains
       stop 'Wrong n in user routine of DISENT'
    endif
 
-   call user_analysis(n+2, dsig(1), x, y, Q2)
+   call user_analysis(n+2, dsig, x, y, Q2)
 
    if(p2b) then
       pbornbreit = p2bbreit
       pbornlab   = p2blab
-      call user_analysis(2+2, -dsig(1), x, y, Q2)
+      call user_analysis(2+2, -dsig, x, y, Q2)
    endif
  END subroutine user
 

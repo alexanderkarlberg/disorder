@@ -202,6 +202,7 @@ c overflow
       end
 
       subroutine pwhgtopout(filename)
+      use parameters
       implicit none
       character * (*) filename
       include 'pwhg_bookhist-multi.h'
@@ -210,12 +211,15 @@ c overflow
       call newunit(iun)
       do l=1,nmulti
          if(nmulti.eq.1) then
+            if(outname.ne."") filename = outname
             open(unit=iun,file=trim(adjustl(filename))//'.top',
      1           status='unknown')
          else
             write(cl,'(i3)') l
-            open(unit=iun,file=trim(adjustl(filename))//'-W'//
-     1           trim(adjustl(cl))//'.top',status='unknown')
+!            open(unit=iun,file=trim(adjustl(filename))//'-W'//
+!     1           trim(adjustl(cl))//'.top',status='unknown')
+            open(unit=iun,file=trim(adjustl(filename))
+     $           //trim(adjustl(scalestr(l)))//'.top',status='unknown')
          endif
          do j=1,jhist
             write(iun,'(a,i3)')'# '//trim(adjustl(stringhist(j)))//

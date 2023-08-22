@@ -6,6 +6,7 @@
 !  pwhgfill  :  fills the histograms with data
 
       subroutine init_histo
+      use parameters, only : maxscales, scaleuncert
       implicit none
       include 'pwhg_bookhist-multi.h'
       integer xnbins, Q2nbins
@@ -13,8 +14,8 @@
       real * 8 Q2binsize, Q2min, Q2max, logQ2min, logQ2max
       real * 8 xbinsize, logxmin, logxmax, sbeams
       call inihists
-
-            ! Bins in Q^2 and as a function of x
+      if(scaleuncert) call setupmulti(maxscales)
+!     Bins in Q^2 and as a function of x
       xnbins = 50
       logxmin = -4d0
       logxmax = 3d0
@@ -113,10 +114,10 @@
        
       end
       
-      subroutine user_analysis(n,dsig,x,y,Q2)
+      subroutine user_analysis(n,dsigma,x,y,Q2)
       use parameters
       implicit none
-      real * 8 dsig
+      real * 8 dsig(maxscales), dsigma(maxscales)
       
       integer n
       double precision x, y, Q2, plab(0:3,n)
@@ -128,7 +129,12 @@
 
       integer i,npartons,njets
 
-      if(dsig.eq.0d0) return
+      dsig = 0d0
+      dsig(1:Nscales) = dsigma(1:Nscales)
+
+!      print*, dsig
+
+      if(dsig(1).eq.0d0) return
       
       sqrtQ2 = sqrt(Q2)
       plab = 0d0

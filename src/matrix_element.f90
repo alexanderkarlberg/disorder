@@ -5,7 +5,6 @@ module matrix_element
   use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   use streamlined_interface
   use parameters
-  use structure_functions_gluon_only
   implicit none
 
   private
@@ -50,19 +49,9 @@ contains
 
     ! Compute the LO structure funtion by adding all the pieces
     ! from tables
-    if(gluon_only) then
-      Fx(:,1) = F_LO_gluon_only(y, Qval, muRval, muFval)
-    else
-      Fx(:,1) = F_LO(y, Qval, muRval, muFval)
-    endif
+    Fx(:,1) = F_LO(y, Qval, muRval, muFval)
     if (order_stop.ge.2) then
-       ! Compute the NLO structure funtion by adding all the pieces
-       ! from tables
-       if(gluon_only) then
-        Fx(:,2) = F_NLO_gluon_only(y, Qval, muRval, muFval)
-       else
-        Fx(:,2) = F_NLO(y, Qval, muRval, muFval)
-       endif
+       Fx(:,2) = F_NLO(y, Qval, muRval, muFval)
     endif
 
     if (order_stop.ge.3) then

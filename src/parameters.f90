@@ -24,10 +24,10 @@ module parameters
   integer,  public :: nflav, ipdf, it1, itmx1, itmx2, ncall1, ncall2, nscales
   character * 4, public :: seedstr
   character * 17, public :: scalestr(maxscales)
-  character(len=50), public :: pdfname
+  character(len=50), public :: pdfname, outname
   integer, public :: nmempdf, outdev
-  logical, public, save :: pdfuncert, scaleuncert3, scaleuncert7, scaleuncert9, fillplots&
-       &, p2b, gluon_only, noZ, positron, Zonly, intonly, scaleuncert, new_scaleuncert
+  logical, public, save :: pdfuncert, fillplots, p2b, noZ, positron,&
+       & Zonly, intonly, scaleuncert, inclusive
   real(dp), public :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
        & Eh, El, sigma_all_scales(maxscales)
   character (len=4), private :: order
@@ -116,36 +116,21 @@ contains
     xmuf         = dble_val_opt("-xmuf",1.0_dp)
     xmur         = dble_val_opt("-xmur",1.0_dp)
     pdfname      = string_val_opt("-pdf", "NNPDF30_nlo_as_0118_hera")
+    outname      = string_val_opt("-out", "")
     ! pdfname      = string_val_opt("-pdf", "PDF4LHC15_nnlo_mc")
     nmempdf      = int_val_opt ("-nmempdf",0)
     pdfuncert    = log_val_opt ("-pdfuncert")
-    scaleuncert3 = log_val_opt ("-3scaleuncert")
-    scaleuncert7 = log_val_opt ("-7scaleuncert")
-    new_scaleuncert = log_val_opt ("-new-scaleuncert")
-    print*, 'new_scaleuncert', new_scaleuncert
-    if(new_scaleuncert) scale_choice = 2
-    scaleuncert = scaleuncert3.or.scaleuncert7
-    if(scaleuncert3) then
-       Nscales = 3
-    elseif(scaleuncert7) then
-       Nscales = 7
-    else
-       Nscales = 1
-    endif
+    scaleuncert = log_val_opt ("-scaleuncert")
+    inclusive = log_val_opt ("-inclusive")
+    if(scaleuncert) scale_choice = 2
+    Nscales =1
+    if(scaleuncert) Nscales = 7
      
     p2b = .false.
     p2b = log_val_opt("-p2b")
     if(.not.noZ.and.p2b) stop 'Cannot do Z in p2b yet'
     if(p2b.and.pdfuncert) stop "Cannot do pdf uncertainties with p2b"
-!    if(p2b.and.scaleuncert3) stop "Cannot do scale uncertainties with p2b"
-!    if(p2b.and.scaleuncert7) stop "Cannot do scale uncertainties with p2b"
-    gluon_only = .false.
-    gluon_only = log_val_opt("-gluon_only")
-    if(scaleuncert3.and.scaleuncert7) then
-       write(*,*) 'WARNING: Have to do either 3 or 7 scales. Cannot do both. Doing none.'
-       scaleuncert3 = .false.
-       scaleuncert7 = .false.
-    endif
+
     ncall1       = int_val_opt ("-ncall1",100000)
     ncall2       = int_val_opt ("-ncall2",100000)
     it1         = int_val_opt("-it1",1)
@@ -244,13 +229,13 @@ contains
     outgridfile='grids-'//seedstr//'.dat'
     outgridtopfile='grids-'//seedstr//'.top'
     ilast=0
-    scalestr(1) = '_μR_1.0_μF_1.0_'
-    scalestr(2) = '_μR_2.0_μF_2.0_'
-    scalestr(3) = '_μR_0.5_μF_0.5_'
-    scalestr(4) = '_μR_1.0_μF_2.0_'
-    scalestr(5) = '_μR_1.0_μF_0.5_'
-    scalestr(6) = '_μR_2.0_μF_1.0_'
-    scalestr(7) = '_μR_0.5_μF_1.0_'
+    scalestr(1) = '_μR_1.0_μF_1.0'
+    scalestr(2) = '_μR_2.0_μF_2.0'
+    scalestr(3) = '_μR_0.5_μF_0.5'
+    scalestr(4) = '_μR_1.0_μF_2.0'
+    scalestr(5) = '_μR_1.0_μF_0.5'
+    scalestr(6) = '_μR_2.0_μF_1.0'
+    scalestr(7) = '_μR_0.5_μF_1.0'
 !    scalestr(8) = '_μR_.25_μF_.25_'
 !    scalestr(9) = '_μR_4.0_μF_4.0_'
 
