@@ -12,11 +12,11 @@ module parameters
   real(dp), parameter, public :: gev2pb = 389379660.0_dp
   real(dp), parameter, public :: gev2nb = 389379.66_dp
   real(dp), parameter, public :: eps    = 1.0e-14_dp
-  integer, parameter, public :: maxscales = 9
+  integer, parameter, public :: maxscales = 7
   real(dp), parameter, public :: scales_mur(1:maxscales) = &
-       & (/1.0_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 2.0_dp, 0.5_dp, 0.25_dp, 4.0_dp/)
+       & (/1.0_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 2.0_dp, 0.5_dp/)
   real(dp), parameter, public :: scales_muf(1:maxscales) = &
-       & (/1.0_dp, 2.0_dp, 0.5_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 0.25_dp, 4.0_dp/)
+       & (/1.0_dp, 2.0_dp, 0.5_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp/)
   real(dp), public :: xmuf, xmur, Qmin
   real(dp), public :: sin_thw, mw, mz, w_width, z_width
   real(dp), public :: sqrts, S, Q0_cut_sq
@@ -26,7 +26,7 @@ module parameters
   character * 17, public :: scalestr(maxscales)
   character(len=50), public :: pdfname
   integer, public :: nmempdf, outdev
-  logical, public :: pdfuncert, scaleuncert3, scaleuncert7, scaleuncert9, fillplots&
+  logical, public, save :: pdfuncert, scaleuncert3, scaleuncert7, scaleuncert9, fillplots&
        &, p2b, gluon_only, noZ, positron, Zonly, intonly, scaleuncert, new_scaleuncert
   real(dp), public :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
        & Eh, El, sigma_all_scales(maxscales)
@@ -121,13 +121,11 @@ contains
     pdfuncert    = log_val_opt ("-pdfuncert")
     scaleuncert3 = log_val_opt ("-3scaleuncert")
     scaleuncert7 = log_val_opt ("-7scaleuncert")
-    scaleuncert9 = log_val_opt ("-9scaleuncert")
     new_scaleuncert = log_val_opt ("-new-scaleuncert")
+    print*, 'new_scaleuncert', new_scaleuncert
     if(new_scaleuncert) scale_choice = 2
-    scaleuncert = scaleuncert3.or.scaleuncert7.or.scaleuncert9
-    if(scaleuncert9) then
-       Nscales = 9
-    elseif(scaleuncert3) then
+    scaleuncert = scaleuncert3.or.scaleuncert7
+    if(scaleuncert3) then
        Nscales = 3
     elseif(scaleuncert7) then
        Nscales = 7
@@ -253,8 +251,8 @@ contains
     scalestr(5) = '_μR_1.0_μF_0.5_'
     scalestr(6) = '_μR_2.0_μF_1.0_'
     scalestr(7) = '_μR_0.5_μF_1.0_'
-    scalestr(8) = '_μR_.25_μF_.25_'
-    scalestr(9) = '_μR_4.0_μF_4.0_'
+!    scalestr(8) = '_μR_.25_μF_.25_'
+!    scalestr(9) = '_μR_4.0_μF_4.0_'
 
     Qmin = 1.0_dp
 

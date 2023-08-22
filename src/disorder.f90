@@ -21,10 +21,6 @@ program disorder
   character * 100 :: analysis_name, histo_name, scale_string
   character * 3 :: pdf_string
 
-  ! DISENT common block
-  integer iev
-  double precision weights(0:2)
-  
   call cpu_time(tini)
 
   ! set up all constants and parameters from command line arguments
@@ -42,28 +38,15 @@ program disorder
 
      call InitPDF(0)
      
-     iev=0
-     weights=0.0d0
-
      ! Careful, it seems disent runs with μR = μF
 !     if(xmur.ne.xmuf.and.(order_max.ge.3)) stop 'With DISENT we must run with μR = μF'
      call DISENT(ncall2,S,nflav,user,dis_cuts,12345+iseed-1,67890+iseed-1,order_max-1,xmuf**2)
      call finalise_histograms('disent')
 
-     weights = weights / iev
-
-     print*, 'Born σ-2jet = ', weights(0), ' pb'
-     print*, 'NLO  σ-2jet = ', weights(0) + weights(1), ' pb'
-!     print*, 'Born σ-3jet = ', weights(1), ' pb'
-!     print*, 'NLO  σ-3jet = ', weights(1) + weights(2), ' pb'
-     !     print*, 'Born σ-4jet = ', weights(2), ' pb'
      call exit()
   elseif(run_disent.and.p2b) then
      call InitPDF(0)
      
-     iev=0
-     weights=0.0d0
-
      imempdf = nmempdf
      nmempdf_start = nmempdf
      
@@ -443,11 +426,11 @@ contains
    LOGICAL SCALE_VAR
    DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
    COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
+   
+   integer i, isc
 
-   integer i
-
-   double precision dsig, alphasPDF, totwgt
-   double precision, save ::  pdfs(-6:6), eta, Q2, Qval, x, y, as2pi
+   double precision dsig(maxscales), alphasPDF, totwgt, wgt_array(maxscales,-6:6)
+   double precision, save ::  pdfs(maxscales,-6:6), eta, Q2, Qval, x, y, as2pi(maxscales)
 
    double precision, save :: etasave = -100d0
    ! For p2b
@@ -460,8 +443,7 @@ contains
    if(p2b.and.n.eq.2) return ! If we do p2b we get the Born and
                              ! virtuals from the structure functions
 
-   if (n.eq.0) then
-      iev=iev+1
+   if (n.eq.0) then ! Disent is done with one event cycle
       call pwhgaccumup
       recompute = .true. ! Signals that next time we have a new event cycle
       return
@@ -472,32 +454,110 @@ contains
    ! few times, so it is worth recomputing eta (which is cheap) and
    ! saving the pdfs (since they are more expensive to recompute).
    ETA=2*DOT(P,1,6)/S
-   if(eta.ne.etasave) then
-      etasave = eta
-      call evolvePDF(eta,xmuf*scales_muf(iscales)*Qval,pdfs)
-   endif
-   
-   if(recompute) then
-      ! get x and Q2
-      Q2=ABS(DOT(P,5,5))
-      Qval=sqrt(Q2)
-      X=ETA*Q2/(2*DOT(P,1,5))
-      Y=DOT(P,1,5)/DOT(P,1,6)
+   if(new_scaleuncert) then
+      ! First we transfer the 3 weights from DISENT (muF variations
+      ! into the full array)
+      !real(dp), parameter, public :: scales_muf(1:maxscales) = &
+      !& (/1.0_dp, 2.0_dp, 0.5_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp/)
+      do isc = 1,3
+         wgt_array(isc,:) = scl_weight(isc,:) * weight(:)
+      enddo
+      wgt_array(4,:) = wgt_array(2,:)
+      wgt_array(5,:) = wgt_array(3,:)
+      wgt_array(6,:) = wgt_array(1,:)
+      wgt_array(7,:) = wgt_array(1,:)
       
-      as2pi = alphasPDF(xmur*scales_mur(iscales)*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
-      call p2bmomenta(x,y,Q2,p2bbreit,p2blab)
-      Qlab(:) = p2blab(:,1) - p2blab(:,3)
-      recompute = .false.
-   endif
+      if(recompute) then
+         ! get x and Q2
+         Q2=ABS(DOT(P,5,5))
+         Qval=sqrt(Q2)
+         X=ETA*Q2/(2*DOT(P,1,5))
+         Y=DOT(P,1,5)/DOT(P,1,6)
+         do isc = 1,3
+            as2pi(isc) = alphasPDF(scales_mur(isc)*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
+         enddo
+         ! Then copy the as2pi into the full array
+         !real(dp), parameter, public :: scales_mur(1:maxscales) = &
+         ! & (/1.0_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 2.0_dp, 0.5_dp)
+         as2pi(4) = as2pi(1)
+         as2pi(5) = as2pi(1)
+         as2pi(6) = as2pi(2)
+         as2pi(7) = as2pi(3)
+         call p2bmomenta(x,y,Q2,p2bbreit,p2blab)
+         Qlab(:) = p2blab(:,1) - p2blab(:,3)
+         recompute = .false.
+      endif
 
-   if(order_max.eq.3.and.NA.eq.1) then ! Doing NLO in DISENT and this is the LO term. Include scale compensation.
-      totwgt = dot_product(weight,pdfs)*(as2pi + two * as2pi**2 * b0 * log(xmur))
+      if(eta.ne.etasave) then
+         etasave = eta
+         do isc = 1,3
+            call evolvePDF(eta,scales_muf(isc)*Qval,pdfs(isc,:))
+         enddo
+         ! Then copy the PDFs into the full array
+         !real(dp), parameter, public :: scales_muf(1:maxscales) = &
+         !& (/1.0_dp, 2.0_dp, 0.5_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp/)
+         pdfs(4,:) = pdfs(2,:)
+         pdfs(5,:) = pdfs(3,:)
+         pdfs(6,:) = pdfs(1,:)
+         pdfs(7,:) = pdfs(1,:)
+      endif
+
+      ! First we dress the weights with the PDFs
+      do isc = 1, maxscales
+         dsig(isc) = dot_product(wgt_array(isc,:),pdfs(isc,:))
+      enddo
+
+      ! Now we dress them with αS and scale compensation
+      !real(dp), parameter, public :: scales_mur(1:maxscales) = &
+      ! & (/1.0_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 2.0_dp, 0.5_dp)     
+      if(order_max.eq.3.and.NA.eq.1) then ! Doing NLO in DISENT and this is the LO term. Include scale compensation.
+        dsig(:) = dsig(:) * (as2pi(:) + two * as2pi(:)**2 * b0 * log(scales_mur(:)))
+      else
+         dsig(:) = dsig(:) * as2pi(:)**NA
+      endif
+      dsig = dsig * ncall2
+!      print*, 'N,NA,NT', N,NA,NT
+!      print*, 'dsig', dsig
+!      print*, 'weight', weight
+!      print*, 'wgt_array1', wgt_array(1,:)
+!      print*, 'wgt_array2', wgt_array(2,:)
+!      print*, 'wgt_array3', wgt_array(3,:)
+!      print*, 'wgt_array4', wgt_array(4,:)
+!      print*, 'wgt_array5', wgt_array(5,:)
+!      print*, 'wgt_array6', wgt_array(6,:)
+!      print*, 'wgt_array7', wgt_array(7,:)
+!      print*, 'pdfs', pdfs
+!      print*, 'as2pi', as2pi
+!      stop
    else
-      totwgt = dot_product(weight,pdfs)*as2pi**na
+      if(recompute) then
+         ! get x and Q2
+         Q2=ABS(DOT(P,5,5))
+         Qval=sqrt(Q2)
+         X=ETA*Q2/(2*DOT(P,1,5))
+         Y=DOT(P,1,5)/DOT(P,1,6)
+         
+         as2pi(1) = alphasPDF(xmur*scales_mur(iscales)*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
+         call p2bmomenta(x,y,Q2,p2bbreit,p2blab)
+         Qlab(:) = p2blab(:,1) - p2blab(:,3)
+         recompute = .false.
+      endif
+      
+      if(eta.ne.etasave) then
+         etasave = eta
+         call evolvePDF(eta,xmuf*scales_muf(iscales)*Qval,pdfs(1,:))
+      endif
+      
+      if(order_max.eq.3.and.NA.eq.1) then ! Doing NLO in DISENT and this is the LO term. Include scale compensation.
+         totwgt = dot_product(weight,pdfs(1,:))*(as2pi(1) + two * as2pi(1)**2 * b0 * log(xmur))
+      else
+         totwgt = dot_product(weight,pdfs(1,:))*as2pi(1)**na
+      endif
+      dsig(1) = totwgt * ncall2
+!      print*, 'dsig', dsig
+!      stop
    endif
-   dsig = totwgt * ncall2
-
-   ! First we transfer the DISENT momenta to p2bee convention
+   ! First we transfer the DISENT momenta to our convention
    pbornbreit = 0 ! pborn(0:3,2+2)
    prealbreit = 0 ! preal(0:3,3+2)
    prrealbreit = 0 ! prreal(0:3,4+2)
@@ -528,15 +588,13 @@ contains
       stop 'Wrong n in user routine of DISENT'
    endif
 
-   call user_analysis(n+2, dsig, x, y, Q2)
+   call user_analysis(n+2, dsig(1), x, y, Q2)
 
    if(p2b) then
       pbornbreit = p2bbreit
       pbornlab   = p2blab
-      call user_analysis(2+2, -dsig, x, y, Q2)
+      call user_analysis(2+2, -dsig(1), x, y, Q2)
    endif
-
-   weights(NA) = weights(NA) + dsig ! Total weights
  END subroutine user
 
  subroutine finalise_histograms(prog)

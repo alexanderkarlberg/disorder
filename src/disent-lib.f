@@ -28,7 +28,7 @@
       NPOW1 = 2D0
       NPOW2 = 4D0
       CUTOFF = 1d-8
-      SCALE_VAR = .false.
+!      SCALE_VAR = .false.
 
       CALL DISENTFULL(NEV,S,NFL,USER,CUTS,USD1,USD2,NPOW1,NPOW2,CUTOFF
      $     ,SCALE,ORDER,CF,CA,TR,SCALE_VAR)
@@ -218,7 +218,6 @@ C---  GIVE THE SUBTRACTION CONFIGURATIONS TO THE USER
 C---  GPS MODIFICATION --------------------
          IF(ORDER.GE.2) THEN
 C---  EVALUATE THE THREE-PARTON ONE-LOOP MATRIX ELEMENT
-!            scale = 4d0
             CALL VIRTHR(S,P,VTHR,*1000)
 C---  GIVE IT TO THE USER
             CALL VECMUL(13,NRM*WTWO*WTHR/JTHR/NEV,VTHR,WEIGHT)
@@ -1120,7 +1119,7 @@ C   AND LIKEWISE KGF AND PGF
       DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
       COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
       DOUBLE PRECISION MUF(3)
-      DATA MUF /1d0, 0.25d0, 4.0d0/
+      DATA MUF /1d0, 4d0, 0.25d0/
       Z=ABS(X)
       S=1
       IF (X.LE.0) S=-1
@@ -1237,7 +1236,7 @@ C-----------------------------------------------------------------------
       IMPLICIT NONE
 C---GENERATE A COLLINEAR SPLITTING TO GIVE FOUR PARTONS
 C   AND EVALUATE THE WEIGHT FOR IT
-      INTEGER I
+      INTEGER I, INF
       DOUBLE PRECISION S,P(4,7),W(-6:6),M(-6:6),X,XJAC,XMIN,
      $     QQ,GQ,QG,GG,KQF,KGF,PQF,PGF,L12,L13,DOT,EMSQ
       INTEGER SCHEME,NF
@@ -1279,9 +1278,14 @@ C---  THE TOTAL
                IF (ABS(I).LE.NF) SCL_WEIGHT(:,0)=GQscl(:)*M(I)
             ENDIF
          ENDDO
+         ! AK: Something is fishy here... Why is W(0) = 0?? 
          W(:) = SCL_WEIGHT(1,:) 
          do i = 1,3
-            SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / W(:) 
+            do inf = -6,6
+               if(W(inf) .ne.0d0) then
+                  SCL_WEIGHT(i,inf) = SCL_WEIGHT(i,inf) / W(inf)
+               endif
+            enddo
          enddo
       else
          CALL KPFUNS(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
