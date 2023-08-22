@@ -48,8 +48,6 @@ program disorder
      ! Careful, it seems disent runs with μR = μF
 !     if(xmur.ne.xmuf.and.(order_max.ge.3)) stop 'With DISENT we must run with μR = μF'
      call DISENT(ncall2,S,nflav,user,dis_cuts,12345+iseed-1,67890+iseed-1,order_max-1,xmuf**2)
-!     call DISENTEXTENDED(ncall2,S,nflav,user,dis_cuts,12345+iseed-1&
-!          &,67890+iseed-1,order_max-1,xmur,cflcl,calcl,trlcl)
      call finalise_histograms('disent')
 
      weights = weights / iev
@@ -114,7 +112,10 @@ program disorder
 
         if(order_max.gt.1) then
            ! Then do the disent run
-           call DISENT(ncall2,S,nflav,user,dis_cuts,12345+iseed-1,67890+iseed-1,order_max-1,(xmuf*scales_muf(iscales))**2)
+!           call DISENT(ncall2,S,nflav,user,dis_cuts,12345+iseed-1,67890+iseed-1,order_max-1,(xmuf*scales_muf(iscales))**2)
+           call DISENTEXTENDED(ncall2,S,nflav,user,dis_cuts,12345&
+                &+iseed-1,67890+iseed-1,order_max-1,(xmuf*scales_muf(iscales))**2,cflcl&
+                &,calcl,trlcl,new_scaleuncert)
            ! Store disent result
            call pwhgaddout
         endif
@@ -439,6 +440,9 @@ contains
    implicit none
    integer, intent(in) :: N, NA, NT
    real(dp), intent(in) :: s, p(4,7), weight(-6:6)
+   LOGICAL SCALE_VAR
+   DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
+   COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
 
    integer i
 

@@ -103,7 +103,7 @@ C
       DATA ZERO/13*0/
 !     AK: Scale variations
       LOGICAL SCALE_VAR, SCALE_VAR_in
-      DOUBLE PRECISION SCL_WEIGHT(3)
+      DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
       COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
 C---PRINT OPENING MESSAGE
       WRITE (6,'(/2A)')  ' This is DISENT, a program for calculating',
@@ -169,30 +169,33 @@ C---PARAMETERS RELATED TO IMPORTANCE SAMPLING
       USEEDS(1) = USD1
       USEEDS(2) = USD2
       CALL RANGEN(0,USEEDS)
-      
+!     AK: Below some modifications: - Removed some calls to
+!     contributions that we do not need since they are already in the
+!     structure functions. This leads to a ~10% reduction in runtime at
+!     NNLO and ~30% at NLO.
 C---  START MAIN LOOP
       DO I=1,NEV
-!     AB mod: just avoid printing seeds every 10000 events
          IF (MOD(I,100 000).EQ.1) CALL RANGEN(-I,SFOR)
 C---  GENERATE A TWO-PARTON STATE
+         SCL_WEIGHT = 1D0 
          CALL GENTWO(S,P,WTWO,CUTS,*1000)
 C---  EVALUATE THE TWO-PARTON TREE-LEVEL MATRIX ELEMENT
-         CALL MATTWO(P,MTWO)
+!         CALL MATTWO(P,MTWO)
 C---  GIVE IT TO THE USER
-         CALL VECMUL(13,NRM*WTWO/NEV,MTWO,WEIGHT)
-         CALL USER(2,0,0,P,S,WEIGHT)
+!         CALL VECMUL(13,NRM*WTWO/NEV,MTWO,WEIGHT)
+!         CALL USER(2,0,0,P,S,WEIGHT)
          
          IF(ORDER.GE.1) THEN
 C---  EVALUATE THE TWO-PARTON ONE-LOOP MATRIX ELEMENT
             CALL VIRTWO(S,P,VTWO,*1000)
 C---  GIVE IT TO THE USER
-            CALL VECMUL(13,NRM*WTWO/NEV,VTWO,WEIGHT)
-            CALL USER(2,1,2,P,S,WEIGHT)
+!            CALL VECMUL(13,NRM*WTWO/NEV,VTWO,WEIGHT)
+!            CALL USER(2,1,2,P,S,WEIGHT)
 C---  EVALUATE THE THREE-PARTON COLLINEAR SUBTRACTION
             CALL COLTHR(S,P,CTHR,*1000)
 C---  GIVE IT TO THE USER
-            CALL VECMUL(13,NRM*WTWO/NEV,CTHR,WEIGHT)
-            CALL USER(3,1,3,P,S,WEIGHT)
+!            CALL VECMUL(13,NRM*WTWO/NEV,CTHR,WEIGHT)
+!            CALL USER(3,1,3,P,S,WEIGHT)
 C---  GENERATE A THREE-PARTON STATE
             CALL GENTHR(P,WTHR,*1000)
 C---  CALCULATE THE JACOBIAN FACTOR AND SUBTRACTION CONFIGURATIONS
@@ -207,14 +210,15 @@ C---  GIVE IT TO THE USER
             CALL VECMUL(13,NRM*WTWO*WTHR/JTHR/NEV,MTHR,WEIGHT)
             CALL USER(3,1,0,P,S,WEIGHT)
 C---  GIVE THE SUBTRACTION CONFIGURATIONS TO THE USER
-            DO J=1,NPERM3
-               CALL VECMUL(13,-NRM*WTWO*WTHR/JTHR/NEV,STHR(-6,J),WEIGHT)
-               CALL USER(3,1,1,Q(1,1,J),S,WEIGHT)
-            ENDDO
+!            DO J=1,NPERM3
+!               CALL VECMUL(13,-NRM*WTWO*WTHR/JTHR/NEV,STHR(-6,J),WEIGHT)
+!               CALL USER(3,1,1,Q(1,1,J),S,WEIGHT)
+!            ENDDO
          ENDIF
 C---  GPS MODIFICATION --------------------
          IF(ORDER.GE.2) THEN
 C---  EVALUATE THE THREE-PARTON ONE-LOOP MATRIX ELEMENT
+!            scale = 4d0
             CALL VIRTHR(S,P,VTHR,*1000)
 C---  GIVE IT TO THE USER
             CALL VECMUL(13,NRM*WTWO*WTHR/JTHR/NEV,VTHR,WEIGHT)
@@ -225,6 +229,7 @@ C---  GIVE IT TO THE USER
             CALL VECMUL(13,NRM*WTWO*WTHR/JTHR/NEV,CFOR,WEIGHT)
             CALL USER(4,2,3,P,S,WEIGHT)
 C---  GENERATE A FOUR-PARTON STATE
+            SCL_WEIGHT = 1D0 
             CALL GENFOR(P,WFOR,*1000)
 C---  CALCULATE THE JACOBIAN FACTOR AND SUBTRACTION CONFIGURATIONS
             JFOR=0
@@ -770,6 +775,10 @@ C---CALCULATE THE TWO-PARTON MATRIX-ELEMENT AT NEXT-TO-LEADING ORDER
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
+            DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
+      DOUBLE PRECISION QQscl(3) ,GQscl(3),QGscl(3) ,GGscl(3)
+      LOGICAL SCALE_VAR
+      COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
 C---CALCULATE THE LOWEST-ORDER MATRIX-ELEMENT
       CALL MATTWO(P,M)
 C---SUM OF FACTORIZING VIRTUAL CROSS-SECTION AND SUBTRACTION COUNTERTERM
@@ -784,19 +793,55 @@ C---GENERATE A COLLINEAR EMISSION
       CALL GENCOL(1,X,XJAC,XMIN)
 C---ENFORCE INVARIANT MASS CUTOFF
       IF (1-X.LT.CUTOFF) RETURN 1
+      RETURN ! AK: We just need the phase space for the next routines
 C---CALCULATE THE COLLINEAR COUNTERTERM
       GQ=0
       QG=0
       KQF=1.5
-      CALL KPFUNS(-X,XJAC,XMIN,KQF,O,O,O,QQ,GQ,QG,GG)
+      if(SCALE_VAR) then
+         QQscl = QQ
+         GQscl = GQ
+         QGscl = QG
+         GGscl = GG
+         do i = 1,3
+            SCL_WEIGHT(i,:) = V(:)
+         enddo
+         CALL KPFUNS_SCL_VAR(-X,XJAC,XMIN,KQF,O,O,O,QQscl,GQscl,QGscl
+     $        ,GGscl)
+C---  THE TOTAL
+         SCL_WEIGHT(:,0)=SCL_WEIGHT(:,0)+GGscl(:)*M(0)
+         DO I=-6,6
+            IF (I.NE.0) THEN
+               SCL_WEIGHT(:,I)=SCL_WEIGHT(:,I)+QGscl(:)*M(0)+QQscl(:)
+     $              *M(I)
+               IF (ABS(I).LE.NF) SCL_WEIGHT(:,0)=SCL_WEIGHT(:,0)
+     $              +GQscl(:)*M(I)
+            ENDIF
+         ENDDO
+         V(:) = SCL_WEIGHT(1,:) 
+         do i = 1,3
+            SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / V(:) 
+         enddo
+      else
+         CALL KPFUNS(-X,XJAC,XMIN,KQF,O,O,O,QQ,GQ,QG,GG)
+C---  THE TOTAL
+         V(0)=V(0)+GG*M(0)
+         DO I=-6,6
+            IF (I.NE.0) THEN
+               V(I)=V(I)+QG*M(0)+QQ*M(I)
+               IF (ABS(I).LE.NF) V(0)=V(0)+GQ*M(I)
+            ENDIF
+         ENDDO
+      endif
+!      CALL KPFUNS(-X,XJAC,XMIN,KQF,O,O,O,QQ,GQ,QG,GG)
 C---THE TOTAL
-      V(0)=V(0)+GG*M(0)
-      DO I=-6,6
-        IF (I.NE.0) THEN
-          V(I)=V(I)+QG*M(0)+QQ*M(I)
-          IF (ABS(I).LE.NF) V(0)=V(0)+GQ*M(I)
-        ENDIF
-      ENDDO
+!      V(0)=V(0)+GG*M(0)
+!      DO I=-6,6
+!        IF (I.NE.0) THEN
+!          V(I)=V(I)+QG*M(0)+QQ*M(I)
+!          IF (ABS(I).LE.NF) V(0)=V(0)+GQ*M(I)
+!        ENDIF
+!      ENDDO
       END
 C-----------------------------------------------------------------------
       SUBROUTINE VIRTHR(S,P,V,*)
@@ -804,11 +849,14 @@ C-----------------------------------------------------------------------
 C---CALCULATE THE THREE-PARTON MATRIX-ELEMENT AT NEXT-TO-LEADING ORDER
       INTEGER I
       DOUBLE PRECISION S,P(4,7),V(-6:6),M(-6:6),X,XJAC,XMIN, QQ,GQ,QG,GG
-     $     ,KQF,KGF,PQF,PGF,L12,L13,L23,DOT,ERTV,LEIV,EMSQ,QQscl(3)
-     $     ,GQscl(3),QGscl(3),GGscl(3)
+     $     ,KQF,KGF,PQF,PGF,L12,L13,L23,DOT,ERTV,LEIV,EMSQ
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
+      DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
+      DOUBLE PRECISION QQscl(3) ,GQscl(3),QGscl(3) ,GGscl(3)
+      LOGICAL SCALE_VAR
+      COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
       EMSQ=-DOT(P,5,5)
       L12=LOG(2*DOT(P,1,2)/EMSQ)
       L13=LOG(2*DOT(P,1,3)/EMSQ)
@@ -844,24 +892,41 @@ C---CALCULATE THE COLLINEAR COUNTERTERM
       KGF=1.5
       PQF=-((CF-CA/2)*L12+CA/2*L13)/CF
       PGF=-(L12+L13)/2
-      QQscl = QQ
-      GQscl = GQ
-      QGscl = QG
-      GGscl = GG
-      CALL KPFUNS(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
-      print*, 'QQ,GQ,QG,GG',QQ,GQ,QG,GG
-      CALL KPFUNS_SCL_VAR(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQscl,GQscl,QGscl
-     $     ,GGscl)
-      print*, 'QQscl,GQscl,QGscl,GGscl',QQscl,GQscl,QGscl,GGscl
-      stop
+      if(SCALE_VAR) then
+         QQscl = QQ
+         GQscl = GQ
+         QGscl = QG
+         GGscl = GG
+         do i = 1,3
+            SCL_WEIGHT(i,:) = V(:)
+         enddo
+         CALL KPFUNS_SCL_VAR(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQscl,GQscl
+     $        ,QGscl,GGscl)
 C---  THE TOTAL
-      V(0)=V(0)+GG*M(0)
-      DO I=-6,6
-        IF (I.NE.0) THEN
-          V(I)=V(I)+QG*M(0)+QQ*M(I)
-          IF (ABS(I).LE.NF) V(0)=V(0)+GQ*M(I)
-        ENDIF
-      ENDDO
+         SCL_WEIGHT(:,0)=SCL_WEIGHT(:,0)+GGscl(:)*M(0)
+         DO I=-6,6
+            IF (I.NE.0) THEN
+               SCL_WEIGHT(:,I)=SCL_WEIGHT(:,I)+QGscl(:)*M(0)+QQscl(:)
+     $              *M(I)
+               IF (ABS(I).LE.NF) SCL_WEIGHT(:,0)=SCL_WEIGHT(:,0)
+     $              +GQscl(:)*M(I)
+            ENDIF
+         ENDDO
+         V(:) = SCL_WEIGHT(1,:) 
+         do i = 1,3
+            SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / V(:) 
+         enddo
+      else
+         CALL KPFUNS(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
+C---  THE TOTAL
+         V(0)=V(0)+GG*M(0)
+         DO I=-6,6
+            IF (I.NE.0) THEN
+               V(I)=V(I)+QG*M(0)+QQ*M(I)
+               IF (ABS(I).LE.NF) V(0)=V(0)+GQ*M(I)
+            ENDIF
+         ENDDO
+      endif
       END
 C-----------------------------------------------------------------------
       DOUBLE PRECISION FUNCTION ERTV(P,I,J,K)
@@ -1052,10 +1117,10 @@ C   AND LIKEWISE KGF AND PGF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
       LOGICAL SCALE_VAR
-      DOUBLE PRECISION SCL_WEIGHT(3)
+      DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
       COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
       DOUBLE PRECISION MUF(3)
-      DATA MUF /0.25d0, 1d0, 4.0d0/
+      DATA MUF /1d0, 0.25d0, 4.0d0/
       Z=ABS(X)
       S=1
       IF (X.LE.0) S=-1
@@ -1106,10 +1171,20 @@ C   AND EVALUATE THE WEIGHT FOR IT
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
+      DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
+      DOUBLE PRECISION QQscl(3) ,GQscl(3),QGscl(3) ,GGscl(3)
+      LOGICAL SCALE_VAR
+      COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
 C---CALCULATE THE LOWEST-ORDER MATRIX-ELEMENT
       CALL MATTWO(P,M)
 C---IN FACT THE GENERATION WAS ALREADY DONE EARLIER
       CALL GETCOL(X,XJAC)
+C---AND THE KINEMATICS
+      DO I=1,4
+        P(I,1)=P(I,1)/X
+        P(I,3)=P(I,1)*(1-X)
+      ENDDO
+      return !AK: Just need the kinematics 
 C---SO WE JUST HAVE TO CALCULATE THE WEIGHT
       XMIN=2*DOT(P,1,6)/S
       QQ=0
@@ -1117,20 +1192,45 @@ C---SO WE JUST HAVE TO CALCULATE THE WEIGHT
       GQ=0
       QG=0
       KQF=1.5
-      CALL KPFUNS(X,XJAC,XMIN,KQF,O,O,O,QQ,GQ,QG,GG)
+      if(SCALE_VAR) then
+         QQscl = QQ
+         GQscl = GQ
+         QGscl = QG
+         GGscl = GG
+         CALL KPFUNS_SCL_VAR(-X,XJAC,XMIN,KQF,O,O,O,QQscl,GQscl,QGscl
+     $        ,GGscl)
+C---  THE TOTAL
+         SCL_WEIGHT(:,0)=GGscl(:)*M(0)
+         DO I=-6,6
+            IF (I.NE.0) THEN
+               SCL_WEIGHT(:,I)=QGscl(:)*M(0)+QQscl(:) *M(I)
+               IF (ABS(I).LE.NF) SCL_WEIGHT(:,0)=GQscl(:)*M(I)
+            ENDIF
+         ENDDO
+         W(:) = SCL_WEIGHT(1,:) 
+         do i = 1,3
+            SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / W(:) 
+         enddo
+      else
+         CALL KPFUNS(-X,XJAC,XMIN,KQF,O,O,O,QQ,GQ,QG,GG)
+C---  THE TOTAL
+         W(0)=GG*M(0)
+         DO I=-6,6
+            IF (I.NE.0) THEN
+               W(I)=QG*M(0)+QQ*M(I)
+               IF (ABS(I).LE.NF) W(0)=GQ*M(I)
+            ENDIF
+         ENDDO
+      endif
+!      CALL KPFUNS(X,XJAC,XMIN,KQF,O,O,O,QQ,GQ,QG,GG)
 C---THE TOTAL
-      W(0)=GG*M(0)
-      DO I=-6,6
-        IF (I.NE.0) THEN
-          W(I)=QG*M(0)+QQ*M(I)
-          IF (ABS(I).LE.NF) W(0)=W(0)+GQ*M(I)
-        ENDIF
-      ENDDO
-C---AND THE KINEMATICS
-      DO I=1,4
-        P(I,1)=P(I,1)/X
-        P(I,3)=P(I,1)*(1-X)
-      ENDDO
+!      W(0)=GG*M(0)
+!      DO I=-6,6
+!        IF (I.NE.0) THEN
+!          W(I)=QG*M(0)+QQ*M(I)
+!          IF (ABS(I).LE.NF) W(0)=W(0)+GQ*M(I)
+!        ENDIF
+!      ENDDO
       END
 C-----------------------------------------------------------------------
       SUBROUTINE COLFOR(S,P,W,*)
@@ -1143,6 +1243,10 @@ C   AND EVALUATE THE WEIGHT FOR IT
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
+      DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
+      DOUBLE PRECISION QQscl(3) ,GQscl(3),QGscl(3) ,GGscl(3)
+      LOGICAL SCALE_VAR
+      COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
 C---CALCULATE THE LOWEST-ORDER MATRIX-ELEMENT
       CALL MATTHR(P,M)
 C---IN FACT THE GENERATION WAS ALREADY DONE EARLIER
@@ -1160,15 +1264,45 @@ C---SO WE JUST HAVE TO CALCULATE THE WEIGHT
       L13=LOG(2*DOT(P,1,3)/EMSQ)
       PQF=-((CF-CA/2)/CF*L12+CA/2/CF*L13)
       PGF=-(L12+L13)/2
-      CALL KPFUNS(X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
+      if(SCALE_VAR) then
+         QQscl = QQ
+         GQscl = GQ
+         QGscl = QG
+         GGscl = GG
+         CALL KPFUNS_SCL_VAR(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQscl,GQscl
+     $        ,QGscl,GGscl)
+C---  THE TOTAL
+         SCL_WEIGHT(:,0)=GGscl(:)*M(0)
+         DO I=-6,6
+            IF (I.NE.0) THEN
+               SCL_WEIGHT(:,I)=QGscl(:)*M(0)+QQscl(:) *M(I)
+               IF (ABS(I).LE.NF) SCL_WEIGHT(:,0)=GQscl(:)*M(I)
+            ENDIF
+         ENDDO
+         W(:) = SCL_WEIGHT(1,:) 
+         do i = 1,3
+            SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / W(:) 
+         enddo
+      else
+         CALL KPFUNS(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
+C---  THE TOTAL
+         W(0)=GG*M(0)
+         DO I=-6,6
+            IF (I.NE.0) THEN
+               W(I)=QG*M(0)+QQ*M(I)
+               IF (ABS(I).LE.NF) W(0)=GQ*M(I)
+            ENDIF
+         ENDDO
+      endif
+!      CALL KPFUNS(X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
 C---THE TOTAL
-      W(0)=GG*M(0)
-      DO I=-6,6
-        IF (I.NE.0) THEN
-          W(I)=QG*M(0)+QQ*M(I)
-          IF (ABS(I).LE.NF) W(0)=W(0)+GQ*M(I)
-        ENDIF
-      ENDDO
+!      W(0)=GG*M(0)
+!      DO I=-6,6
+!        IF (I.NE.0) THEN
+!          W(I)=QG*M(0)+QQ*M(I)
+!          IF (ABS(I).LE.NF) W(0)=W(0)+GQ*M(I)
+!        ENDIF
+!      ENDDO
 C---AND THE KINEMATICS
       DO I=1,4
         P(I,1)=P(I,1)/X
@@ -1224,6 +1358,7 @@ C--- GPS to avoid crashes -------
       JAC=1/(2*NPOW(1)*(Z*(1-Z))**XPOW(1))*(Z**XPOW(1)+(1-Z)**XPOW(1))
      $     *(0.5/(-X*LOG(XMIN))
      $     +0.5*((1-XMIN)/(1-X))**XPOW(1)/(NPOW(1)*(1-XMIN)))
+      RETURN ! AK: We only need the jacobian
       IF (PERM.LT.0) RETURN
 C---OVERALL FACTOR
       F=16*PISQ/EMSQ
