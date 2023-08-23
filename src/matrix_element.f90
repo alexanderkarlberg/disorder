@@ -23,9 +23,7 @@ contains
     real(dp) :: Fx(-6:7,4)
     real(dp) :: F1, F2, F3
     real(dp) :: overall_norm, prop
-    real(dp) :: P1q1
-    integer  :: i, j
-    integer :: iorder
+    integer  :: i
 
     y = -log(x)
 
@@ -115,9 +113,7 @@ contains
     real(dp) :: Fx(-6:7,4)
     real(dp) :: F1, F2, F3
     real(dp) :: overall_norm, prop
-    real(dp) :: P1q1
-    integer  :: i, j, iscale
-    integer :: iorder
+    integer  :: i, iscale
 
     if(iscales.gt.maxscales.or.iscales.lt.1) stop 'Need number of scale between 1 and 9'
     

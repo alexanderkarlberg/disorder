@@ -39,7 +39,7 @@ OBJ=$(PWD)/obj
 ANA=$(PWD)/analysis
 VPATH=./:$(SRC):/$(OBJ):/$(ANA)
 
-FFLAGS= -O3 -ffixed-line-length-132
+FFLAGS= -O3 -ffixed-line-length-132 #-Wunused
 FFLAGS+= $(shell $(HPEXEC) --fflags)
 INCLUDE= -I$(ANA) -I$(SRC) $(wildcard *.h)
 FFLAGS+= $(INCLUDE) -J$(OBJ)
@@ -76,7 +76,7 @@ mod_dsigma.o: parameters.o phase_space.o matrix_element.o analysis.o
 phase_space.o: parameters.o 
 disorder.o: matrix_element.o parameters.o phase_space.o integration.o analysis.o mod_dsigma.o
 parameters.o: io_utils.o lcl_dec.o integration.o
-matrix_element.o: parameters.o structure_functions_gluon_only.o
+matrix_element.o: parameters.o 
 #histo.o: types.o consts.o
 analysis.o: parameters.o
 mod_analysis.o: parameters.o

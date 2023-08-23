@@ -14,8 +14,8 @@
       use phase_space
       implicit none
 !     xrand contains a vector of random numbers in [0,1]
-      real(dp) :: x, y, Qsq, Qval,jac(1:2), jacborn, jacreal, Qvec(0:3)
-      real(dp) :: dsigma_real, pdf(-6:6), csi, z, dsigma_all_scales(maxscales)
+      real(dp) :: x, y, Qsq, jacborn, Qvec(0:3)
+      real(dp) :: dsigma_all_scales(maxscales)
       real(dp) :: xrand(4), vegas_weight
       integer vegas_ncall
       common/vegas_ncall/vegas_ncall
@@ -23,10 +23,9 @@
       dsigma = 0d0
       dsigma_all_scales = 0d0
 !     generate phase space 
-      call gen_phsp_born(xrand(1:2),x,y,Qsq,Qvec,jac(1),pbornlab,pbornbreit)
-      jacborn = jac(1)
+      call gen_phsp_born(xrand(1:2),x,y,Qsq,Qvec,jacborn,pbornlab,pbornbreit)
 !     skip phase space points with vanishing jacobian or with Q < Qmin
-      if (.not.(jac(1).ne.0d0).and.(Qsq.gt.(Qmin**2))) return
+      if (.not.(jacborn.ne.0d0).and.(Qsq.gt.(Qmin**2))) return
       if(scaleuncert) then
          dsigma_all_scales = eval_matrix_element_scale_variation(order_min,order_max, x, y, Qsq, nscales)
          dsigma_all_scales = dsigma_all_scales * gev2pb * jacborn 

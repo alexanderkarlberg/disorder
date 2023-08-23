@@ -27,7 +27,7 @@ module parameters
   character(len=50), public :: pdfname, outname
   integer, public :: nmempdf, outdev
   logical, public, save :: pdfuncert, fillplots, p2b, noZ, positron,&
-       & Zonly, intonly, scaleuncert, inclusive
+       & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC
   real(dp), public :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
        & Eh, El, sigma_all_scales(maxscales)
   character (len=4), private :: order
@@ -40,8 +40,6 @@ module parameters
   real(dp), public, parameter :: Qup =  2.0_dp/3.0_dp
   real(dp), public, parameter :: Qdn = -1.0_dp/3.0_dp
   real(dp), public :: sin_thw_sq, sin_2thw_sq,Ve, Ae, Ve2, Ae2, Ve2_Ae2, two_Ve_Ae ! Vector and axial couplings of the electron
-
-  logical, public :: run_disent
 
     ! VEGAS common blocks
   integer, public :: ilast
@@ -57,6 +55,8 @@ contains
   subroutine set_parameters ()
     integer :: call, i
     real(dp) :: ran
+    
+    ! Some physical parameters and constants
     mw           = dble_val_opt("-mw",80.398_dp)
     mz           = dble_val_opt("-mz",91.1876_dp)
     nflav        = int_val_opt ("-nf",5)
@@ -65,15 +65,25 @@ contains
     CAlcl        = dble_val_opt("-CA",3.0_dp)
     CFlcl        = dble_val_opt("-CF",4.0_dp/3.0_dp)
     TRlcl        = dble_val_opt("-Tr",0.5_dp)
-    
-    ! Compute β0 as needed for scale compensation
+    ! Compute β0 as needed for scale compensation in disent
     b0 = (11.0_dp * CAlcl - 4.0_dp * nflav * TRlcl) / 6.0_dp
-    
+    sin_thw_sq = 1.0_dp - (mw/mz)**2
+    sin_2thw_sq = 4.0_dp * (1.0_dp - sin_thw_sq) * sin_thw_sq
+    positron = log_val_opt ("-positron",.false.)
+    ! For a positron the Axial coupling flips sign
+    Ae = - 0.5_dp
+    if(positron) Ae = - Ae
+    Ve = - 0.5_dp + 2.0_dp * sin_thw_sq 
+    Ae2 = Ae**2
+    Ve2 = Ve**2
+    Ve2_Ae2 = Ve2 + Ae2
+    two_Ve_Ae = 2.0_dp * Ve * Ae
+
+    ! The order at which we are running is read here along with
+    ! whether or not we are doing inclsuvie/p2b and NC/CC.
     order_min    = int_val_opt ('-order-min',1)
     order_max    = int_val_opt ('-order-max',3)
     order = 'NNLO'
-    sin_thw_sq = 1.0_dp - (mw/mz)**2
-    sin_2thw_sq = 4.0_dp * (1.0_dp - sin_thw_sq) * sin_thw_sq
     ! if "-lo/-nlo/-nnlo/-n3lo" command is given, overwrite order_min and order_max accordingly
     if (log_val_opt("-lo")) then
        order_min = 1
@@ -92,52 +102,71 @@ contains
        order_max = 4
        order = 'N3LO'
     endif
-    
+    NC = log_val_opt("-NC",.true.)
+    CC = log_val_opt("-CC",.false.)
     noZ = .not.log_val_opt ("-includeZ",.false.)
     Zonly = .false.
     intonly = .false.
     if(.not.noZ) Zonly = log_val_opt ("-Zonly",.false.)
     if(.not.noZ) intonly = log_val_opt ("-intonly",.false.)
     if(Zonly.and.intonly) stop 'Cannot run with both Z and interference ONLY flags'
-    positron = log_val_opt ("-positron",.false.)
-    run_disent = log_val_opt("-disent",.false.)
+    if(.not.NC.and..not.CC) stop 'Need to run with either or/both of NC and CC'
+    p2b = log_val_opt("-p2b",.false.)
+    inclusive = .not.p2b 
+    if(.not.noZ.and.p2b) stop 'Cannot do Z in p2b yet'
+    if(CC.and.p2b) stop 'Cannot do CC in p2b yet'
+    if(order_max.ge.4.and.p2b) stop 'Cannot run p2b at N3LO yet'
+    outname      = string_val_opt("-out", "") ! Overwite the prefix of the file name
 
-    ! For a positron the Axial coupling flips sign
-    Ae = - 0.5_dp
-    if(positron) Ae = - Ae
-    Ve = - 0.5_dp + 2.0_dp * sin_thw_sq 
-    Ae2 = Ae**2
-    Ve2 = Ve**2
-    Ve2_Ae2 = Ve2 + Ae2
-    two_Ve_Ae = 2.0_dp * Ve * Ae
 
-    scale_choice = int_val_opt ('-scale-choice',1)
-    readin       = log_val_opt ("-readingrid")
+    ! Parameters dealing with scale variations
+    scale_choice = 1 !int_val_opt ('-scale-choice',1) ! 1: Use Q. 0: Use MZ. For now fixed.
     xmuf         = dble_val_opt("-xmuf",1.0_dp)
     xmur         = dble_val_opt("-xmur",1.0_dp)
     pdfname      = string_val_opt("-pdf", "NNPDF30_nlo_as_0118_hera")
-    outname      = string_val_opt("-out", "")
-    ! pdfname      = string_val_opt("-pdf", "PDF4LHC15_nnlo_mc")
     nmempdf      = int_val_opt ("-nmempdf",0)
     pdfuncert    = log_val_opt ("-pdfuncert")
     scaleuncert = log_val_opt ("-scaleuncert")
-    inclusive = log_val_opt ("-inclusive")
     if(scaleuncert) scale_choice = 2
     Nscales =1
     if(scaleuncert) Nscales = 7
+    scalestr(1) = '_μR_1.0_μF_1.0'
+    scalestr(2) = '_μR_2.0_μF_2.0'
+    scalestr(3) = '_μR_0.5_μF_0.5'
+    scalestr(4) = '_μR_1.0_μF_2.0'
+    scalestr(5) = '_μR_1.0_μF_0.5'
+    scalestr(6) = '_μR_2.0_μF_1.0'
+    scalestr(7) = '_μR_0.5_μF_1.0'
+
      
-    p2b = .false.
-    p2b = log_val_opt("-p2b")
-    if(.not.noZ.and.p2b) stop 'Cannot do Z in p2b yet'
     if(p2b.and.pdfuncert) stop "Cannot do pdf uncertainties with p2b"
 
+    ! Some parameters setting up the VEGAS run
+    readin       = log_val_opt ("-readingrid")
     ncall1       = int_val_opt ("-ncall1",100000)
     ncall2       = int_val_opt ("-ncall2",100000)
     it1         = int_val_opt("-it1",1)
     itmx1        = int_val_opt ("-itmx1",3)
     itmx2        = int_val_opt ("-itmx2",1)
     iseed        = int_val_opt ("-iseed",10)
+    write(seedstr,"(I4.4)") iseed
+    idum = -iseed ! Initial seed
+    if(readin.or.it1.gt.1) then
+       readin = .true.
+       ! Fastforward random seed
+       do i = 1,it1
+          do call = 1,ncall1
+             ran = ran2(idum)
+          enddo
+       enddo
+       idum = -idum
+    endif
+    ingridfile ='grids-'//seedstr//'.dat'
+    outgridfile='grids-'//seedstr//'.dat'
+    outgridtopfile='grids-'//seedstr//'.top'
+    ilast=0
 
+    ! Setup the phase space
     !     Read in bounds on x,y,Q2
     Q = dble_val_opt("-Q",-1.0_dp)
     if(Q.lt.0.0_dp) then
@@ -182,9 +211,11 @@ contains
 
     if(s*xmax*ymax.lt.Q2min .or. s*xmin*ymin.gt.Q2max) stop 'No phase space available'
 
+    novegas = .false.
     if(Q2min.eq.Q2max.and.xmin.eq.xmax) then
        ymin = Q2min/(s*xmin)
        ymax = ymin
+       novegas = .true.
     else
        if(xmin*(ymax*s) .lt. Q2min) xmin = Q2min/(ymax*s)
        if(xmax*(ymin*s) .gt. Q2max) xmax = Q2max/(ymin*s)
@@ -194,9 +225,9 @@ contains
     sqrts = sqrt(s * xmax)  
     print*, '****************************************'
     print*, 'Doing DIS @ ', trim(order)
-    if(run_disent.and..not.p2b) then
-       print*, 'Using DISENT'
-    elseif(run_disent.and.p2b) then
+    if(.not.p2b) then
+       print*, 'Inclusively in radiation'
+    elseif(p2b) then
        print*, 'Using DISENT with projection-to-Born'
     endif
     if(noZ)  print*, 'With γ only'
@@ -211,39 +242,10 @@ contains
     print*, 'COM energy: ', S, 'GeV^2'
     print*, '****************************************'    
 
-    ! various setup
-    write(seedstr,"(I4.4)") iseed
-
-    idum = -iseed ! Initial seed
-    if(readin.or.it1.gt.1) then
-       readin = .true.
-       ! Fastforward random seed
-       do i = 1,it1
-          do call = 1,ncall1
-             ran = ran2(idum)
-          enddo
-       enddo
-       idum = -idum
-    endif
-    ingridfile ='grids-'//seedstr//'.dat'
-    outgridfile='grids-'//seedstr//'.dat'
-    outgridtopfile='grids-'//seedstr//'.top'
-    ilast=0
-    scalestr(1) = '_μR_1.0_μF_1.0'
-    scalestr(2) = '_μR_2.0_μF_2.0'
-    scalestr(3) = '_μR_0.5_μF_0.5'
-    scalestr(4) = '_μR_1.0_μF_2.0'
-    scalestr(5) = '_μR_1.0_μF_0.5'
-    scalestr(6) = '_μR_2.0_μF_1.0'
-    scalestr(7) = '_μR_0.5_μF_1.0'
-!    scalestr(8) = '_μR_.25_μF_.25_'
-!    scalestr(9) = '_μR_4.0_μF_4.0_'
-
+    ! Sensible initial Qmin for the PDF
     Qmin = 1.0_dp
 
-    sigma_all_scales = 0.0_dp
-
-    !outdev = idev_open_opt("-out")
+    sigma_all_scales = 0.0_dp ! Initialise
 
     if (.not.CheckAllArgsUsed(0)) call exit()
   end subroutine set_parameters

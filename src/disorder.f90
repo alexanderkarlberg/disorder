@@ -13,7 +13,7 @@ program disorder
   integer, parameter :: nmempdfMAX = 200 ! max number of pdfs
   integer  :: nmempdf_start, nmempdf_end, imempdf
   real(dp) :: integ, error_int, proba, tini, tfin
-  real(dp) :: sigma_tot, error_tot, region(1:2*ndim)
+  real(dp) :: sigma_tot, error_tot, region(1:2*ndim),xdum(4)
   real(dp) :: res(0:nmempdfMAX), central, errminus, errplus, errsymm
   real(dp) :: res_scales(1:maxscales),maxscale,minscale
   character * 100 :: analysis_name, histo_name, scale_string
@@ -60,44 +60,52 @@ program disorder
              & one, scale_choice, mz, .true., Qmin, mw, mz)
         call read_PDF()
         call InitStrFct(order_max, separate_orders = .true.)
-        
-        region(1:ndim)        = 0.0_dp
-        region(ndim+1:2*ndim) = 1.0_dp
-        sigma_tot = 0.0_dp
-        error_tot = 0.0_dp
-        
-        
-        ! vegas warmup call
-        if(ncall1.gt.0.and.itmx1.gt.0) then 
-           ! Skip grid generation if grid is being read from file
-           writeout=.true.
-           fillplots = .false.
-           scaleuncert = .false.
-           call vegas(region,ndim,dsigma,0,ncall1,itmx1,0,integ,error_int,proba)
-           scaleuncert = scaleuncert_lcl
-           writeout=.false.
-           ! set random seed to current idum value
-           saveseed = idum
-        elseif (imempdf.eq.nmempdf_start) then
-           ! if reading in grids from first loop iteration, make sure
-           ! saveseed is initialized to correct value
-           saveseed = iseed
+
+        if(novegas) then ! This means Q and x fixed
+           ! Need dummy random numbers
+           xdum = 0.5_dp
+           sigma_tot = dsigma(xdum,1d0)
+           error_tot = 0.0_dp
+           res(imempdf) = sigma_tot
+           res_scales(1:nscales) = sigma_all_scales(1:nscales) 
+        else
+           region(1:ndim)        = 0.0_dp
+           region(ndim+1:2*ndim) = 1.0_dp
+           sigma_tot = 0.0_dp
+           error_tot = 0.0_dp
+           
+           ! vegas warmup call
+           if(ncall1.gt.0.and.itmx1.gt.0) then 
+              ! Skip grid generation if grid is being read from file
+              writeout=.true.
+              fillplots = .false.
+              scaleuncert = .false.
+              call vegas(region,ndim,dsigma,0,ncall1,itmx1,0,integ,error_int,proba)
+              scaleuncert = scaleuncert_lcl
+              writeout=.false.
+              ! set random seed to current idum value
+              saveseed = idum
+           elseif (imempdf.eq.nmempdf_start) then
+              ! if reading in grids from first loop iteration, make sure
+              ! saveseed is initialized to correct value
+              saveseed = iseed
+           endif
+           
+           if(ncall2.lt.1) return
+           if(itmx2.lt.1) return
+           ! vegas main call
+           ! set random seed to saved value 
+           idum     = -saveseed
+           fillplots = .true.
+           call vegas(region,ndim,dsigma,1,ncall2,itmx2,0,integ,error_int,proba)
+           readin = .true.
+           ! add integral to the total cross section
+           sigma_tot = sigma_tot + integ
+           error_tot = error_tot + error_int**2
+           
+           res(imempdf) = integ
+           res_scales(1:nscales) = sigma_all_scales(1:nscales) 
         endif
-        
-        if(ncall2.lt.1) return
-        if(itmx2.lt.1) return
-        ! vegas main call
-        ! set random seed to saved value 
-        idum     = -saveseed
-        fillplots = .true.
-        call vegas(region,ndim,dsigma,1,ncall2,itmx2,0,integ,error_int,proba)
-        readin = .true.
-        ! add integral to the total cross section
-        sigma_tot = sigma_tot + integ
-        error_tot = error_tot + error_int**2
-        
-        res(imempdf) = integ
-        res_scales(1:nscales) = sigma_all_scales(1:nscales) 
         
         ! print total cross section and error into file  
         ! construct name of output file
@@ -307,6 +315,7 @@ contains
   ! evolution)
   subroutine read_PDF()
     use streamlined_interface
+    use parameters
     real(dp), external :: alphasPDF
     interface
        subroutine EvolvePDF(x,Q,res)
@@ -315,10 +324,6 @@ contains
          real(dp), intent(out) :: res(*)
        end subroutine EvolvePDF
     end interface
-    !----------------
-    real(dp) :: res_lhapdf(-6:6), x, Q
-    real(dp) :: res_hoppet(-6:6)
-    real(dp), parameter :: mz = 91.2_dp
 
    ! InitRunningCoupling has to be called for the HOPPET coupling to be initialised 
    ! Default is to ask for 4 loop running and threshold corrections at quark masses.  
@@ -355,7 +360,7 @@ contains
    DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
    COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
    
-   integer i, isc
+   integer isc
 
    double precision dsig(maxscales), alphasPDF, totwgt, wgt_array(maxscales,-6:6)
    double precision, save ::  pdfs(maxscales,-6:6), eta, Q2, Qval, x, y, as2pi(maxscales)

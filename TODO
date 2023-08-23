@@ -19,3 +19,9 @@ Items to be done before release/publication of v1.0:
  complicated way. Check against results from Alex.
 
 *) Do check with Alex at LO/NLO/NNLO
+
+*) Add charged current to inclsuive ME
+
+*) Add support for reduced cross sections
+
+*) Function to print result on screen

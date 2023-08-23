@@ -4,8 +4,8 @@
       
       PRIVATE
 
-      PUBLIC gen_phsp_born, gen_phsp_real, p2bmomenta, mbreit2lab,
-     $     mlab2breit, mbreit2labdisent
+      PUBLIC gen_phsp_born, p2bmomenta, mbreit2lab, mlab2breit,
+     $     mbreit2labdisent
      
       contains
 
@@ -117,105 +117,6 @@
 
       end subroutine gen_phsp_born
 
-      ! It looks like something is bot right in this phase space. In
-      ! particular if one plots the current Energy (defined as the sum
-      ! of the energy of all partons in the direction of Q in the Breit
-      ! frame) this is clearly not bounded by Q as it should be. 
-      subroutine gen_phsp_real(xreal, x, y, Qsq, Qvec, csi, z, jacobian, plab, pbreit)
-      implicit none
-      double precision x, y, Qsq, jacobian, plab(0:3,2+3), pbreit(0:3,2+3)
-      double precision xreal(2), jac, Qval, Qvec(0:3)
-      ! The two variables of hep-ph/9704297
-      double precision csi, z, z0, z3, z0bar, z3bar, zperp, oocsi
-      DOUBLE PRECISION pbreit0(0:3,3), plab0(0:3,3)
-      
-      pbreit = 0d0
-      plab = 0d0
-      pbreit0 = 0d0
-      Qval = sqrt(Qsq)
-      ! We start by setting up the leptons as they are not affected by the emission.
-      ! This routine takes x,y,Qsq and Qvec as inputs
-      ! Incoming lepton
-      pbreit(0,1) = (2.0d0 - y) * 0.5d0 / y
-      pbreit(1,1) = - sqrt(1-y)/y
-      pbreit(2,1) = 0d0
-      pbreit(3,1) = - 0.5d0
-      pbreit(:,1) = Qval * pbreit(:,1)
-      ! Outgoing lepton
-      pbreit(0,3) = (2.0d0 - y) * 0.5d0 / y
-      pbreit(1,3) = - sqrt(1-y)/y
-      pbreit(2,3) = 0d0
-      pbreit(3,3) = 0.5d0
-      pbreit(:,3) = Qval * pbreit(:,3)
-      ! Incoming lepton
-      plab(0,1) = El
-      plab(3,1) = El
-      ! Outgoing lepton
-      plab(:,3) = plab(:,1) - Qvec(:)
-
-      jacobian = 1d0
-
-      ! csi is in range x < csi < 1 and 0 < z < 1
-
-      csi = xreal(1) * (1d0 - x) + x
-      jacobian = jacobian * (1d0 - x)
-      z = xreal(2)
-
-      ! eq. 3.6
-      oocsi = 1d0 / csi
-      z0 = 2d0 * z - 1d0 + (1d0 - z) * oocsi
-      z3 = 1d0 - (1d0 - z) * oocsi
-      z0bar = 1d0 - 2d0 * z + z * oocsi
-      z3bar = 1d0 - z * oocsi
-      zperp = 2d0 * sqrt(z * (1d0 - z)*(1d0 - csi) * oocsi)
-
-      ! Now we construct the partons (incoming and outgoing) in the Breit frame from eq. 3.5
-      ! Incoming parton
-      pbreit0(0,1) = oocsi
-      pbreit0(3,1) = - oocsi
-      ! First outgoing parton
-      pbreit0(0,2) = z0
-      pbreit0(1,2) = zperp
-      pbreit0(3,2) = z3
-      ! Second outgoing parton
-      pbreit0(0,3) = z0bar
-      pbreit0(1,3) = -zperp
-      pbreit0(3,3) = z3bar
-
-      pbreit0 = Qval * 0.5d0 * pbreit0
-
-      ! Now transfer these to the right array
-      pbreit(:,2) = pbreit0(:,1)
-      pbreit(:,4) = pbreit0(:,2)
-      pbreit(:,5) = pbreit0(:,3)
-
-      call mbreit2lab(3,Qvec,pbreit0,plab0,.false.)
-
-      ! Now transfer these to the right array
-      plab(:,2) = plab0(:,1)
-      plab(:,4) = plab0(:,2)
-      plab(:,5) = plab0(:,3)
-
-
-      !print*, 'Momenta in Breit frame'
-      !print*, 'Incoming lepton :', pbreit(:,1)
-      !print*, 'Incoming parton :', pbreit(:,2)
-      !print*, 'Outgoing lepton :', pbreit(:,3)
-      !print*, 'Outgoing parton1:', pbreit(:,4)
-      !print*, 'Outgoing parton2:', pbreit(:,5)
-      !print*, 'Momenta in lab frame'
-      !print*, 'Incoming lepton :', plab(:,1)
-      !print*, 'Incoming parton :', plab(:,2)
-      !print*, 'Outgoing lepton :', plab(:,3)
-      !print*, 'Outgoing parton1:', plab(:,4)
-      !print*, 'Outgoing parton1:', plab(:,5)
-      !print*, 'Qvec:           ', Qvec(:)
-      !print*, 'Qsq x 2:        ', Qsq, invmsq(Qvec)
-      !print*, 'x,y:            ', x, y
-
-      end subroutine gen_phsp_real
-
-
       double precision function invmsq(p) 
       implicit none
       double precision p(0:3)
@@ -228,11 +129,11 @@
 !     by A Cooper-Sakar. Page 208 Appendix 7.11. 
       subroutine mlab2breit(m,Q,p,pout,isPlus)
       implicit none
-      integer i,j,m
+      integer j,m
       logical isPlus
       double precision Q(0:3), p(0:3,m), pin(0:3,m), pout(0:3,m), Qval
-      double precision cosphi, sinphi, invQval, norm, q0, q1, q2, q3
-      double precision z(3), Qb(0:3), modrot
+      double precision invQval, norm, q0, q1, q2, q3
+      double precision z(3), Qb(0:3)
       parameter (z = (/0d0,0d0,1d0/))
       double precision trans(0:3,0:3)
 
@@ -290,11 +191,11 @@
 !     transformation mlab2breit2.
       subroutine mbreit2lab(m,Q,p,pout,isPlus)
       implicit none
-      integer i,j,m
+      integer j,m
       logical isPlus
       double precision Q(0:3), p(0:3,m), pin(0:3,m), pout(0:3,m), Qval
-      double precision cosphi, sinphi, norm, invQval
-      double precision z(3), Qb(0:3), modrot, q0, q1, q2, q3
+      double precision norm, invQval
+      double precision z(3), Qb(0:3), q0, q1, q2, q3
       parameter (z = (/0d0,0d0,1d0/))
       double precision trans(0:3,0:3)
 

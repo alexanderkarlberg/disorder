@@ -209,9 +209,9 @@ c overflow
       integer k,j,iun,l
       character * 3 cl
       call newunit(iun)
+      if(outname.ne."") filename = outname
       do l=1,nmulti
          if(nmulti.eq.1) then
-            if(outname.ne."") filename = outname
             open(unit=iun,file=trim(adjustl(filename))//'.top',
      1           status='unknown')
          else
