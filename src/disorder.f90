@@ -24,7 +24,6 @@ program disorder
 
   ! set up all constants and parameters from command line arguments
   call set_parameters()
-  write(*,'(a)') '# Command line : '//trim(command_line())
   ! Initialise histograms
   call init_histo()
   ! Initialise PDF

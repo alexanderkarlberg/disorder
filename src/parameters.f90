@@ -8,6 +8,9 @@ module parameters
   implicit none
 
   private
+
+  public print_header, welcome_message
+  
   real(dp), parameter, public :: alpha_em = 1.0_dp/137.0_dp
   real(dp), parameter, public :: gev2pb = 389379660.0_dp
   real(dp), parameter, public :: gev2nb = 389379.66_dp
@@ -128,7 +131,7 @@ contains
     pdfname      = string_val_opt("-pdf", "NNPDF30_nlo_as_0118_hera")
     nmempdf      = int_val_opt ("-nmempdf",0)
     pdfuncert    = log_val_opt ("-pdfuncert")
-    scaleuncert = log_val_opt ("-scaleuncert")
+    scaleuncert  = log_val_opt ("-scaleuncert")
     if(scaleuncert) scale_choice = 2
     Nscales =1
     if(scaleuncert) Nscales = 7
@@ -147,7 +150,7 @@ contains
     readin       = log_val_opt ("-readingrid")
     ncall1       = int_val_opt ("-ncall1",100000)
     ncall2       = int_val_opt ("-ncall2",100000)
-    it1         = int_val_opt("-it1",1)
+    it1          = int_val_opt("-it1",1)
     itmx1        = int_val_opt ("-itmx1",3)
     itmx2        = int_val_opt ("-itmx2",1)
     iseed        = int_val_opt ("-iseed",10)
@@ -225,24 +228,6 @@ contains
     !         if(s*xmin*ymin .gt. Q2min) Q2min = s*xmin*ymin
     !         if(s*xmax*ymax .gt. Q2max) Q2max = s*xmax*ymax
     sqrts = sqrt(s * xmax)  
-    print*, '****************************************'
-    print*, 'Doing DIS @ ', trim(order)
-    if(.not.p2b) then
-       print*, 'Inclusively in radiation'
-    elseif(p2b) then
-       print*, 'Using DISENT with projection-to-Born'
-    endif
-    if(noZ)  print*, 'With γ only'
-    if(.not.noZ.and.(.not.Zonly).and.(.not.intonly))  print*, 'With γ/Z'
-    if(Zonly)  print*, 'With Z only'
-    if(intonly)  print*, 'With γ/Z interference only'
-    print*, 'xmin, xmax', xmin, xmax
-    print*, 'ymin, ymax', ymin, ymax
-    print*, 'Q2min, Q2max', Q2min, Q2max, 'GeV^2'
-    print*, 'Electron energy: ', El, 'GeV'
-    print*, 'Proton energy: ', Eh, 'GeV'
-    print*, 'COM energy: ', S, 'GeV^2'
-    print*, '****************************************'    
 
     ! Sensible initial Qmin for the PDF
     Qmin = 1.0_dp
@@ -250,6 +235,60 @@ contains
     sigma_all_scales = 0.0_dp ! Initialise
 
     if (.not.CheckAllArgsUsed(0)) call exit()
+
+    call welcome_message
+    call print_header(0)
   end subroutine set_parameters
+
+  subroutine print_header(idev)
+    implicit none
+    integer, intent(in) :: idev
+    write(idev,'(a)',advance='no') ' # '
+    call time_stamp(idev)
+    write(idev,*) '#'//trim(command_line())
+    write(idev,*) '# ----------------------------------------------------------'
+    write(idev,*) '# Doing DIS @ ', trim(order)
+    if(.not.p2b) then
+       write(idev,*) '# Inclusively in radiation'
+    elseif(p2b) then
+       write(idev,*) '# Using DISENT with projection-to-Born'
+    endif
+    if(CC) write(idev,*) '# Including charged current'
+    if(NC) then
+       write(idev,*) '# Including neutral current'
+       if(noZ)  write(idev,*) '# With γ only'
+       if(.not.noZ.and.(.not.Zonly).and.(.not.intonly))  write(idev,*) '# With γ/Z'
+       if(Zonly)  write(idev,*) '# With Z only'
+       if(intonly)  write(idev,*) '# With γ/Z interference only'
+    else
+       write(idev,*) '# And no neutral current'
+    endif
+    write(idev,*) '# xmin, xmax', xmin, xmax
+    write(idev,*) '# ymin, ymax', ymin, ymax
+    write(idev,*) '# Q2min, Q2max', Q2min, Q2max, 'GeV^2'
+    write(idev,*) '# Electron energy: ', El, 'GeV'
+    write(idev,*) '# Proton energy: ', Eh, 'GeV'
+    write(idev,*) '# COM energy: ', S, 'GeV^2'
+    write(idev,*) '# ----------------------------------------------------------'
+  end subroutine print_header
+
+  subroutine welcome_message
+    write(0,'(a)') '-----------------------------------------------------------'
+    write(0,'(a)') '               Welcome to disorder v. 1.0.0                '
+    write(0,'(a)') '        Written by Alexander Karlberg (2023-)              '
+    write(0,'(a)') '                                                           '
+    write(0,'(a)') ' It is made available under the GNU public license,        '
+    write(0,'(a)') ' with the additional request that if you use it or any     '
+    write(0,'(a)') ' derivative of it in scientific work then you should cite: '
+    write(0,'(a)') ' A. Karlberg (arXiv:23XX.YYYYY).                           '
+    write(0,'(a)') '                                                           '
+    write(0,'(a)') ' You are also encouraged to cite HOPPET the original       '
+    write(0,'(a)') ' references,for LO, NLO and NNLO splitting functions, the  '
+    write(0,'(a)') ' QCD 1, 2, 3 and 4 loop beta functions and the coupling and'
+    write(0,'(a)') ' PDF mass threshold matching functions. You are furthermore' 
+    write(0,'(a)') ' encouraged to cite the LO, NLO, NNLO, and N3LO coefficient'
+    write(0,'(a)') ' functions and the disent references.                      '
+    write(0,'(a)') '-----------------------------------------------------------'
+  end subroutine welcome_message
 
 end module parameters
