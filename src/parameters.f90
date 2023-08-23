@@ -18,7 +18,7 @@ module parameters
   real(dp), parameter, public :: scales_muf(1:maxscales) = &
        & (/1.0_dp, 2.0_dp, 0.5_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp/)
   real(dp), public :: xmuf, xmur, Qmin
-  real(dp), public :: sin_thw, mw, mz, w_width, z_width
+  real(dp), public :: sin_thw, mw, mz, w_width, z_width, GF
   real(dp), public :: sqrts, S, Q0_cut_sq
   integer,  public :: order_min, order_max, iseed, scale_choice
   integer,  public :: nflav, ipdf, it1, itmx1, itmx2, ncall1, ncall2, nscales
@@ -69,6 +69,8 @@ contains
     b0 = (11.0_dp * CAlcl - 4.0_dp * nflav * TRlcl) / 6.0_dp
     sin_thw_sq = 1.0_dp - (mw/mz)**2
     sin_2thw_sq = 4.0_dp * (1.0_dp - sin_thw_sq) * sin_thw_sq
+!    GF           = 1.1663787D-5 
+    GF           =  3.14159265359_dp * alpha_em / sqrt(2.0_dp) / mw**2/sin_thw_sq
     positron = log_val_opt ("-positron",.false.)
     ! For a positron the Axial coupling flips sign
     Ae = - 0.5_dp

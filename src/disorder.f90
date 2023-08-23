@@ -56,8 +56,8 @@ program disorder
         
         scaleuncert_lcl = scaleuncert
         
-        call StartStrFct(sqrts, order_max, nflav, one, &
-             & one, scale_choice, mz, .true., Qmin, mw, mz)
+        call StartStrFct(sqrts*maxval(scales_muf), order_max, nflav,&
+             & one, one, scale_choice, mz, .true., Qmin, mw, mz)
         call read_PDF()
         call InitStrFct(order_max, separate_orders = .true.)
 
