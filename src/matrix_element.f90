@@ -32,7 +32,6 @@ contains
     muRval = muRlcl(Qval)
     muFval = muFlcl(Qval)
 
-
     F1 = zero
     F2 = zero
     F3 = zero
@@ -94,7 +93,7 @@ contains
     res = (                   x * yDIS**2 * F1 &
          +                   (one - yDIS) * F2 &
          + x * yDIS * (one - half * yDIS) * F3)
-    
+
     res = res * overall_norm / x
     
   end function eval_matrix_element
@@ -145,7 +144,6 @@ contains
        if (order_stop.ge.3) Fx(:,3) = F_NNLO(y, Qval, muRval, muFval)
        if (order_stop.ge.4) Fx(:,4) = F_N3LO(y, Qval, muRval, muFval)
 
-       
        if(NC) then
           do i = order_start,order_stop
              if(noZ) then

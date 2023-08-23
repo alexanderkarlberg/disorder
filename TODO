@@ -20,8 +20,10 @@ Items to be done before release/publication of v1.0:
 
 *) Do check with Alex at LO/NLO/NNLO
 
-*) Add charged current to inclsuive ME
+*) Add charged current to inclsuive ME (needs testing)
 
 *) Add support for reduced cross sections
 
 *) Function to print result on screen
+
+*) Check on grid violationsin proVBFH. Maybe the upper bound is not set correctly?
