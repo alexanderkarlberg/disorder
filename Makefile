@@ -11,7 +11,7 @@ include Makefile.inc
 # main program and modules to be compiled
 MAIN = disorder
 #MODULES = types consts integration phase_space parameters io_utils lcl_dec matrix_element histo mod_dsigma
-MODULES = integration phase_space parameters io_utils lcl_dec matrix_element mod_dsigma disent-lib mod_analysis
+MODULES = integration io_utils lcl_dec parameters phase_space matrix_element mod_dsigma disent-lib mod_analysis
 ANALYSIS = fastjetfortran pwhg_bookhist-multi 
 #ANALYSIS += sigmaR
 #ANALYSIS += analysis_caesar
@@ -80,6 +80,8 @@ matrix_element.o: parameters.o
 #histo.o: types.o consts.o
 analysis.o: parameters.o
 mod_analysis.o: parameters.o
+pwhg_bookhist-multi.o: parameters.o
+$(addsuffix .o,$(ANALYSIS)): parameters.o
 # make clean
 clean:
 	rm -f $(OBJ)/*.o $(OBJ)/*.mod *~ *.log fort* $(MAIN)
