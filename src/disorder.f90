@@ -51,6 +51,7 @@ program disorder
         call initialise_run_structure_functions
         Nscales = 1 ! To avoid computing scale variations in the next calls
         call pwhgsetout
+        
         call finalise_histograms
      enddo ! end loop over pdfs
   else
@@ -66,16 +67,16 @@ program disorder
      ncall2_save = ncall2
      ncall2 = max(100000,ncall2)/10
 
-     call initialise_run_structure_functions
-     call pwhgaddout
+!     call initialise_run_structure_functions
+!     call pwhgaddout
 
      ncall2 = ncall2_save
 
      if(order_max.gt.1) then
         ! Then do the disent run
         call DISENTFULL(ncall2,S,nflav,user,dis_cuts,12345&
-             &+iseed-1,67890+iseed-1,NPOW1,NPOW2,CUTOFF,order_max-1&
-             &,xmuf,cflcl,calcl,trlcl,scaleuncert)
+             &+iseed-1,67890+iseed-1,NPOW1,NPOW2,CUTOFF,xmuf&
+             &,order_max-1 ,cflcl,calcl,trlcl,scaleuncert)
         ! Store disent result
         call pwhgaddout
      endif
@@ -222,19 +223,6 @@ contains
       minscale = minval(res_scales(1:Nscales))
        res(imempdf) = res_scales(1) ! Copy central scale
    endif
-   ! print total cross section and error into file  
-   ! construct name of output file
-   write(pdf_string,"(I3.3)") imempdf
-   scale_string = "_pdfmem"//trim(pdf_string)
-   if (order_max.eq.1) then
-      histo_name="disorder_lo_seed"//seedstr//scale_string//".dat"
-   else if (order_max.eq.2) then
-      histo_name="disorder_nlo_seed"//seedstr//scale_string//".dat"
-   else if (order_max.eq.3) then
-      histo_name="disorder_nnlo_seed"//seedstr//scale_string//".dat"
-   else if (order_max.eq.4) then
-      histo_name="disorder_n3lo_seed"//seedstr//scale_string//".dat"
-   endif
  end subroutine initialise_run_structure_functions
 
  subroutine dis_cuts(s,xminl,xmaxl,Q2minl,Q2maxl,yminl,ymaxl)
@@ -275,14 +263,14 @@ contains
    if(order_max.le.1.and.NA.ge.1) return ! Disregard O(αS) if we are doing LO
 
    if(p2b.and.n.eq.2) return ! If we do p2b we get the Born and
-                             ! virtuals from the structure functions
+   ! virtuals from the structure functions
 
    if (n.eq.0) then ! Disent is done with one event cycle
       call pwhgaccumup
       recompute = .true. ! Signals that next time we have a new event cycle
       return
    endif
-
+ 
    ! It looks like, in a given set of calls (ie born + real + ...) eta
    ! can change, but x,y,Q2 stay the same. Eta however only changes a
    ! few times, so it is worth recomputing eta (which is cheap) and
@@ -375,6 +363,8 @@ contains
       endif
       dsig(1) = totwgt * ncall2
    endif
+
+
    ! First we transfer the DISENT momenta to our convention
    pbornbreit = 0 ! pborn(0:3,2+2)
    prealbreit = 0 ! preal(0:3,3+2)
@@ -426,6 +416,20 @@ contains
 
  subroutine finalise_histograms
    implicit none
+
+   ! print total cross section and error into file  
+   ! construct name of output file
+   write(pdf_string,"(I3.3)") imempdf
+   scale_string = "_pdfmem"//trim(pdf_string)
+   if (order_max.eq.1) then
+      histo_name="disorder_lo_seed"//seedstr//scale_string//".dat"
+   else if (order_max.eq.2) then
+      histo_name="disorder_nlo_seed"//seedstr//scale_string//".dat"
+   else if (order_max.eq.3) then
+      histo_name="disorder_nnlo_seed"//seedstr//scale_string//".dat"
+   else if (order_max.eq.4) then
+      histo_name="disorder_n3lo_seed"//seedstr//scale_string//".dat"
+   endif
 
    call pwhgtopout(histo_name)
    call resethists
