@@ -210,6 +210,7 @@ c overflow
       character * 3 cl
       call newunit(iun)
       if(outname.ne."") filename = outname
+      print*, 'Outputting results to: ', filename
       do l=1,nmulti
          if(nmulti.eq.1) then
             open(unit=iun,file=trim(adjustl(filename))//'.top',
@@ -221,6 +222,7 @@ c overflow
             open(unit=iun,file=trim(adjustl(filename))
      $           //trim(adjustl(scalestr(l)))//'.top',status='unknown')
          endif
+         call print_header(iun)
          do j=1,jhist
             write(iun,'(a,i3)')'# '//trim(adjustl(stringhist(j)))//
      1           ' index ',j-1

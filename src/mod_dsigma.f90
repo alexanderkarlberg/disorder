@@ -22,6 +22,7 @@ contains
     
     dsigma = 0d0
     dsigma_all_scales = 0d0
+
     !     generate phase space 
     call gen_phsp_born(xrand(1:2),x,y,Qsq,Qvec,jacborn,pbornlab,pbornbreit)
     
@@ -30,28 +31,15 @@ contains
     dsigma_all_scales = eval_matrix_element(order_min,order_max, x, y, Qsq)
     dsigma_all_scales = dsigma_all_scales * gev2pb * jacborn 
     dsigma = dsigma_all_scales(1)
-    dsigma_all_scales = dsigma_all_scales * vegas_weight 
+    dsigma_all_scales = dsigma_all_scales * vegas_weight / itmx2
     sigma_all_scales = sigma_all_scales + dsigma_all_scales
-    
-    !      if(scaleuncert) then
-    !         dsigma_all_scales = eval_matrix_element(order_min,order_max, x, y, Qsq, nscales)
-    !         dsigma_all_scales = dsigma_all_scales * gev2pb * jacborn 
-    !         dsigma = dsigma_all_scales(1)
-    !         dsigma_all_scales = dsigma_all_scales * vegas_weight 
-    !         sigma_all_scales = sigma_all_scales + dsigma_all_scales
-    !      else
-    !         dsigma_all_scales = eval_matrix_element(order_min,order_max, x, y, Qsq, 1)
-    !         dsigma = dsigma_all_scales(1)
-    !         dsigma = dsigma * gev2pb * jacborn
-    !         dsigma_all_scales = dsigma * vegas_weight
-    !      endif
     
     !     remove the rare outliers where we get dsigma = NaN (never happens)
     if (dsigma.ne.dsigma) then
        dsigma = 0d0
        dsigma_all_scales = 0d0
     endif
-    
+
     ! Do the analysis
     if(fillplots) then
        call user_analysis(4,dsigma_all_scales*vegas_ncall,x,y,Qsq)

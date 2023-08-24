@@ -132,8 +132,6 @@
       dsig = 0d0
       dsig(1:Nscales) = dsigma(1:Nscales)
 
-!      print*, dsig
-
       if(dsig(1).eq.0d0) return
       
       sqrtQ2 = sqrt(Q2)

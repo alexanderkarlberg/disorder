@@ -38,7 +38,7 @@ module mod_parameters
   real(dp), public :: pbornlab(0:3,2+2), preallab(0:3,2+3), prreallab(0:3,2+4)
   real(dp), public :: pbornbreit(0:3,2+2), prealbreit(0:3,2+3), prrealbreit(0:3,2+4)
 
-  real(dp), public, save :: CFlcl, CAlcl, Trlcl, b0
+  real(dp), public, save :: CFlcl, CAlcl, Trlcl, b0, NPOW1, NPOW2, CUTOFF
 
   real(dp), public, parameter :: Qup =  2.0_dp/3.0_dp
   real(dp), public, parameter :: Qdn = -1.0_dp/3.0_dp
@@ -229,6 +229,11 @@ contains
     !         if(s*xmax*ymax .gt. Q2max) Q2max = s*xmax*ymax
     sqrts = sqrt(s * xmax)  
 
+    ! Some parameters for DISENT
+    NPOW1  = dble_val_opt("-npow1",2.0_dp)
+    NPOW2  = dble_val_opt("-npow2",4.0_dp)
+    CUTOFF = dble_val_opt("-cutoff",1d-8)
+
     ! Sensible initial Qmin for the PDF
     Qmin = 1.0_dp
 
@@ -236,8 +241,6 @@ contains
 
     if (.not.CheckAllArgsUsed(0)) call exit()
 
-    call welcome_message
-    call print_header(0)
   end subroutine set_parameters
 
   !----------------------------------------------------------------------
@@ -259,7 +262,9 @@ contains
     call time_stamp(idev)
     write(idev,*) '#'//trim(command_line())
     write(idev,*) '# ----------------------------------------------------------'
-    write(idev,*) '# Doing DIS @ ', trim(order)
+    write(idev,'(a,a)',advance='no') ' # Doing DIS @ ', trim(order)
+    if(.not.positron) write(idev,*) ' (e^- + p)'
+    if(positron) write(idev,*) ' (e^+ + p)'
     if(.not.p2b) then
        write(idev,*) '# Inclusively in radiation'
     elseif(p2b) then
@@ -275,13 +280,26 @@ contains
     else
        write(idev,*) '# And no neutral current'
     endif
-    write(idev,*) '# xmin, xmax', xmin, xmax
-    write(idev,*) '# ymin, ymax', ymin, ymax
-    write(idev,*) '# Q2min, Q2max', Q2min, Q2max, 'GeV^2'
+    write(idev,*) '# xmin, xmax:      ', xmin, xmax
+    write(idev,*) '# ymin, ymax:      ', ymin, ymax
+    write(idev,*) '# Q2min, Q2max:    ', Q2min, Q2max, 'GeV^2'
     write(idev,*) '# Electron energy: ', El, 'GeV'
-    write(idev,*) '# Proton energy: ', Eh, 'GeV'
-    write(idev,*) '# COM energy: ', S, 'GeV^2'
+    write(idev,*) '# Proton energy:   ', Eh, 'GeV'
+    write(idev,*) '# COM energy:      ', S, 'GeV^2'
+    write(idev,*) '# PDF:             ', trim(adjustl(pdfname))
+    write(idev,*) '# MZ:              ', MZ
+    write(idev,*) '# MW:              ', MW
+    write(idev,*) '# nf:              ', nflav
+    write(idev,*) '# CA:              ', CAlcl
+    write(idev,*) '# CF:              ', CFlcl
+    write(idev,*) '# TR:              ', TRlcl
+    write(idev,*) '# αS(MZ):          ', alphasLocal(MZ)
+    write(idev,*) '# 1/αEM:           ', 1.0_dp/alpha_em
+    write(idev,*) '# GF:              ', GF
+    write(idev,*) '# sin(θ_W)^2:      ', sin_thw_sq
+    
     write(idev,*) '# ----------------------------------------------------------'
+
   end subroutine print_header
 
   subroutine welcome_message
@@ -294,7 +312,7 @@ contains
     write(0,'(a)') ' derivative of it in scientific work then you should cite: '
     write(0,'(a)') ' A. Karlberg (arXiv:23XX.YYYYY).                           '
     write(0,'(a)') '                                                           '
-    write(0,'(a)') ' You are also encouraged to cite HOPPET the original       '
+    write(0,'(a)') ' You are also encouraged to cite HOPPET, the original      '
     write(0,'(a)') ' references,for LO, NLO and NNLO splitting functions, the  '
     write(0,'(a)') ' QCD 1, 2, 3 and 4 loop beta functions and the coupling and'
     write(0,'(a)') ' PDF mass threshold matching functions. You are furthermore' 
