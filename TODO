@@ -20,7 +20,8 @@ Items to be done before release/publication of v1.0:
 
 *) Do check with Alex at LO/NLO/NNLO
 
-*) Add charged current to inclsuive ME (needs testing)
+*) Add charged current to inclsuive ME (needs testing). FOr sure an
+ overall factor missing due to helicity average (5/4?)
 
 *) Add support for reduced cross sections
 

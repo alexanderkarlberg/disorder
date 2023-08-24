@@ -13,7 +13,7 @@
       end subroutine
       
       subroutine user_analysis(n,dsigma,x,y,Qsq)
-      use parameters
+      use mod_parameters
       implicit none
       integer n
       double precision dsigma, x, y, Qsq, plab(0:3,n), pbreit(0:3,n)

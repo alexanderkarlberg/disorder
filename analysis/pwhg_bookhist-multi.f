@@ -202,7 +202,7 @@ c overflow
       end
 
       subroutine pwhgtopout(filename)
-      use parameters
+      use mod_parameters
       implicit none
       character * (*) filename
       include 'pwhg_bookhist-multi.h'

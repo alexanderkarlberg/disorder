@@ -1,7 +1,7 @@
 !----------------------------------------------------------------------
 ! A module to define all parameters of the run, which can be read from
 ! command line arguments
-module parameters
+module mod_parameters
   use sub_defs_io
   use integration
   use types
@@ -9,7 +9,7 @@ module parameters
 
   private
 
-  public print_header, welcome_message
+  public print_header, welcome_message, alphasLocal
   
   real(dp), parameter, public :: alpha_em = 1.0_dp/137.0_dp
   real(dp), parameter, public :: gev2pb = 389379660.0_dp
@@ -55,7 +55,7 @@ module parameters
 contains
 
   ! set all parameters from input card or command line arguments
-  subroutine set_parameters ()
+  subroutine set_parameters 
     integer :: call, i
     real(dp) :: ran
     
@@ -240,6 +240,18 @@ contains
     call print_header(0)
   end subroutine set_parameters
 
+  !----------------------------------------------------------------------
+  real(dp) function alphasLocal(muR)
+    real(dp), intent(in) :: muR
+    real(dp) :: muR_lcl, alphasPDF
+    muR_lcl = max(muR,Qmin)
+    ! we use alphas from the LHAPDF PDF
+    alphasLocal = alphasPDF(muR_lcl)
+    ! we use alphas from HOPPET
+    !alphasLocal = Value(coupling, muR_lcl)
+  end function alphasLocal
+  
+
   subroutine print_header(idev)
     implicit none
     integer, intent(in) :: idev
@@ -291,4 +303,4 @@ contains
     write(0,'(a)') '-----------------------------------------------------------'
   end subroutine welcome_message
 
-end module parameters
+end module mod_parameters

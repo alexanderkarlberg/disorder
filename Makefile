@@ -11,7 +11,7 @@ include Makefile.inc
 # main program and modules to be compiled
 MAIN = disorder
 #MODULES = types consts integration phase_space parameters io_utils lcl_dec matrix_element histo mod_dsigma
-MODULES = integration io_utils lcl_dec parameters phase_space matrix_element mod_dsigma disent-lib mod_analysis
+MODULES = integration io_utils lcl_dec mod_parameters mod_phase_space mod_matrix_element mod_dsigma disent-lib mod_analysis
 ANALYSIS = fastjetfortran pwhg_bookhist-multi 
 #ANALYSIS += sigmaR
 #ANALYSIS += analysis_caesar
@@ -72,16 +72,16 @@ mergedata:
 
 
 # f90 module dependencies
-mod_dsigma.o: parameters.o phase_space.o matrix_element.o analysis.o
-phase_space.o: parameters.o 
-disorder.o: matrix_element.o parameters.o phase_space.o integration.o analysis.o mod_dsigma.o
-parameters.o: io_utils.o lcl_dec.o integration.o
-matrix_element.o: parameters.o 
+mod_dsigma.o: mod_parameters.o mod_phase_space.o mod_matrix_element.o mod_analysis.o
+mod_phase_space.o: mod_parameters.o 
+disorder.o: mod_matrix_element.o mod_parameters.o mod_phase_space.o integration.o analysis.o mod_dsigma.o
+mod_parameters.o: io_utils.o lcl_dec.o integration.o
+mod_matrix_element.o: mod_parameters.o 
 #histo.o: types.o consts.o
-analysis.o: parameters.o
-mod_analysis.o: parameters.o
-pwhg_bookhist-multi.o: parameters.o
-$(addsuffix .o,$(ANALYSIS)): parameters.o
+analysis.o: mod_parameters.o
+mod_analysis.o: mod_parameters.o
+pwhg_bookhist-multi.o: mod_parameters.o
+$(addsuffix .o,$(ANALYSIS)): mod_parameters.o
 # make clean
 clean:
 	rm -f $(OBJ)/*.o $(OBJ)/*.mod *~ *.log fort* $(MAIN)

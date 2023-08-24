@@ -6,7 +6,7 @@
 !  pwhgfill  :  fills the histograms with data
 
       subroutine init_histo
-      use parameters, only : maxscales, scaleuncert
+      use mod_parameters, only : maxscales, scaleuncert
       implicit none
       include 'pwhg_bookhist-multi.h'
       integer xnbins, Q2nbins
@@ -115,7 +115,7 @@
       end
       
       subroutine user_analysis(n,dsigma,x,y,Q2)
-      use parameters
+      use mod_parameters
       implicit none
       real * 8 dsig(maxscales), dsigma(maxscales)
       

@@ -2,9 +2,9 @@ program disorder
   use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   use sub_defs_io
   !use dummy_pdfs
-  use matrix_element
-  use parameters
-  use phase_space
+  use mod_matrix_element
+  use mod_parameters
+  use mod_phase_space
   use integration
   use types
   use mod_dsigma
@@ -314,7 +314,6 @@ contains
   ! evolution)
   subroutine read_PDF()
     use streamlined_interface
-    use parameters
     real(dp), external :: alphasPDF
     interface
        subroutine EvolvePDF(x,Q,res)
