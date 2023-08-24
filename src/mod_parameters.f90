@@ -30,7 +30,7 @@ module mod_parameters
   character(len=50), public :: pdfname, outname
   integer, public :: nmempdf, outdev
   logical, public, save :: pdfuncert, fillplots, p2b, noZ, positron,&
-       & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC
+       & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC, vnf
   real(dp), public :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
        & Eh, El, sigma_all_scales(maxscales)
   character (len=4), private :: order
@@ -63,6 +63,7 @@ contains
     mw           = dble_val_opt("-mw",80.398_dp)
     mz           = dble_val_opt("-mz",91.1876_dp)
     nflav        = int_val_opt ("-nf",5)
+    vnf          = log_val_opt("-vnf",.false.)
     w_width      = dble_val_opt("-wwidth",2.141_dp)
     z_width      = dble_val_opt("-zwidth",2.4952_dp)
     CAlcl        = dble_val_opt("-CA",3.0_dp)
@@ -121,6 +122,7 @@ contains
     if(.not.noZ.and.p2b) stop 'Cannot do Z in p2b yet'
     if(CC.and.p2b) stop 'Cannot do CC in p2b yet'
     if(order_max.ge.4.and.p2b) stop 'Cannot run p2b at N3LO yet'
+    if(vnf.and.p2b) stop 'Cannot run p2b with variable flavour'
     outname      = string_val_opt("-out", "") ! Overwite the prefix of the file name
 
 
@@ -133,6 +135,13 @@ contains
     pdfuncert    = log_val_opt ("-pdfuncert")
     scaleuncert  = log_val_opt ("-scaleuncert")
     if(scaleuncert) scale_choice = 2
+    if(scaleuncert.and.vnf) then
+       print*, 'Cannot currently do automatic scale uncertainties and&
+            & vnf. Please run the scale choices individually like&
+            & this:'
+       print*, './disorder -xmur 1.0 -xmuf 1.0 -vnf '
+       stop
+    endif
     Nscales =1
     if(scaleuncert) Nscales = 7
     scalestr(1) = '_μR_1.0_μF_1.0'
@@ -289,7 +298,8 @@ contains
     write(idev,*) '# PDF:             ', trim(adjustl(pdfname))
     write(idev,*) '# MZ:              ', MZ
     write(idev,*) '# MW:              ', MW
-    write(idev,*) '# nf:              ', nflav
+    if(.not.vnf)   write(idev,*) '# nf:              ', nflav
+    if(vnf)   write(idev,*) '# nf:              ', 'variable'
     write(idev,*) '# CA:              ', CAlcl
     write(idev,*) '# CF:              ', CFlcl
     write(idev,*) '# TR:              ', TRlcl

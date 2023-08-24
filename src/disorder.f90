@@ -107,8 +107,8 @@ program disorder
 contains
 
 !----------------------------------------------------------------------
-  ! fill the streamlined interface PDF table (possibly using hoppet's
-  ! evolution)
+  ! fill the streamlined interface PDF table for the structure
+  ! functions only.
   subroutine read_PDF()
     use streamlined_interface
     real(dp), external :: alphasPDF
@@ -119,20 +119,26 @@ contains
          real(dp), intent(out) :: res(*)
        end subroutine EvolvePDF
     end interface
-
-   ! InitRunningCoupling has to be called for the HOPPET coupling to be initialised 
-   ! Default is to ask for 4 loop running and threshold corrections at quark masses.  
-   call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , 4,&
-        & -1000000045, quark_masses_sf(4:6), .true.)
-   ! fixnf can be set to a positive number for
-   ! fixed nf. -1000000045 gives variable nf
-   ! and threshold corrections at quarkmasses.
-   call hoppetAssign(EvolvePDF)
+    ! InitRunningCoupling has to be called for the HOPPET coupling
+    ! to be initialised Default is to ask for 4 loop running and
+    ! threshold corrections at quark masses.
+    if(vnf) then
+       call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
+            & -1000000045, quark_masses_sf(4:6), .true.)
+    else
+       call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
+            & nflav, quark_masses_sf(4:6), .true.)
+    end if
+    ! fixnf can be set to a positive number for
+    ! fixed nf. -1000000045 gives variable nf
+    ! and threshold corrections at quarkmasses.
+    call hoppetAssign(EvolvePDF)
 
  end subroutine read_PDF
 
  subroutine initialise_run_structure_functions
    implicit none
+   real(dp) :: rts
 
    write(6,*) "PDF member:",imempdf
    call InitPDF(imempdf)
@@ -146,9 +152,20 @@ contains
    endif
 
    scaleuncert_save = scaleuncert
-
-   call StartStrFct(sqrts*maxval(scales_muf), order_max, nflav,&
-        & xmur, xmuf, scale_choice, mz, .true., Qmin, mw, mz)
+   
+   rts = sqrts
+   if(scaleuncert) rts = rts * maxval(scales_muf) * xmuf
+   if(vnf) then
+      call StartStrFct(rts = rts, order_max = order_max, xR = xmur,&
+           & xF = xmuf, sc_choice = scale_choice, cmu = mz,&
+           & param_coefs = .true. , Qmin_PDF = Qmin, wmass = mw,&
+           & zmass = mz)
+   else
+      call StartStrFct(rts = rts, order_max&
+           & = order_max, nflav = nflav, xR = xmur, xF = xmuf,&
+           & sc_choice = scale_choice, cmu = mz, param_coefs = .true.&
+           & , Qmin_PDF = Qmin, wmass = mw, zmass = mz)      
+   endif
    call read_PDF()
    call InitStrFct(order_max, separate_orders = .true.)
 

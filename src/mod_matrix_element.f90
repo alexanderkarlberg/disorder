@@ -20,7 +20,7 @@ contains
     real(dp) :: y, Qval
     real(dp) :: muRval, muFval
     real(dp) :: Fx(-6:7,4)
-    real(dp) :: F1, F2, F3
+    real(dp) :: F1, F2, F3, FL, ym, yp
     real(dp) :: overall_norm, propZ, propW, propgZ
     integer  :: i, iscale
 
@@ -34,12 +34,6 @@ contains
     ! Note that there are typos in 4.19-4.21
     ! https://www.hep.phy.cam.ac.uk/theory/webber/QCDupdates.html
     overall_norm = 4.0_dp * pi * alpha_em**2 / Qsq**2 / x
-
-    propgZ = Qsq / (Qsq + MZ**2) / sin_2thw_sq! Z propagator
-    !    propgZ = (GF*MZ**2/(two*sqrt(two)*pi*alpha_em)) * Qsq / (Qsq + MZ**2)
-    propZ  = propgZ**2
-    !    propW = half * (GF * MW**2/(four * pi * alpha_em) * Qsq / (Qsq + MW**2))**2 ! W propagator 
-    propW = half * (1/(sqrt(two) * four * sin_thw_sq) * Qsq / (Qsq + MW**2))**2 ! W propagator 
 
     do iscale = 1,Nscales
        F1  = zero
@@ -56,6 +50,9 @@ contains
        if (order_stop.ge.4) Fx(:,4) = F_N3LO(y, Qval, muRval, muFval)
 
        if(NC) then
+          propgZ = Qsq / (Qsq + MZ**2) / sin_2thw_sq! Z propagator
+          !    propgZ = (GF*MZ**2/(two*sqrt(two)*pi*alpha_em)) * Qsq / (Qsq + MZ**2)
+          propZ  = propgZ**2
           do i = order_start,order_stop
              if(noZ) then
                 F1 = F1 + Fx(F1EM,i)
@@ -77,6 +74,9 @@ contains
        endif
        
        if(CC) then
+          !    propW = half * (GF * MW**2/(four * pi * alpha_em) * Qsq / (Qsq + MW**2))**2 ! W propagator 
+!          propW = half * (1/(sqrt(two) * four * sin_thw_sq) * Qsq / (Qsq + MW**2))**2 ! W propagator 
+          propW = two * (1/(sqrt(two) * four * sin_thw_sq) * Qsq / (Qsq + MW**2))**2 ! W propagator 
           do i = order_start,order_stop
              if(positron) then ! Always W+
                 F1 = F1 + propW * Fx(F1Wp,i) 
@@ -90,12 +90,26 @@ contains
           enddo
           
        endif
-       
+
+       print*, Fx(F1Wm,1), Fx(F2Wm,1), Fx(F3Wm,1)
+
        res(iscale) = (           yDIS**2 * x * F1 &
             +                   (one - yDIS) * F2 &
             + yDIS * (one - half * yDIS) * x * F3)
+
+!       print*, res
+!
+!       Fl = F2 - two * x* F1
+!       yp = one + (one - yDIS)**2
+!       ym = one - (one - yDIS)**2
+!       
+!       res(iscale) = yp * F2 + x*ym*F3 - yDIS**2 * FL
+!
+!       print*, res
+!
+
+       res(iscale) = res(iscale) * overall_norm
        
-       res(iscale) = res(iscale) * overall_norm 
     enddo
   end function eval_matrix_element
     

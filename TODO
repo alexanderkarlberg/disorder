@@ -6,17 +6,11 @@ Items to be done before release/publication of v1.0:
 
 *) write paper
 
-*) Fix pdf interface so it uses fixed nf in the coupling as
- well. Check consistency between disent and hoppet
-
 *) COLFOR has a weird feature that W(0) is set to zero in a very
  complicated way. Check against results from Alex.
 
 *) Do check with Alex at LO/NLO/NNLO
 
-*) Add charged current to inclsuive ME (needs testing). For sure an
- overall factor missing due to helicity average (5/4?)
-
 *) Add support for reduced cross sections
 
-*) Check on grid violationsin proVBFH. Maybe the upper bound is not set correctly?
+*) Ask Valerio about W+/W- convention...
