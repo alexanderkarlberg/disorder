@@ -89,7 +89,7 @@ contains
     ! whether or not we are doing inclsuvie/p2b and NC/CC.
     order_min    = int_val_opt ('-order-min',1)
     order_max    = int_val_opt ('-order-max',3)
-    order = 'NNLO'
+    order = 'manually specified order'
     ! if "-lo/-nlo/-nnlo/-n3lo" command is given, overwrite order_min and order_max accordingly
     if (log_val_opt("-lo")) then
        order_min = 1

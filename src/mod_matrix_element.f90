@@ -75,7 +75,8 @@ contains
        
        if(CC) then
           !    propW = half * (GF * MW**2/(four * pi * alpha_em) * Qsq / (Qsq + MW**2))**2 ! W propagator 
-!          propW = half * (1/(sqrt(two) * four * sin_thw_sq) * Qsq / (Qsq + MW**2))**2 ! W propagator 
+          !          propW = half * (1/(sqrt(two) * four * sin_thw_sq) * Qsq / (Qsq + MW**2))**2 ! W propagator
+          ! AK There seems to be some factors of 2 not fully accounted for. 
           propW = two * (1/(sqrt(two) * four * sin_thw_sq) * Qsq / (Qsq + MW**2))**2 ! W propagator 
           do i = order_start,order_stop
              if(positron) then ! Always W+
@@ -90,8 +91,6 @@ contains
           enddo
           
        endif
-
-       print*, Fx(F1Wm,1), Fx(F2Wm,1), Fx(F3Wm,1)
 
        res(iscale) = (           yDIS**2 * x * F1 &
             +                   (one - yDIS) * F2 &

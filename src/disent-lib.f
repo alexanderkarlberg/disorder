@@ -134,9 +134,9 @@ C---INITIALIZE COLOUR FACTORS AND OTHER CONSTANTS
          TR = 0.5d0
       end if
       NF=NFL
-!      write(6,
-!     $   '(" CA =",f10.6,"  CF =",f10.6,"  TR =",f10.6,"  nf =",i3)')
-!     $     ca,cf,tr,nf
+      write(6,
+     $   '(" CA =",f10.6,"  CF =",f10.6,"  TR =",f10.6,"  nf =",i3)')
+     $     ca,cf,tr,nf
       PI=ATAN(1D0)*4
       PISQ=PI**2
       HF=0.5D0
