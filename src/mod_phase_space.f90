@@ -298,7 +298,7 @@ contains
     pbreit(:,1) = Qval * pbreit(:,1)
     ! Incoming parton
     pbreit(0,2) = Qval * 0.5d0
-    pbreit(3,2) = Qval * 0.5d0
+    pbreit(3,2) = -Qval * 0.5d0
     ! Outgoing lepton
     pbreit(0,3) = (2.0d0 - y) * 0.5d0 / y
     pbreit(1,3) = - sqrt(1-y)/y
@@ -307,7 +307,7 @@ contains
     pbreit(:,3) = Qval * pbreit(:,3)
     ! Outgoing parton
     pbreit(0,4) = Qval * 0.5d0
-    pbreit(3,4) = -Qval * 0.5d0
+    pbreit(3,4) = Qval * 0.5d0
 
     Qvec(0) = y * (El - x * Eh)
     Qvec(1) = Qval * sqrt(1 - y) 
