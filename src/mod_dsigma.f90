@@ -22,6 +22,9 @@ contains
     
     dsigma = 0d0
     dsigma_all_scales = 0d0
+    NC_reduced_dsigma = 0d0
+    CC_reduced_dsigma = 0d0
+    
 
     !     generate phase space 
     call gen_phsp_born(xrand(1:2),x,y,Qsq,Qvec,jacborn,pbornlab,pbornbreit)
@@ -35,11 +38,12 @@ contains
     sigma_all_scales = sigma_all_scales + dsigma_all_scales
 
     ! Do reduced cross sections
-    NC_reduced_dsigma = NC_reduced_dsigma * gev2pb * jacborn * vegas_weight / itmx2
-    CC_reduced_dsigma = CC_reduced_dsigma * gev2pb * jacborn * vegas_weight / itmx2
+    NC_reduced_dsigma = NC_reduced_dsigma * jacborn * vegas_weight / itmx2
+    CC_reduced_dsigma = CC_reduced_dsigma * jacborn * vegas_weight / itmx2
 
     NC_reduced_sigma = NC_reduced_sigma + NC_reduced_dsigma
     CC_reduced_sigma = CC_reduced_sigma + CC_reduced_dsigma
+
     !     remove the rare outliers where we get dsigma = NaN (never happens)
     if (dsigma.ne.dsigma) then
        dsigma = 0d0

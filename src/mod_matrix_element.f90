@@ -99,9 +99,9 @@ contains
 
        res(iscale) = sigma(1) + sigma(2) ! NC + CC contributions
 
-       NC_reduced_sigma(iscale) = sigma(3)
-       CC_reduced_sigma(iscale) = sigma(4)
-       
+       NC_reduced_dsigma(iscale) = sigma(3)
+       CC_reduced_dsigma(iscale) = sigma(4)
+
     enddo
   end function eval_matrix_element
     

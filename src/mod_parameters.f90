@@ -168,7 +168,7 @@ contains
 
     ! Some parameters setting up the VEGAS run
     readin       = log_val_opt ("-readingrid")
-    ncall1       = int_val_opt ("-ncall1",100000)
+    ncall1       = int_val_opt ("-ncall1",10000)
     ncall2       = int_val_opt ("-ncall2",100000)
     it1          = int_val_opt("-it1",1)
     itmx1        = int_val_opt ("-itmx1",3)
@@ -260,6 +260,8 @@ contains
     sigma_all_scales = 0.0_dp ! Initialise
     NC_reduced_sigma = 0.0_dp
     CC_reduced_sigma = 0.0_dp
+    NC_reduced_dsigma = 0.0_dp
+    CC_reduced_dsigma = 0.0_dp
     
     if (.not.CheckAllArgsUsed(0)) then
        call help_message
