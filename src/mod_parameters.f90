@@ -30,7 +30,7 @@ module mod_parameters
   character(len=50), public :: pdfname, outname
   integer, public :: nmempdf, outdev
   logical, public, save :: pdfuncert, fillplots, p2b, noZ, positron,&
-       & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC, vnf
+       & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC, vnf, help
   real(dp), public :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
        & Eh, El, sigma_all_scales(maxscales)
   character (len=4), private :: order
@@ -58,6 +58,12 @@ contains
   subroutine set_parameters 
     integer :: call, i
     real(dp) :: ran
+
+    help = log_val_opt("-help",.false.)
+    if(help) then
+       call help_message
+       call exit()
+    endif
     
     ! Some physical parameters and constants
     mw           = dble_val_opt("-mw",80.398_dp)
@@ -89,7 +95,7 @@ contains
     ! whether or not we are doing inclsuvie/p2b and NC/CC.
     order_min    = int_val_opt ('-order-min',1)
     order_max    = int_val_opt ('-order-max',3)
-    order = 'manually specified order'
+    order = 'NNLO'
     ! if "-lo/-nlo/-nnlo/-n3lo" command is given, overwrite order_min and order_max accordingly
     if (log_val_opt("-lo")) then
        order_min = 1
@@ -107,6 +113,11 @@ contains
        order_min = 1
        order_max = 4
        order = 'N3LO'
+    else
+       if(order_max.eq.1) order = '  LO'
+       if(order_max.eq.2) order = ' NLO'
+       if(order_max.eq.3) order = 'NNLO'
+       if(order_max.eq.4) order = 'N3LO'
     endif
     NC = log_val_opt("-NC",.true.)
     CC = log_val_opt("-CC",.false.)
@@ -130,7 +141,7 @@ contains
     scale_choice = 1 !int_val_opt ('-scale-choice',1) ! 1: Use Q. 0: Use MZ. For now fixed.
     xmuf         = dble_val_opt("-xmuf",1.0_dp)
     xmur         = dble_val_opt("-xmur",1.0_dp)
-    pdfname      = string_val_opt("-pdf", "NNPDF30_nlo_as_0118_hera")
+    pdfname      = string_val_opt("-pdf", "NNPDF30_nnlo_as_0118_hera")
     nmempdf      = int_val_opt ("-nmempdf",0)
     pdfuncert    = log_val_opt ("-pdfuncert")
     scaleuncert  = log_val_opt ("-scaleuncert")
@@ -161,8 +172,8 @@ contains
     ncall2       = int_val_opt ("-ncall2",100000)
     it1          = int_val_opt("-it1",1)
     itmx1        = int_val_opt ("-itmx1",3)
-    itmx2        = int_val_opt ("-itmx2",1)
-    iseed        = int_val_opt ("-iseed",10)
+    itmx2        = 1!int_val_opt ("-itmx2",1)
+    iseed        = int_val_opt ("-iseed",1)
     write(seedstr,"(I4.4)") iseed
     idum = -iseed ! Initial seed
     if(readin.or.it1.gt.1) then
@@ -184,8 +195,8 @@ contains
     !     Read in bounds on x,y,Q2
     Q = dble_val_opt("-Q",-1.0_dp)
     if(Q.lt.0.0_dp) then
-      Q2min = (dble_val_opt("-Qmin",1.0_dp))**2
-      Q2max = (dble_val_opt("-Qmax",1d10))**2
+      Q2min = (dble_val_opt("-Qmin",10.0_dp))**2
+      Q2max = (dble_val_opt("-Qmax",100000000.0_dp))**2
     else 
       Q2min = Q**2
       Q2max = Q2min
@@ -209,7 +220,7 @@ contains
 
     !     Set centre of mass energy
     El = dble_val_opt("-Elep",27.5_dp)
-    Eh = dble_val_opt("-Epro",820.0_dp)
+    Eh = dble_val_opt("-Ehad",820.0_dp)
     s = 4d0 * Eh * El
 
     !     Sanity checks
@@ -248,7 +259,10 @@ contains
 
     sigma_all_scales = 0.0_dp ! Initialise
 
-    if (.not.CheckAllArgsUsed(0)) call exit()
+    if (.not.CheckAllArgsUsed(0)) then
+       call help_message
+       call exit()
+    endif
 
   end subroutine set_parameters
 
@@ -330,5 +344,47 @@ contains
     write(0,'(a)') ' functions and the disent references.                      '
     write(0,'(a)') '-----------------------------------------------------------'
   end subroutine welcome_message
+
+  subroutine help_message
+    call welcome_message
+    write(0,'(a)') ' Some common flags to use are (default values in [] and () '
+    write(0,'(a)') ' means that the flag takes a numerical input. Values are in'
+    write(0,'(a)') ' GeV typically) :                                          '
+    write(0,'(a)') '                                                           '
+    write(0,'(a)') ' -lo/-nlo/-nnlo/-n3lo [-nnlo]: Run at LO/NLO/NNLO/N3LO     '
+    write(0,'(a)') ' -Q (val) : Specify fixed Q                                '
+    write(0,'(a)') ' -Qmin (val) [10.0] : Specify minimum Q                    '
+    write(0,'(a)') ' -Qmax (val) : Specify maximum Q                           '
+    write(0,'(a)') ' -x (val) : Specify fixed x                                '
+    write(0,'(a)') ' -xmin (val) : Specify minimum x                           '
+    write(0,'(a)') ' -xmax (val) : Specify maximum x                           '
+    write(0,'(a)') ' -y (val) : Specify fixed y                                '
+    write(0,'(a)') ' -ymin (val) : Specify minimum y                           '
+    write(0,'(a)') ' -ymax (val) : Specify maximum y                           '
+    write(0,'(a)') ' -Elep (val) [27.5] : Energy of lepton in lab frame        '
+    write(0,'(a)') ' -Ehad (val) [820.0] : Energy of hadron in lab frame       '
+    write(0,'(a)') ' -scaleuncert [false]: Do 7-point scale variation around Q '
+    write(0,'(a)') ' -pdf [NNPDF30_nnlo_as_0118_hera] : LHAPDF name            '
+    write(0,'(a)') ' -pdfuncert [false] : Compute pdf uncertainties            '
+    write(0,'(a)') ' -CC [false] : Include charged current processes           '
+    write(0,'(a)') ' -NC [true] : Include neutral current processes            '
+    write(0,'(a)') ' -includeZ [false] : Include Z and interferences           '
+    write(0,'(a)') ' -positron [false] : Incoming positron                     '
+    write(0,'(a)') ' -out : Overwrite the default output prefix                '
+    write(0,'(a)') ' -ncall2 [100000] : Number of calls to disent              '
+    write(0,'(a)') ' -iseed [1] : The seed                                     '
+    write(0,'(a)') ' -p2b [false] : Turn on disent and projection-to-Born      '
+    write(0,'(a)') ' -help : Print this help message                           '
+    write(0,'(a)') '                                                           '
+    write(0,'(a)') ' More specialised flags and helpful information can be     '
+    write(0,'(a)') ' found in src/mod_parameters.f90. Logical flags are set to '
+    write(0,'(a)') ' true if present on the command line (-p2b turns on p2b).  '
+    write(0,'(a)') ' They can be set to false by prefixing with "no", for      '
+    write(0,'(a)') ' instance like this : -noNC.                               '
+    write(0,'(a)') '                                                           '
+    write(0,'(a)') ' Example command line:                                     '
+    write(0,'(a)') '                                                           '
+    write(0,'(a)') ' ./disorder -nnlo -Q 20.0 -noNC -CC -scaleuncert           '
+  end subroutine help_message
 
 end module mod_parameters

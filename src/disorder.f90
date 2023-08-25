@@ -458,18 +458,15 @@ contains
    else if (order_max.eq.3) then 
       write(idev,'(a,es13.6,a,es13.6,a)') ' # Total NNLO cross-section (pb)'
    else if (order_max.eq.4) then 
-      write(idev,'(a)') ' # Total N3LO cross-section (pb)'
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Total N3LO cross-section (pb)'
    endif
 
    if (nmempdf_start.eq.nmempdf_end.and..not.scaleuncert) then
-      write(idev,'(a)') ' # central     MC_error'
-      write(idev,'(es13.6,es13.6)') sigma_tot, sqrt(error_tot)
+      write(idev,'(a)') ' # Summary:'
+      write(idev,'(a,f16.5,a)') ' # sigma =', sigma_tot,' pb'
+      write(idev,'(a,f10.3,a)') ' # MC integration uncertainty =', sqrt(error_tot)/sigma_tot*100.0_dp, ' %'
    elseif(nmempdf_start.eq.nmempdf_end) then
       central = res(0)
-      write(idev,'(a)') ' # central     max          min          MC_error'
-      write(idev,'(7(es13.6))') central, maxscale, minscale,sqrt(error_tot)
-      write(idev,'(a)') ''
-      write(idev,'(a)') ''
       write(idev,'(a)') ' # Summary:'
       write(idev,'(a,f16.5,a)') ' # sigma =', central,' pb'
       write(idev,'(a,f16.5,a,a,f9.3,a)') ' # QCD scale uncertainty (+) =', maxscale-central, ' pb', &
@@ -479,10 +476,6 @@ contains
       write(idev,'(a,f10.3,a)') ' # MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
    elseif(.not.scaleuncert) then
       call getpdfuncertainty(res(nmempdf_start:nmempdf_end),central,errplus,errminus,errsymm)
-      write(idev,'(a)') ' # central     max          min          MC_error'
-      write(idev,'(7(es13.6))') central, maxscale, minscale,sqrt(error_tot)
-      write(idev,'(a)') ''
-      write(idev,'(a)') ''
       write(idev,'(a)') ' # Summary:'
       write(idev,'(a,f10.5,a)') ' # sigma =', central,' pb'
       write(idev,'(a,f10.3,a)') ' # MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
@@ -491,10 +484,6 @@ contains
       write(idev,'(a)') ' #   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas))'
    else
       call getpdfuncertainty(res(nmempdf_start:nmempdf_end),central,errplus,errminus,errsymm)
-      write(idev,'(a)') ' # central     max          min          MC_error     PDF_err_plus PDF_err_min  PDF_err_symm'
-      write(idev,'(7(es13.6))') central, maxscale, minscale,sqrt(error_tot), errplus, errminus, errsymm
-      write(idev,'(a)') ''
-      write(idev,'(a)') ''
       write(idev,'(a)') ' # Summary:'
       write(idev,'(a,f10.5,a)') ' # sigma =', central,' pb'
       write(idev,'(a,f9.5,a,a,f9.3,a)') ' # QCD scale uncertainty (+) =', maxscale-central, ' pb', &
