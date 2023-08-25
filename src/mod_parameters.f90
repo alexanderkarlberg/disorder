@@ -282,9 +282,9 @@ contains
     real(dp) :: muR_lcl, alphasPDF
     muR_lcl = max(muR,Qmin)
     ! we use alphas from the LHAPDF PDF
-    !alphasLocal = alphasPDF(muR_lcl)
+    alphasLocal = alphasPDF(muR_lcl)
     ! we use alphas from HOPPET
-    alphasLocal = CouplingValue(coupling, muR_lcl)
+    !alphasLocal = CouplingValue(coupling, muR_lcl)
   end function alphasLocal
   
 
