@@ -167,17 +167,6 @@ contains
        call hoppetAssign(EvolvePDF)
     endif
 
-    print*, alphasLocal(91.2d0)
-!    stop
-    ! quickly test that we have read in the PDFs correctly
-    write(6,*) "Quick test that PDFs have been read in correctly"
-    x = 0.08_dp
-    Q = 17.0_dp
-    call EvolvePDF(x, Q, res_lhapdf)
-    call EvalPdfTable_xQ(tables(0), x, Q, res_hoppet)
-    write(6,*) 'lhapdf: ', res_lhapdf
-    write(6,*) 'hoppet: ', res_hoppet
-    
  end subroutine read_PDF
 
  subroutine initialise_run_structure_functions
