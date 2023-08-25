@@ -66,40 +66,47 @@ contains
 
     ! Incoming lepton
     pbreit(0,1) = (2.0d0 - y) * 0.5d0 / y
-    pbreit(1,1) = - sqrt(1-y)/y
+    pbreit(1,1) = sqrt(1-y)/y
     pbreit(2,1) = 0d0
     pbreit(3,1) = - 0.5d0
     pbreit(:,1) = Qval * pbreit(:,1)
     ! Incoming parton
     pbreit(0,2) = Qval * 0.5d0
-    pbreit(3,2) = -Qval * 0.5d0
+    pbreit(3,2) = Qval * 0.5d0
     ! Outgoing lepton
     pbreit(0,3) = (2.0d0 - y) * 0.5d0 / y
-    pbreit(1,3) = - sqrt(1-y)/y
+    pbreit(1,3) = sqrt(1-y)/y
     pbreit(2,3) = 0d0
     pbreit(3,3) = 0.5d0
     pbreit(:,3) = Qval * pbreit(:,3)
     ! Outgoing parton
     pbreit(0,4) = Qval * 0.5d0
-    pbreit(3,4) = Qval * 0.5d0 
+    pbreit(3,4) = - Qval * 0.5d0 
 
     Qvec(0) = y * (El - x * Eh)
-    Qvec(1) = Qval * sqrt(1 - y) 
+    Qvec(1) = -Qval * sqrt(1 - y) 
     Qvec(2) = 0d0
-    Qvec(3) = y * (El + x * Eh)
+    Qvec(3) = -y * (El + x * Eh)
 
     !     In lab frame by hand
     ! Incoming lepton
     plab(0,1) = El
-    plab(3,1) = El
+    plab(3,1) = -El
     ! Incoming parton
     plab(0,2) = x * Eh
-    plab(3,2) = -x * Eh
+    plab(3,2) = x * Eh
     ! Outgoing lepton
     plab(:,3) = plab(:,1) - Qvec(:)
     ! Outgoing parton
     plab(:,4) = plab(:,2) + Qvec
 
+    !    call mlab2breit(4,Qvec,plab,pbreit,.true.)
+    !    print*, ''
+    !    print*, 'pbreit 1', pbreit(:,1)
+    !    print*, 'pbreit 2', pbreit(:,2)
+    !    print*, 'pbreit 3', pbreit(:,3)
+    !    print*, 'pbreit 4', pbreit(:,4)
+    
     !print*, 'Momenta in Breit frame'
     !print*, 'Incoming lepton:', pbreit(:,1)
     !print*, 'Incoming parton:', pbreit(:,2)
@@ -137,7 +144,7 @@ contains
     parameter (z = (/0d0,0d0,1d0/))
     double precision trans(0:3,0:3)
 
-    Qval = DSqrt(-invmsq(Q))
+    Qval = sqrt(-invmsq(Q))
     invQval = 1d0/Qval
     Qb = Q                    ! Local copy
     pin = p                   ! Local copy
@@ -199,7 +206,7 @@ contains
     parameter (z = (/0d0,0d0,1d0/))
     double precision trans(0:3,0:3)
 
-    Qval = DSqrt(-invmsq(Q))
+    Qval = sqrt(-invmsq(Q))
     invQval = 1d0/Qval
     Qb = Q                    ! Local copy
     pin = p                   ! Local copy
@@ -292,35 +299,35 @@ contains
 
     !     Incoming lepton
     pbreit(0,1) = (2.0d0 - y) * 0.5d0 / y
-    pbreit(1,1) = - sqrt(1-y)/y
+    pbreit(1,1) = sqrt(1-y)/y
     pbreit(2,1) = 0d0
     pbreit(3,1) = - 0.5d0
     pbreit(:,1) = Qval * pbreit(:,1)
     ! Incoming parton
     pbreit(0,2) = Qval * 0.5d0
-    pbreit(3,2) = -Qval * 0.5d0
+    pbreit(3,2) = Qval * 0.5d0
     ! Outgoing lepton
     pbreit(0,3) = (2.0d0 - y) * 0.5d0 / y
-    pbreit(1,3) = - sqrt(1-y)/y
+    pbreit(1,3) = sqrt(1-y)/y
     pbreit(2,3) = 0d0
     pbreit(3,3) = 0.5d0
     pbreit(:,3) = Qval * pbreit(:,3)
     ! Outgoing parton
     pbreit(0,4) = Qval * 0.5d0
-    pbreit(3,4) = Qval * 0.5d0
+    pbreit(3,4) = -Qval * 0.5d0
 
     Qvec(0) = y * (El - x * Eh)
-    Qvec(1) = Qval * sqrt(1 - y) 
+    Qvec(1) = -Qval * sqrt(1 - y) 
     Qvec(2) = 0d0
-    Qvec(3) = y * (El + x * Eh)
+    Qvec(3) = -y * (El + x * Eh)
 
     !     In lab frame by hand
     ! Incoming lepton
     plab(0,1) = El
-    plab(3,1) = El
+    plab(3,1) = -El
     ! Incoming parton
     plab(0,2) = x * Eh
-    plab(3,2) = -x * Eh
+    plab(3,2) = x * Eh
     ! Outgoing lepton
     plab(:,3) = plab(:,1) - Qvec(:)
     ! Outgoing parton

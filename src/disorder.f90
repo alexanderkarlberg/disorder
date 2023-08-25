@@ -374,6 +374,8 @@ contains
       dsig(1) = totwgt * ncall2
    endif
 
+   if(xmin.eq.xmax) dsig = dsig / x ! Because of convention in DISENT
+
    ! First we transfer the DISENT momenta to our convention
    pbornbreit = 0 ! pborn(0:3,2+2)
    prealbreit = 0 ! preal(0:3,3+2)
@@ -384,8 +386,6 @@ contains
       pbornbreit(:,2)   = cshift(p(:,1),-1) ! Incoming quark
       pbornbreit(:,3)   = cshift(p(:,7),-1) ! Outgoing lepton
       pbornbreit(:,4)   = cshift(p(:,2),-1) ! Outgoing quark
-      pbornbreit(1:3,2) = - pbornbreit(1:3,2)
-      pbornbreit(1:3,4) = - pbornbreit(1:3,4)
       call mbreit2labdisent(n+2,Qlab,pbornbreit,pbornlab)
    elseif(n.eq.3) then
       prealbreit(:,1)    = cshift(p(:,6),-1) ! Incoming lepton
@@ -393,8 +393,6 @@ contains
       prealbreit(:,3)    = cshift(p(:,7),-1) ! Outgoing lepton
       prealbreit(:,4)    = cshift(p(:,2),-1) ! Outgoing quark
       prealbreit(:,5)    = cshift(p(:,3),-1) ! Outgoing emission
-      prealbreit(1:3,2)  = - prealbreit(1:3,2)
-      prealbreit(1:3,4:) = - prealbreit(1:3,4:)
       call mbreit2labdisent(n+2,Qlab,prealbreit,preallab)
    elseif(n.eq.4) then
       prrealbreit(:,1)    = cshift(p(:,6),-1) ! Incoming lepton
@@ -403,14 +401,11 @@ contains
       prrealbreit(:,4)    = cshift(p(:,2),-1) ! Outgoing quark
       prrealbreit(:,5)    = cshift(p(:,3),-1) ! Outgoing emission
       prrealbreit(:,6)    = cshift(p(:,4),-1) ! Outgoing emission
-      prrealbreit(1:3,2)  = - prrealbreit(1:3,2)
-      prrealbreit(1:3,4:) = - prrealbreit(1:3,4:)
       call mbreit2labdisent(n+2,Qlab,prrealbreit,prreallab)
    else
       print*, 'n = ', n
       stop 'Wrong n in user routine of DISENT'
    endif
-!   print*, n,na,nt
    call user_analysis(n+2, dsig, x, y, Q2)
 
    ! projection-to-Born analysis call
