@@ -11,8 +11,11 @@ contains
     implicit none
     
     call inihists
+
     if(scaleuncert) call setupmulti(maxscales)
+
     call define_histograms
+    
   end subroutine init_histo
   
   subroutine analysis(n,dsigma,x,y,Qsq)
