@@ -114,6 +114,7 @@ contains
   ! fill the streamlined interface PDF table for the structure
   ! functions only.
   subroutine read_PDF()
+    use dummy_pdfs
     use streamlined_interface
     real(dp), external :: alphasPDF
     interface
@@ -123,21 +124,60 @@ contains
          real(dp), intent(out) :: res(*)
        end subroutine EvolvePDF
     end interface
-    ! InitRunningCoupling has to be called for the HOPPET coupling
-    ! to be initialised Default is to ask for 4 loop running and
-    ! threshold corrections at quark masses.
-    if(vnf) then
-       call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-            & -1000000045, quark_masses_sf(4:6), .true.)
+    real(dp) :: res_lhapdf(-6:6), x, Q
+    real(dp) :: res_hoppet(-6:6)
+    real(dp) :: toy_pdf_at_Q0(0:grid%ny,ncompmin:ncompmax)
+    real(dp) :: pdf_at_Q0(0:grid%ny,ncompmin:ncompmax)
+    
+    if (toy_Q0 > zero) then
+       write(6,*) "WARNING: Using toy PDF"
+       toy_pdf_at_Q0 = unpolarized_dummy_pdf(xValues(grid))
+       if(vnf) then
+          call InitRunningCoupling(coupling, toy_alphas_Q0,&
+               & toy_Q0, order_max, -1000000045, quark_masses_sf(4:6)&
+               &, .true.)
+       else
+          call InitRunningCoupling(coupling, toy_alphas_Q0,&
+               & toy_Q0, order_max, nflav, quark_masses_sf(4:6)&
+               &, .true.)
+       endif
+       call EvolvePdfTable(tables(0), toy_Q0, toy_pdf_at_Q0, dh,&
+            & coupling, nloop=min(order_max,3))
+    elseif (Q0pdf > zero) then
+       write(6,*) "WARNING: Using internal HOPPET DGLAP evolution"
+       call InitPDF_LHAPDF(grid, pdf_at_Q0, EvolvePDF, Q0pdf)
+       
+       if(vnf) then
+          call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
+               & -1000000045, quark_masses_sf(4:6), .true.)
+       else
+          call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
+               & nflav, quark_masses_sf(4:6), .true.)
+       end if
+       call EvolvePdfTable(tables(0), Q0pdf, pdf_at_Q0, dh, coupling, &
+            &  muR_Q=xmuR_PDF, nloop=min(order_max,3))
     else
-       call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-            & nflav, quark_masses_sf(4:6), .true.)
-    end if
-    ! fixnf can be set to a positive number for
-    ! fixed nf. -1000000045 gives variable nf
-    ! and threshold corrections at quarkmasses.
-    call hoppetAssign(EvolvePDF)
+       if(vnf) then
+          call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
+               & -1000000045, quark_masses_sf(4:6), .true.)
+       else
+          call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
+               & nflav, quark_masses_sf(4:6), .true.)
+       end if
+       call hoppetAssign(EvolvePDF)
+    endif
 
+    print*, alphasLocal(91.2d0)
+!    stop
+    ! quickly test that we have read in the PDFs correctly
+    write(6,*) "Quick test that PDFs have been read in correctly"
+    x = 0.08_dp
+    Q = 17.0_dp
+    call EvolvePDF(x, Q, res_lhapdf)
+    call EvalPdfTable_xQ(tables(0), x, Q, res_hoppet)
+    write(6,*) 'lhapdf: ', res_lhapdf
+    write(6,*) 'hoppet: ', res_hoppet
+    
  end subroutine read_PDF
 
  subroutine initialise_run_structure_functions

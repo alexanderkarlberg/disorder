@@ -11,9 +11,5 @@ Items to be done before release/publication of v1.0:
 
 *) Do check with Alex at LO/NLO/NNLO
 
-*) Add support for reduced cross sections
-
 *) Ask Valerio about W+/W- convention...
 
-*) Need to check the lab frame transformations again since now the
- Breit frame momenta swapped sign...

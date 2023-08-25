@@ -5,6 +5,8 @@ module mod_parameters
   use sub_defs_io
   use integration
   use types
+  use streamlined_interface, CouplingValue => Value
+  use dummy_pdfs
   implicit none
 
   private
@@ -35,6 +37,7 @@ module mod_parameters
        & Eh, El, sigma_all_scales(maxscales),&
        & NC_reduced_dsigma(maxscales), CC_reduced_dsigma(maxscales),&
        & NC_reduced_sigma(maxscales), CC_reduced_sigma(maxscales)
+  real(dp), public, save :: toy_Q0, Q0pdf, xmuR_PDF ! For HOPPET PDF evolution
   character (len=4), private :: order
   real(dp), private :: Q, x, y
   real(dp), public :: pbornlab(0:3,2+2), preallab(0:3,2+3), prreallab(0:3,2+4)
@@ -142,6 +145,9 @@ contains
     xmuf         = dble_val_opt("-xmuf",1.0_dp)
     xmur         = dble_val_opt("-xmur",1.0_dp)
     pdfname      = string_val_opt("-pdf", "NNPDF30_nnlo_as_0118_hera")
+    toy_Q0       = dble_val_opt("-toyQ0",-1d0)
+    Q0pdf        = dble_val_opt("-Q0pdf",-1d0)
+    xmuR_PDF     = dble_val_opt("-xmuRPDF",1d0)
     nmempdf      = int_val_opt ("-nmempdf",0)
     pdfuncert    = log_val_opt ("-pdfuncert")
     scaleuncert  = log_val_opt ("-scaleuncert")
@@ -276,9 +282,9 @@ contains
     real(dp) :: muR_lcl, alphasPDF
     muR_lcl = max(muR,Qmin)
     ! we use alphas from the LHAPDF PDF
-    alphasLocal = alphasPDF(muR_lcl)
+    !alphasLocal = alphasPDF(muR_lcl)
     ! we use alphas from HOPPET
-    !alphasLocal = Value(coupling, muR_lcl)
+    alphasLocal = CouplingValue(coupling, muR_lcl)
   end function alphasLocal
   
 
