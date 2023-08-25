@@ -16,6 +16,8 @@ program disorder
   real(dp) :: sigma_tot, error_tot, region(1:2*ndim),xdum(4)
   real(dp) :: res(0:nmempdfMAX), central, errminus, errplus, errsymm
   real(dp) :: res_scales(1:maxscales),maxscale,minscale
+  real(dp) :: NC_reduced_central, NC_reduced_max, NC_reduced_min
+  real(dp) :: CC_reduced_central, CC_reduced_max, CC_reduced_min
   character * 100 :: analysis_name, histo_name, scale_string
   character * 3 :: pdf_string
   logical :: scaleuncert_save
@@ -175,15 +177,15 @@ contains
       xdum = 0.5_dp
       fillplots = .true.
       vegas_ncall = 1
-      sigma_tot = dsigma(xdum,1d0)
-      error_tot = 0.0_dp
+      sigma_tot = dsigma(xdum, one)
+      error_tot = zero
       res(imempdf) = sigma_tot
       res_scales(1:nscales) = sigma_all_scales(1:nscales) 
    else
-      region(1:ndim)        = 0.0_dp
-      region(ndim+1:2*ndim) = 1.0_dp
-      sigma_tot = 0.0_dp
-      error_tot = 0.0_dp
+      region(1:ndim)        = zero
+      region(ndim+1:2*ndim) = one
+      sigma_tot = zero
+      error_tot = zero
 
       ! vegas warmup call
       if(ncall1.gt.0.and.itmx1.gt.0) then 
@@ -192,7 +194,9 @@ contains
          fillplots = .false.
          scaleuncert = .false.
          call vegas(region,ndim,dsigma,0,ncall1,itmx1,0,integ,error_int,proba)
-         sigma_all_scales = 0d0 ! Reset for the production run below
+         sigma_all_scales = zero ! Reset for the production run below
+         NC_reduced_sigma = zero
+         CC_reduced_sigma = zero
          scaleuncert = scaleuncert_save
          writeout=.false.
          ! set random seed to current idum value
@@ -221,7 +225,13 @@ contains
    if(imempdf.eq.nmempdf_start) then ! First PDF, this is where we compute scale uncertainties
       maxscale = maxval(res_scales(1:Nscales)) 
       minscale = minval(res_scales(1:Nscales))
-       res(imempdf) = res_scales(1) ! Copy central scale
+      res(imempdf) = res_scales(1) ! Copy central scale
+      NC_reduced_central = NC_reduced_sigma(1)
+      CC_reduced_central = CC_reduced_sigma(1)
+      NC_reduced_max = maxval(NC_reduced_sigma(1:Nscales))
+      CC_reduced_max = maxval(CC_reduced_sigma(1:Nscales))
+      NC_reduced_min = minval(NC_reduced_sigma(1:Nscales))
+      CC_reduced_min = minval(CC_reduced_sigma(1:Nscales))
    endif
  end subroutine initialise_run_structure_functions
 
@@ -235,8 +245,8 @@ contains
    Q2minl = Q2min
    Q2maxl = Q2max
    
-   yminl = 0d0
-   ymaxl = 1d0
+   yminl = zero
+   ymaxl = one
   
  end subroutine dis_cuts
 
@@ -251,7 +261,7 @@ contains
    
    integer isc
 
-   double precision dsig(maxscales), alphasPDF, totwgt, wgt_array(maxscales,-6:6)
+   double precision dsig(maxscales), totwgt, wgt_array(maxscales,-6:6)
    double precision, save ::  pdfs(maxscales,-6:6), eta, Q2, Qval, x, y, as2pi(maxscales)
 
    double precision, save :: etasave = -100d0
@@ -296,7 +306,7 @@ contains
          X=ETA*Q2/(2*DOT(P,1,5))
          Y=DOT(P,1,5)/DOT(P,1,6)
          do isc = 1,3
-            as2pi(isc) = alphasPDF(scales_mur(isc)*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
+            as2pi(isc) = alphasLocal(scales_mur(isc)*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
          enddo
          ! Then copy the as2pi into the full array
          !real(dp), parameter, public :: scales_mur(1:maxscales) = &
@@ -345,7 +355,7 @@ contains
          X=ETA*Q2/(2*DOT(P,1,5))
          Y=DOT(P,1,5)/DOT(P,1,6)
          
-         as2pi(1) = alphasPDF(xmur*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
+         as2pi(1) = alphasLocal(xmur*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
          call p2bmomenta(x,y,Q2,p2bbreit,p2blab)
          Qlab(:) = p2blab(:,1) - p2blab(:,3)
          recompute = .false.
@@ -461,41 +471,84 @@ contains
       write(idev,'(a,es13.6,a,es13.6,a)') ' # Total N3LO cross-section (pb)'
    endif
 
-   if (nmempdf_start.eq.nmempdf_end.and..not.scaleuncert) then
-      write(idev,'(a)') ' # Summary:'
-      write(idev,'(a,f16.5,a)') ' # sigma =', sigma_tot,' pb'
-      write(idev,'(a,f10.3,a)') ' # MC integration uncertainty =', sqrt(error_tot)/sigma_tot*100.0_dp, ' %'
-   elseif(nmempdf_start.eq.nmempdf_end) then
-      central = res(0)
-      write(idev,'(a)') ' # Summary:'
-      write(idev,'(a,f16.5,a)') ' # sigma =', central,' pb'
-      write(idev,'(a,f16.5,a,a,f9.3,a)') ' # QCD scale uncertainty (+) =', maxscale-central, ' pb', &
-           & ' (', ((maxscale-central)/central)*100.0_dp, ' %)'
-      write(idev,'(a,f16.5,a,a,f9.3,a)') ' # QCD scale uncertainty (-) =', minscale-central, ' pb', &
-           & ' (', ((minscale-central)/central)*100.0_dp, ' %)'
-      write(idev,'(a,f10.3,a)') ' # MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
-   elseif(.not.scaleuncert) then
-      call getpdfuncertainty(res(nmempdf_start:nmempdf_end),central,errplus,errminus,errsymm)
-      write(idev,'(a)') ' # Summary:'
-      write(idev,'(a,f10.5,a)') ' # sigma =', central,' pb'
-      write(idev,'(a,f10.3,a)') ' # MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
-      write(idev,'(a,f10.3,a)') ' # PDF symmetric uncertainty* =', errsymm/central*100.0_dp, ' %'
-      write(idev,'(a)') ' # (*PDF uncertainty contains alphas uncertainty if using a'
-      write(idev,'(a)') ' #   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas))'
-   else
-      call getpdfuncertainty(res(nmempdf_start:nmempdf_end),central,errplus,errminus,errsymm)
-      write(idev,'(a)') ' # Summary:'
-      write(idev,'(a,f10.5,a)') ' # sigma =', central,' pb'
-      write(idev,'(a,f9.5,a,a,f9.3,a)') ' # QCD scale uncertainty (+) =', maxscale-central, ' pb', &
-           & ' (', ((maxscale-central)/central)*100.0_dp, ' %)'
-      write(idev,'(a,f9.5,a,a,f9.3,a)') ' # QCD scale uncertainty (-) =', minscale-central, ' pb', &
-           & ' (', ((minscale-central)/central)*100.0_dp, ' %)'
-      write(idev,'(a,f10.3,a)') ' # MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
-      write(idev,'(a,f10.3,a)') ' # PDF symmetric uncertainty* =', errsymm/central*100.0_dp, ' %'
-      write(idev,'(a)') ' # (*PDF uncertainty contains alphas uncertainty if using a'
-      write(idev,'(a)') ' #   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas))'
+   central = res(0)
+
+   write(idev,'(a)') ' # Summary:'
+   if(NC.and.CC) then
+      write(idev,'(a,f16.6,a)') ' # σ(NC + CC)                 =', central,' pb'
+   elseif(NC) then
+      write(idev,'(a,f16.6,a)') ' # σ(NC)                      =', central,' pb'
+   elseif(CC) then
+      write(idev,'(a,f16.6,a)') ' # σ(CC)                      =', central,' pb'
    endif
-   write(idev,*) '============================================================'
+   write(idev,'(a,f14.4,a)') ' # MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
+
+   if(scaleuncert) then
+      write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)  =',&
+           & ((maxscale-central)/central)*100.0_dp, ' %'
+      write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)  =',&
+           & ((minscale-central)/central)*100.0_dp, ' %'
+   endif
+
+   if(pdfuncert) then
+      call getpdfuncertainty(res(nmempdf_start:nmempdf_end),central,errplus,errminus,errsymm)
+      write(idev,'(a,f14.4,a)') ' # PDF symmetric uncertainty* =', errsymm/central*100.0_dp, ' %'
+      write(idev,'(a)') ' # (*PDF uncertainty contains alphas uncertainty if using a  '
+      write(idev,'(a)') ' #   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas)).'
+   endif
+   write(idev,*) ''
+   
+   if (order_max.eq.1) then 
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced LO cross-sections (pb)'
+   else if (order_max.eq.2) then 
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced NLO cross-sections (pb)'
+   else if (order_max.eq.3) then 
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced NNLO cross-sections (pb)'
+   else if (order_max.eq.4) then 
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced N3LO cross-sections (pb)'
+   endif
+
+   if(NC.and.CC) then
+      write(idev,'(a,f16.6)') ' # σ reduced (NC)             =', NC_reduced_central
+      if(scaleuncert) then
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)  =',&
+              & ((NC_reduced_max-NC_reduced_central)/NC_reduced_central)&
+              &*100.0_dp, ' %'
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)  =',&
+              & ((NC_reduced_min-NC_reduced_central)/NC_reduced_central)&
+              &*100.0_dp, ' %'
+      endif
+      write(idev,'(a,f16.6)') ' # σ reduced (CC)             =', CC_reduced_central
+      if(scaleuncert) then
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)  =',&
+              & ((CC_reduced_max-CC_reduced_central)/CC_reduced_central)&
+              &*100.0_dp, ' %'
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)  =',&
+              & ((CC_reduced_min-CC_reduced_central)/CC_reduced_central)&
+              &*100.0_dp, ' %'
+      endif
+   elseif(NC) then
+      write(idev,'(a,f16.6)') ' # σ reduced (NC)             =', NC_reduced_central
+      if(scaleuncert) then
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)  =',&
+              & ((NC_reduced_max-NC_reduced_central)/NC_reduced_central)&
+              &*100.0_dp, ' %'
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)  =',&
+              & ((NC_reduced_min-NC_reduced_central)/NC_reduced_central)&
+              &*100.0_dp, ' %'
+      endif
+   elseif(CC) then
+      write(idev,'(a,f16.6)') ' # σ reduced (CC)             =', CC_reduced_central
+      if(scaleuncert) then
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)  =',&
+              & ((CC_reduced_max-CC_reduced_central)/CC_reduced_central)&
+              &*100.0_dp, ' %'
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)  =',&
+              & ((CC_reduced_min-CC_reduced_central)/CC_reduced_central)&
+              &*100.0_dp, ' %'
+      endif
+   endif
+      write(idev,*) '============================================================'
 
 
  end subroutine print_results

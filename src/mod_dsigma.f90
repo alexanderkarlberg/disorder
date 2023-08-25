@@ -33,7 +33,13 @@ contains
     dsigma = dsigma_all_scales(1)
     dsigma_all_scales = dsigma_all_scales * vegas_weight / itmx2
     sigma_all_scales = sigma_all_scales + dsigma_all_scales
-    
+
+    ! Do reduced cross sections
+    NC_reduced_dsigma = NC_reduced_dsigma * gev2pb * jacborn * vegas_weight / itmx2
+    CC_reduced_dsigma = CC_reduced_dsigma * gev2pb * jacborn * vegas_weight / itmx2
+
+    NC_reduced_sigma = NC_reduced_sigma + NC_reduced_dsigma
+    CC_reduced_sigma = CC_reduced_sigma + CC_reduced_dsigma
     !     remove the rare outliers where we get dsigma = NaN (never happens)
     if (dsigma.ne.dsigma) then
        dsigma = 0d0

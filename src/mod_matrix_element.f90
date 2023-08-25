@@ -20,7 +20,7 @@ contains
     real(dp) :: y, Qval
     real(dp) :: muRval, muFval
     real(dp) :: Fx(-6:7,4)
-    real(dp) :: F1, F2, F3, FL, ym, yp
+    real(dp) :: F1NC, F2NC, F3NC, F1CC, F2CC, F3CC, sigma(4)
     real(dp) :: overall_norm, propZ, propW, propgZ
     integer  :: i, iscale
 
@@ -36,9 +36,12 @@ contains
     overall_norm = 4.0_dp * pi * alpha_em**2 / Qsq**2 / x
 
     do iscale = 1,Nscales
-       F1  = zero
-       F2  = zero
-       F3  = zero
+       F1NC  = zero
+       F2NC  = zero
+       F3NC  = zero
+       F1CC  = zero
+       F2CC  = zero
+       F3CC  = zero
        Fx  = zero
        muRval = Qval * scales_mur(iscale)
        muFval = Qval * scales_muf(iscale)
@@ -55,20 +58,20 @@ contains
           propZ  = propgZ**2
           do i = order_start,order_stop
              if(noZ) then
-                F1 = F1 + Fx(F1EM,i)
-                F2 = F2 + Fx(F2EM,i)
+                F1NC = F1NC + Fx(F1EM,i)
+                F2NC = F2NC + Fx(F2EM,i)
              elseif(Zonly) then ! No interference or γ
-                F1 = F1 +   Ve2_Ae2 * propZ * Fx(F1Z,i) 
-                F2 = F2 +   Ve2_Ae2 * propZ * Fx(F2Z,i) 
-                F3 = F3 + two_Ve_Ae * propZ * Fx(F3Z,i) 
+                F1NC = F1NC +   Ve2_Ae2 * propZ * Fx(F1Z,i) 
+                F2NC = F2NC +   Ve2_Ae2 * propZ * Fx(F2Z,i) 
+                F3NC = F3NC + two_Ve_Ae * propZ * Fx(F3Z,i) 
              elseif(intonly) then ! No γ/Z
-                F1 = F1  - Ve * propgZ * Fx(F1gZ,i) 
-                F2 = F2  - Ve * propgZ * Fx(F2gZ,i) 
-                F3 = F3  - Ae * propgZ * Fx(F3gZ,i) 
+                F1NC = F1NC  - Ve * propgZ * Fx(F1gZ,i) 
+                F2NC = F2NC  - Ve * propgZ * Fx(F2gZ,i) 
+                F3NC = F3NC  - Ae * propgZ * Fx(F3gZ,i) 
              else
-                F1 = F1 + Fx(F1EM,i) - (Ve * propgZ * Fx(F1gZ,i) -   Ve2_Ae2 * propZ * Fx(F1Z,i)) 
-                F2 = F2 + Fx(F2EM,i) - (Ve * propgZ * Fx(F2gZ,i) -   Ve2_Ae2 * propZ * Fx(F2Z,i)) 
-                F3 = F3              - (Ae * propgZ * Fx(F3gZ,i) - two_Ve_Ae * propZ * Fx(F3Z,i)) 
+                F1NC = F1NC + Fx(F1EM,i) - (Ve * propgZ * Fx(F1gZ,i) -   Ve2_Ae2 * propZ * Fx(F1Z,i)) 
+                F2NC = F2NC + Fx(F2EM,i) - (Ve * propgZ * Fx(F2gZ,i) -   Ve2_Ae2 * propZ * Fx(F2Z,i)) 
+                F3NC = F3NC              - (Ae * propgZ * Fx(F3gZ,i) - two_Ve_Ae * propZ * Fx(F3Z,i)) 
              endif
           enddo
        endif
@@ -80,34 +83,24 @@ contains
           propW = two * (1/(sqrt(two) * four * sin_thw_sq) * Qsq / (Qsq + MW**2))**2 ! W propagator 
           do i = order_start,order_stop
              if(positron) then ! Always W+
-                F1 = F1 + propW * Fx(F1Wp,i) 
-                F2 = F2 + propW * Fx(F2Wp,i) 
-                F3 = F3 - propW * Fx(F3Wp,i)
+                F1CC = F1CC + propW * Fx(F1Wp,i) 
+                F2CC = F2CC + propW * Fx(F2Wp,i) 
+                F3CC = F3CC - propW * Fx(F3Wp,i)
              else
-                F1 = F1 + propW * Fx(F1Wm,i) 
-                F2 = F2 + propW * Fx(F2Wm,i) 
-                F3 = F3 + propW * Fx(F3Wm,i)
+                F1CC = F1CC + propW * Fx(F1Wm,i) 
+                F2CC = F2CC + propW * Fx(F2Wm,i) 
+                F3CC = F3CC + propW * Fx(F3Wm,i)
              endif
           enddo
           
        endif
 
-       res(iscale) = (           yDIS**2 * x * F1 &
-            +                   (one - yDIS) * F2 &
-            + yDIS * (one - half * yDIS) * x * F3)
+       sigma = compute_sigmas(x,yDIS,Qsq,F1NC,F2NC,F3NC,F1CC,F2CC,F3CC) * overall_norm
 
-!       print*, res
-!
-!       Fl = F2 - two * x* F1
-!       yp = one + (one - yDIS)**2
-!       ym = one - (one - yDIS)**2
-!       
-!       res(iscale) = yp * F2 + x*ym*F3 - yDIS**2 * FL
-!
-!       print*, res
-!
+       res(iscale) = sigma(1) + sigma(2) ! NC + CC contributions
 
-       res(iscale) = res(iscale) * overall_norm
+       NC_reduced_sigma(iscale) = sigma(3)
+       CC_reduced_sigma(iscale) = sigma(4)
        
     enddo
   end function eval_matrix_element
@@ -139,5 +132,39 @@ contains
        muFlcl = xmur * Q
     endif
   end function muFlcl
+
+  ! These are basically taken from 1206.7007 eq.1, 6, 7, 11
+  function compute_sigmas(x,y,Qsq,F1NC,F2NC,F3NC,F1CC,F2CC,F3CC) result(res)
+    implicit none
+    real(dp), intent(in) :: x, y, Qsq, F1NC, F2NC, F3NC, F1CC, F2CC,&
+         & F3CC
+    real(dp) :: res(4) ! 1: NC inclusive, 2: CC inclusive, 3: NC
+    ! reduced, 4: CC reduced
+    real(dp) :: yp, ym, FLNC, FLCC
+
+    FLNC = F2NC - two * x * F1NC
+    FLCC = F2CC - two * x * F1CC
+    
+    yp = one + (one - y)**2
+    ym = one - (one - y)**2
+
+    res = zero
+    
+    if(NC) then
+       res(1) = yp * F2NC + x * ym * F3NC - y**2 * FLNC
+       res(3) = x * Qsq**2 / (two * pi * alpha_em**2 * yp) * res(1)
+    endif
+    if(CC) then
+       res(2) = yp * F2CC + x * ym * F3CC - y**2 * FLCC
+       res(4) = 4.0_dp * pi * x  / GF**2 * ((mw**2 + Qsq) / mw**2)**2 * res(2)
+    endif
+
+    ! Before we used
+    ! res = y**2 * x * F1 + (one - y) * F2 + y * (one - half * y) * x * F3)
+    !
+    ! Which differs by a factor 2
+    
+    res = half * res 
+  end function compute_sigmas
   
 end module mod_matrix_element

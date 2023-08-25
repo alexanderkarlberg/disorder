@@ -31,8 +31,10 @@ module mod_parameters
   integer, public :: nmempdf, outdev
   logical, public, save :: pdfuncert, fillplots, p2b, noZ, positron,&
        & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC, vnf, help
-  real(dp), public :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
-       & Eh, El, sigma_all_scales(maxscales)
+  real(dp), public, save :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
+       & Eh, El, sigma_all_scales(maxscales),&
+       & NC_reduced_dsigma(maxscales), CC_reduced_dsigma(maxscales),&
+       & NC_reduced_sigma(maxscales), CC_reduced_sigma(maxscales)
   character (len=4), private :: order
   real(dp), private :: Q, x, y
   real(dp), public :: pbornlab(0:3,2+2), preallab(0:3,2+3), prreallab(0:3,2+4)
@@ -40,8 +42,6 @@ module mod_parameters
 
   real(dp), public, save :: CFlcl, CAlcl, Trlcl, b0, NPOW1, NPOW2, CUTOFF
 
-  real(dp), public, parameter :: Qup =  2.0_dp/3.0_dp
-  real(dp), public, parameter :: Qdn = -1.0_dp/3.0_dp
   real(dp), public :: sin_thw_sq, sin_2thw_sq,Ve, Ae, Ve2, Ae2, Ve2_Ae2, two_Ve_Ae ! Vector and axial couplings of the electron
 
     ! VEGAS common blocks
@@ -196,7 +196,7 @@ contains
     Q = dble_val_opt("-Q",-1.0_dp)
     if(Q.lt.0.0_dp) then
       Q2min = (dble_val_opt("-Qmin",10.0_dp))**2
-      Q2max = (dble_val_opt("-Qmax",100000000.0_dp))**2
+      Q2max = (dble_val_opt("-Qmax",1d100))**2
     else 
       Q2min = Q**2
       Q2max = Q2min
@@ -258,7 +258,9 @@ contains
     Qmin = 1.0_dp
 
     sigma_all_scales = 0.0_dp ! Initialise
-
+    NC_reduced_sigma = 0.0_dp
+    CC_reduced_sigma = 0.0_dp
+    
     if (.not.CheckAllArgsUsed(0)) then
        call help_message
        call exit()
