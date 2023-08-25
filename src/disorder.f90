@@ -5,6 +5,7 @@ program disorder
   use mod_matrix_element
   use mod_parameters
   use mod_phase_space
+  use mod_analysis
   use integration
   use types
   use mod_dsigma
@@ -406,12 +407,12 @@ contains
       print*, 'n = ', n
       stop 'Wrong n in user routine of DISENT'
    endif
-   call user_analysis(n+2, dsig, x, y, Q2)
+   call analysis(n+2, dsig, x, y, Q2)
 
    ! projection-to-Born analysis call
    pbornbreit = p2bbreit
    pbornlab   = p2blab
-   call user_analysis(2+2, -dsig, x, y, Q2)
+   call analysis(2+2, -dsig, x, y, Q2)
  END subroutine user
 
  ! Taken directly from DISENT

@@ -10,16 +10,12 @@ include Makefile.inc
 
 # main program and modules to be compiled
 MAIN = disorder
-#MODULES = types consts integration phase_space parameters io_utils lcl_dec matrix_element histo mod_dsigma
 MODULES = integration io_utils lcl_dec mod_parameters mod_phase_space mod_matrix_element mod_dsigma disent-lib mod_analysis
 ANALYSIS = fastjetfortran pwhg_bookhist-multi 
 #ANALYSIS += sigmaR
-#ANALYSIS += analysis_caesar
-#ANALYSIS += analysis_H1_2006
-#ANALYSIS += analysis_EvShpTest
-ANALYSIS += analysis_cut_Ecur 
-#ANALYSIS += vbf_analysis
-#ANALYSIS += analysis_event_shapes
+ANALYSIS += cut_Ecur 
+#ANALYSIS += jets_lab_frame
+
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(STD)
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
@@ -44,8 +40,6 @@ FFLAGS+= $(shell $(HPEXEC) --fflags)
 INCLUDE= -I$(ANA) -I$(SRC) $(wildcard *.h)
 FFLAGS+= $(INCLUDE) -J$(OBJ)
 LDFLAGS= $(shell $(HPEXEC) --libs) $(shell $(LHEXEC) --libs) 
-#LDFLAGS= -Wl,-rpath,$(shell $(LHEXEC) --libdir)  -L$(shell $(LHEXEC) --libdir) -lLHAPDF 
-#LDFLAGS+= -Wl,-rpath,$(shell $(HPEXEC) --libs) 
 
 all: disorder mergegrids mergedata 
 
@@ -82,6 +76,7 @@ analysis.o: mod_parameters.o
 mod_analysis.o: mod_parameters.o
 pwhg_bookhist-multi.o: mod_parameters.o
 $(addsuffix .o,$(ANALYSIS)): mod_parameters.o
+
 # make clean
 clean:
 	rm -f $(OBJ)/*.o $(OBJ)/*.mod *~ *.log fort* $(MAIN)

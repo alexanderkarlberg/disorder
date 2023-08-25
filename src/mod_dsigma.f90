@@ -1,6 +1,7 @@
 module mod_dsigma
   use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   use mod_parameters
+  use mod_analysis
   use types
   
   implicit none
@@ -52,7 +53,7 @@ contains
 
     ! Do the analysis
     if(fillplots) then
-       call user_analysis(4,dsigma_all_scales*vegas_ncall,x,y,Qsq)
+       call analysis(4,dsigma_all_scales*vegas_ncall,x,y,Qsq)
        call pwhgaccumup
     endif
   end function dsigma

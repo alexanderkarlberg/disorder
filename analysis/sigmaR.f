@@ -1,5 +1,5 @@
-      subroutine init_histo
-      use parameters
+      subroutine define_histograms
+      use mod_parameters
       implicit none
       include 'pwhg_bookhist-multi.h'
       
@@ -7,7 +7,6 @@
       
       real * 8 Q2binsize, logQ2min, logQ2max
       real * 8 xbinsize, logxmin, logxmax
-      call inihists
       
       ! Bins in Q^2 and as a function of x
       xnbins = 50
@@ -97,14 +96,12 @@
       end subroutine
       
       subroutine user_analysis(n,dsigma,x,y,Q2)
-      use parameters
+      use mod_analysis
       implicit none
       integer n
-      double precision dsigma, x, y, Q2
+      double precision dsigma(maxscales), x, y, Q2
       double precision sigma_r, delx
       double precision, parameter :: pi = 4d0*atan(1d0)
-
-      if(dsigma.eq.0d0) return
 
     !     Reduced cross section
       sigma_r =  x * Q2**2

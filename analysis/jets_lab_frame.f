@@ -1,20 +1,10 @@
-!  The next subroutines, open some histograms and prepare them 
-!      to receive data 
-!  You can substitute these  with your favourite ones
-!  init   :  opens the histograms
-!  topout :  closes them
-!  pwhgfill  :  fills the histograms with data
-
-      subroutine init_histo
-      use mod_parameters, only : maxscales, scaleuncert
+      subroutine define_histograms
       implicit none
       include 'pwhg_bookhist-multi.h'
       integer xnbins, Q2nbins
       
       real * 8 Q2binsize, Q2min, Q2max, logQ2min, logQ2max
       real * 8 xbinsize, logxmin, logxmax, sbeams
-      call inihists
-      if(scaleuncert) call setupmulti(maxscales)
 !     Bins in Q^2 and as a function of x
       xnbins = 50
       logxmin = -4d0
@@ -114,13 +104,13 @@
        
       end
       
-      subroutine user_analysis(n,dsigma,x,y,Q2)
-      use mod_parameters
+      subroutine user_analysis(n,dsig,x,y,Q2)
+      use mod_analysis
       implicit none
-      real * 8 dsig(maxscales), dsigma(maxscales)
+      real * 8 dsig(maxscales)
       
       integer n
-      double precision x, y, Q2, plab(0:3,n)
+      double precision x, y, Q2
       integer maxjets
       parameter (maxjets=3)
       double precision ppartons(0:3,maxjets),pj(0:3,maxjets)
@@ -129,24 +119,7 @@
 
       integer i,npartons,njets
 
-      dsig = 0d0
-      dsig(1:Nscales) = dsigma(1:Nscales)
-
-      if(dsig(1).eq.0d0) return
-      
       sqrtQ2 = sqrt(Q2)
-      plab = 0d0
-
-      ! Now fill the momenta
-      if(n.eq.4) then           ! Born kinematics
-        plab = pbornlab
-      elseif(n.eq.5) then
-        plab = preallab
-      elseif(n.eq.6) then
-        plab = prreallab
-      else
-        stop 'Wrong n in analysis'
-      endif
       npartons = n - 3
 
       ppartons(:,1:npartons) = plab(:,4:n)
