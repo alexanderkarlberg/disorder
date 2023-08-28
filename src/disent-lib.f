@@ -1196,14 +1196,15 @@ C---SO WE JUST HAVE TO CALCULATE THE WEIGHT
          GQscl = GQ
          QGscl = QG
          GGscl = GG
-         CALL KPFUNS_SCL_VAR(-X,XJAC,XMIN,KQF,O,O,O,QQscl,GQscl,QGscl
+         CALL KPFUNS_SCL_VAR(X,XJAC,XMIN,KQF,O,O,O,QQscl,GQscl,QGscl
      $        ,GGscl)
 C---  THE TOTAL
          SCL_WEIGHT(:,0)=GGscl(:)*M(0)
          DO I=-6,6
             IF (I.NE.0) THEN
                SCL_WEIGHT(:,I)=QGscl(:)*M(0)+QQscl(:) *M(I)
-               IF (ABS(I).LE.NF) SCL_WEIGHT(:,0)=GQscl(:)*M(I)
+               IF (ABS(I).LE.NF) SCL_WEIGHT(:,0)=SCL_WEIGHT(:,0)
+     $              +GQscl(:)*M(I)
             ENDIF
          ENDDO
          W(:) = SCL_WEIGHT(1,:) 
@@ -1211,13 +1212,13 @@ C---  THE TOTAL
             SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / W(:) 
          enddo
       else
-         CALL KPFUNS(-X,XJAC,XMIN,KQF,O,O,O,QQ,GQ,QG,GG)
+         CALL KPFUNS(X,XJAC,XMIN,KQF,O,O,O,QQ,GQ,QG,GG)
 C---  THE TOTAL
          W(0)=GG*M(0)
          DO I=-6,6
             IF (I.NE.0) THEN
                W(I)=QG*M(0)+QQ*M(I)
-               IF (ABS(I).LE.NF) W(0)=GQ*M(I)
+               IF (ABS(I).LE.NF) W(0)=W(0)+GQ*M(I)
             ENDIF
          ENDDO
       endif
@@ -1268,33 +1269,29 @@ C---SO WE JUST HAVE TO CALCULATE THE WEIGHT
          GQscl = GQ
          QGscl = QG
          GGscl = GG
-         CALL KPFUNS_SCL_VAR(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQscl,GQscl
+         CALL KPFUNS_SCL_VAR(X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQscl,GQscl
      $        ,QGscl,GGscl)
 C---  THE TOTAL
          SCL_WEIGHT(:,0)=GGscl(:)*M(0)
          DO I=-6,6
             IF (I.NE.0) THEN
                SCL_WEIGHT(:,I)=QGscl(:)*M(0)+QQscl(:) *M(I)
-               IF (ABS(I).LE.NF) SCL_WEIGHT(:,0)=GQscl(:)*M(I)
+               IF (ABS(I).LE.NF) SCL_WEIGHT(:,0)=SCL_WEIGHT(:,0)
+     $              +GQscl(:)*M(I)
             ENDIF
          ENDDO
-         ! AK: Something is fishy here... Why is W(0) = 0?? 
          W(:) = SCL_WEIGHT(1,:) 
          do i = 1,3
-            do inf = -6,6
-               if(W(inf) .ne.0d0) then
-                  SCL_WEIGHT(i,inf) = SCL_WEIGHT(i,inf) / W(inf)
-               endif
-            enddo
+            SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / W(:)
          enddo
       else
-         CALL KPFUNS(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
-C---  THE TOTAL
+         CALL KPFUNS(X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
+C---THE TOTAL
          W(0)=GG*M(0)
          DO I=-6,6
             IF (I.NE.0) THEN
                W(I)=QG*M(0)+QQ*M(I)
-               IF (ABS(I).LE.NF) W(0)=GQ*M(I)
+               IF (ABS(I).LE.NF) W(0)=W(0)+GQ*M(I)
             ENDIF
          ENDDO
       endif

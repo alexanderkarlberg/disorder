@@ -304,10 +304,11 @@ contains
 
    if(p2b.and.n.eq.2) return ! If we do p2b we get the Born and
    ! virtuals from the structure functions
-
+   
    if (n.eq.0) then ! Disent is done with one event cycle
       call pwhgaccumup
       recompute = .true. ! Signals that next time we have a new event cycle
+!      stop
       return
    endif
  
@@ -385,7 +386,7 @@ contains
          X=ETA*Q2/(2*DOT(P,1,5))
          Y=DOT(P,1,5)/DOT(P,1,6)
          
-         as2pi(1) = alphasLocal(xmur*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
+         as2pi(1) = alphasLocal(xmur*Qval)/pi * 0.5d0 
          call p2bmomenta(x,y,Q2,p2bbreit,p2blab)
          Qlab(:) = p2blab(:,1) - p2blab(:,3)
          recompute = .false.
@@ -437,7 +438,8 @@ contains
       stop 'Wrong n in user routine of DISENT'
    endif
    call analysis(n+2, dsig, x, y, Q2)
-
+!   print*, dsig(1), eta, Q2, x, y
+!   print*, weight(:)
    ! projection-to-Born analysis call
    pbornbreit = p2bbreit
    pbornlab   = p2blab

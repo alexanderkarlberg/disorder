@@ -63,7 +63,7 @@
       
       do i=1,njets
          ptj1 = kt(pj(:,i))
-         etaj1 = eta(pj(:,1))
+         etaj1 = eta(pj(:,i))
          etaj1 = -etaj1 ! Convention changed
          !if(n.gt.4) print*, ptj1, etaj1
          if(etaj1.gt.-1.5d0) cycle
