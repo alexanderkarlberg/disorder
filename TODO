@@ -6,10 +6,5 @@ Items to be done before release/publication of v1.0:
 
 *) write paper
 
-*) COLFOR has a weird feature that W(0) is set to zero in a very
- complicated way. Check against results from Alex.
-
 *) Do check with Alex at LO/NLO/NNLO
-
-*) Ask Valerio about W+/W- convention...
 
