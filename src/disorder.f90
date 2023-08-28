@@ -416,14 +416,14 @@ contains
       pbornbreit(:,2)   = cshift(p(:,1),-1) ! Incoming quark
       pbornbreit(:,3)   = cshift(p(:,7),-1) ! Outgoing lepton
       pbornbreit(:,4)   = cshift(p(:,2),-1) ! Outgoing quark
-      call mbreit2labdisent(n+2,Qlab,pbornbreit,pbornlab)
+      call mbreit2lab(n+2,Qlab,pbornbreit,pbornlab,.true.)
    elseif(n.eq.3) then
       prealbreit(:,1)    = cshift(p(:,6),-1) ! Incoming lepton
       prealbreit(:,2)    = cshift(p(:,1),-1) ! Incoming quark
       prealbreit(:,3)    = cshift(p(:,7),-1) ! Outgoing lepton
       prealbreit(:,4)    = cshift(p(:,2),-1) ! Outgoing quark
       prealbreit(:,5)    = cshift(p(:,3),-1) ! Outgoing emission
-      call mbreit2labdisent(n+2,Qlab,prealbreit,preallab)
+      call mbreit2lab(n+2,Qlab,prealbreit,preallab,.true.)
    elseif(n.eq.4) then
       prrealbreit(:,1)    = cshift(p(:,6),-1) ! Incoming lepton
       prrealbreit(:,2)    = cshift(p(:,1),-1) ! Incoming quark
@@ -431,7 +431,7 @@ contains
       prrealbreit(:,4)    = cshift(p(:,2),-1) ! Outgoing quark
       prrealbreit(:,5)    = cshift(p(:,3),-1) ! Outgoing emission
       prrealbreit(:,6)    = cshift(p(:,4),-1) ! Outgoing emission
-      call mbreit2labdisent(n+2,Qlab,prrealbreit,prreallab)
+      call mbreit2lab(n+2,Qlab,prrealbreit,prreallab,.true.)
    else
       print*, 'n = ', n
       stop 'Wrong n in user routine of DISENT'

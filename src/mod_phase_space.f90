@@ -4,8 +4,7 @@ module mod_phase_space
   
   PRIVATE
   
-  PUBLIC gen_phsp_born, p2bmomenta, mbreit2lab, mlab2breit,&
-       & mbreit2labdisent
+  PUBLIC gen_phsp_born, p2bmomenta, mbreit2lab, mlab2breit
   
 contains
   
@@ -253,39 +252,6 @@ contains
        pout(:,j) = MATMUL(trans,pin(:,j))
     enddo
   end subroutine mbreit2lab
-
-  ! This is not too nice. The routines above do not for disent as
-  ! they give the wrong sign for the quarks due to different
-  ! conventions, and the leptons have to be set by hand. For now we
-  ! fix it by hand, but perhaps worth thinking of making the
-  ! conventions uniform.
-  subroutine mbreit2labdisent(m,Q,p,pout)
-    implicit none
-    integer m
-    double precision Q(0:3), p(0:3,m), pin(0:3,m), pout(0:3,m),&
-         & plcl(0:3,m)
-
-    plcl = 0d0
-    pin = 0d0
-    pout = 0d0
-
-    !     First we do partons
-    pin(:,1) = p(:,2)
-    pin(:,2:m-2) = p(:,4:m)
-    pin(3,1) = -pin(3,1)
-    pin(3,2:m-2) = - pin(3,2:m-2)
-
-    call mbreit2lab(m-2,Q,pin,plcl,.false.)
-    pout(:,2) = plcl(:,1)
-    pout(:,4:m) = plcl(:,2:m-2)
-
-    !     Then the leptons are trivial. We fix the incoming and use the Q
-    !     vector to get the outgoing one.
-    pout(0,1) = El
-    pout(3,1) = El
-    pout(:,3) = pout(:,1) - Q(:)
-
-  end subroutine mbreit2labdisent
 
   subroutine p2bmomenta(x,y,Qsq,pbreit,plab)
     implicit none

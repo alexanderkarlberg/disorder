@@ -13,8 +13,10 @@ MAIN = disorder
 MODULES = integration io_utils lcl_dec mod_parameters mod_phase_space mod_matrix_element mod_dsigma disent-lib mod_analysis
 ANALYSIS = fastjetfortran pwhg_bookhist-multi 
 #ANALYSIS += sigmaR
-ANALYSIS += cut_Ecur 
+#ANALYSIS += cut_Ecur 
 #ANALYSIS += jets_lab_frame
+#ANALYSIS += event_shapes caesar
+ANALYSIS += vbf
 
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(STD)
