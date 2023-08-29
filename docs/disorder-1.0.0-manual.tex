@@ -29,12 +29,16 @@
 \DeclareSymbolFont{usualmathcal}{OMS}{cmsy}{m}{n}
 \DeclareSymbolFontAlphabet{\mathcal}{usualmathcal}
 
-\newcommand{\hoppet}{{\tt HOPPET}}
+\newcommand{\hoppet}{{\sc hoppet}}
 \newcommand{\disent}{{\tt disent}}
+\newcommand{\disorder}{{\tt disorder}}
 \newcommand{\provbfh}{{\tt proVBFH}}
 \newcommand{\disaster}{{\tt disaster++}}
 \newcommand{\nlojet}{{\tt nlojet++}}
 \newcommand{\as}{\alpha_{\mathrm{s}}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\NC}{\mathrm{NC}}
+\newcommand{\CC}{\mathrm{CC}}
 
 \begin{document}
 \begin{flushright}
@@ -68,7 +72,7 @@ CERN, Theoretical Physics Department, CH-1211 Geneva 23, Switzerland
 % TODO: write your abstract here.
 We present a Fortran 77/95 code capable of computing QCD corrections
 in deep inelastic scattering (DIS). The code uses the
-projection-to-Born method to combine an exclusive DIS + 1 jet
+Projection-to-Born method to combine an exclusive DIS + 1 jet
 calculation with the inclusive DIS structure functions, thereby
 obtaining fully differential DIS predictions at
 $\mathcal{O}(\as^2)$. The code is lightweight and fast, and yet
@@ -94,9 +98,9 @@ $\mathcal{O}(\as^3)$.}
 
 \section{Introduction}
 \label{sec:intro}
-Deep inelastic scattering (DIS) is one of the best understood
-processes in perturbative Quantum Chromo Dynamics (QCD). It is one of
-few processes for which there exists an exact factorisation
+Deep inelastic scattering (DIS) is arguably one of the best understood
+processes in perturbative QCD. It is one of few processes for which
+there exists an exact factorisation
 theorem~\cite{Collins:1987pm,Collins:1989gx}, and the massless
 unpolarised hard perturbative coefficients have been computed through
 an impressive three
@@ -105,41 +109,139 @@ with progress on the four loop results presented recently in
 Ref.~\cite{Moch:2022frw}. Together with the three-loop results for the
 splitting functions~\cite{Moch:2004pa,Vogt:2004mw} and the four-loop
 $\beta$-function~\cite{vanRitbergen:1997va,Czakon:2004bu} for the
-running QCD coupling this allows for the determination of the proton
+running coupling this allows for the determination of the proton
 structure functions at the next-to-next-to-next-to-leading order
-(N3LO)\footnote{Technically the four-loop splitting functions are
+(N3LO).\footnote{Technically the four-loop splitting functions are
 needed to claim this accuracy. Recent progress in determining those
 can be found in
 Refs.\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm}.}
-These can be combined with an exclusive next-to-next-to-leading order
-(NNLO) DIS+1 jet computation to obtain fully differential N3LO
-predictions in DIS, as was done by the NNLOJET
-collaboration~\cite{Currie:2018fgr,Gehrmann:2018odt}. This compuation
-uses the projection-to-Born method, which was first introduced in the
-context of NNLO Vector Boson Fusion (VBF)
+The structure functions can be combined with an exclusive
+next-to-next-to-leading order (NNLO) DIS + 1 jet computation to obtain
+fully differential N3LO predictions in DIS, as was done by the NNLOJET
+collaboration~\cite{Currie:2018fgr,Gehrmann:2018odt}. This computation
+uses the Projection-to-Born (P2B) method, which was first introduced
+in the context of NNLO Vector Boson Fusion (VBF)
 production~\cite{Cacciari:2015jma}.
 
-Despite this impressive progress in the theoretical determination of
-the DIS cross section, there are few computer codes available from
-which one can obtain fast and reliable perturbative predictions. 
+Despite this impressive theoretical progress, there are few publically
+available computer codes from which one can obtain
+fast and reliable high-order cross section predictions. This paper
+and associated Fortran code seeks to address that.
+
+One of the advantages of the P2B method is that it is rather agnostic
+towards the details of the underlying exclusive computation, and it is
+hence possible to ``upgrade'' existing fixed-order codes to one order
+higher.
+
+Historically the most succesful fixed-order codes have been
+\disent{}~\cite{Catani:1996vz}, \disaster{}~\cite{Graudenz:1997gv},
+and \nlojet{}~\cite{Nagy:2001xb} which are all next-to-leading order
+(NLO) accurate. Discrepancies between \disent{} and fixed-order
+coefficients from analytical resummation were initially observed in
+Refs.\cite{Antonelli:1999kx,Dasgupta:2002dc}, and were only recently
+understood to be due to a bug in one of the dipole terms for the gluon
+channel~\cite{Borsa:2020ulb,Borsa:2020yxh}.
+
+With the bug fixed we can use \disent{} as the underlying exclusive
+NLO code together with the NNLO structure functions
+from~\hoppet{}~\cite{Salam:2008qg,BertoneKarlberg}.\footnote{The
+combination of \disent{} and \hoppet{} naturally leads to a Fortran
+code. For a C++ alternative, based on publically available codes, one
+could have started from either \disaster{} or \nlojet{} and used the
+structure functions as implemented in
+APFEL++~\cite{Bertone:2013vaa,Bertone:2017gds}.} Advantages of using
+\disent{} are its well-known efficiency and numerical stability. The
+resulting program is dubbed \disorder{} keeping in the spirit of
+previous names for fixed-order DIS codes.\footnote{{\tt
+  dispatch}~\cite{Dasgupta:2002dc} deserves an honorable mentioning in
+this context.} Since the program relies on \hoppet{} for the structure
+functions, the inclusive DIS cross section can actually be obtained
+one order higher, since the structure functions were implemented at
+N3LO already in the context of the {\tt proVBFH}
+code~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}. The
+\disorder{} program therefore has two more or less separate use cases:
+1. The computation of fully exclusive NNLO photon-mediated DIS 2. The
+computation of inclusive/reduced neutral- (NC) and charged-current
+(CC) DIS at N3LO accuracy.
+
+The paper is structured as follows: In section~\ref{sec:dis} we review
+the DIS process and kinematics as implemented in \disorder{}. In
+section~\ref{sec:running} we provide details on how to run \disorder{}
+and in section~\ref{sec:results} we show a few results from the
+program. Finally we conclude in section~\ref{sec:conclusion}.
 
 
 
-Some references: \hoppet{}~\cite{Salam:2008qg}, NNLO coefficient
-functions~\cite{vanNeerven:1999ca,vanNeerven:2000uj}, N3LO coefficient
-functions~\cite{Moch:2004xu,Vermaseren:2005qc,Moch:2008fj,Davies:2016ruz},
-\provbfh{}~\cite{Cacciari:2015jma}, \disent{}~\cite{Catani:1996vz}
-with bug fix fromRefs.~\cite{Borsa:2020ulb,Borsa:2020yxh},
-\nlojet{}~\cite{Nagy:2001xb}, \disaster{}~\cite{Graudenz:1997gv}
+\section{Basics of the DIS process}
+\label{sec:dis}
+At leading order (LO) the DIS process is the scattering of a massless
+(anti-)quark $q$ off a massless \mbox{(anti-)lepton} $l$ via the
+exchange of a photon or electroweak gauge boson $V$ of virtuality
+$Q^2$. Denoting the external four-momenta by $k_i$ (incoming lepton),
+$k_f$ (outgoing lepton), $p_i$ (incoming quark), and $p_f$ (outgoing
+quark) we can define the lorentz invariant DIS variables $x$, $Q^2$,
+and $y$, given by
+\begin{align}
+  Q^2 = -q^2 = -(k_i - k_f)^2, \qquad  x = \frac{Q^2}{2 P \cdot q},
+  \qquad  y = \frac{P \cdot q}{P \cdot k_i} = \frac{p_i \cdot q}{p_i \cdot k_i} ,
+  \label{eq:dis-variables}
+\end{align}
+where $P$ is the proton four-momentum. These variables fully specify
+the kinematics at LO. DIS is most often analysed in the Breit-frame
+which is specified\footnote{For the explicit transformation between
+lab- and Breit-frames we follow Appendix 7.11 in
+Ref.~\cite{Devenish:2004pb}.} by requiring that $2 x \vec{P} + \vec{q}
+= 0$. In this frame the mediated vector boson has zero energy
+component and is anti-aligned with the incoming parton. Explicitly in
+\disorder{} the Breit-frame at LO is
+\begin{align}
+k_i &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,-1 \right), \quad  p_i = \frac{Q}{2}\left(1,0,0,+1 \right) \\ \notag
+k_f &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,+1 \right), \quad  p_f = \frac{Q}{2}\left(1,0,0,-1 \right) 
+\end{align}
+where four-momenta are given as $(E,p_x,p_y,p_z)$. The resulting
+vector $q$ is hence given by $Q(0,0,0,-1)$. In the lab frame we align
+the parton with the positive $z$-axis and hence the lepton with the
+negative
+\begin{align}
+\tilde{k}_i &= E_\mathrm{l}\left(1,0,0,-1 \right), \quad  \tilde{p}_i = x E_\mathrm{h}\left(1,0,0,+1 \right) 
+\end{align}
+where $E_\mathrm{h}$ is the energy of the incoming hadron. Using the
+definitions of Eq.~\eqref{eq:dis-variables} one finds that in the lab
+frame
+\begin{equation}
+  \tilde{q} = \left(y(E_\mathrm{l} - x E_\mathrm{h}), -Q\sqrt{1-y},0, -y(E_\mathrm{l} - x E_\mathrm{h})\right) 
+\end{equation}
+and the outgoing momenta then simply follow from momentum conservation
+\begin{equation}
+  \tilde{k}_f = \tilde{k}_i - \tilde{q}, \quad   \tilde{p}_f = \tilde{p}_i + \tilde{q}\,. 
+\end{equation}
 
-\section{The DIS process}
-\label{sed:dis}
+The inclusive cross section for DIS can be split into a NC
+contribution, from $e^\pm p \to e^\pm + X $ scattering, and a CC
+contribution from $e^\pm p \to \nu + X$\footnote{Here
+$\nu=\{\nu_e,\bar{\nu}_e\}$ for $e^-$ and $e^+$ respectively. One can
+of course also consider incoming neutrinos which does not change the
+discussion here, but has not been implemented in \disorder{}.}
+scattering. The unpolarised NC cross section can be written as
+\begin{equation}
+\frac{\dd\sigma_{\NC}^\pm}{\dd x \dd Q^2} =   \frac{2\pi\alpha^2}{xQ^4} \left[y_+ F_2^{\NC} \mp y_- F_3^\NC - y^2 F_L^\NC\right],\,
+\label{eq:NCsigma}
+\end{equation}
+where $y_\pm=1\pm(1-y)^2$, $\alpha$ is the fine structure constant and
+$F_i^\NC$ can be expressed in terms of the usual proton structure
+functions
+\begin{align}
+  F_{i}^\NC &= F_{i}^\gamma  - v_e \Gamma_{\gamma Z} F_{i}^{\gamma Z} + (v_e^2 + a_e^2)\Gamma_{Z} F_{i}^{Z},\, \quad i =2,L \\ \notag
+  F_{3}^\NC &= - a_e \Gamma_{\gamma Z} F_{3}^{\gamma Z} + 2v_e a_e\Gamma_{Z} F_{3}^{Z}\,.
+\end{align}
+Here $v_e = -\frac12 + 2 \sin^2\theta_W$, $a_e=\frac12$, $\Gamma_{\gamma Z} = \frac{Q^2}{\sin^2 2\theta_W(Q^2+M_Z^2)}$, and $\Gamma_Z=\Gamma_{\gamma Z}^2$
 
-\section{Running the program}
+
+\section{Running \disorder{}}
 \label{sec:running}
 
 \section{Benchmarks and results}
-\label{sec:benchmarks}
+\label{sec:results}
 
 \section{Conclusion}
 \label{sec:conclusion}
