@@ -10,7 +10,6 @@
 % e.g. SciPostPhys_skeleton.tex
 % =========================================================================
 \documentclass[submission, PhysCodeb]{SciPost}
-
 % Prevent all line breaks in inline equations.
 \binoppenalty=10000
 \relpenalty=10000
@@ -23,6 +22,22 @@
 }
 
 \usepackage[bitstream-charter]{mathdesign}
+\usepackage{listings}
+% Define special colors
+\definecolor{comment}{rgb}{0,0.3,0}
+\definecolor{identifier}{rgb}{0.0,0,0.3}
+\lstset{language=bash}
+\lstset{
+  columns=flexible,
+  basicstyle=\tt\footnotesize,
+  keywordstyle=,
+  identifierstyle=\color{black},
+  commentstyle=\tt\color{comment},
+  mathescape=true,
+  escapebegin=\color{comment},
+  showstringspaces=false,
+  keepspaces=true
+}
 \urlstyle{sf}
 
 % Fix \cal and \mathcal characters look (so it's not the same as \mathscr)
@@ -95,7 +110,7 @@ $\mathcal{O}(\as^3)$.}
 \tableofcontents\thispagestyle{fancy}
 \noindent\rule{\textwidth}{1pt}
 \vspace{10pt}
-
+\newpage
 \section{Introduction}
 \label{sec:intro}
 Deep inelastic scattering (DIS) is arguably one of the best understood
@@ -131,9 +146,7 @@ and associated Fortran code seeks to address that.
 One of the advantages of the P2B method is that it is rather agnostic
 towards the details of the underlying exclusive computation, and it is
 hence possible to ``upgrade'' existing fixed-order codes to one order
-higher.
-
-Historically the most succesful fixed-order codes have been
+higher. Historically the most succesful fixed-order codes have been
 \disent{}~\cite{Catani:1996vz}, \disaster{}~\cite{Graudenz:1997gv},
 and \nlojet{}~\cite{Nagy:2001xb} which are all next-to-leading order
 (NLO) accurate. Discrepancies between \disent{} and fixed-order
@@ -164,6 +177,30 @@ code~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}. The
 computation of inclusive/reduced neutral- (NC) and charged-current
 (CC) DIS at N3LO accuracy.
 
+The program is designed to be user-friendly with a simple command line
+interface. The program prints cross sections and all important
+run-parameters to the screen and disk, allowing a user to acquire
+cross sections with very little effort. It comes with an interface to
+{\tt fastjet} and {\tt LHAPDF} and uses the histogramming package from
+the {\tt POWHEG-BOX}~\cite{Alioli:2010xd} for easy analysis. The code
+can also compute renormalisation and factorisation scale uncertainties
+on-the-fly. For inclusive cross sections the code provides results in
+a matter of seconds\footnote{The majority of this time is taken up by
+the structure function initialisation inside \hoppet{} rather than the
+integration of the cross section.} even at N3LO with uncertainties
+typically below the permille level. For exclusive quantities the code
+can be run on a laptop at NLO and depending on the analysis, and the
+laptop, even at NNLO.
+
+It should be pointed out that the code does not provide any
+theoretical advances on its own. As described above, the structure
+functions themselves have been known for a little while, and the P2B
+method has already been applied to DIS, even one order higher than
+here. It is however the author's opinion, that public code is
+extremely valuable for both the experimental and theoretical
+communities, and that providing documentation in the form of this
+article will enable the wide use of the code.
+
 The paper is structured as follows: In section~\ref{sec:dis} we review
 the DIS process and kinematics as implemented in \disorder{}. In
 section~\ref{sec:running} we provide details on how to run \disorder{}
@@ -174,27 +211,34 @@ program. Finally we conclude in section~\ref{sec:conclusion}.
 
 \section{Basics of the DIS process}
 \label{sec:dis}
-At leading order (LO) the DIS process is the scattering of a massless
-(anti-)quark $q$ off a massless \mbox{(anti-)lepton} $l$ via the
-exchange of a photon or electroweak gauge boson $V$ of virtuality
-$Q^2$. Denoting the external four-momenta by $k_i$ (incoming lepton),
-$k_f$ (outgoing lepton), $p_i$ (incoming quark), and $p_f$ (outgoing
-quark) we can define the lorentz invariant DIS variables $x$, $Q^2$,
-and $y$, given by
+In this section we first give some standard definitions for kinematics
+and cross sections in DIS. Along the way we specify the conventions
+that are used in the \disorder{} code, and provide some details on the
+P2B method as applied here.
+
+At leading order (LO) the DIS process is
+the scattering of a massless (anti-)quark $q$ off a massless
+\mbox{(anti-)lepton} $l$ via the exchange of a photon or electroweak
+gauge boson $V$ of virtuality $Q^2$. Denoting the external
+four-momenta by $k_i$ (incoming lepton), $k_f$ (outgoing lepton),
+$p_i$ (incoming quark), and $p_f$ (outgoing quark) we can define the
+lorentz invariant DIS variables $x$, $Q^2$, and $y$, given by
 \begin{align}
   Q^2 = -q^2 = -(k_i - k_f)^2, \qquad  x = \frac{Q^2}{2 P \cdot q},
   \qquad  y = \frac{P \cdot q}{P \cdot k_i} = \frac{p_i \cdot q}{p_i \cdot k_i} ,
   \label{eq:dis-variables}
 \end{align}
-where $P$ is the proton four-momentum. These variables fully specify
-the kinematics at LO. DIS is most often analysed in the Breit-frame
+where $P$ is the proton four-momentum. As can be seen these kinematics
+are fully specified by the proton and lepton momenta. This is also
+true beyond LO. LO. DIS is most often analysed in the Breit-frame
 which is specified\footnote{For the explicit transformation between
 lab- and Breit-frames we follow Appendix 7.11 in
-Ref.~\cite{Devenish:2004pb}.} by requiring that $2 x \vec{P} + \vec{q}
-= 0$. In this frame the mediated vector boson has zero energy
+Ref.~\cite{Devenish:2004pb}.}  by requiring that $2 x \vec{P} +
+\vec{q} = 0$. In this frame the mediated vector boson has zero energy
 component and is anti-aligned with the incoming parton. Explicitly in
 \disorder{} the Breit-frame at LO is
 \begin{align}
+  \label{eq:BreitLO}
 k_i &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,-1 \right), \quad  p_i = \frac{Q}{2}\left(1,0,0,+1 \right) \\ \notag
 k_f &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,+1 \right), \quad  p_f = \frac{Q}{2}\left(1,0,0,-1 \right) 
 \end{align}
@@ -206,13 +250,14 @@ negative
 \tilde{k}_i &= E_\mathrm{l}\left(1,0,0,-1 \right), \quad  \tilde{p}_i = x E_\mathrm{h}\left(1,0,0,+1 \right) 
 \end{align}
 where $E_\mathrm{h}$ is the energy of the incoming hadron. Using the
-definitions of Eq.~\eqref{eq:dis-variables} one finds that in the lab
+definitions of eq.~\eqref{eq:dis-variables} one finds that in the lab
 frame
 \begin{equation}
   \tilde{q} = \left(y(E_\mathrm{l} - x E_\mathrm{h}), -Q\sqrt{1-y},0, -y(E_\mathrm{l} - x E_\mathrm{h})\right) 
 \end{equation}
 and the outgoing momenta then simply follow from momentum conservation
 \begin{equation}
+  \label{eq:LabLO}
   \tilde{k}_f = \tilde{k}_i - \tilde{q}, \quad   \tilde{p}_f = \tilde{p}_i + \tilde{q}\,. 
 \end{equation}
 
@@ -221,10 +266,10 @@ contribution, from $e^\pm p \to e^\pm + X $ scattering, and a CC
 contribution from $e^\pm p \to \nu + X$\footnote{Here
 $\nu=\{\nu_e,\bar{\nu}_e\}$ for $e^-$ and $e^+$ respectively. One can
 of course also consider incoming neutrinos which does not change the
-discussion here, but has not been implemented in \disorder{}.}
-scattering. The unpolarised NC cross section can be written as
+discussion here.} scattering. The unpolarised NC cross section can be
+written as
 \begin{equation}
-\frac{\dd\sigma_{\NC}^\pm}{\dd x \dd Q^2} =   \frac{2\pi\alpha^2}{xQ^4} \left[y_+ F_2^{\NC} \mp y_- F_3^\NC - y^2 F_L^\NC\right],\,
+\frac{\dd\sigma_{\NC}^\pm}{\dd x \dd Q^2} =   \frac{2\pi\alpha^2}{xQ^4} \left[y_+ F_2^{\NC} \mp y_- x F_3^\NC - y^2 F_L^\NC\right],\,
 \label{eq:NCsigma}
 \end{equation}
 where $y_\pm=1\pm(1-y)^2$, $\alpha$ is the fine structure constant and
@@ -234,11 +279,92 @@ functions
   F_{i}^\NC &= F_{i}^\gamma  - v_e \Gamma_{\gamma Z} F_{i}^{\gamma Z} + (v_e^2 + a_e^2)\Gamma_{Z} F_{i}^{Z},\, \quad i =2,L \\ \notag
   F_{3}^\NC &= - a_e \Gamma_{\gamma Z} F_{3}^{\gamma Z} + 2v_e a_e\Gamma_{Z} F_{3}^{Z}\,.
 \end{align}
-Here $v_e = -\frac12 + 2 \sin^2\theta_W$, $a_e=\frac12$, $\Gamma_{\gamma Z} = \frac{Q^2}{\sin^2 2\theta_W(Q^2+M_Z^2)}$, and $\Gamma_Z=\Gamma_{\gamma Z}^2$
+Here $v_e = -\frac12 + 2 \sin^2\theta_W$ is the vector and
+$a_e=\frac12$ is the axial-vector coupling, $M_Z$ is the Z boson mass,
+$\Gamma_{\gamma Z} = \frac{Q^2}{\sin^2 2\theta_W(Q^2+M_Z^2)}$, and
+$\Gamma_Z=\Gamma_{\gamma Z}^2$. $\theta_W$ is the weak mixing
+angle. Similarly we define the unpolarised CC cross section as
+\begin{equation}
+\frac{\dd\sigma_{\CC}^\pm}{\dd x \dd Q^2} =   \frac{\pi\alpha^2}{8\sin^4\theta_W x}\left[\frac{1}{M_W^2 + Q^2}\right]^2 \left[y_+ F_2^{\CC} \mp y_- x F_3^\CC - y^2 F_L^\CC\right],\,
+\label{eq:CCsigma}
+\end{equation}
+where $M_W$ is the mass of $W$ boson and the CC structure functions
+are now simply given by the $W$ ones
+\begin{equation}
+  F_2^\CC = F_2^{W^\pm}, \quad   F_L^\CC = F_L^{W^\pm}, \quad   F_3^\CC = F_3^{W^\pm}\,.
+\end{equation}
+The exact definitions of all proton structure functions inside
+\hoppet{} up to N3LO can be found in
+Refs.~\cite{Salam:2008qg,BertoneKarlberg}. In DIS it is also customary
+to define the dimensionless \emph{reduced} NC and CC cross sections
+by~\cite{H1:2012qti}
+\begin{align}
+  \label{eq:reducedsigma}
+  \tilde{\sigma}_\NC^\pm(x,Q^2) &= \frac{xQ^4}{2\pi\alpha^2}\frac{1}{y_+}\frac{\dd\sigma_{\NC}^\pm}{\dd x \dd Q^2} \\ \notag
+  \tilde{\sigma}_\CC^\pm(x,Q^2) &= \frac{8\sin^4\theta_W x}{\pi\alpha^2}\left[M_W^2+Q^2\right]^2\frac{\dd\sigma_{\CC}^\pm}{\dd x \dd Q^2}\,.
+\end{align}
+\disorder{} provides direct access to all the cross sections in
+eqs.~\eqref{eq:NCsigma},~\eqref{eq:CCsigma},
+and~\eqref{eq:reducedsigma} at N3LO accuracy. In principle one can
+also access the NC and CC structure functions, although they are
+currently only computed as an intermediate step to construct the cross
+sections.
+
+\subsection{Applying P2B}
+\label{sec:P2B}
+The structure functions are by definition inclusive in all radiation
+and can therefore only provide predictions for quantities, like the
+inclusive cross sections, which depend on the Born kinematics of
+eq.~\eqref{eq:dis-variables} only. If we instead evaluate the
+structure functions on an observable sensitive to emissions, e.g. the
+transverse momentum of the hardest jet in the lab frame, we see that
+this will not give the right answer, as the real emissions are not
+included with their correct kinematics. 
+
+
+The P2B method lifts this restriction by effectively replacing the
+Born-kinematics real-emission contributions in the structure functions
+with the correct kinematics ones. In practice whenever \disent{}
+returns an event with some weight, we bin it once according to the
+true kinematics, and again projecting the kinematics to the underlying
+Born changing the sign of the weight. This last term, upon integration,
+will exactly cancel the real contribution in the structure functions,
+whereas the first term will provide the correct real matrix element.
+
+The projections themselves are trivial because, as outlined above, the
+Born kinematics are fully specified at all orders by the lepton (and
+proton) momenta, as given in
+eqs.~\eqref{eq:BreitLO}--\eqref{eq:LabLO}. Hence computing the
+projections adds very little computational effort to the cross section
+calculation.
+
+At this point it is worth reminding the reader that \disent{} only
+includes the photon-mediated NC, and hence \disorder{} only provides
+exclusive predictions for this channel. It should in principle be
+possible to extend the code to include Z-mediation (including
+interferences) and CC, but we leave this for future work.
 
 
 \section{Running \disorder{}}
 \label{sec:running}
+Instructions for how to compile \disorder{} can be found in the
+INSTALLATION file in the main directory of the code. Below we provide
+a few examples of the use of the program along with a list of the most
+common command line arguments.
+
+\subsection{Inclusive mode}
+\label{sec:Inclusive}
+The syntax for running the program is
+\begin{lstlisting}
+  ./disorder [options]
+\end{lstlisting}
+Running the program without any options will compute the total cross
+section for using the default parameters of the program, and should
+result in output like this 
+
+
+\subsection{P2B mode}
+\label{sec:P2Bmode}
 
 \section{Benchmarks and results}
 \label{sec:results}
