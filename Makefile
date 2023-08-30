@@ -16,7 +16,9 @@ ANALYSIS = fastjetfortran pwhg_bookhist-multi
 #ANALYSIS += cut_Ecur 
 #ANALYSIS += jets_lab_frame
 #ANALYSIS += event_shapes caesar
-ANALYSIS += vbf
+#ANALYSIS += vbf
+#ANALYSIS += nnlojet_comparison
+ANALYSIS += simple_analysis
 
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(STD)
@@ -30,7 +32,6 @@ CXXFLAGS += $(shell $(FASTJET_CONFIG) --cxxflags)
 CXXLIBS= -lstdc++
 
 # librairies and flags needed for compilation
-#FF = ifort
 AUX=$(PWD)/aux
 SRC=$(PWD)/src
 OBJ=$(PWD)/obj
