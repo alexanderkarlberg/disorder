@@ -53,9 +53,11 @@ program disorder
      
      do imempdf = nmempdf_start,nmempdf_end
         call initialise_run_structure_functions
-        call pwhgsetout
-        
-        call finalise_histograms
+        if(do_analysis) then
+           call pwhgsetout
+           
+           call finalise_histograms
+        endif
         Nscales = 1 ! To avoid computing scale variations in the next calls
         call setupmulti(1)
      enddo ! end loop over pdfs
@@ -91,13 +93,13 @@ program disorder
 
   analysis_name='xsct'
   if (order_max.eq.1) then
-     analysis_name="xsct_lo_seed"//seedstr//".dat"
+     analysis_name=trim(prefix)//"xsct_lo_seed"//seedstr//".dat"
   else if (order_max.eq.2) then
-     analysis_name="xsct_nlo_seed"//seedstr//".dat"
+     analysis_name=trim(prefix)//"xsct_nlo_seed"//seedstr//".dat"
   else if (order_max.eq.3) then
-     analysis_name="xsct_nnlo_seed"//seedstr//".dat"
+     analysis_name=trim(prefix)//"xsct_nnlo_seed"//seedstr//".dat"
   else if (order_max.eq.4) then
-     analysis_name="xsct_n3lo_seed"//seedstr//".dat"
+     analysis_name=trim(prefix)//"xsct_n3lo_seed"//seedstr//".dat"
   endif
 
   call print_results(0, '')
@@ -244,7 +246,7 @@ contains
       ! vegas main call
       ! set random seed to saved value 
       idum     = -saveseed
-      fillplots = .true.
+      fillplots = do_analysis !.true.
       call vegas(region,ndim,dsigma,1,ncall2,itmx2,0,integ,error_int,proba)
       readin = .true.
       ! add integral to the total cross section

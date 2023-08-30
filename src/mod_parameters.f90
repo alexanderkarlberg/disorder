@@ -29,10 +29,10 @@ module mod_parameters
   integer,  public :: nflav, ipdf, it1, itmx1, itmx2, ncall1, ncall2, nscales
   character * 4, public :: seedstr
   character * 17, public :: scalestr(maxscales)
-  character(len=50), public :: pdfname, outname
+  character(len=50), public :: pdfname, outname, prefix
   integer, public :: nmempdf, outdev
   logical, public, save :: pdfuncert, alphasuncert, fillplots, p2b, noZ, positron,&
-       & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC, vnf, help
+       & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC, vnf, help, do_analysis
   real(dp), public, save :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
        & Eh, El, sigma_all_scales(maxscales),&
        & NC_reduced_dsigma(maxscales), CC_reduced_dsigma(maxscales),&
@@ -140,7 +140,9 @@ contains
     if(order_max.ge.4.and.p2b) stop 'Cannot run p2b at N3LO yet'
     if(vnf.and.p2b) stop 'Cannot run p2b with variable flavour'
     outname      = string_val_opt("-out", "") ! Overwite the prefix of the file name
-
+    prefix       = string_val_opt("-prefix", "") ! Overwite the prefix of the file name
+    do_analysis = .not.log_val_opt("-no-analysis",.false.)
+    if(p2b.and..not.do_analysis) stop 'Should really be doing an analysis with p2b'
 
     ! Parameters dealing with scale variations
     scale_choice = 1 !int_val_opt ('-scale-choice',1) ! 1: Use Q. 0: Use MZ. For now fixed.

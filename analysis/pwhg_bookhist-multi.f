@@ -219,7 +219,7 @@ c overflow
             write(cl,'(i3)') l
 !            open(unit=iun,file=trim(adjustl(filename))//'-W'//
 !     1           trim(adjustl(cl))//'.dat',status='unknown')
-            open(unit=iun,file=trim(adjustl(filename))
+            open(unit=iun,file=trim(prefix)//trim(adjustl(filename))
      $           //trim(adjustl(scalestr(l)))//'.dat',status='unknown')
          endif
          call print_header(iun)

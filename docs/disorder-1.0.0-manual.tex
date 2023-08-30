@@ -41,7 +41,7 @@
   keepspaces=true
 }
 \urlstyle{sf}
-
+\usepackage{booktabs}
 % Fix \cal and \mathcal characters look (so it's not the same as \mathscr)
 \DeclareSymbolFont{usualmathcal}{OMS}{cmsy}{m}{n}
 \DeclareSymbolFontAlphabet{\mathcal}{usualmathcal}
@@ -56,6 +56,8 @@
 \newcommand{\dd}{\mathrm{d}}
 \newcommand{\NC}{\mathrm{NC}}
 \newcommand{\CC}{\mathrm{CC}}
+\newcommand{\GEV}{\,\mathrm{GeV}}
+\newcommand{\NNNLO}{N$^3$LO}
 
 \begin{document}
 \begin{flushright}
@@ -128,13 +130,13 @@ splitting functions~\cite{Moch:2004pa,Vogt:2004mw} and the four-loop
 $\beta$-function~\cite{vanRitbergen:1997va,Czakon:2004bu} for the
 running coupling this allows for the determination of the proton
 structure functions at the next-to-next-to-next-to-leading order
-(N3LO).\footnote{Technically the four-loop splitting functions are
+(\NNNLO{}).\footnote{Technically the four-loop splitting functions are
 needed to claim this accuracy. Recent progress in determining those
 can be found in
 Refs.\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm}.}
 The structure functions can be combined with an exclusive
 next-to-next-to-leading order (NNLO) DIS + 1 jet computation to obtain
-fully differential N3LO predictions in DIS, as was done by the NNLOJET
+fully differential \NNNLO{} predictions in DIS, as was done by the NNLOJET
 collaboration~\cite{Currie:2018fgr,Gehrmann:2018odt}. This computation
 uses the Projection-to-Born (P2B) method, which was first introduced
 in the context of NNLO Vector Boson Fusion (VBF)
@@ -172,12 +174,12 @@ previous names for fixed-order DIS codes.\footnote{{\tt
 this context.} Since the program relies on \hoppet{} for the structure
 functions, the inclusive DIS cross section can actually be obtained
 one order higher, since the structure functions were implemented at
-N3LO already in the context of the {\tt proVBFH}
+\NNNLO{} already in the context of the {\tt proVBFH}
 code~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}. The
 \disorder{} program therefore has two more or less separate use cases:
 1. The computation of fully exclusive NNLO photon-mediated DIS 2. The
 computation of inclusive/reduced neutral- (NC) and charged-current
-(CC) DIS at N3LO accuracy.
+(CC) DIS at \NNNLO{} accuracy.
 
 The program is designed to be user-friendly with a simple command line
 interface. The program prints cross sections and all important
@@ -189,7 +191,7 @@ can also compute renormalisation and factorisation scale uncertainties
 on-the-fly. For inclusive cross sections the code provides results in
 a matter of seconds\footnote{The majority of this time is taken up by
 the structure function initialisation inside \hoppet{} rather than the
-integration of the cross section.} even at N3LO with uncertainties
+integration of the cross section.} even at \NNNLO{} with uncertainties
 typically below the permille level. For exclusive quantities the code
 can be run on a laptop at NLO and depending on the analysis, and the
 laptop, even at NNLO.
@@ -303,9 +305,11 @@ are now simply given by the $W$ ones
   F_2^\CC = F_2^{W^\pm}, \quad   F_L^\CC = F_L^{W^\pm}, \quad   F_3^\CC = F_3^{W^\pm}\,.
 \end{equation}
 The exact definitions of all proton structure functions inside
-\hoppet{} up to N3LO can be found in
-Refs.~\cite{Salam:2008qg,BertoneKarlberg}. In DIS it is also customary
-to define the dimensionless \emph{reduced} NC and CC cross sections
+\hoppet{} up to \NNNLO{} can be found in
+Refs.~\cite{Salam:2008qg,BertoneKarlberg}. The tabulation of the
+structure functions inside \hoppet{} has a numerical precision of
+$10^{-4}$ for most values of $x$. In DIS it is also customary to
+define the dimensionless \emph{reduced} NC and CC cross sections
 by~\cite{H1:2012qti}
 \begin{align}
   \label{eq:reducedsigma}
@@ -314,7 +318,7 @@ by~\cite{H1:2012qti}
 \end{align}
 \disorder{} provides direct access to all the cross sections in
 eqs.~\eqref{eq:NCsigma},~\eqref{eq:CCsigma},
-and~\eqref{eq:reducedsigma} at N3LO accuracy. In principle one can
+and~\eqref{eq:reducedsigma} at \NNNLO{} accuracy. In principle one can
 also access the NC and CC structure functions, although they are
 currently only computed as an intermediate step to construct the cross
 sections.
@@ -439,7 +443,7 @@ The program allows the user to specify limits on $x$, $y$, and $Q$
 through {\tt -xmin}, {\tt -xmax}, {\tt -ymin}, {\tt -ymax}, {\tt
   -Qmin}, {\tt -Qmax}, or to fix them through the options {\tt -x},
 {\tt -y}, {\tt -Q}. For instance to compute the cross section at $Q=20
-\, \mathrm{GeV}$ and $x>0.01$ one would run
+\GEV$ and $x>0.01$ one would run
 \begin{lstlisting}
   ./disorder -Q 20 -xmin 0.01
 \end{lstlisting}
@@ -468,10 +472,10 @@ LHAPDF name, can be specified with the {\tt -pdf} flag. If the user
 wants to compute PDF uncertainties, the flag {\tt pdfuncert} should be
 given. This flag will make \disorder{} loop over all the members in
 the PDF, and combine their errors according to the internal LHAPDF
-routine {\tt getpdfuncertainty}. This also means that the program is
-slowed down proportionally to the number of PDF members. If the PDF
-also includes $\as$ variations these are included in the PDF
-uncertainty by default. If the user wants the PDF and $\as$
+routine {\tt getpdfuncertainty}~\cite{Watt:2011kp}. This also means
+that the program is slowed down proportionally to the number of PDF
+members. If the PDF also includes $\as$ variations these are included
+in the PDF uncertainty by default. If the user wants the PDF and $\as$
 uncertainties independently, then the flag {\tt -alphasuncert} should
 be specified. Some care should be taken here, as in practice the code
 assumes that the $\as$ variations are contained in the last two PDF
@@ -487,9 +491,9 @@ all 7 runs will be printed. The user can in principle also carry out
 arbitrary variations in individual runs by specifying {\tt -xmur} and
 {\tt -xmuf} on the command line. Here {\tt xmur} is the ratio of
 $\mu_R/Q$ and similarly for {\tt xmuf}.\footnote{In practice it is
-faster to use the {\tt scaleuncert} flag as the program will only
+faster to use the {\tt -scaleuncert} flag as the program will only
 recompute what is needed for the variations rather than do a full
-event. However, at N3LO, in general, this is not true, due to the fact
+event. However, at \NNNLO{}, in general, this is not true, due to the fact
 that the number of tables needed in \hoppet{} to carry out on-the-fly
 scale variations increases dramatically at this order, compared to
 using a fixed ratio of $Q$. Given how fast the code is, it is still
@@ -502,16 +506,22 @@ number of files depending on the exact input. There is always a file
 called {\tt xsct\_nnlo\_seed0001.dat}, where the {\tt nnlo} and {\tt
   seed0001} parts will vary depending on the order and seed, which
 contains a summary of the run, including the total and reduced cross
-sections.
+sections. It is possible to specify a prefix to the file name through
+the {\tt -prefix} option.
 
-The output of the analysis is printed to {\tt .dat} files prefixed by
-{\tt disorder\_nnlo\_seed001\_pdfmem000} where again the exact prefix
+The output of the analysis is printed to a number of {\tt .dat} files,
+the number depending on the input, prefixed by {\tt
+  disorder\_nnlo\_seed001\_pdfmem000} where again the exact prefix
 will depend on the input. The output name also contains information on
 the seed, the PDF member and the renormalisation and factorisation
 scales if {\tt -scaleuncert} is on. The output prefix can be
 overwritten by specifying a string name with the flag {\tt -out}. Care
 should be taken as this will not work if running with {\tt -pdfuncert}
 on.
+
+Since it is often not necessary to run an analysis in the inclusive
+mode, the user can simply turn this off with the {\tt -no-analysis}
+flag.
 
 \subsection{P2B mode}
 \label{sec:P2Bmode}
@@ -524,11 +534,13 @@ mode, with a few limitations
 \item {\tt -pdfuncert} and {\tt -alphasuncert} are not supported
 \item {\tt -y}, {\tt -ymin}, and {\tt -ymax} are not supported
 \end{itemize}
-When running in P2B mode it is furthermore of use to be able to
-control the number of calls to \disent{}. This is done through the
-flag {\tt -ncall2} which takes an integer. It can in principle also
-be specified in the inclusive mode, but most users should not need
-too.
+Importantly, it \emph{is} possible to run with the {\tt -scaleuncert}
+flag which leads to a significant reduction in run-time compared to
+doing 7 separate runs. When running in P2B mode it is furthermore of
+use to be able to control the number of calls to \disent{}. This is
+done through the flag {\tt -ncall2} which takes an integer. It can in
+principle also be specified in the inclusive mode, but most users
+should not need too.
 
 We provide a small script to run on multiple cores on a single machine
 in {\tt aux/runpar.sh}. In the {\tt aux} folder one may also find a
@@ -544,22 +556,99 @@ is taken from the {\tt POWHEG-BOX}.
 
 \section{Benchmarks and results}
 \label{sec:results}
+In this section we show a few results obtained by running the code in
+both the inclusive and the P2B modes. The purpose is not to provide an
+exhaustive phenomenological analysis, but rather to provide a few
+select results that can be used to either validate the code when
+running it, or to validate other programs in the future. The results
+of this section also serve to demonstrate that the code is indeed
+capable of producing what it claims to. All analyses used in this
+section can be found in the {\tt analysis} directory, and the raw
+results can be found in the {\tt paper\_runs} folder.
+
+Unless otherwise stated we collide electrons and protons using the
+MSHT20nnlo\_as118~\cite{Bailey:2020ooq} PDF set and the following
+input parameters in all calculations
+\begin{align}
+  \label{eq:setup}
+  M_W = 80.398\GEV, \qquad M_Z = 91.1876\GEV, &\qquad E_h = 920\GEV, \qquad E_l = 27.6\GEV  \\ \notag
+  \alpha = 1/137, \qquad \as(M_Z) &= 0.118, \qquad n_f = 5\,.
+\end{align}
+
+\subsection{Inclusive results}
+The perhaps most fundamental question one can ask in DIS is ``what is
+the total cross section?'' for a given value of $x$ and $Q$. The
+answer to that question is given in table~\ref{tab:cross-sections} for
+both the NC and CC cross sections at $Q=10\GEV$ and $x=0.01$.
+\begin{table}[t] 
+  \centering
+  \phantom{x}\medskip% add space to make table look nicer...
+  \begin{center} $Q = 10\GEV,\quad x = 0.01$\end{center}
+  {\renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{lcccc|cc}
+    \toprule
+    & $\frac{\sigma_\NC}{\dd x \dd Q^2}$ [pb] & $\delta$PDF & $\frac{\sigma_\CC}{\dd x \dd Q^2}$ [pb] & $\delta$PDF & $\tilde{\sigma}_\NC$  & $\tilde{\sigma}_\CC$ \\ 
+    \midrule
+    a\NNNLO & $1932^{+.705\%}_{-.486\%}$ & $0.972\%$ & $1.100^{+.591\%}_{-.423\%}$ & $1.103\%$ & $0.8174$ & $2.884$\\    
+    \NNNLO  & $1886^{+.546\%}_{-.160\%}$ & $0.845\%$ & $1.080^{+.455\%}_{-.132\%}$ & $0.914\%$ & $0.7980$ & $2.829$\\    
+    NNLO    & $1895^{+1.50\%}_{-1.18\%}$ & $0.840\%$ & $1.084^{+1.25\%}_{-.994\%}$ & $0.908\%$ & $0.8018$ & $2.840$\\    
+    NLO     & $1952^{+3.66\%}_{-4.43\%}$ & $0.810\%$ & $1.111^{+3.02\%}_{-3.63\%}$ & $0.880\%$ & $0.8260$ & $2.913$\\    
+    LO      & $2058^{+13.8\%}_{-17.0\%}$ & $0.843\%$ & $1.163^{+11.4\%}_{-14.1\%}$ & $0.885\%$ & $0.9708$ & $3.050$\\    
+    \bottomrule
+  \end{tabular}}
+  \caption{The inclusive and reduced cross sections at various orders
+    in both NC and CC DIS. The setup is given in
+    eq.~\eqref{eq:setup}. The a\NNNLO{} row is obtained using the
+    approximate \NNNLO{} PDF set MSHT20nnlo\_as118. Note that there is
+    no Monte Carlo error on these numbers.}
+\label{tab:cross-sections}
+\end{table}
+The row a\NNNLO{} is obtained with the
+MSHT20nnlo\_as118~\cite{McGowan:2022nag} PDF set which includes
+approximate \NNNLO{} splitting functions. It is interesting to note
+that the inclusion of the approximate terms has an impact that is
+parametrically of the same order as the NNLO corrections. The PDF
+uncertainties stay more or less constant across all orders, which is
+not unexpected given that we use the same PDF at each order. To give a
+sense of the speed of the code, the combined results presented in the
+table took a total of 7 minutes to obtain on a laptop equipped with an
+Intel i9-10885H CPU.
+
+\subsection{Exclusive lab frame results}
 
 \section{Conclusion}
 \label{sec:conclusion}
 
 \section*{Acknowledgements}
-The author is grateful for discussions with Gavin Salam regarding {\tt disent}. 
+The author is grateful for discussions with Gavin Salam regarding {\tt
+  disent}. Also thank Andrea and mention that work initiated in the
+powheg project.
 
 
-\begin{appendix}
-
-  \section{An appendix}
-
-\end{appendix}
+%\begin{appendix}
+%
+%  \section{An appendix}
+%
+%\end{appendix}
 
 \bibliography{bibliography.bib}
 
 \nolinenumbers
 
 \end{document}
+%============================================================
+% # Total N3LO cross-section (pb)
+% # Summary:
+% # σ(NC)                          =     1859.900603 pb
+% # MC integration uncertainty     =        0.0000 %
+% # QCD scale uncertainty (+)      =        0.5466 %
+% # QCD scale uncertainty (-)      =       -0.1592 %
+% # PDF symmetric uncertainty*     =        0.8460 %
+% # (*PDF uncertainty contains alphas uncertainty if using a  
+% #   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas)).
+% 
+% # Reduced N3LO cross-sections (pb)
+% # σ reduced (NC)                 =        0.796872
+% # QCD scale uncertainty (+)      =        0.5466 %
+% # QCD scale uncertainty (-)      =       -0.1592 %
+% ============================================================

@@ -1,0 +1,42 @@
+ # Stamped by ../../disorder on 30/08/2023 at 16:00:12
+ #../../disorder -pdf MSHT20nnlo_as118 -Q 10 -x 0.01 -pdfuncert -scaleuncert -NC -noCC -no-analysis -Ehad 920 -Elep 27.6 -mz 91.1876 -mw 80.398 -includeZ -prefix NC_ -nlo
+ # ----------------------------------------------------------
+ # Doing DIS @  NLO  (e^- + p)
+ # Inclusively in radiation
+ # Including neutral current
+ # With γ/Z
+ # xmin, xmax:         1.0000000000000000E-002   1.0000000000000000E-002
+ # ymin, ymax:         9.8456206679269048E-002   9.8456206679269048E-002
+ # Q2min, Q2max:       100.00000000000000        100.00000000000000      GeV^2
+ # Electron energy:    27.600000000000001      GeV
+ # Proton energy:      920.00000000000000      GeV
+ # COM energy:         101568.00000000000      GeV^2
+ # PDF:             MSHT20nnlo_as118
+ # MZ:                 91.187600000000003     
+ # MW:                 80.397999999999996     
+ # nf:                         5
+ # CA:                 3.0000000000000000     
+ # CF:                 1.3333333333333333     
+ # TR:                0.50000000000000000     
+ # αS(MZ):            0.11800072760577117     
+ # 1/αEM:              137.00000000000000     
+ # GF:                 1.1267023651653377E-005
+ # sin(θ_W)^2:        0.22264585341299603     
+ # ----------------------------------------------------------
+ 
+ ============================================================
+ # Total NLO cross-section (pb)
+ # Summary:
+ # σ(NC)                          =     1951.859722 pb
+ # MC integration uncertainty     =        0.0000 %
+ # QCD scale uncertainty (+)      =        3.6604 %
+ # QCD scale uncertainty (-)      =       -4.4263 %
+ # PDF symmetric uncertainty*     =        0.8100 %
+ # (*PDF uncertainty contains alphas uncertainty if using a  
+ #   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas)).
+ 
+ # Reduced NLO cross-sections (pb)
+ # σ reduced (NC)                 =        0.826021
+ # QCD scale uncertainty (+)      =        3.6604 %
+ # QCD scale uncertainty (-)      =       -4.4263 %
+ ============================================================
