@@ -13,8 +13,7 @@ module mod_parameters
 
   public print_header, welcome_message, alphasLocal
   
-  real(dp), parameter, public :: alpha_em = 1.0_dp/137.0_dp
-  real(dp), parameter, public :: gev2pb = 389379660.0_dp
+    real(dp), parameter, public :: gev2pb = 389379660.0_dp
   real(dp), parameter, public :: gev2nb = 389379.66_dp
   real(dp), parameter, public :: eps    = 1.0e-14_dp
   integer, parameter, public :: maxscales = 7
@@ -23,7 +22,8 @@ module mod_parameters
   real(dp), parameter, public :: scales_muf(1:maxscales) = &
        & (/1.0_dp, 2.0_dp, 0.5_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp/)
   real(dp), public :: xmuf, xmur, Qmin
-  real(dp), public :: sin_thw, mw, mz, w_width, z_width, GF
+  real(dp), public :: mw, mz, w_width, z_width, GF, alpha_em,&
+       & sin_thw_sq, sin_2thw_sq
   real(dp), public :: sqrts, S, Q0_cut_sq
   integer,  public :: order_min, order_max, iseed, scale_choice
   integer,  public :: nflav, ipdf, it1, itmx1, itmx2, ncall1, ncall2, nscales
@@ -45,7 +45,7 @@ module mod_parameters
 
   real(dp), public, save :: CFlcl, CAlcl, Trlcl, b0, NPOW1, NPOW2, CUTOFF
 
-  real(dp), public :: sin_thw_sq, sin_2thw_sq,Ve, Ae, Ve2, Ae2, Ve2_Ae2, two_Ve_Ae ! Vector and axial couplings of the electron
+  real(dp), public :: Ve, Ae, Ve2, Ae2, Ve2_Ae2, two_Ve_Ae ! Vector and axial couplings of the electron
 
     ! VEGAS common blocks
   integer, public :: ilast
@@ -75,6 +75,7 @@ contains
     vnf          = log_val_opt("-vnf",.false.)
     w_width      = dble_val_opt("-wwidth",2.141_dp)
     z_width      = dble_val_opt("-zwidth",2.4952_dp)
+    alpha_em     = 1.0_dp/dble_val_opt("-one-over-alpha",137.0_dp)
     CAlcl        = dble_val_opt("-CA",3.0_dp)
     CFlcl        = dble_val_opt("-CF",4.0_dp/3.0_dp)
     TRlcl        = dble_val_opt("-Tr",0.5_dp)
@@ -83,7 +84,8 @@ contains
     sin_thw_sq = 1.0_dp - (mw/mz)**2
     sin_2thw_sq = 4.0_dp * (1.0_dp - sin_thw_sq) * sin_thw_sq
 !    GF           = 1.1663787D-5 
-    GF           =  3.14159265359_dp * alpha_em / sqrt(2.0_dp) / mw**2/sin_thw_sq
+!    GF           =  3.14159265359_dp * alpha_em / sqrt(2.0_dp) / mw**2/sin_thw_sq
+    GF           =  4.0_dp * atan(1.0_dp) * alpha_em / sqrt(2.0_dp) / mw**2/sin_thw_sq
     positron = log_val_opt ("-positron",.false.)
     ! For a positron the Axial coupling flips sign
     Ae = - 0.5_dp
