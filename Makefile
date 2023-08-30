@@ -44,15 +44,12 @@ INCLUDE= -I$(ANA) -I$(SRC) $(wildcard *.h)
 FFLAGS+= $(INCLUDE) -J$(OBJ)
 LDFLAGS= $(shell $(HPEXEC) --libs) $(shell $(LHEXEC) --libs) 
 
-all: disorder mergegrids mergedata 
+all: disorder mergedata 
 
 # main program
 $(MAIN): %: %.o $(addsuffix .o,$(MODULES))  $(addsuffix .o,$(ANALYSIS)) Makefile
 	$(FF) $(OBJ)/$@.o $(patsubst %,$(OBJ)/%,$(addsuffix .o,$(MODULES))) \
 	$(patsubst %,$(OBJ)/%,$(addsuffix .o,$(ANALYSIS))) $(CXXLIBS) $(FFLAGS) $(LDFLAGS) $(LIBSFASTJET) -o $@
-
-mergegrids:
-	$(FF) $(FFLAGS) -mcmodel=large -o $(AUX)/$@ $(AUX)/mergegrids.f
 
 mergedata:
 	$(FF) $(FFLAGS) -mcmodel=large -o $(AUX)/$@ $(AUX)/mergedata.f

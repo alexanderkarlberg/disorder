@@ -7,7 +7,7 @@ function general_help {
     echo "Usage: 
   ./configure [options]
 
-proVBFH-inclusive requires lhapdf and hoppet/struct-func-devel
+disorder requires lhapdf and hoppet (v1.3.0 or later)
 installed on your machine. For a default installation, the
 corresponding binaries need to be in your path.
 
@@ -33,7 +33,7 @@ done
 
 cat > $MKF << "BLOCKTEXT"
 ######################################################################
-# Makefile.inc for proVBFH-inclusive 
+# Makefile.inc for disorder 
 # File generated with:
 BLOCKTEXT
 echo "#  "$0 $@ >> $MKF

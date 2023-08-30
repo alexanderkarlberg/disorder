@@ -26,6 +26,7 @@
 % Define special colors
 \definecolor{comment}{rgb}{0,0.3,0}
 \definecolor{identifier}{rgb}{0.0,0,0.3}
+
 \lstset{language=bash}
 \lstset{
   columns=flexible,
@@ -34,6 +35,7 @@
   identifierstyle=\color{black},
   commentstyle=\tt\color{comment},
   mathescape=true,
+  texcl=true,
   escapebegin=\color{comment},
   showstringspaces=false,
   keepspaces=true
@@ -283,7 +285,14 @@ Here $v_e = -\frac12 + 2 \sin^2\theta_W$ is the vector and
 $a_e=\frac12$ is the axial-vector coupling, $M_Z$ is the Z boson mass,
 $\Gamma_{\gamma Z} = \frac{Q^2}{\sin^2 2\theta_W(Q^2+M_Z^2)}$, and
 $\Gamma_Z=\Gamma_{\gamma Z}^2$. $\theta_W$ is the weak mixing
-angle. Similarly we define the unpolarised CC cross section as
+angle. In \disorder{} the electroweak parameters are fixed by
+$\alpha$, $M_W$, and $M_Z$ through the tree-level relations
+\begin{align}
+  \sin^2\theta_W = 1-\frac{M_W^2}{M_Z^2}, \qquad G_F = \frac{\pi\alpha}{\sqrt{2}m_W^2\sin^2\theta_W},
+\end{align}
+with $G_F$ the Fermi constant.
+
+Similarly we define the unpolarised CC cross section as
 \begin{equation}
 \frac{\dd\sigma_{\CC}^\pm}{\dd x \dd Q^2} =   \frac{\pi\alpha^2}{8\sin^4\theta_W x}\left[\frac{1}{M_W^2 + Q^2}\right]^2 \left[y_+ F_2^{\CC} \mp y_- x F_3^\CC - y^2 F_L^\CC\right],\,
 \label{eq:CCsigma}
@@ -347,10 +356,67 @@ interferences) and CC, but we leave this for future work.
 
 \section{Running \disorder{}}
 \label{sec:running}
-Instructions for how to compile \disorder{} can be found in the
-INSTALLATION file in the main directory of the code. Below we provide
-a few examples of the use of the program along with a list of the most
-common command line arguments.
+In this section we give instructions on how to compile and run
+\disorder{}, giving a few examples of the use of the most common
+command line arguments.
+
+\subsection{Compiling and prerequisites}
+To compile \disorder{} both \hoppet{} and
+LHAPDF~\cite{Buckley:2014ana} have to be installed on the machine. If
+both are installed in a location in the {\tt \$PATH} it is enough to
+run\footnote{Despite the name, this has nothing to do with {\tt autotools}.}
+\begin{lstlisting}
+  ./configure
+\end{lstlisting}
+For non-standard installation the paths can be specified like this
+\begin{lstlisting}
+  ./configure --with=hoppet=/path/to/hoppet-config --with-lhapdf=/path/to/lhapdf-config
+\end{lstlisting}
+In both cases the file {\tt Makefile.inc} is created which can also be
+modified by hand. The program should now compile with
+\begin{lstlisting}
+  make [-j]
+\end{lstlisting}
+which will result in the binary {\tt disorder} being created.
+\subsubsection{The analysis framework}
+The code uses the {\tt POWHEG-BOX} analysis framework, with a few
+minor modifications. A few example analyses are included in the {\tt
+  analysis directory}. Any new analysis should be put here and name of
+the analysis should to be specified in the {\tt Makefile}. For
+example, if the file {\tt my\_analysis.f} is to be compiled one should
+add
+\begin{lstlisting}
+  ANALYSIS += my_analysis
+\end{lstlisting}
+to the {\tt Makefile} in place of the default {\tt
+  simple\_analysis}. There are two mandatory routines in the analysis
+file, {\tt define\_histograms} and {\tt user\_analysis}. In the first
+routine one should define histograms like this (there are also
+routines available to book histograms with varying bins sizes)
+\begin{lstlisting}
+  call bookupeqbins('string_name', binsize, min, max)
+\end{lstlisting}
+In the {\tt user\_analysis} routine the user should perform their
+analysis and fill histograms like this
+\begin{lstlisting}
+  call filld('string_name', obs_value, dsig)
+\end{lstlisting}
+where {\tt obs\_value} is the value of the observable to be binned, and
+{\tt dsig} is the associated array of weights. The routine takes as
+input
+\begin{lstlisting}
+  integer n
+  double precision dsig(maxscales), x, y, Q2
+\end{lstlisting}
+where {\tt n} is the number of initial plus final state particles,
+{\tt dsig} is the weights computed by \disorder{} and {\tt maxscales}
+is the maximum number of scales which is supported (currently 7). {\tt
+  x}, {\tt y}, and {\tt Q2} are the DIS variables.
+
+Through the module {\tt mod\_analysis} the analysis has access to two
+array of momenta {\tt pbreit(0:3,1:n)} and {\tt plab{0:3,1:n}} which
+are the Breit and lab frame momenta respectively. The output of the
+analysis will be saved to the disk as outlined below.
 
 \subsection{Inclusive mode}
 \label{sec:Inclusive}
@@ -358,13 +424,123 @@ The syntax for running the program is
 \begin{lstlisting}
   ./disorder [options]
 \end{lstlisting}
-Running the program without any options will compute the total cross
-section for using the default parameters of the program, and should
-result in output like this 
+Running the program without any options will compute the total
+inclusive cross section using the default parameters of the
+program, which are printed to screen. The user can get a list of most
+parameters which can be specified on the command line by running
+\begin{lstlisting}
+  ./disorder -help
+\end{lstlisting}
+For a complete list of all parameters, and their use, the user should
+look through the file {\tt src/mod\_parameters.f90}. Here we describe
+the most common flags.
 
+The program allows the user to specify limits on $x$, $y$, and $Q$
+through {\tt -xmin}, {\tt -xmax}, {\tt -ymin}, {\tt -ymax}, {\tt
+  -Qmin}, {\tt -Qmax}, or to fix them through the options {\tt -x},
+{\tt -y}, {\tt -Q}. For instance to compute the cross section at $Q=20
+\, \mathrm{GeV}$ and $x>0.01$ one would run
+\begin{lstlisting}
+  ./disorder -Q 20 -xmin 0.01
+\end{lstlisting}
+The program will perform a Monte Carlo integration in the ranges
+specified, using the integrator VEGAS~\cite{Lepage:1977sw}. If the
+phase space is fully constrained by fixing two of either $x$, $y$, and
+$Q$ the program simply evaluates one point and returns the answer.
+
+One can further specify the energy of the incoming lepton through {\tt
+  -Elep}, the incoming hadron through {\tt -Ehad}. By default the
+lepton is taken to be an electron but specifying {\tt -positron} on
+the command line will change that. By default the code computes the
+photon-mediated NC cross section. To include the $Z$ one can specify
+{\tt -includeZ} and to include CC processes one can specify {\tt
+  -CC}. The inclusion of NC processes can also be controlled through
+the {\tt -NC} flag. In fact, all logical flags can be prefixed by
+``no'' to turn them off. Hence the below command line would run the
+program with CC processes only using a positron
+\begin{lstlisting}
+  ./disorder -Q 20 -xmin 0.01 -noNC -CC -positron
+\end{lstlisting}
+
+The order of the calculation is by default NNLO but can be specified
+with one of the flags {\tt -lo/-nlo/-nnlo/-n3lo}. The PDF, using the
+LHAPDF name, can be specified with the {\tt -pdf} flag. If the user
+wants to compute PDF uncertainties, the flag {\tt pdfuncert} should be
+given. This flag will make \disorder{} loop over all the members in
+the PDF, and combine their errors according to the internal LHAPDF
+routine {\tt getpdfuncertainty}. This also means that the program is
+slowed down proportionally to the number of PDF members. If the PDF
+also includes $\as$ variations these are included in the PDF
+uncertainty by default. If the user wants the PDF and $\as$
+uncertainties independently, then the flag {\tt -alphasuncert} should
+be specified. Some care should be taken here, as in practice the code
+assumes that the $\as$ variations are contained in the last two PDF
+members, and simply separates them from the rest.
+
+Renormalisation, $\mu_R$ and factorisation, $\mu_F$ scale
+uncertainties can be included by specifying the flag {\tt
+  -scaleuncert}. \disorder{} uses the vector boson virtuality, $Q$, as
+its default central scale. The program will then compute a standard
+7-point scale variation varying this scale by a factor of two up and
+down keeping $1/2\le \mu_R/\mu_F\le 2$. On the screen the envelope of
+all 7 runs will be printed. The user can in principle also carry out
+arbitrary variations in individual runs by specifying {\tt -xmur} and
+{\tt -xmuf} on the command line. Here {\tt xmur} is the ratio of
+$\mu_R/Q$ and similarly for {\tt xmuf}.\footnote{In practice it is
+faster to use the {\tt scaleuncert} flag as the program will only
+recompute what is needed for the variations rather than do a full
+event. However, at N3LO, in general, this is not true, due to the fact
+that the number of tables needed in \hoppet{} to carry out on-the-fly
+scale variations increases dramatically at this order, compared to
+using a fixed ratio of $Q$. Given how fast the code is, it is still
+the author's opinion that it is more convenient to use the on-the-fly
+variations.}
+
+Finally the random seed can be set with the {\tt iseed} flag. When the
+program terminates it will print results to screen but also save a
+number of files depending on the exact input. There is always a file
+called {\tt xsct\_nnlo\_seed0001.dat}, where the {\tt nnlo} and {\tt
+  seed0001} parts will vary depending on the order and seed, which
+contains a summary of the run, including the total and reduced cross
+sections.
+
+The output of the analysis is printed to {\tt .dat} files prefixed by
+{\tt disorder\_nnlo\_seed001\_pdfmem000} where again the exact prefix
+will depend on the input. The output name also contains information on
+the seed, the PDF member and the renormalisation and factorisation
+scales if {\tt -scaleuncert} is on. The output prefix can be
+overwritten by specifying a string name with the flag {\tt -out}. Care
+should be taken as this will not work if running with {\tt -pdfuncert}
+on.
 
 \subsection{P2B mode}
 \label{sec:P2Bmode}
+To turn on P2B it is enough to specify {\tt -p2b} on the command
+line. Many of the flags described above can also be specified in this
+mode, with a few limitations
+\begin{itemize}
+\item {\tt -CC} and {\tt -includeZ} are not supported
+\item {\tt -n3lo} is not supported
+\item {\tt -pdfuncert} and {\tt -alphasuncert} are not supported
+\item {\tt -y}, {\tt -ymin}, and {\tt -ymax} are not supported
+\end{itemize}
+When running in P2B mode it is furthermore of use to be able to
+control the number of calls to \disent{}. This is done through the
+flag {\tt -ncall2} which takes an integer. It can in principle also
+be specified in the inclusive mode, but most users should not need
+too.
+
+We provide a small script to run on multiple cores on a single machine
+in {\tt aux/runpar.sh}. In the {\tt aux} folder one may also find a
+script called {\tt mergedata} that can perform various manipulations
+of the datafiles. In particular
+\begin{lstlisting}
+  ./mergedata 1 {list of statistically equivalent files}
+\end{lstlisting}
+will take the average of all files and produce the file {\tt fort.12}
+with the result. Running the script without any arguments will result
+in a list of possible uses of the script. The {\tt mergedata} script
+is taken from the {\tt POWHEG-BOX}. 
 
 \section{Benchmarks and results}
 \label{sec:results}
