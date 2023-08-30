@@ -249,6 +249,14 @@ contains
        ymin = Q2min/(s*xmin)
        ymax = ymin
        novegas = .true.
+    elseif(Q2min.eq.Q2max.and.ymin.eq.ymax) then
+       xmin = Q2min/(s*ymin)
+       xmax = xmin
+       novegas = .true.
+    elseif(xmin.eq.xmax.and.ymin.eq.ymax) then
+       Q2min = s*xmin*ymin
+       Q2max = Q2min
+       novegas = .true.
     else
        if(xmin*(ymax*s) .lt. Q2min) xmin = Q2min/(ymax*s)
        if(xmax*(ymin*s) .gt. Q2max) xmax = Q2max/(ymin*s)

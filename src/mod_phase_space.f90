@@ -30,23 +30,31 @@ contains
        jac = jac * log(xmax/xmin) * x
     endif
 
-    !     Check available phase space for y/x
-    ymn = ymin
-    ymx = ymax
-
-    if(ymin.lt. Q2min/(x * s)) ymn = Q2min/(x * s)
-    if(ymax.gt. Q2max/(x * s)) ymx = Q2max/(x * s)
-
-    if(ymn.eq.ymx) then
-       y = ymn
+    if(ymin.eq.ymax) then
+       y = ymin
        jac = 1d0 * jac
-    elseif(ymn.lt.ymx) then
+    else
+       !     Check available phase space for y/x
+       ymn = ymin
+       ymx = ymax
+       
+       if(ymin.lt. Q2min/(x * s)) ymn = Q2min/(x * s)
+       if(ymax.gt. Q2max/(x * s)) ymx = Q2max/(x * s)
        y = ymn * exp(xborn(2)*log(ymx/ymn))
        jac = jac * log(ymx/ymn) * y
-    else
-       print*, ymn,ymx,x,s,Q2min,Q2max
-       stop 'No phase space available for y'
     endif
+    
+!    if(ymn.eq.ymx) then
+!       y = ymn
+!       jac = 1d0 * jac
+!    elseif(ymn.lt.ymx) then
+!       y = ymn * exp(xborn(2)*log(ymx/ymn))
+!       jac = jac * log(ymx/ymn) * y
+!    else
+!       print*, ymn,ymx,x,s,Q2min,Q2max
+!       stop 'No phase space available for y'
+!    endif
+
     ! For numerical stability
     if(Q2min.eq.Q2max) then
        Qsq = Q2min
