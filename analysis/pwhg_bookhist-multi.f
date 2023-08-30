@@ -213,14 +213,14 @@ c overflow
       print*, 'Outputting results to: ', filename
       do l=1,nmulti
          if(nmulti.eq.1) then
-            open(unit=iun,file=trim(adjustl(filename))//'.top',
+            open(unit=iun,file=trim(adjustl(filename))//'.dat',
      1           status='unknown')
          else
             write(cl,'(i3)') l
 !            open(unit=iun,file=trim(adjustl(filename))//'-W'//
-!     1           trim(adjustl(cl))//'.top',status='unknown')
+!     1           trim(adjustl(cl))//'.dat',status='unknown')
             open(unit=iun,file=trim(adjustl(filename))
-     $           //trim(adjustl(scalestr(l)))//'.top',status='unknown')
+     $           //trim(adjustl(scalestr(l)))//'.dat',status='unknown')
          endif
          call print_header(iun)
          do j=1,jhist
