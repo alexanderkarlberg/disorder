@@ -15,7 +15,8 @@ program disorder
   integer  :: nmempdf_start, nmempdf_end, imempdf, ncall2_save
   real(dp) :: integ, error_int, proba, tini, tfin
   real(dp) :: sigma_tot, error_tot, region(1:2*ndim),xdum(4)
-  real(dp) :: res(0:nmempdfMAX), central, errminus, errplus, errsymm
+  real(dp) :: res(0:nmempdfMAX), central, errminus, errplus, errsymm,&
+       & respdf(0:nmempdfMAX),resas(0:nmempdfMAX), central_dummy
   real(dp) :: res_scales(1:maxscales),maxscale,minscale
   real(dp) :: NC_reduced_central, NC_reduced_max, NC_reduced_min
   real(dp) :: CC_reduced_central, CC_reduced_max, CC_reduced_min
@@ -52,10 +53,11 @@ program disorder
      
      do imempdf = nmempdf_start,nmempdf_end
         call initialise_run_structure_functions
-        Nscales = 1 ! To avoid computing scale variations in the next calls
         call pwhgsetout
         
         call finalise_histograms
+        Nscales = 1 ! To avoid computing scale variations in the next calls
+        call setupmulti(1)
      enddo ! end loop over pdfs
   else
      call InitPDF(0)
@@ -502,24 +504,35 @@ contains
 
    write(idev,'(a)') ' # Summary:'
    if(NC.and.CC) then
-      write(idev,'(a,f16.6,a)') ' # σ(NC + CC)                 =', central,' pb'
+      write(idev,'(a,f16.6,a)') ' # σ(NC + CC)                     =', central,' pb'
    elseif(NC) then
-      write(idev,'(a,f16.6,a)') ' # σ(NC)                      =', central,' pb'
+      write(idev,'(a,f16.6,a)') ' # σ(NC)                          =', central,' pb'
    elseif(CC) then
-      write(idev,'(a,f16.6,a)') ' # σ(CC)                      =', central,' pb'
+      write(idev,'(a,f16.6,a)') ' # σ(CC)                          =', central,' pb'
    endif
-   write(idev,'(a,f14.4,a)') ' # MC integration uncertainty =', sqrt(error_tot)/central*100.0_dp, ' %'
+   write(idev,'(a,f14.4,a)') ' # MC integration uncertainty     =', sqrt(error_tot)/central*100.0_dp, ' %'
 
    if(scaleuncert) then
-      write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)  =',&
+      write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)      =',&
            & ((maxscale-central)/central)*100.0_dp, ' %'
-      write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)  =',&
+      write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)      =',&
            & ((minscale-central)/central)*100.0_dp, ' %'
    endif
 
    if(pdfuncert) then
       call getpdfuncertainty(res(nmempdf_start:nmempdf_end),central,errplus,errminus,errsymm)
-      write(idev,'(a,f14.4,a)') ' # PDF symmetric uncertainty* =', errsymm/central*100.0_dp, ' %'
+      write(idev,'(a,f14.4,a)') ' # PDF symmetric uncertainty*     =', errsymm/central*100.0_dp, ' %'
+      if(alphasuncert) then
+        central_dummy = central
+        respdf = central
+        resas = central
+        respdf(0:nmempdf_end-2) = res(0:nmempdf_end-2)
+        resas(nmempdf_end-1:nmempdf_end) = res(nmempdf_end-1:nmempdf_end)
+        call getpdfuncertainty(respdf(nmempdf_start:nmempdf_end),central_dummy,errplus,errminus,errsymm)
+        write(idev,'(a,f14.4,a)') ' # Pure PDF symmetric uncertainty =', errsymm/central*100.0_dp, ' %'
+        call getpdfuncertainty(resas(nmempdf_start:nmempdf_end),central_dummy,errplus,errminus,errsymm)
+        write(idev,'(a,f14.4,a)') ' # Pure αS symmetric uncertainty  =', errsymm/central*100.0_dp, ' %'
+     endif
       write(idev,'(a)') ' # (*PDF uncertainty contains alphas uncertainty if using a  '
       write(idev,'(a)') ' #   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas)).'
    endif
@@ -536,41 +549,41 @@ contains
    endif
 
    if(NC.and.CC) then
-      write(idev,'(a,f16.6)') ' # σ reduced (NC)             =', NC_reduced_central
+      write(idev,'(a,f16.6)') ' # σ reduced (NC)                 =', NC_reduced_central
       if(scaleuncert) then
-         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)  =',&
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)      =',&
               & ((NC_reduced_max-NC_reduced_central)/NC_reduced_central)&
               &*100.0_dp, ' %'
-         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)  =',&
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)      =',&
               & ((NC_reduced_min-NC_reduced_central)/NC_reduced_central)&
               &*100.0_dp, ' %'
       endif
-      write(idev,'(a,f16.6)') ' # σ reduced (CC)             =', CC_reduced_central
+      write(idev,'(a,f16.6)') ' # σ reduced (CC)                 =', CC_reduced_central
       if(scaleuncert) then
-         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)  =',&
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)      =',&
               & ((CC_reduced_max-CC_reduced_central)/CC_reduced_central)&
               &*100.0_dp, ' %'
-         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)  =',&
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)      =',&
               & ((CC_reduced_min-CC_reduced_central)/CC_reduced_central)&
               &*100.0_dp, ' %'
       endif
    elseif(NC) then
-      write(idev,'(a,f16.6)') ' # σ reduced (NC)             =', NC_reduced_central
+      write(idev,'(a,f16.6)') ' # σ reduced (NC)                 =', NC_reduced_central
       if(scaleuncert) then
-         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)  =',&
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)      =',&
               & ((NC_reduced_max-NC_reduced_central)/NC_reduced_central)&
               &*100.0_dp, ' %'
-         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)  =',&
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)      =',&
               & ((NC_reduced_min-NC_reduced_central)/NC_reduced_central)&
               &*100.0_dp, ' %'
       endif
    elseif(CC) then
-      write(idev,'(a,f16.6)') ' # σ reduced (CC)             =', CC_reduced_central
+      write(idev,'(a,f16.6)') ' # σ reduced (CC)                 =', CC_reduced_central
       if(scaleuncert) then
-         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)  =',&
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (+)      =',&
               & ((CC_reduced_max-CC_reduced_central)/CC_reduced_central)&
               &*100.0_dp, ' %'
-         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)  =',&
+         write(idev,'(a,f14.4,a)') ' # QCD scale uncertainty (-)      =',&
               & ((CC_reduced_min-CC_reduced_central)/CC_reduced_central)&
               &*100.0_dp, ' %'
       endif

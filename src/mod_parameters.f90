@@ -31,7 +31,7 @@ module mod_parameters
   character * 17, public :: scalestr(maxscales)
   character(len=50), public :: pdfname, outname
   integer, public :: nmempdf, outdev
-  logical, public, save :: pdfuncert, fillplots, p2b, noZ, positron,&
+  logical, public, save :: pdfuncert, alphasuncert, fillplots, p2b, noZ, positron,&
        & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC, vnf, help
   real(dp), public, save :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
        & Eh, El, sigma_all_scales(maxscales),&
@@ -152,6 +152,8 @@ contains
     xmuR_PDF     = dble_val_opt("-xmuRPDF",1d0)
     nmempdf      = int_val_opt ("-nmempdf",0)
     pdfuncert    = log_val_opt ("-pdfuncert")
+    alphasuncert = log_val_opt ("-alphasuncert")
+    if(alphasuncert.and..not.pdfuncert) stop "Need -pdfuncert to run with -alphasuncert"
     scaleuncert  = log_val_opt ("-scaleuncert")
     if(scaleuncert) scale_choice = 2
     if(scaleuncert.and.vnf) then

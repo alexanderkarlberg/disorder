@@ -40,8 +40,14 @@ contains
        
        if(ymin.lt. Q2min/(x * s)) ymn = Q2min/(x * s)
        if(ymax.gt. Q2max/(x * s)) ymx = Q2max/(x * s)
-       y = ymn * exp(xborn(2)*log(ymx/ymn))
-       jac = jac * log(ymx/ymn) * y
+
+       if(ymn.eq.ymx) then
+          y = ymn
+          jac = 1d0 * jac
+       else
+          y = ymn * exp(xborn(2)*log(ymx/ymn))
+          jac = jac * log(ymx/ymn) * y
+       endif
     endif
     
 !    if(ymn.eq.ymx) then
@@ -62,6 +68,7 @@ contains
        Qsq = y * x * s
        jac = jac * x * s
     endif
+
     Qval = sqrt(Qsq)
     jacobian = jac 
 
