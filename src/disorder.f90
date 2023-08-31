@@ -59,10 +59,11 @@ program disorder
            call finalise_histograms
         endif
         Nscales = 1 ! To avoid computing scale variations in the next calls
+        scale_choice = 1 ! Sets up the fast tables for a central scale choice
         call setupmulti(1)
      enddo ! end loop over pdfs
   else
-     call InitPDF(0)
+     call InitPDF(0) ! AK Should this not be nmempdf?
      
      imempdf = nmempdf
      nmempdf_start = nmempdf

@@ -261,9 +261,12 @@ contains
        Q2min = s*xmin*ymin
        Q2max = Q2min
        novegas = .true.
-    else
-       if(xmin*(ymax*s) .lt. Q2min) xmin = Q2min/(ymax*s)
-       if(xmax*(ymin*s) .gt. Q2max) xmax = Q2max/(ymin*s)
+    else if(Q2min.eq.Q2max) then
+       if(xmin*ymax*s .lt. Q2min) xmin = Q2min/(ymax*s)
+       if(xmax*ymin*s .gt. Q2max) xmax = Q2max/(ymin*s)
+    else if(xmin.eq.xmax) then
+       if(xmin*ymin*s .gt. Q2min) Q2min = xmin*ymin*s
+       if(xmax*ymax*s .lt. Q2max) Q2max = xmax*ymax*s
     endif
     !         if(s*xmin*ymin .gt. Q2min) Q2min = s*xmin*ymin
     !         if(s*xmax*ymax .gt. Q2max) Q2max = s*xmax*ymax

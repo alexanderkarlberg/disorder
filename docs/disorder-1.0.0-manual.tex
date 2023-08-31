@@ -577,9 +577,10 @@ input parameters in all calculations
 
 \subsection{Inclusive results}
 The perhaps most fundamental question one can ask in DIS is ``what is
-the total cross section?'' for a given value of $x$ and $Q$. The
+the total cross section? for a given value of $x$ and $Q$''. The
 answer to that question is given in table~\ref{tab:cross-sections} for
-both the NC and CC cross sections at $Q=10\GEV$ and $x=0.01$.
+both the NC and CC channels at $Q=10\GEV$ and $x=0.01$, at all
+available perturbative orders.
 \begin{table}[t] 
   \centering
   \phantom{x}\medskip% add space to make table look nicer...
@@ -605,14 +606,27 @@ both the NC and CC cross sections at $Q=10\GEV$ and $x=0.01$.
 \end{table}
 The row a\NNNLO{} is obtained with the
 MSHT20nnlo\_as118~\cite{McGowan:2022nag} PDF set which includes
-approximate \NNNLO{} splitting functions. It is interesting to note
+approximate \NNNLO{} theoretical input. It is interesting to note
 that the inclusion of the approximate terms has an impact that is
 parametrically of the same order as the NNLO corrections. The PDF
 uncertainties stay more or less constant across all orders, which is
 not unexpected given that we use the same PDF at each order. To give a
 sense of the speed of the code, the combined results presented in the
-table took a total of 7 minutes to obtain on a laptop equipped with an
+table took a total of 3.5 minutes to obtain on a laptop equipped with an
 Intel i9-10885H CPU.
+\begin{figure}[tb!]
+  \centering\includegraphics[width=0.49\textwidth,page=1]{../paper_runs/inclusive_runs/plot/sigma-ratios.pdf}
+  \centering\includegraphics[width=0.49\textwidth,page=3]{../paper_runs/inclusive_runs/plot/sigma-ratios.pdf}
+  \caption{Something}
+  \label{fig:sigma}
+\end{figure}
+
+In figure~\ref{fig:sigma} we show the NC cross section for fixed
+$Q=10\GEV$ (left) or $x=0.01$ (right), now only at NNLO, \NNNLO{} and
+a\NNNLO{}. The uncertainty band is obtained as a linear combination of
+the scale uncertainty and the PDF uncertainty, and is typically
+dominated by the latter. 
+
 
 \subsection{Exclusive lab frame results}
 
