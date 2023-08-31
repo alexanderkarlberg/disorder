@@ -18,8 +18,8 @@ ANALYSIS = fastjetfortran pwhg_bookhist-multi
 #ANALYSIS += event_shapes caesar
 #ANALYSIS += vbf
 #ANALYSIS += nnlojet_comparison
-#ANALYSIS += simple_analysis
-ANALYSIS += inclusive_paper_analysis
+ANALYSIS += simple_analysis
+#ANALYSIS += inclusive_paper_analysis
 
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(STD)
@@ -45,15 +45,21 @@ INCLUDE= -I$(ANA) -I$(SRC) $(wildcard *.h)
 FFLAGS+= $(INCLUDE) -J$(OBJ)
 LDFLAGS= $(shell $(HPEXEC) --libs) $(shell $(LHEXEC) --libs) 
 
-all: disorder mergedata 
+all: disorder mergedata getpdfuncert 
 
 # main program
-$(MAIN): %: %.o $(addsuffix .o,$(MODULES))  $(addsuffix .o,$(ANALYSIS)) Makefile
+$(MAIN): %: %.o $(addsuffix .o,$(MODULES))  $(addsuffix .o,$(ANALYSIS))  Makefile
 	$(FF) $(OBJ)/$@.o $(patsubst %,$(OBJ)/%,$(addsuffix .o,$(MODULES))) \
 	$(patsubst %,$(OBJ)/%,$(addsuffix .o,$(ANALYSIS))) $(CXXLIBS) $(FFLAGS) $(LDFLAGS) $(LIBSFASTJET) -o $@
 
 mergedata:
 	$(FF) $(FFLAGS) -mcmodel=large -o $(AUX)/$@ $(AUX)/mergedata.f
+
+#getpdfuncert:
+#	$(FF) $(CXXLIBS) $(FFLAGS) $(LDFLAGS) $(LIBSFASTJET) -mcmodel=large -o $(AUX)/$@ $(AUX)/getpdfuncert.f
+
+getpdfuncert:
+	gfortran aux/getpdfuncert.f -L/usr/local/lib -lLHAPDF -mcmodel=large -o aux/getpdfuncert
 
 # object files
 %.o: %.f Makefile 
