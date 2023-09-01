@@ -213,8 +213,8 @@ c overflow
       print*, 'Outputting results to: ', filename
       do l=1,nmulti
          if(nmulti.eq.1) then
-            open(unit=iun,file=trim(adjustl(filename))//'.dat',
-     1           status='unknown')
+            open(unit=iun,file=trim(prefix)//trim(adjustl(filename))/
+     $           /trim(adjustl(scalestr(1)))//'.dat',status='unknown')
          else
             write(cl,'(i3)') l
 !            open(unit=iun,file=trim(adjustl(filename))//'-W'//

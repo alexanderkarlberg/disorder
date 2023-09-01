@@ -105,24 +105,24 @@ contains
     if (log_val_opt("-lo")) then
        order_min = 1
        order_max = 1
-       order = '  LO'
+       order = '  lo'
     elseif (log_val_opt("-nlo")) then
        order_min = 1
        order_max = 2
-       order = ' NLO'
+       order = ' nlo'
     elseif (log_val_opt("-nnlo")) then
        order_min = 1
        order_max = 3
-       order = 'NNLO'
+       order = 'nnlo'
     elseif (log_val_opt("-n3lo")) then
        order_min = 1
        order_max = 4
-       order = 'N3LO'
+       order = 'n3lo'
     else
-       if(order_max.eq.1) order = '  LO'
-       if(order_max.eq.2) order = ' NLO'
-       if(order_max.eq.3) order = 'NNLO'
-       if(order_max.eq.4) order = 'N3LO'
+       if(order_max.eq.1) order = '  lo'
+       if(order_max.eq.2) order = ' nlo'
+       if(order_max.eq.3) order = 'nnlo'
+       if(order_max.eq.4) order = 'n3lo'
     endif
     NC = log_val_opt("-NC",.true.)
     CC = log_val_opt("-CC",.false.)
@@ -198,9 +198,9 @@ contains
        enddo
        idum = -idum
     endif
-    ingridfile ='grids-'//seedstr//'.dat'
-    outgridfile='grids-'//seedstr//'.dat'
-    outgridtopfile='grids-'//seedstr//'.top'
+    ingridfile    =trim(prefix)//'grids-'//trim(order)//'-'//seedstr//'.dat'
+    outgridfile   =ingridfile
+    outgridtopfile=trim(prefix)//'grids-'//trim(order)//'-'//seedstr//'.top'
     ilast=0
 
     ! Setup the phase space

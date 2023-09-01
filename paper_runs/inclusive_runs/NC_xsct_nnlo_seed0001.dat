@@ -1,4 +1,4 @@
- # Stamped by ../../disorder on 30/08/2023 at 16:01:20
+ # Stamped by ../../disorder on 31/08/2023 at 16:39:54
  #../../disorder -pdf MSHT20nnlo_as118 -Q 10 -x 0.01 -pdfuncert -scaleuncert -NC -noCC -no-analysis -Ehad 920 -Elep 27.6 -mz 91.1876 -mw 80.398 -includeZ -prefix NC_ -nnlo
  # ----------------------------------------------------------
  # Doing DIS @ NNLO  (e^- + p)

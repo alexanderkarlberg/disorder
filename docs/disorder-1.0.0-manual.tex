@@ -166,7 +166,8 @@ combination of \disent{} and \hoppet{} naturally leads to a Fortran
 code. For a C++ alternative, based on publically available codes, one
 could have started from either \disaster{} or \nlojet{} and used the
 structure functions as implemented in
-APFEL++~\cite{Bertone:2013vaa,Bertone:2017gds}.} Advantages of using
+APFEL++~\cite{Bertone:2013vaa,Bertone:2017gds}, where the reduced
+cross sections have also been implemented.} Advantages of using
 \disent{} are its well-known efficiency and numerical stability. The
 resulting program is dubbed \disorder{} keeping in the spirit of
 previous names for fixed-order DIS codes.\footnote{{\tt
@@ -182,7 +183,7 @@ computation of inclusive/reduced neutral- (NC) and charged-current
 (CC) DIS at \NNNLO{} accuracy.
 
 The program is designed to be user-friendly with a simple command line
-interface. The program prints cross sections and all important
+interface. It prints cross sections and all important
 run-parameters to the screen and disk, allowing a user to acquire
 cross sections with very little effort. It comes with an interface to
 {\tt fastjet} and {\tt LHAPDF} and uses the histogramming package from
@@ -200,10 +201,12 @@ It should be pointed out that the code does not provide any
 theoretical advances on its own. As described above, the structure
 functions themselves have been known for a little while, and the P2B
 method has already been applied to DIS, even one order higher than
-here. It is however the author's opinion, that public code is
-extremely valuable for both the experimental and theoretical
-communities, and that providing documentation in the form of this
-article will enable the wide use of the code.
+here\footnote{It has also been applied in polarised DIS in
+Refs.~\cite{Borsa:2020ulb,Borsa:2020yxh,Borsa:2021afb,Borsa:2022irn,Borsa:2022cap}.}. It
+is however the author's opinion, that public code is extremely
+valuable for both the experimental and theoretical communities, and
+that providing documentation in the form of this article will enable
+the wide use of the code.
 
 The paper is structured as follows: In section~\ref{sec:dis} we review
 the DIS process and kinematics as implemented in \disorder{}. In
@@ -623,9 +626,14 @@ Intel i9-10885H CPU.
 
 In figure~\ref{fig:sigma} we show the NC cross section for fixed
 $Q=10\GEV$ (left) or $x=0.01$ (right), now only at NNLO, \NNNLO{} and
-a\NNNLO{}. The uncertainty band is obtained as a linear combination of
-the scale uncertainty and the PDF uncertainty, and is typically
-dominated by the latter. 
+a\NNNLO{}. The uncertainty bands are obtained as a linear combination
+of the scale uncertainty and the PDF uncertainty, and is typically
+dominated by the latter, in particular at \NNNLO{}. It is interesting
+to observe that although the central prediction at a\NNNLO{} is in
+tension with the \NNNLO{} curve, it is contained within the NNLO scale
+uncertainty band, except at intermediate $x$ values. It will be
+interesting to see, if the inclusion of the exact \NNNLO{} splitting
+functions, when they become available, will ameliorate this tension. 
 
 
 \subsection{Exclusive lab frame results}

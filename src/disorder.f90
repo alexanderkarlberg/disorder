@@ -55,12 +55,12 @@ program disorder
         call initialise_run_structure_functions
         if(do_analysis) then
            call pwhgsetout
-           
            call finalise_histograms
+           call setupmulti(1) ! Tell analysis only one scale from now on
         endif
         Nscales = 1 ! To avoid computing scale variations in the next calls
         scale_choice = 1 ! Sets up the fast tables for a central scale choice
-        call setupmulti(1)
+        ncall1 = 0 ! turn off the grid computation
      enddo ! end loop over pdfs
   else
      call InitPDF(0) ! AK Should this not be nmempdf?
