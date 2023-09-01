@@ -7,7 +7,7 @@ c in column 3 and the symmetric PDF error in column 4.
       parameter (maxfiles=1000,maxlines=25000)
       character *(100) files(maxfiles)
       character *(100) line(maxlines,maxfiles)
-      integer nlines(maxfiles)
+      integer nlines(maxfiles),nset
       integer ifile,nfiles,ios,k,ipdf,nmempdf_end
       character *(100) cpdf
       real * 8 v1,v2,v3,v4
@@ -27,14 +27,11 @@ C - <<<<<<< kh modification ended here.
 
       endif
 
-!      read(cpdf,*) ipdf
-      
-!      call PDFSET('DEFAULT',dble(ipdf))
-!     call InitPDFset(ipdf,0)
       call initPDFSetByName(trim(cpdf))
       call numberPDF(nmempdf_end)
-      call initPDF(nmempdf_end)
+
       OPEN(UNIT=51, FILE='pdfuncert.dat', ACTION="write")
+
       res = 0d0
       
       do ifile=1,maxfiles
@@ -81,12 +78,10 @@ c load data
                read(unit=line(k,ifile),fmt=*,iostat=ios) v1,v2,v3,v4
                res(ifile-1) = v3
             enddo
-            res(1:nmempdf_end-1) = res(0)
+
             call getpdfuncertainty(res(0:nmempdf_end),central,errplus
      $           ,errminus,errsymm)
-            print*, res(0:nmempdf_end)
-            print*, central, errsymm
-            stop
+
             write(51,'(4(1x,d14.8))') v1,v2,central,errsymm
          endif
       enddo
