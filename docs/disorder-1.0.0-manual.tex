@@ -113,7 +113,8 @@ $\mathcal{O}(\as^3)$.}
 \noindent\rule{\textwidth}{1pt}
 \tableofcontents\thispagestyle{fancy}
 \noindent\rule{\textwidth}{1pt}
-\vspace{10pt}
+\vspace{10pt}\\
+\begin{center}\url{https://github.com/alexanderkarlberg/disorder}\end{center}
 \newpage
 \section{Introduction}
 \label{sec:intro}
@@ -183,19 +184,20 @@ computation of inclusive/reduced neutral- (NC) and charged-current
 (CC) DIS at \NNNLO{} accuracy.
 
 The program is designed to be user-friendly with a simple command line
-interface. It prints cross sections and all important
-run-parameters to the screen and disk, allowing a user to acquire
-cross sections with very little effort. It comes with an interface to
-{\tt fastjet} and {\tt LHAPDF} and uses the histogramming package from
-the {\tt POWHEG-BOX}~\cite{Alioli:2010xd} for easy analysis. The code
-can also compute renormalisation and factorisation scale uncertainties
-on-the-fly. For inclusive cross sections the code provides results in
-a matter of seconds\footnote{The majority of this time is taken up by
-the structure function initialisation inside \hoppet{} rather than the
-integration of the cross section.} even at \NNNLO{} with uncertainties
-typically below the permille level. For exclusive quantities the code
-can be run on a laptop at NLO and depending on the analysis, and the
-laptop, even at NNLO.
+interface. It prints cross sections and all important run-parameters
+to the screen and disk, allowing a user to acquire cross sections with
+very little effort. It comes with an interface to {\tt
+  fastjet}~\cite{Cacciari:2011ma} and {\tt
+  LHAPDF}~\cite{Buckley:2014ana} and uses the histogramming package
+from the {\tt POWHEG-BOX}~\cite{Alioli:2010xd} for easy analysis. The
+code can also compute renormalisation and factorisation scale
+uncertainties on-the-fly. For inclusive cross sections the code
+provides results in a matter of seconds\footnote{The majority of this
+time is taken up by the structure function initialisation inside
+\hoppet{} rather than the integration of the cross section.} even at
+\NNNLO{} with uncertainties typically below the permille level. For
+exclusive quantities the code can be run on a laptop at NLO and
+depending on the analysis, and the laptop, even at NNLO.
 
 It should be pointed out that the code does not provide any
 theoretical advances on its own. As described above, the structure
@@ -250,7 +252,7 @@ k_i &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,-1 \right), \quad 
 k_f &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,+1 \right), \quad  p_f = \frac{Q}{2}\left(1,0,0,-1 \right) 
 \end{align}
 where four-momenta are given as $(E,p_x,p_y,p_z)$. The resulting
-vector $q$ is hence given by $Q(0,0,0,-1)$. In the lab frame we align
+vector $q$ is hence given by $Q(0,0,0,-1)$. In the laboratory frame we align
 the parton with the positive $z$-axis and hence the lepton with the
 negative
 \begin{align}
@@ -333,7 +335,7 @@ and can therefore only provide predictions for quantities, like the
 inclusive cross sections, which depend on the Born kinematics of
 eq.~\eqref{eq:dis-variables} only. If we instead evaluate the
 structure functions on an observable sensitive to emissions, e.g. the
-transverse momentum of the hardest jet in the lab frame, we see that
+transverse momentum of the hardest jet in the laboratory frame, we see that
 this will not give the right answer, as the real emissions are not
 included with their correct kinematics. 
 
@@ -379,7 +381,9 @@ times.
 \label{sec:running}
 In this section we give instructions on how to compile and run
 \disorder{}, giving a few examples of the use of the most common
-command line arguments.
+command line arguments. The code itself can be obtained from
+
+\begin{center}\url{https://github.com/alexanderkarlberg/disorder}\end{center}
 
 \subsection{Compiling and prerequisites}
 To compile \disorder{} both \hoppet{} and
@@ -442,7 +446,7 @@ is the maximum number of scales which is supported (currently 7). {\tt
 
 Through the module {\tt mod\_analysis} the analysis has access to two
 array of momenta {\tt pbreit(0:3,1:n)} and {\tt plab{0:3,1:n}} which
-the Breit and lab frame momenta are stored respectively. The output of
+the Breit and laboratory frame momenta are stored respectively. The output of
 the analysis will be saved to the disk as outlined below.
 
 In the {\tt aux} folder one may also find a
@@ -456,23 +460,23 @@ with the result. Running the script without any arguments will result
 in a list of possible uses of the script. The {\tt mergedata} script
 is taken from the {\tt POWHEG-BOX} as well.
 
-
 \subsection{Inclusive mode}
 \label{sec:Inclusive}
 The syntax for running the program is
 \begin{lstlisting}
-  ./disorder [options]
+  ./disorder -pdf LHAPDF_name [options]
 \end{lstlisting}
-Running the program without any options will compute the total
-inclusive cross section using the default parameters of the
-program, which are printed to screen. The user can get a list of most
-parameters which can be specified on the command line by running
+Running the program without any other options than {\tt -pdf} will
+compute the total inclusive cross section above the minimum $Q$ value
+accessible in the PDF, and using default parameters everywhere. The
+user can get a list of most parameters which can be specified on the
+command line by running
 \begin{lstlisting}
   ./disorder -help
 \end{lstlisting}
-For a complete list of all parameters, and their use, the user should
-look through the file {\tt src/mod\_parameters.f90}. Here we describe
-the most common flags.
+Here we describe the most common flags, but for a complete list of all
+parameters, and their use, the user should look through the file {\tt
+  src/mod\_parameters.f90}.
 
 The program allows the user to specify limits on $x$, $y$, and $Q$
 through {\tt -xmin}, {\tt -xmax}, {\tt -ymin}, {\tt -ymax}, {\tt
@@ -480,7 +484,7 @@ through {\tt -xmin}, {\tt -xmax}, {\tt -ymin}, {\tt -ymax}, {\tt
 {\tt -y}, {\tt -Q}. For instance to compute the cross section at $Q=20
 \GEV$ and $x>0.01$ one would run
 \begin{lstlisting}
-  ./disorder -Q 20 -xmin 0.01
+  ./disorder -Q 20 -xmin 0.01 -pdf LHAPDF_name
 \end{lstlisting}
 The program will perform a Monte Carlo integration in the ranges
 specified, using the integrator VEGAS~\cite{Lepage:1977sw}. If the
@@ -491,28 +495,29 @@ One can further specify the energy of the incoming lepton through {\tt
   -Elep}, the incoming hadron through {\tt -Ehad}. By default the
 lepton is taken to be an electron but specifying {\tt -positron} on
 the command line will change that. By default the code computes the
-photon-mediated NC cross section. To include the $Z$ one can specify
+photon-mediated NC cross section only. To include the $Z$ one can specify
 {\tt -includeZ} and to include CC processes one can specify {\tt
   -CC}. The inclusion of NC processes can also be controlled through
 the {\tt -NC} flag. In fact, all logical flags can be prefixed by
-``no'' to turn them off. Hence the below command line would run the
+``{\tt{no}}'' to turn them off. Hence the below command line would run the
 program with CC processes only using a positron
 \begin{lstlisting}
-  ./disorder -Q 20 -xmin 0.01 -noNC -CC -positron
+  ./disorder -Q 20 -xmin 0.01 -noNC -CC -positron -pdf LHAPDF_name
 \end{lstlisting}
 
 The order of the calculation is by default NNLO but can be specified
-with one of the flags {\tt -lo/-nlo/-nnlo/-n3lo}. The PDF, using the
-LHAPDF name, can be specified with the {\tt -pdf} flag. If the user
-wants to compute PDF uncertainties, the flag {\tt pdfuncert} should be
+with one of the flags {\tt -lo/-nlo/-nnlo/-n3lo}. If the user wants to
+compute PDF uncertainties, the flag {\tt pdfuncert} should be
 given. This flag will make \disorder{} loop over all the members in
-the PDF, and combine their errors according to the internal LHAPDF
-routine {\tt getpdfuncertainty}~\cite{Watt:2011kp}. This also means
-that the program is slowed down proportionally to the number of PDF
-members. If the PDF also includes $\as$ variations these are included
-in the PDF uncertainty by default. If the user wants the PDF and $\as$
-uncertainties independently, then the flag {\tt -alphasuncert} should
-be specified. Some care should be taken here, as in practice the code
+the PDF, and combine their errors according to the routine {\tt
+  getpdfuncertainty}~\cite{Watt:2011kp}, native to LHAPDF. This also
+means that the program is slowed down proportionally to the number of
+PDF members (although the VEGAS grid only gets computed once and then
+stored so that the runs are fully correlated). If the PDF also
+includes $\as$ variations these are included in the PDF uncertainty by
+default. If the user wants the PDF and $\as$ uncertainties
+independently, then the flag {\tt -alphasuncert} should be
+specified. Some care should be taken here, as in practice the code
 assumes that the $\as$ variations are contained in the last two PDF
 members, and simply separates them from the rest.
 
@@ -541,22 +546,32 @@ number of files depending on the exact input. There is always a file
 called {\tt xsct\_nnlo\_seed0001.dat}, where the {\tt nnlo} and {\tt
   seed0001} parts will vary depending on the order and seed, which
 contains a summary of the run, including the total and reduced cross
-sections. It is possible to specify a prefix to the file name through
-the {\tt -prefix} option.
+sections. 
 
 The output of the analysis is printed to a number of {\tt .dat} files,
 the number depending on the input, prefixed by {\tt
   disorder\_nnlo\_seed001\_pdfmem000} where again the exact prefix
 will depend on the input. The output name also contains information on
 the seed, the PDF member and the renormalisation and factorisation
-scales if {\tt -scaleuncert} is on. The output prefix can be
-overwritten by specifying a string name with the flag {\tt -out}. Care
-should be taken as this will not work if running with {\tt -pdfuncert}
-on.
+scales if {\tt -scaleuncert} is on.
+
+The user can specify a prefix to be added to all the files through the
+{\tt -prefix} flag.
 
 Since it is often not necessary to run an analysis in the inclusive
 mode, the user can simply turn this off with the {\tt -no-analysis}
 flag.
+
+Finally the user can control the number of VEGAS integration points
+through the two flags {\tt -ncall1} and {\tt -ncall2}. The first flags
+controls the number of points to use to set up the grids. Since the
+phase space is not complicated it is rarely necessary to increase the
+default of 10000. The second flag controls the number of points that
+are used for the actual integration. If one is not running an
+analysis, the default number of 100000 should give results that have
+better than permille level accuracy. If the user wishes to for
+instance bin the cross section in fine bins of $x$ and $Q^2$, this
+number will most likely have to increase.
 
 \subsection{P2B mode}
 \label{sec:P2Bmode}
@@ -571,11 +586,9 @@ mode, with a few limitations
 \end{itemize}
 Importantly, it \emph{is} possible to run with the {\tt -scaleuncert}
 flag which leads to a significant reduction in run-time compared to
-doing 7 separate runs. When running in P2B mode it is furthermore of
+doing seven separate runs. When running in P2B mode it is furthermore of
 use to be able to control the number of calls to \disent{}. This is
-done through the flag {\tt -ncall2} which takes an integer. It can in
-principle also be specified in the inclusive mode, but most users
-should not need too.
+done through the flag {\tt -ncall2}, introduced already above. 
 
 We provide a small script to run on multiple cores on a single machine
 in {\tt aux/runpar.sh}. 
@@ -584,29 +597,25 @@ in {\tt aux/runpar.sh}.
 \label{sec:results}
 In this section we show a few results obtained by running the code in
 both the inclusive and the P2B modes. The purpose is not to provide an
-exhaustive phenomenological analysis, but rather to provide a few
-select results that can be used to either validate the code when
-running it, or to validate other programs in the future. The results
-of this section also serve to demonstrate that the code is indeed
-capable of producing what it claims to. All analyses used in this
-section can be found in the {\tt analysis} directory, and the raw
-results can be found in the {\tt paper\_runs} folder.
+exhaustive phenomenological analysis, but rather show the capabilities
+of \disorder{} and to provide a few select results that can be used to
+either validate the code when running it, or to validate other
+programs in the future. All analyses used in this section can be found
+in the {\tt analysis} directory, and the raw results can be found in
+the {\tt paper\_runs} folder.
 
-Unless otherwise stated we collide electrons and protons using the
-MSHT20nnlo\_as118~\cite{Bailey:2020ooq} PDF set and the following
-input parameters in all calculations
+We use {\tt fastjet v3.4.1} for jet-clustering, and unless otherwise
+stated we collide electrons and protons using the
+MSHT20nnlo\_as118~\cite{Bailey:2020ooq} PDF set as implemented in {\tt
+  LHAPDF v6.5.4} and the following input parameters in all
+calculations
 \begin{align}
   \label{eq:setup}
-  M_W = 80.398\GEV, \qquad M_Z = 91.1876\GEV, &\qquad E_h = 920\GEV, \qquad E_l = 27.6\GEV  \\ \notag
+  M_W = 80.398\GEV, \qquad M_Z = 91.1876\GEV, &\qquad E_h = 920\GEV, \qquad E_l = 27.6\GEV,  \\ \notag
   \alpha = 1/137, \qquad \as(M_Z) &= 0.118, \qquad n_f = 5\,.
 \end{align}
 
 \subsection{Inclusive results}
-The perhaps most fundamental question one can ask in DIS is ``what is
-the total cross section? for a given value of $x$ and $Q$''. The
-answer to that question is given in table~\ref{tab:cross-sections} for
-both the NC and CC channels at $Q=10\GEV$ and $x=0.01$, at all
-available perturbative orders.
 \begin{table}[t] 
   \centering
   \phantom{x}\medskip% add space to make table look nicer...
@@ -626,24 +635,32 @@ available perturbative orders.
   \caption{The inclusive and reduced cross sections at various orders
     in both NC and CC DIS. The setup is given in
     eq.~\eqref{eq:setup}. The a\NNNLO{} row is obtained using the
-    approximate \NNNLO{} PDF set MSHT20nnlo\_as118. Note that there is
-    no Monte Carlo error on these numbers.}
+    approximate \NNNLO{} PDF set MSHT20an3lo\_as118. Note that there
+    is no Monte Carlo error on these numbers.}
 \label{tab:cross-sections}
 \end{table}
-The row a\NNNLO{} is obtained with the
-MSHT20nnlo\_as118~\cite{McGowan:2022nag} PDF set which includes
-approximate \NNNLO{} theoretical input. It is interesting to note
-that the inclusion of the approximate terms has an impact that is
+The perhaps most fundamental question one can ask in DIS is ``what is
+the total cross section for a given value of $x$ and $Q$?''. The
+answer to that question is given in table~\ref{tab:cross-sections} for
+both the NC and CC channels at $Q=10\GEV$ and $x=0.01$, at all
+available perturbative orders.  The row a\NNNLO{} is obtained with the
+MSHT20an3lo\_as118~\cite{McGowan:2022nag} PDF set which includes
+approximate \NNNLO{} theoretical input. It is interesting to note that
+the inclusion of the approximate terms has an impact that is
 parametrically of the same order as the NNLO corrections. The PDF
 uncertainties stay more or less constant across all orders, which is
 not unexpected given that we use the same PDF at each order. To give a
 sense of the speed of the code, the combined results presented in the
-table took a total of 3.5 minutes to obtain on a laptop equipped with an
-Intel i9-10885H CPU.
+table took a total of 3.5 minutes to obtain on a laptop equipped with
+an Intel i9-10885H CPU.
 \begin{figure}[tb!]
   \centering\includegraphics[width=0.49\textwidth,page=1]{../paper_runs/inclusive_runs/plot/sigma-ratios.pdf}
   \centering\includegraphics[width=0.49\textwidth,page=3]{../paper_runs/inclusive_runs/plot/sigma-ratios.pdf}
-  \caption{Something}
+  \caption{The NC cross section for fixed $Q=10\GEV$ differential in
+    $\log x$ (left) and for fixed $x=0.01$ and differential in $\log
+    Q$ (right). We show NNLO (purple), \NNNLO{} (green), and a\NNNLO{}
+    (red). The uncertainty band is obtained as the linear combination
+    of scale and PDF uncertainties.}
   \label{fig:sigma}
 \end{figure}
 
@@ -659,8 +676,21 @@ interesting to see, if the inclusion of the exact \NNNLO{} splitting
 functions, when they become available, will ameliorate this tension. 
 
 
-\subsection{Exclusive lab frame results}
-
+\subsection{Exclusive laboratory frame results}
+To demonstrate the results of the code in P2B mode, we perform a jet
+analysis in laboratory frame, based on Ref.~\cite{Borsa:2022cap}, which
+probes the kinematic range accessible by the upcoming
+Electron-Ion-Collider. For this analysis we set $E_l=18\GeV$,
+$E_h=275\GeV$, and restrict the DIS kinematics by
+\begin{align}
+  25\GEV^2 < Q^2 < 1000 \GEV^2, \quad 0.04 < y < 0.95\,.
+\end{align}
+We reconstruct jets in the laboratory frame using the anti-$k_T$
+algorithm~\cite{Cacciari:2008gp} with $R=0.8$. Jets are those that
+satisfy the following transverse momentum and pseudo-rapidity requirements
+\begin{align}
+  p_T > 5 \GeV, \quad |\eta| < 3\,.
+\end{align}
 \section{Conclusion}
 \label{sec:conclusion}
 

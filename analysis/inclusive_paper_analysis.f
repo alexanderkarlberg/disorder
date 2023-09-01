@@ -3,7 +3,7 @@
       include 'pwhg_bookhist-multi.h'
       double precision bins
       double precision xmin, logxmin, xbinsize
-      double precision Qmax, logQmax, Qbinsize
+      double precision Qmax, logQmax, Qbinsize, Qmin, logQmin
 
       bins = 25d0
       xmin = 9.8456206679269054D-4 ! For Q = 10 and setup in paper
@@ -14,10 +14,12 @@
       call bookupeqbins('dsigma/dx',1d0/bins,0d0,1d0)
 
       Qmax = sqrt(1015.68D0)    ! For x = 0.01 and setup in paper
-      logQmax = log(Qmax) 
-      Qbinsize = logQmax/bins ! Qmin = 1d0
+      logQmax = log(Qmax)
+      Qmin = exp(0.5d0)
+      logQmin = 0.5d0
+      Qbinsize = (logQmax-logQmin)/bins 
 
-      call bookupeqbins('dsigma/dlogQ^2',Qbinsize,0d0,logQmax)
+      call bookupeqbins('dsigma/dlogQ^2',Qbinsize,logQmin,logQmax)
       call bookupeqbins('dsigma/dQ^2',Qmax/bins,0d0,Qmax)
 
       end subroutine

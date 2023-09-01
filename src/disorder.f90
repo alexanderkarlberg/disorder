@@ -33,8 +33,6 @@ program disorder
   call set_parameters()
   ! Initialise histograms
   call init_histo()
-  ! Initialise PDF
-  call initPDFSetByName(pdfname)
 
   call welcome_message
 

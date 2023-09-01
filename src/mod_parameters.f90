@@ -13,7 +13,7 @@ module mod_parameters
 
   public print_header, welcome_message, alphasLocal
   
-    real(dp), parameter, public :: gev2pb = 389379660.0_dp
+  real(dp), parameter, public :: gev2pb = 389379660.0_dp
   real(dp), parameter, public :: gev2nb = 389379.66_dp
   real(dp), parameter, public :: eps    = 1.0e-14_dp
   integer, parameter, public :: maxscales = 7
@@ -37,7 +37,7 @@ module mod_parameters
        & Eh, El, sigma_all_scales(maxscales),&
        & NC_reduced_dsigma(maxscales), CC_reduced_dsigma(maxscales),&
        & NC_reduced_sigma(maxscales), CC_reduced_sigma(maxscales)
-  real(dp), public, save :: toy_Q0, Q0pdf, xmuR_PDF ! For HOPPET PDF evolution
+  real(dp), public, save :: toy_Q0, Q0pdf, xmuR_PDF, Q2minPDF ! For HOPPET PDF evolution
   character (len=4), private :: order
   real(dp), private :: Q, x, y
   real(dp), public :: pbornlab(0:3,2+2), preallab(0:3,2+3), prreallab(0:3,2+4)
@@ -148,7 +148,16 @@ contains
     scale_choice = 1 !int_val_opt ('-scale-choice',1) ! 1: Use Q. 0: Use MZ. For now fixed.
     xmuf         = dble_val_opt("-xmuf",1.0_dp)
     xmur         = dble_val_opt("-xmur",1.0_dp)
-    pdfname      = string_val_opt("-pdf", "NNPDF30_nnlo_as_0118_hera")
+    pdfname      = string_val_opt("-pdf", "")
+    if(pdfname.eq.'') then
+       call help_message
+       print*, '-pdf must be specified!'
+       call exit()
+    endif
+    ! Initialise PDF
+    call initPDFSetByName(pdfname)
+    call getQ2min(0,Q2minPDF)
+
     toy_Q0       = dble_val_opt("-toyQ0",-1d0)
     Q0pdf        = dble_val_opt("-Q0pdf",-1d0)
     xmuR_PDF     = dble_val_opt("-xmuRPDF",1d0)
@@ -198,16 +207,16 @@ contains
        enddo
        idum = -idum
     endif
-    ingridfile    =trim(prefix)//'grids-'//trim(order)//'-'//seedstr//'.dat'
+    ingridfile    =trim(prefix)//'grids-'//trim(adjustl(order))//'-'//seedstr//'.dat'
     outgridfile   =ingridfile
-    outgridtopfile=trim(prefix)//'grids-'//trim(order)//'-'//seedstr//'.top'
+    outgridtopfile=trim(prefix)//'grids-'//trim(adjustl(order))//'-'//seedstr//'.top'
     ilast=0
 
     ! Setup the phase space
     !     Read in bounds on x,y,Q2
     Q = dble_val_opt("-Q",-1.0_dp)
     if(Q.lt.0.0_dp) then
-      Q2min = (dble_val_opt("-Qmin",10.0_dp))**2
+      Q2min = (dble_val_opt("-Qmin",sqrt(Q2minPDF)))**2
       Q2max = (dble_val_opt("-Qmax",1d100))**2
     else 
       Q2min = Q**2
@@ -261,12 +270,12 @@ contains
        Q2min = s*xmin*ymin
        Q2max = Q2min
        novegas = .true.
-    else if(Q2min.eq.Q2max) then
-       if(xmin*ymax*s .lt. Q2min) xmin = Q2min/(ymax*s)
-       if(xmax*ymin*s .gt. Q2max) xmax = Q2max/(ymin*s)
     else if(xmin.eq.xmax) then
        if(xmin*ymin*s .gt. Q2min) Q2min = xmin*ymin*s
        if(xmax*ymax*s .lt. Q2max) Q2max = xmax*ymax*s
+    else
+       if(xmin*ymax*s .lt. Q2min) xmin = Q2min/(ymax*s)
+       if(xmax*ymin*s .gt. Q2max) xmax = Q2max/(ymin*s)
     endif
     !         if(s*xmin*ymin .gt. Q2min) Q2min = s*xmin*ymin
     !         if(s*xmax*ymax .gt. Q2max) Q2max = s*xmax*ymax
@@ -376,28 +385,28 @@ contains
     call welcome_message
     write(0,'(a)') ' Some common flags to use are (default values in [] and () '
     write(0,'(a)') ' means that the flag takes a numerical input. Values are in'
-    write(0,'(a)') ' GeV typically) :                                          '
+    write(0,'(a)') ' GeV typically). -pdf is mandatory :                                          '
     write(0,'(a)') '                                                           '
+    write(0,'(a)') ' -pdf : LHAPDF name (e.g. NNPDF30_nnlo_as_0118_hera)       '
     write(0,'(a)') ' -lo/-nlo/-nnlo/-n3lo [-nnlo]: Run at LO/NLO/NNLO/N3LO     '
-    write(0,'(a)') ' -Q (val) : Specify fixed Q                                '
-    write(0,'(a)') ' -Qmin (val) [10.0] : Specify minimum Q                    '
-    write(0,'(a)') ' -Qmax (val) : Specify maximum Q                           '
-    write(0,'(a)') ' -x (val) : Specify fixed x                                '
-    write(0,'(a)') ' -xmin (val) : Specify minimum x                           '
-    write(0,'(a)') ' -xmax (val) : Specify maximum x                           '
-    write(0,'(a)') ' -y (val) : Specify fixed y                                '
-    write(0,'(a)') ' -ymin (val) : Specify minimum y                           '
-    write(0,'(a)') ' -ymax (val) : Specify maximum y                           '
-    write(0,'(a)') ' -Elep (val) [27.5] : Energy of lepton in lab frame        '
-    write(0,'(a)') ' -Ehad (val) [820.0] : Energy of hadron in lab frame       '
+    write(0,'(a)') ' -Q (dble) : Specify fixed Q                               '
+    write(0,'(a)') ' -Qmin (dble) [10.0] : Specify minimum Q                   '
+    write(0,'(a)') ' -Qmax (dble) : Specify maximum Q                          '
+    write(0,'(a)') ' -x (dble) : Specify fixed x                               '
+    write(0,'(a)') ' -xmin (dble) : Specify minimum x                          '
+    write(0,'(a)') ' -xmax (dble) : Specify maximum x                          '
+    write(0,'(a)') ' -y (dble) : Specify fixed y                               '
+    write(0,'(a)') ' -ymin (dble) : Specify minimum y                          '
+    write(0,'(a)') ' -ymax (dble) : Specify maximum y                          '
+    write(0,'(a)') ' -Elep (dble) [27.5] : Energy of lepton in lab frame       '
+    write(0,'(a)') ' -Ehad (dble) [820.0] : Energy of hadron in lab frame      '
     write(0,'(a)') ' -scaleuncert [false]: Do 7-point scale variation around Q '
-    write(0,'(a)') ' -pdf [NNPDF30_nnlo_as_0118_hera] : LHAPDF name            '
     write(0,'(a)') ' -pdfuncert [false] : Compute pdf uncertainties            '
     write(0,'(a)') ' -CC [false] : Include charged current processes           '
     write(0,'(a)') ' -NC [true] : Include neutral current processes            '
     write(0,'(a)') ' -includeZ [false] : Include Z and interferences           '
     write(0,'(a)') ' -positron [false] : Incoming positron                     '
-    write(0,'(a)') ' -out : Overwrite the default output prefix                '
+    write(0,'(a)') ' -prefix (string) : Add a prefix to all output             '
     write(0,'(a)') ' -ncall2 [100000] : Number of calls to disent              '
     write(0,'(a)') ' -iseed [1] : The seed                                     '
     write(0,'(a)') ' -p2b [false] : Turn on disent and projection-to-Born      '
@@ -411,7 +420,7 @@ contains
     write(0,'(a)') '                                                           '
     write(0,'(a)') ' Example command line:                                     '
     write(0,'(a)') '                                                           '
-    write(0,'(a)') ' ./disorder -nnlo -Q 20.0 -noNC -CC -scaleuncert           '
+    write(0,'(a)') ' ./disorder -pdf MSHT20nnlo_as118 -Q 20.0 -noNC  -CC       '
   end subroutine help_message
 
 end module mod_parameters
