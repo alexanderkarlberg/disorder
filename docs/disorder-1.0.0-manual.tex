@@ -595,27 +595,6 @@ in {\tt aux/runpar.sh}.
 
 \section{Benchmarks and results}
 \label{sec:results}
-In this section we show a few results obtained by running the code in
-both the inclusive and the P2B modes. The purpose is not to provide an
-exhaustive phenomenological analysis, but rather show the capabilities
-of \disorder{} and to provide a few select results that can be used to
-either validate the code when running it, or to validate other
-programs in the future. All analyses used in this section can be found
-in the {\tt analysis} directory, and the raw results can be found in
-the {\tt paper\_runs} folder.
-
-We use {\tt fastjet v3.4.1} for jet-clustering, and unless otherwise
-stated we collide electrons and protons using the
-MSHT20nnlo\_as118~\cite{Bailey:2020ooq} PDF set as implemented in {\tt
-  LHAPDF v6.5.4} and the following input parameters in all
-calculations
-\begin{align}
-  \label{eq:setup}
-  M_W = 80.398\GEV, \qquad M_Z = 91.1876\GEV, &\qquad E_h = 920\GEV, \qquad E_l = 27.6\GEV,  \\ \notag
-  \alpha = 1/137, \qquad \as(M_Z) &= 0.118, \qquad n_f = 5\,.
-\end{align}
-
-\subsection{Inclusive results}
 \begin{table}[t] 
   \centering
   \phantom{x}\medskip% add space to make table look nicer...
@@ -639,6 +618,27 @@ calculations
     is no Monte Carlo error on these numbers.}
 \label{tab:cross-sections}
 \end{table}
+In this section we show a few results obtained by running the code in
+both the inclusive and the P2B modes. The purpose is not to provide an
+exhaustive phenomenological analysis, but rather show the capabilities
+of \disorder{} and to provide a few select results that can be used to
+either validate the code when running it, or to validate other
+programs in the future. All analyses used in this section can be found
+in the {\tt analysis} directory, and the raw results can be found in
+the {\tt paper\_runs} folder.
+
+We use {\tt fastjet~v3.4.1} for jet-clustering, and unless otherwise
+stated we collide electrons and protons using the
+MSHT20nnlo\_as118~\cite{Bailey:2020ooq} PDF set using {\tt
+  LHAPDF~v6.5.4} and the following input parameters in all
+calculations
+\begin{align}
+  \label{eq:setup}
+  M_W = 80.398\GEV, \qquad M_Z = 91.1876\GEV, &\qquad E_h = 920\GEV, \qquad E_l = 27.6\GEV,  \\ \notag
+  \alpha = 1/137, \qquad \as(M_Z) &= 0.118, \qquad n_f = 5\,.
+\end{align}
+
+\subsection{Inclusive results}
 The perhaps most fundamental question one can ask in DIS is ``what is
 the total cross section for a given value of $x$ and $Q$?''. The
 answer to that question is given in table~\ref{tab:cross-sections} for
@@ -680,8 +680,8 @@ functions, when they become available, will ameliorate this tension.
 To demonstrate the results of the code in P2B mode, we perform a jet
 analysis in laboratory frame, based on Ref.~\cite{Borsa:2022cap}, which
 probes the kinematic range accessible by the upcoming
-Electron-Ion-Collider. For this analysis we set $E_l=18\GeV$,
-$E_h=275\GeV$, and restrict the DIS kinematics by
+Electron-Ion-Collider. For this analysis we set $E_l=18\GEV$,
+$E_h=275\GEV$, and restrict the DIS kinematics by
 \begin{align}
   25\GEV^2 < Q^2 < 1000 \GEV^2, \quad 0.04 < y < 0.95\,.
 \end{align}
@@ -689,7 +689,7 @@ We reconstruct jets in the laboratory frame using the anti-$k_T$
 algorithm~\cite{Cacciari:2008gp} with $R=0.8$. Jets are those that
 satisfy the following transverse momentum and pseudo-rapidity requirements
 \begin{align}
-  p_T > 5 \GeV, \quad |\eta| < 3\,.
+  p_T > 5 \GEV, \quad |\eta| < 3\,.
 \end{align}
 \section{Conclusion}
 \label{sec:conclusion}
