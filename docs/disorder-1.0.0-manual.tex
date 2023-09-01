@@ -235,9 +235,9 @@ lorentz invariant DIS variables $x$, $Q^2$, and $y$, given by
   \qquad  y = \frac{P \cdot q}{P \cdot k_i} = \frac{p_i \cdot q}{p_i \cdot k_i} ,
   \label{eq:dis-variables}
 \end{align}
-where $P$ is the proton four-momentum. As can be seen these kinematics
-are fully specified by the proton and lepton momenta. This is also
-true beyond LO. LO. DIS is most often analysed in the Breit-frame
+where $P$ is the hadron four-momentum. As can be seen these kinematics
+are fully specified by the hadron and lepton momenta. This is also
+true beyond LO. DIS is most often analysed in the Breit-frame
 which is specified\footnote{For the explicit transformation between
 lab- and Breit-frames we follow Appendix 7.11 in
 Ref.~\cite{Devenish:2004pb}.}  by requiring that $2 x \vec{P} +
@@ -360,6 +360,20 @@ exclusive predictions for this channel. It should in principle be
 possible to extend the code to include Z-mediation (including
 interferences) and CC, but we leave this for future work.
 
+In principle P@B can be applied to the \disent{} code without any
+major modifications besides the bug fix mentioned in the
+introduction. The version of \disent{} that we include in \disorder{}
+is based on the version which can be found in {\tt
+  dispatch}~\cite{Dasgupta:2002dc}. In addition to the modifications
+present there, we have also introduced $\alpha$ as an input parameter,
+whereas before it was fixed to $1/137$. A number of parameters can
+also now be set on the command line. Besides coding the actual
+interface to \disent{}, the biggest modification introduced in
+\disorder{} is that the {\tt KPFUNS} subroutine now returns an array
+of weights corresponding to varying the factorisation scale by a
+factor two up and down. This allows for much faster evaluation of
+scale uncertainties compared to running the program three separate
+times.
 
 \section{Running \disorder{}}
 \label{sec:running}
@@ -384,12 +398,18 @@ modified by hand. The program should now compile with
 \begin{lstlisting}
   make [-j]
 \end{lstlisting}
-which will result in the binary {\tt disorder} being created.
+which will result in the binary {\tt disorder} being created. Two
+auxiliary Fortran programs used to manipulate the histograms can be
+compiled by
+\begin{lstlisting}
+  make aux [-j]
+\end{lstlisting}
+and will be created in the {\tt aux} folder. 
 \subsubsection{The analysis framework}
-The code uses the {\tt POWHEG-BOX} analysis framework, with a few
+The code uses the {\tt POWHEG-BOX} analysis framework, with a some
 minor modifications. A few example analyses are included in the {\tt
-  analysis directory}. Any new analysis should be put here and name of
-the analysis should to be specified in the {\tt Makefile}. For
+  analysis directory}. Any new analysis should be put here and the
+name of the analysis should be specified in the {\tt Makefile}. For
 example, if the file {\tt my\_analysis.f} is to be compiled one should
 add
 \begin{lstlisting}
@@ -422,8 +442,20 @@ is the maximum number of scales which is supported (currently 7). {\tt
 
 Through the module {\tt mod\_analysis} the analysis has access to two
 array of momenta {\tt pbreit(0:3,1:n)} and {\tt plab{0:3,1:n}} which
-are the Breit and lab frame momenta respectively. The output of the
-analysis will be saved to the disk as outlined below.
+the Breit and lab frame momenta are stored respectively. The output of
+the analysis will be saved to the disk as outlined below.
+
+In the {\tt aux} folder one may also find a
+script called {\tt mergedata} that can perform various manipulations
+of the datafiles. In particular
+\begin{lstlisting}
+  ./mergedata 1 {list of statistically equivalent files}
+\end{lstlisting}
+will take the average of all files and produce the file {\tt fort.12}
+with the result. Running the script without any arguments will result
+in a list of possible uses of the script. The {\tt mergedata} script
+is taken from the {\tt POWHEG-BOX} as well.
+
 
 \subsection{Inclusive mode}
 \label{sec:Inclusive}
@@ -546,16 +578,7 @@ principle also be specified in the inclusive mode, but most users
 should not need too.
 
 We provide a small script to run on multiple cores on a single machine
-in {\tt aux/runpar.sh}. In the {\tt aux} folder one may also find a
-script called {\tt mergedata} that can perform various manipulations
-of the datafiles. In particular
-\begin{lstlisting}
-  ./mergedata 1 {list of statistically equivalent files}
-\end{lstlisting}
-will take the average of all files and produce the file {\tt fort.12}
-with the result. Running the script without any arguments will result
-in a list of possible uses of the script. The {\tt mergedata} script
-is taken from the {\tt POWHEG-BOX}. 
+in {\tt aux/runpar.sh}. 
 
 \section{Benchmarks and results}
 \label{sec:results}

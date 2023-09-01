@@ -1,7 +1,8 @@
 ######################################################################
 # Makefile for disorder
 #
-#  - "make" creates the vbfh executable
+#  - "make [-j]" creates the disorder executable
+#  - "make aux [-j]" compiles a number of useful auxiliary scripts
 #  - "make clean" removes all files created by the "make" command
 ######################################################################
 
@@ -45,7 +46,8 @@ INCLUDE= -I$(ANA) -I$(SRC) $(wildcard *.h)
 FFLAGS+= $(INCLUDE) -J$(OBJ)
 LDFLAGS= $(shell $(HPEXEC) --libs) $(shell $(LHEXEC) --libs) 
 
-all: disorder mergedata getpdfuncert 
+all: disorder
+aux: mergedata getpdfuncert 
 
 # main program
 $(MAIN): %: %.o $(addsuffix .o,$(MODULES))  $(addsuffix .o,$(ANALYSIS))  Makefile
@@ -86,5 +88,5 @@ $(addsuffix .o,$(ANALYSIS)): mod_parameters.o
 
 # make clean
 clean:
-	rm -f $(OBJ)/*.o $(OBJ)/*.mod *~ *.log fort* $(MAIN)
+	rm -f $(OBJ)/*.o $(OBJ)/*.mod *~ *.log fort* $(MAIN) aux/mergedata aux/getpdfuncert
 
