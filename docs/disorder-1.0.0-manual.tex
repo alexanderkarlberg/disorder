@@ -661,7 +661,7 @@ an Intel i9-10885H CPU.
     Q$ (right). We show NNLO (purple), \NNNLO{} (green), and a\NNNLO{}
     (red). The uncertainty band is obtained as the linear combination
     of scale and PDF uncertainties.}
-  \label{fig:labframe}
+  \label{fig:sigma}
 \end{figure}
 
 In figure~\ref{fig:sigma} we show the NC cross section for fixed
@@ -685,7 +685,7 @@ functions, when they become available, will ameliorate this tension.
     Q$ (right). We show NNLO (purple), \NNNLO{} (green), and a\NNNLO{}
     (red). The uncertainty band is obtained as the linear combination
     of scale and PDF uncertainties.}
-  \label{fig:sigma}
+  \label{fig:labframe}
 \end{figure}
 To demonstrate the results of the code in P2B mode, we perform a jet
 analysis in laboratory frame, based on Ref.~\cite{Borsa:2022cap}, which
@@ -699,17 +699,50 @@ We reconstruct jets in the laboratory frame using the anti-$k_T$
 algorithm~\cite{Cacciari:2008gp} with $R=0.8$. Jets are those that
 satisfy the following transverse momentum and pseudo-rapidity requirements
 \begin{align}
-  p_T > 5 \GEV, \quad |\eta| < 3\,.
+  p_{t,j} > 5 \GEV, \quad |\eta_j| < 3\,.
 \end{align}
-
+In Fig.~\ref{fig:labframe} we show the inclusive jet transverse
+momentum and rapidity at LO, NLO, and NNLO, in photon-induced NC
+DIS. For the transverse momentum the higher order corrections are
+moderate except for small values and close to the LO threshold of
+$p_{t,j}=Q$. The rapidity distribution on the other hand receives
+larger corrections. This is in part due to hard jets with $p_{t,j}>Q$
+that can only arise at NLO and beyond. Here the scale variation bands
+do not cover the actual corretions, and it is obvious that one needs
+to go beyond NLO for reliable predictions (of course one needs the
+full \NNNLO{} to assess the reliability of the NNLO result). 
 
 \section{Conclusion}
 \label{sec:conclusion}
+In this paper we have presented version 1.0.0 of a Fortran code,
+\disorder{}, capable of computing DIS cross sections fully
+differentially at NNLO and inclusively at \NNNLO{}. The code combines
+the structure functions from \hoppet{} and the exclusive DIS + 1 jet
+calculation of \disent{}, using the P2B method. In the inclusive mode
+the program includes all NC and CC contributions and can carry out
+both scale and PDF variations on the fly. Due to the underlying
+tabulation of the structure functions in \hoppet{}, the code is
+extremely fast, and a user can obtain cross section results in a
+matter of seconds.
+
+In the fully differential mode, only photon-mediated DIS can be
+computed, and no PDF variations are currently implemented. It should
+in principle be possible to extend \disent{} to full NC and CC, and
+this is something that is planned for a future release of the
+code. Similarly the PDF variations could also be implemented, however
+this would require some serious restructuring of the code, for it to
+be efficient. At LO and NLO a user can obtain differential results on
+a laptop running for a just a few minutes, and even reasonable NNLO
+results can be obtained on a single machine running for a few hours.
+
+The code comes with an interface to {\tt fastjet} and {\tt LHAPDF} and
+is run through a user-friendly command line interface. 
 
 \section*{Acknowledgements}
 The author is grateful for discussions with Gavin Salam regarding {\tt
-  disent}. Also thank Andrea and mention that work initiated in the
-powheg project.
+  disent}, and for encouragement to publish \disorder{} from Andrea
+Banfi. The idea for the code originated while the author was working
+on Ref.~[].
 
 
 %\begin{appendix}
