@@ -15,8 +15,8 @@
       Qmax = sqrt(1000d0)
 
       call bookupeqbins('sigcut',1d0,0d0,1d0)
-      call bookupeqbins('ptj1',5d0,5d0,100d0)
-      call bookupeqbins('etaj1',0.2d0,-3d0,3d0)
+      call bookupeqbins('ptj1',1d0,5d0,30d0)
+      call bookupeqbins('etaj1',0.2d0,-2d0,3d0)
        
       end
       
@@ -36,6 +36,9 @@
 
       integer i,npartons,njets
 
+      if (y < 0.04d0 .or. y > 0.95d0 .or. Q2 < 25d0 .or. Q2 > 1000d0)
+     $     return
+      
       sqrtQ2 = sqrt(Q2)
 
       npartons = n - 3
@@ -46,17 +49,23 @@
       palg = -1d0
       call buildjets(npartons,ppartons,R,palg,pj,njets)
 
-      ptj1 = kt(pj(:,1))
-      etaj1 = eta(pj(:,1))
+      do i=1,njets
+         ptj1 = kt(pj(:,i))
+         etaj1 = eta(pj(:,i))
+
+         if(ptj1.lt.5d0) cycle
+         if(abs(etaj1).gt.3d0) cycle
+
+         call filld('ptj1',ptj1,dsig)
+         
+         call filld('etaj1',etaj1,dsig)
+      enddo
 
       if(ptj1.lt.5d0) return
       if(abs(etaj1).gt.3d0) return
 
       call filld('sigcut',0.5d0,dsig)
       
-      call filld('ptj1',ptj1,dsig)
-      
-      call filld('etaj1',etaj1,dsig)
       
      
       end
