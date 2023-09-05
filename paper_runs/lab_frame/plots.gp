@@ -84,12 +84,12 @@ set nologscale y
 set title ''
 set format x
 set format y
-set ytics 0.0,0.5,1.99
+set ytics 0.5,0.25,1.49
 set mytics 5
 unset label
 set xlabel 'p_{t,j [GeV]'
 set ylabel 'Ratio to NLO'
-set yrange [0.0:2.0]
+set yrange [0.5:1.5]
 
 plot  lo i ii u   (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @LOfill not,\
       lo i ii u   (($1+$2)/2.):($3/$15):1:2 w @LOline not,\

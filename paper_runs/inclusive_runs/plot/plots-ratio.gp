@@ -47,7 +47,7 @@ set xrange [*:log(1.)]
 set yrange [0.95:1.10]
 set key at  -5.2,1.095
 
-set title 'σ(Reduced NC) Q = 10 GeV'
+set title 'σ(NC) Q = 10 GeV'
 
 #set label 2 '4 GeV^2 < Q^2 < 5 GeV^2' font "Latin Modern Roman,28" at -8.9,1.7
 #set label 28 'e^+ (27.6 GeV) p (920 GeV) → e^+ + X' font "Latin Modern Roman,28" at -1, 0.4 right
@@ -98,7 +98,7 @@ set xrange [*:*]
 set yrange [0.9:1.2]
 set key at  -5.3,1.19
 
-set title 'σ(Reduced NC) Q = 10 GeV'
+set title 'σ(NC) Q = 10 GeV'
 
 #set label 2 '4 GeV^2 < Q^2 < 5 GeV^2' font "Latin Modern Roman,28" at -8.9,1.7
 #set label 28 'e^+ (27.6 GeV) p (920 GeV) → e^+ + X' font "Latin Modern Roman,28" at -1, 0.4 right
