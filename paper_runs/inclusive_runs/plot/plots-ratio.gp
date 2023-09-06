@@ -49,11 +49,10 @@ set key at  -5.2,1.095
 
 set title 'σ_{NC}, Q = 10 GeV'
 
-#set label 2 '4 GeV^2 < Q^2 < 5 GeV^2' font "Latin Modern Roman,28" at -8.9,1.7
-#set label 28 'e^+ (27.6 GeV) p (920 GeV) → e^+ + X' font "Latin Modern Roman,28" at -1, 0.4 right
-#set label 29 'NNPDF30\_nnlo\_as\_0118\_hera' font "Latin Modern Roman,28" at -1, 0.32 right
-#set label 30 'μ_R = μ_F = Q' font "Latin Modern Roman,28" at -1, 0.24 right
-#set label 31 '7-point variation' font "Latin Modern Roman,28" at -1, 0.16 right
+set label 28 'e^- (27.6 GeV) p (920 GeV) → e^- + X' font "Latin Modern Roman,28" at -1, 1.09 right
+set label 29 'MSHT20nnlo\_as118 / MSHT20an3lo\_as118' font "Latin Modern Roman,28" at -1, 1.08 right
+set label 30 'μ_R = μ_F = Q' font "Latin Modern Roman,28" at -1,1.07 right
+set label 31 '7-point variation + PDF variations' font "Latin Modern Roman,28" at -1, 1.06 right
 
 set ylabel 'Ratio to NNLO'
 set xlabel 'log[x]'
@@ -156,11 +155,11 @@ set key at  3.4,1.19
 
 set title 'σ_{NC}, x = 0.01'
 
-#set label 2 '4 GeV^2 < Q^2 < 5 GeV^2' font "Latin Modern Roman,28" at -8.9,1.7
-#set label 28 'e^+ (27.6 GeV) p (920 GeV) → e^+ + X' font "Latin Modern Roman,28" at -1, 0.4 right
-#set label 29 'NNPDF30\_nnlo\_as\_0118\_hera' font "Latin Modern Roman,28" at -1, 0.32 right
-#set label 30 'μ_R = μ_F = Q' font "Latin Modern Roman,28" at -1, 0.24 right
-#set label 31 '7-point variation' font "Latin Modern Roman,28" at -1, 0.16 right
+set label 28 'e^- (27.6 GeV) p (920 GeV) → e^- + X' font "Latin Modern Roman,28" at 3.4, 0.95 right
+set label 29 'MSHT20nnlo\_as118 / MSHT20an3lo\_as118' font "Latin Modern Roman,28" at 3.4, 0.925 right
+set label 30 'μ_R = μ_F = Q' font "Latin Modern Roman,28" at 3.4,0.9 right
+set label 31 '7-point variation + PDF variations' font "Latin Modern Roman,28" at 3.4, 0.875 right
+
 
 set ylabel 'Ratio to NNLO'
 set xlabel 'log[Q/GeV]'
