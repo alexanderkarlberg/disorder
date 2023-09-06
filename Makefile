@@ -18,10 +18,10 @@ ANALYSIS = fastjetfortran pwhg_bookhist-multi
 #ANALYSIS += jets_lab_frame
 #ANALYSIS += event_shapes caesar
 #ANALYSIS += vbf
-#ANALYSIS += nnlojet_comparison
 #ANALYSIS += simple_analysis
 #ANALYSIS += inclusive_paper_analysis
-ANALYSIS += exclusive_lab_frame_analysis
+#ANALYSIS += exclusive_lab_frame_analysis
+ANALYSIS += nnlojet
 
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(STD)

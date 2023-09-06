@@ -393,6 +393,15 @@ void fastjetppgenkt_(const double * p, const int & npart,
   transfer_cluster_transfer(p,npart,jet_def,f77jets,njets);
 }
   
+void fastjetppktetscheme_(const double * p, const int & npart,                   
+			  const double & R, double * f77jets, int & njets) {
+    
+  jet_def = JetDefinition(kt_algorithm, R, Et_scheme);
+  
+  // do everything
+  transfer_cluster_transfer(p,npart,jet_def,f77jets,njets);
+}
+  
 /// same pp generalised-kt as above without the caching (invalidating
 /// calls to constituents, ... but making this call thread-safe)
 void fastjetppgenktnocache_(const double * p, const int & npart,                   
