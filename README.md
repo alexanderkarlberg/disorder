@@ -1,6 +1,7 @@
 #disorder
 ----------------------------------------------------------------------
- Installation ---
+ Installation
+---
 
 To compile disorder, you will need
 * hoppet, v 1.3.0 or newer (https://github.com/gavinsalam/hoppet)
@@ -28,7 +29,8 @@ with
   make aux [-j]
 
 ----------------------------------------------------------------------
-Usage ---
+Usage
+---
 
 To run disorder, use the disorder executable, and pass command
 line arguments to specify inputs. Example:
