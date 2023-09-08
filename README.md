@@ -1,17 +1,4 @@
 #disorder
-                     Welcome to disorder v. 1.0.0                
-              Written by Alexander Karlberg (2023-)              
-                                                           
- It is made available under the GNU public license, with the
- additional request that if you use it or any derivative of it in
- scientific work then you should cite: A. Karlberg (arXiv:23XX.YYYYY).
-                                                           
- You are also encouraged to cite HOPPET, the original references,for
- LO, NLO and NNLO splitting functions, the QCD 1, 2, 3 and 4 loop beta
- functions and the coupling and PDF mass threshold matching
- functions. You are furthermore encouraged to cite the LO, NLO, NNLO,
- and N3LO coefficient functions and the disent references.
-
 ----------------------------------------------------------------------
  Installation ---
 
