@@ -278,8 +278,8 @@ contains
    Q2minl = Q2min
    Q2maxl = Q2max
    
-   yminl = zero
-   ymaxl = one
+   yminl = ymin
+   ymaxl = ymax
   
  end subroutine dis_cuts
 
@@ -505,11 +505,23 @@ contains
 
    write(idev,'(a)') ' # Summary:'
    if(NC.and.CC) then
-      write(idev,'(a,f16.6,a)') ' # σ(NC + CC)                     =', central,' pb'
+      if(Q2min.eq.Q2max) then
+         write(idev,'(a,f16.6,a)') ' # σ(NC + CC)                     =', central,' pb/GeV^2'
+      else
+         write(idev,'(a,f16.6,a)') ' # σ(NC + CC)                     =', central,' pb'
+      endif
    elseif(NC) then
-      write(idev,'(a,f16.6,a)') ' # σ(NC)                          =', central,' pb'
+      if(Q2min.eq.Q2max) then
+         write(idev,'(a,f16.6,a)') ' # σ(NC)                          =', central,' pb/GeV^2'
+      else
+         write(idev,'(a,f16.6,a)') ' # σ(NC)                          =', central,' pb'
+      endif
    elseif(CC) then
-      write(idev,'(a,f16.6,a)') ' # σ(CC)                          =', central,' pb'
+      if(Q2min.eq.Q2max) then
+         write(idev,'(a,f16.6,a)') ' # σ(CC)                          =', central,' pb/GeV^2'
+      else
+         write(idev,'(a,f16.6,a)') ' # σ(CC)                          =', central,' pb'
+      endif
    endif
    write(idev,'(a,f14.4,a)') ' # MC integration uncertainty     =', sqrt(error_tot)/central*100.0_dp, ' %'
 
@@ -540,13 +552,13 @@ contains
    write(idev,*) ''
    
    if (order_max.eq.1) then 
-      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced LO cross-sections (pb)'
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced LO cross-sections'
    else if (order_max.eq.2) then 
-      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced NLO cross-sections (pb)'
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced NLO cross-sections'
    else if (order_max.eq.3) then 
-      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced NNLO cross-sections (pb)'
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced NNLO cross-sections'
    else if (order_max.eq.4) then 
-      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced N3LO cross-sections (pb)'
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Reduced N3LO cross-sections'
    endif
 
    if(NC.and.CC) then

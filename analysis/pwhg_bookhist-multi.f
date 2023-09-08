@@ -210,7 +210,8 @@ c overflow
       character * 3 cl
       call newunit(iun)
       if(outname.ne."") filename = outname
-      print*, 'Outputting results to: ', filename
+      print*, 'Outputting results to: ', trim(prefix)
+     $     //trim(adjustl(filename))
       do l=1,nmulti
          if(nmulti.eq.1) then
             open(unit=iun,file=trim(prefix)//trim(adjustl(filename))/

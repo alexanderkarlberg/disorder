@@ -11,7 +11,7 @@ include Makefile.inc
 
 # main program and modules to be compiled
 MAIN = disorder
-MODULES = integration io_utils lcl_dec mod_parameters mod_phase_space mod_matrix_element mod_dsigma disent-lib mod_analysis
+MODULES = integration io_utils lcl_dec mod_parameters mod_phase_space mod_matrix_element mod_dsigma libdisent mod_analysis
 ANALYSIS = fastjetfortran pwhg_bookhist-multi 
 #ANALYSIS += sigmaR
 #ANALYSIS += cut_Ecur 
