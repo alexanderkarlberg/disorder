@@ -1,5 +1,4 @@
 #disorder
-----------------------------------------------------------------------
                      Welcome to disorder v. 1.0.0                
               Written by Alexander Karlberg (2023-)              
                                                            
@@ -12,8 +11,8 @@
  functions and the coupling and PDF mass threshold matching
  functions. You are furthermore encouraged to cite the LO, NLO, NNLO,
  and N3LO coefficient functions and the disent references.
- ----------------------------------------------------------------------
- 
+
+----------------------------------------------------------------------
  Installation ---
 
 To compile disorder, you will need
@@ -41,6 +40,7 @@ with
 
   make aux [-j]
 
+----------------------------------------------------------------------
 Usage ---
 
 To run disorder, use the disorder executable, and pass command
