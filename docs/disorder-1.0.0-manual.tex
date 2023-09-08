@@ -50,6 +50,8 @@
 \newcommand{\disent}{{\tt disent}}
 \newcommand{\disorder}{{\tt disorder}}
 \newcommand{\provbfh}{{\tt proVBFH}}
+\newcommand{\fastjet}{{\tt fastjet}}
+\newcommand{\lhapdf}{{\tt LHAPDF}}
 \newcommand{\disaster}{{\tt disaster++}}
 \newcommand{\nlojet}{{\tt nlojet++}}
 \newcommand{\as}{\alpha_{\mathrm{s}}}
@@ -98,7 +100,7 @@ $\mathcal{O}(\as^2)$. The code is lightweight and fast, and yet
 includes the most common functionalities found in typical perturbative
 QCD programs, like automatic renormalisation and factorisation scale
 uncertainties, options to run and combine multiple seeds, and
-interfaces to {\tt fastjet} and {\tt LHAPDF}. Due to the underlying
+interfaces to \fastjet{} and \lhapdf{}. Due to the underlying
 exclusive DIS + 1 jet code, the program also provides stable results
 in the infrared, relevant for extracting logarithmic coefficients for
 analytic resummations. As a by-product the code provides access
@@ -177,7 +179,7 @@ previous names for fixed-order DIS codes.\footnote{{\tt
 this context.} Since the program relies on \hoppet{} for the structure
 functions, the inclusive DIS cross section can actually be obtained
 one order higher, as the structure functions were implemented at
-\NNNLO{} already in the context of the {\tt proVBFH}
+\NNNLO{} already in the context of the \provbfh{}
 code~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}. The
 \disorder{} program therefore has two more or less separate use cases:
 1. The computation of fully exclusive NNLO photon-mediated DIS 2. The
@@ -187,18 +189,18 @@ computation of inclusive/reduced neutral- (NC) and charged-current
 The program is designed to be user-friendly with a simple command line
 interface. It prints cross sections and all important run-parameters
 to the screen and disk, allowing a user to acquire cross sections with
-very little effort. It comes with an interface to {\tt
-  fastjet}~\cite{Cacciari:2011ma} and {\tt
-  LHAPDF}~\cite{Buckley:2014ana} and uses the histogramming package
-from the {\tt POWHEG-BOX}~\cite{Alioli:2010xd} for easy analysis. The
-code can also compute renormalisation and factorisation scale
-uncertainties on-the-fly. For inclusive cross sections the code
-provides results in a matter of seconds\footnote{The majority of this
-time is taken up by the structure function initialisation inside
-\hoppet{} rather than the integration of the cross section.} even at
-\NNNLO{} with integration uncertainties typically below the permille
-level. For exclusive quantities the code can be run on a laptop at NLO
-and depending on the analysis, and the laptop, even at NNLO.
+very little effort. It comes with an interface to
+\fastjet{}~\cite{Cacciari:2011ma} and \lhapdf{}~\cite{Buckley:2014ana}
+and uses the histogramming package from the {\tt
+  POWHEG-BOX}~\cite{Alioli:2010xd} for easy analysis. The code can
+also compute renormalisation and factorisation scale uncertainties
+on-the-fly. For inclusive cross sections the code provides results in
+a matter of seconds\footnote{The majority of this time is taken up by
+the structure function initialisation inside \hoppet{} rather than the
+integration of the cross section.} even at \NNNLO{} with integration
+uncertainties typically below the permille level. For exclusive
+quantities the code can be run on a laptop at NLO and depending on the
+analysis, and the laptop, even at NNLO.
 
 It should be pointed out that the code provide little theoretical
 advance on its own. As described above, the structure functions
@@ -387,8 +389,8 @@ command line arguments. The code itself can be obtained from
 \begin{center}\url{https://github.com/alexanderkarlberg/disorder}\end{center}
 
 \subsection{Compiling and prerequisites}
-To compile \disorder{} both \hoppet{} and {\tt
-  LHAPDF}~\cite{Buckley:2014ana} have to be installed on the
+To compile \disorder{} both \hoppet{} and
+\lhapdf{}~\cite{Buckley:2014ana} have to be installed on the
 machine. If both are installed in a location in the {\tt \$PATH} it is
 enough to run\footnote{Despite the name, this has nothing to do with
 {\tt autotools}.}
@@ -404,7 +406,7 @@ modified by hand. The program should now compile with
 \begin{lstlisting}
   make [-j]
 \end{lstlisting}
-which will result in the binary {\tt disorder} being created. Two
+which will result in the binary \disorder{} being created. Two
 auxiliary Fortran programs used to manipulate the histograms can be
 compiled by
 \begin{lstlisting}
@@ -582,7 +584,6 @@ mode, with a few limitations
 \item {\tt -CC} and {\tt -includeZ} are not supported
 \item {\tt -n3lo} is not supported
 \item {\tt -pdfuncert} and {\tt -alphasuncert} are not supported
-%\item {\tt -y}, {\tt -ymin}, and {\tt -ymax} are not supported
 \end{itemize}
 Importantly, it \emph{is} possible to run with the {\tt -scaleuncert}
 flag which leads to a significant reduction in run-time compared to
@@ -597,7 +598,7 @@ in {\tt aux/runpar.sh}.
 \label{sec:results}
 \begin{table}[t] 
   \centering
-  \phantom{x}\medskip% add space to make table look nicer...
+  \phantom{x}\medskip
   \begin{center} $Q = 10\GEV,\quad x = 0.01$\end{center}
   {\renewcommand{\arraystretch}{1.2}
   \begin{tabular}{lcccc|cc}
@@ -748,12 +749,12 @@ even reasonable NNLO results can be obtained on a single machine
 running for a few hours. \NNNLO{} results will inevitably require
 large resources on a High Performance Cluster.
 
-The code comes with an interface to {\tt fastjet} and {\tt LHAPDF} and
+The code comes with an interface to \fastjet{} and \lhapdf{} and
 is run through a user-friendly command line interface. 
 
 \section*{Acknowledgements}
 The author is grateful for many discussions with Andrea Banfi and
-Gavin Salam regarding {\tt disent}, and for encouragement to publish
+Gavin Salam regarding \disent{}, and for encouragement to publish
 \disorder{}. The idea for the code originated while the author was
 working on Ref.~\cite{Banfi:2023mhz}.
 
@@ -769,19 +770,3 @@ working on Ref.~\cite{Banfi:2023mhz}.
 \nolinenumbers
 
 \end{document}
-%============================================================
-% # Total N3LO cross-section (pb)
-% # Summary:
-% # σ(NC)                          =     1859.900603 pb
-% # MC integration uncertainty     =        0.0000 %
-% # QCD scale uncertainty (+)      =        0.5466 %
-% # QCD scale uncertainty (-)      =       -0.1592 %
-% # PDF symmetric uncertainty*     =        0.8460 %
-% # (*PDF uncertainty contains alphas uncertainty if using a  
-% #   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas)).
-% 
-% # Reduced N3LO cross-sections (pb)
-% # σ reduced (NC)                 =        0.796872
-% # QCD scale uncertainty (+)      =        0.5466 %
-% # QCD scale uncertainty (-)      =       -0.1592 %
-% ============================================================
