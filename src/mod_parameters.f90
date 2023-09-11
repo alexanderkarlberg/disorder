@@ -149,18 +149,22 @@ contains
     xmuf         = dble_val_opt("-xmuf",1.0_dp)
     xmur         = dble_val_opt("-xmur",1.0_dp)
     pdfname      = string_val_opt("-pdf", "")
-    if(pdfname.eq.'') then
-       call help_message
-       print*, '-pdf must be specified!'
-       call exit()
-    endif
-    ! Initialise PDF
-    call initPDFSetByName(pdfname)
-    call getQ2min(0,Q2minPDF)
-
+    
     toy_Q0       = dble_val_opt("-toyQ0",-1d0)
     Q0pdf        = dble_val_opt("-Q0pdf",-1d0)
     xmuR_PDF     = dble_val_opt("-xmuRPDF",1d0)
+    if(pdfname.eq.'') then
+       if(toy_Q0.lt.0d0) then
+          call help_message
+          print*, '-pdf must be specified!'
+          call exit()
+       endif
+    else
+       ! Initialise PDF
+       call initPDFSetByName(pdfname)
+       call getQ2min(0,Q2minPDF)
+    endif
+
     nmempdf      = int_val_opt ("-nmempdf",0)
     pdfuncert    = log_val_opt ("-pdfuncert")
     alphasuncert = log_val_opt ("-alphasuncert")

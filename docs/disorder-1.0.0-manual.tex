@@ -50,6 +50,8 @@
 \newcommand{\disent}{{\tt disent}}
 \newcommand{\disorder}{{\tt disorder}}
 \newcommand{\provbfh}{{\tt proVBFH}}
+\newcommand{\fastjet}{{\tt fastjet}}
+\newcommand{\lhapdf}{{\tt LHAPDF}}
 \newcommand{\disaster}{{\tt disaster++}}
 \newcommand{\nlojet}{{\tt nlojet++}}
 \newcommand{\as}{\alpha_{\mathrm{s}}}
@@ -98,7 +100,7 @@ $\mathcal{O}(\as^2)$. The code is lightweight and fast, and yet
 includes the most common functionalities found in typical perturbative
 QCD programs, like automatic renormalisation and factorisation scale
 uncertainties, options to run and combine multiple seeds, and
-interfaces to {\tt fastjet} and {\tt LHAPDF}. Due to the underlying
+interfaces to \fastjet{} and \lhapdf{}. Due to the underlying
 exclusive DIS + 1 jet code, the program also provides stable results
 in the infrared, relevant for extracting logarithmic coefficients for
 analytic resummations. As a by-product the code provides access
@@ -152,10 +154,11 @@ One of the advantages of the P2B method is that it is rather agnostic
 towards the details of the underlying exclusive computation, and it is
 hence possible to ``upgrade'' existing fixed-order codes to one order
 higher. Historically the most succesful fixed-order codes have been
-\disent{}~\cite{Catani:1996vz}, \disaster{}~\cite{Graudenz:1997gv},
-and \nlojet{}~\cite{Nagy:2001xb} which are all next-to-leading order
-(NLO) accurate. Discrepancies between \disent{} and fixed-order
-coefficients from analytical resummation were initially observed in
+{\tt MEPJET}~\cite{Mirkes:1995ks}, \disent{}~\cite{Catani:1996vz},
+\disaster{}~\cite{Graudenz:1997gv}, and \nlojet{}~\cite{Nagy:2001xb}
+which are all next-to-leading order (NLO) accurate. Discrepancies
+between \disent{} and fixed-order coefficients from analytical
+resummation were initially observed in
 Refs.\cite{Antonelli:1999kx,Dasgupta:2002dc}, and were only recently
 understood to be due to a bug in one of the dipole terms for the gluon
 channel~\cite{Borsa:2020ulb,Borsa:2020yxh}.
@@ -176,7 +179,7 @@ previous names for fixed-order DIS codes.\footnote{{\tt
 this context.} Since the program relies on \hoppet{} for the structure
 functions, the inclusive DIS cross section can actually be obtained
 one order higher, as the structure functions were implemented at
-\NNNLO{} already in the context of the {\tt proVBFH}
+\NNNLO{} already in the context of the \provbfh{}
 code~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}. The
 \disorder{} program therefore has two more or less separate use cases:
 1. The computation of fully exclusive NNLO photon-mediated DIS 2. The
@@ -186,26 +189,26 @@ computation of inclusive/reduced neutral- (NC) and charged-current
 The program is designed to be user-friendly with a simple command line
 interface. It prints cross sections and all important run-parameters
 to the screen and disk, allowing a user to acquire cross sections with
-very little effort. It comes with an interface to {\tt
-  fastjet}~\cite{Cacciari:2011ma} and {\tt
-  LHAPDF}~\cite{Buckley:2014ana} and uses the histogramming package
-from the {\tt POWHEG-BOX}~\cite{Alioli:2010xd} for easy analysis. The
-code can also compute renormalisation and factorisation scale
-uncertainties on-the-fly. For inclusive cross sections the code
-provides results in a matter of seconds\footnote{The majority of this
-time is taken up by the structure function initialisation inside
-\hoppet{} rather than the integration of the cross section.} even at
-\NNNLO{} with uncertainties typically below the permille level. For
-exclusive quantities the code can be run on a laptop at NLO and
-depending on the analysis, and the laptop, even at NNLO.
+very little effort. It comes with an interface to
+\fastjet{}~\cite{Cacciari:2011ma} and \lhapdf{}~\cite{Buckley:2014ana}
+and uses the histogramming package from the {\tt
+  POWHEG-BOX}~\cite{Alioli:2010xd} for easy analysis. The code can
+also compute renormalisation and factorisation scale uncertainties
+on-the-fly. For inclusive cross sections the code provides results in
+a matter of seconds\footnote{The majority of this time is taken up by
+the structure function initialisation inside \hoppet{} rather than the
+integration of the cross section.} even at \NNNLO{} with integration
+uncertainties typically below the permille level. For exclusive
+quantities the code can be run on a laptop at NLO and depending on the
+analysis, and the laptop, even at NNLO.
 
-It should be pointed out that the code does not provide any
-theoretical advances on its own. As described above, the structure
-functions themselves have been known for a little while, and the P2B
-method has already been applied to DIS, even one order higher than
+It should be pointed out that the code provide little theoretical
+advance on its own. As described above, the structure functions
+themselves have been known for a little while, and the P2B method has
+already been applied to DIS, even one order higher than
 here\footnote{It has also been applied in polarised DIS in
 Refs.~\cite{Borsa:2020ulb,Borsa:2020yxh,Borsa:2021afb,Borsa:2022irn,Borsa:2022cap}.}. It
-is however the author's opinion, that public code is extremely
+is however the author's opinion that public code is extremely
 valuable for both the experimental and theoretical communities, and
 that providing documentation in the form of this article will enable
 the wide use of the code.
@@ -252,7 +255,7 @@ k_i &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,-1 \right), \quad 
 k_f &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,+1 \right), \quad  p_f = \frac{Q}{2}\left(1,0,0,-1 \right) 
 \end{align}
 where four-momenta are given as $(E,p_x,p_y,p_z)$. The resulting
-vector $q$ is hence given by $Q(0,0,0,-1)$. In the laboratory frame we align
+vector $q$ is hence given by $(0,0,0,-Q)$. In the laboratory frame we align
 the parton with the positive $z$-axis and hence the lepton with the
 negative
 \begin{align}
@@ -387,9 +390,10 @@ command line arguments. The code itself can be obtained from
 
 \subsection{Compiling and prerequisites}
 To compile \disorder{} both \hoppet{} and
-LHAPDF~\cite{Buckley:2014ana} have to be installed on the machine. If
-both are installed in a location in the {\tt \$PATH} it is enough to
-run\footnote{Despite the name, this has nothing to do with {\tt autotools}.}
+\lhapdf{}~\cite{Buckley:2014ana} have to be installed on the
+machine. If both are installed in a location in the {\tt \$PATH} it is
+enough to run\footnote{Despite the name, this has nothing to do with
+{\tt autotools}.}
 \begin{lstlisting}
   ./configure
 \end{lstlisting}
@@ -402,7 +406,7 @@ modified by hand. The program should now compile with
 \begin{lstlisting}
   make [-j]
 \end{lstlisting}
-which will result in the binary {\tt disorder} being created. Two
+which will result in the binary \disorder{} being created. Two
 auxiliary Fortran programs used to manipulate the histograms can be
 compiled by
 \begin{lstlisting}
@@ -410,9 +414,9 @@ compiled by
 \end{lstlisting}
 and will be created in the {\tt aux} folder. 
 \subsubsection{The analysis framework}
-The code uses the {\tt POWHEG-BOX} analysis framework, with a some
+The code uses the {\tt POWHEG-BOX} analysis framework, with some
 minor modifications. A few example analyses are included in the {\tt
-  analysis directory}. Any new analysis should be put here and the
+  analysis} directory. Any new analysis should be put here and the
 name of the analysis should be specified in the {\tt Makefile}. For
 example, if the file {\tt my\_analysis.f} is to be compiled one should
 add
@@ -427,14 +431,7 @@ routines available to book histograms with varying bins sizes)
 \begin{lstlisting}
   call bookupeqbins('string_name', binsize, min, max)
 \end{lstlisting}
-In the {\tt user\_analysis} routine the user should perform their
-analysis and fill histograms like this
-\begin{lstlisting}
-  call filld('string_name', obs_value, dsig)
-\end{lstlisting}
-where {\tt obs\_value} is the value of the observable to be binned, and
-{\tt dsig} is the associated array of weights. The routine takes as
-input
+The {\tt user\_analysis} routine takes as input
 \begin{lstlisting}
   integer n
   double precision dsig(maxscales), x, y, Q2
@@ -446,8 +443,15 @@ is the maximum number of scales which is supported (currently 7). {\tt
 
 Through the module {\tt mod\_analysis} the analysis has access to two
 array of momenta {\tt pbreit(0:3,1:n)} and {\tt plab{0:3,1:n}} which
-the Breit and laboratory frame momenta are stored respectively. The output of
-the analysis will be saved to the disk as outlined below.
+the Breit and laboratory frame momenta are stored respectively. The
+output of the analysis will be saved to the disk as outlined below.
+In the {\tt user\_analysis} routine the user should perform their
+analysis and fill histograms like this
+\begin{lstlisting}
+  call filld('string_name', obs_value, dsig)
+\end{lstlisting}
+where {\tt obs\_value} is the value of the observable to be binned, and
+{\tt dsig} is the associated array of weights. 
 
 In the {\tt aux} folder one may also find a
 script called {\tt mergedata} that can perform various manipulations
@@ -494,13 +498,13 @@ $Q$ the program simply evaluates one point and returns the answer.
 One can further specify the energy of the incoming lepton through {\tt
   -Elep}, the incoming hadron through {\tt -Ehad}. By default the
 lepton is taken to be an electron but specifying {\tt -positron} on
-the command line will change that. By default the code computes the
-photon-mediated NC cross section only. To include the $Z$ one can specify
-{\tt -includeZ} and to include CC processes one can specify {\tt
-  -CC}. The inclusion of NC processes can also be controlled through
-the {\tt -NC} flag. In fact, all logical flags can be prefixed by
-``{\tt{no}}'' to turn them off. Hence the below command line would run the
-program with CC processes only using a positron
+the command line will change that. The code computes the
+photon-mediated NC cross section only by default. To include the $Z$
+one can specify {\tt -includeZ} and to include CC processes one can
+specify {\tt -CC}. The inclusion of NC processes can also be
+controlled through the {\tt -NC} flag. In fact, all logical flags can
+be prefixed by ``{\tt{no}}'' to turn them off. Hence the below command
+line would run the program with CC processes only using a positron
 \begin{lstlisting}
   ./disorder -Q 20 -xmin 0.01 -noNC -CC -positron -pdf LHAPDF_name
 \end{lstlisting}
@@ -521,7 +525,7 @@ specified. Some care should be taken here, as in practice the code
 assumes that the $\as$ variations are contained in the last two PDF
 members, and simply separates them from the rest.
 
-Renormalisation, $\mu_R$ and factorisation, $\mu_F$ scale
+Renormalisation, $\mu_R$, and factorisation, $\mu_F$, scale
 uncertainties can be included by specifying the flag {\tt
   -scaleuncert}. \disorder{} uses the vector boson virtuality, $Q$, as
 its default central scale. The program will then compute a standard
@@ -553,10 +557,8 @@ the number depending on the input, prefixed by {\tt
   disorder\_nnlo\_seed001\_pdfmem000} where again the exact prefix
 will depend on the input. The output name also contains information on
 the seed, the PDF member and the renormalisation and factorisation
-scales if {\tt -scaleuncert} is on.
-
-The user can specify a prefix to be added to all the files through the
-{\tt -prefix} flag.
+scales if {\tt -scaleuncert} is on. The user can specify a prefix to
+be added to all the files through the {\tt -prefix} flag.
 
 Since it is often not necessary to run an analysis in the inclusive
 mode, the user can simply turn this off with the {\tt -no-analysis}
@@ -569,9 +571,9 @@ phase space is not complicated it is rarely necessary to increase the
 default of 10000. The second flag controls the number of points that
 are used for the actual integration. If one is not running an
 analysis, the default number of 100000 should give results that have
-better than permille level accuracy. If the user wishes to for
-instance bin the cross section in fine bins of $x$ and $Q^2$, this
-number will most likely have to increase.
+better than permille level accuracy. If the user wishes for instance
+to bin the cross section in fine bins of $x$ and $Q^2$, this number
+will most likely have to be increased.
 
 \subsection{P2B mode}
 \label{sec:P2Bmode}
@@ -582,7 +584,6 @@ mode, with a few limitations
 \item {\tt -CC} and {\tt -includeZ} are not supported
 \item {\tt -n3lo} is not supported
 \item {\tt -pdfuncert} and {\tt -alphasuncert} are not supported
-\item {\tt -y}, {\tt -ymin}, and {\tt -ymax} are not supported
 \end{itemize}
 Importantly, it \emph{is} possible to run with the {\tt -scaleuncert}
 flag which leads to a significant reduction in run-time compared to
@@ -597,12 +598,12 @@ in {\tt aux/runpar.sh}.
 \label{sec:results}
 \begin{table}[t] 
   \centering
-  \phantom{x}\medskip% add space to make table look nicer...
+  \phantom{x}\medskip
   \begin{center} $Q = 10\GEV,\quad x = 0.01$\end{center}
   {\renewcommand{\arraystretch}{1.2}
   \begin{tabular}{lcccc|cc}
     \toprule
-    & $\frac{\sigma_\NC}{\dd x \dd Q^2}$ [pb] & $\delta$PDF & $\frac{\sigma_\CC}{\dd x \dd Q^2}$ [pb] & $\delta$PDF & $\tilde{\sigma}_\NC$  & $\tilde{\sigma}_\CC$ \\ 
+    & $\frac{\sigma_\NC}{\dd x \dd Q^2}$ [pb/GeV$^2$] & $\delta$PDF & $\frac{\sigma_\CC}{\dd x \dd Q^2}$ [pb/GeV$^2$] & $\delta$PDF & $\tilde{\sigma}_\NC$  & $\tilde{\sigma}_\CC$ \\ 
     \midrule
     a\NNNLO & $1932^{+.705\%}_{-.486\%}$ & $0.972\%$ & $1.100^{+.591\%}_{-.423\%}$ & $1.103\%$ & $0.8174$ & $2.884$\\    
     \NNNLO  & $1886^{+.546\%}_{-.160\%}$ & $0.845\%$ & $1.080^{+.455\%}_{-.132\%}$ & $0.914\%$ & $0.7980$ & $2.829$\\    
@@ -709,8 +710,11 @@ $p_{t,j}=Q$. The rapidity distribution on the other hand receives
 larger corrections. This is in part due to hard jets with $p_{t,j}>Q$
 that can only arise at NLO and beyond. Here the scale variation bands
 do not cover the actual corretions, and it is obvious that one needs
-to go beyond NLO for reliable predictions (of course one needs the
-full \NNNLO{} to assess the reliability of the NNLO result). 
+to go beyond NLO for reliable predictions. Of course one needs the
+full \NNNLO{} to assess the reliability of the NNLO result. However,
+from similar results in Ref.~\cite{Currie:2018fgr} it can be expected
+that the actual \NNNLO{} results will be contained within the scale
+variation band at NNLO.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -722,8 +726,10 @@ calculation of \disent{}, using the P2B method. In the inclusive mode
 the program includes all NC and CC contributions and can carry out
 both scale and PDF variations on the fly. Due to the underlying
 tabulation of the structure functions in \hoppet{}, the code is
-extremely fast, and a user can obtain cross section results in a
-matter of seconds.
+extremely fast, and a user can obtain cross section results at
+\NNNLO{} in a matter of seconds. In principle the code will benefit
+from any future developments in \hoppet{}, e.g.~the inclusion of
+massive coefficient functions and 4-loop splitting functions.
 
 In the fully differential mode, only photon-mediated DIS can be
 computed, and no PDF variations are currently implemented. It should
@@ -731,18 +737,26 @@ in principle be possible to extend \disent{} to full NC and CC, and
 this is something that is planned for a future release of the
 code. Similarly the PDF variations could also be implemented, however
 this would require some serious restructuring of the code, for it to
-be efficient. At LO and NLO a user can obtain differential results on
-a laptop running for a just a few minutes, and even reasonable NNLO
-results can be obtained on a single machine running for a few hours.
+be efficient. The upgrade of the code to handle \NNNLO{} fully
+differentially is not currently planned. This is mainly due to the
+fact that this would require a complete replacement of \disent{} with
+a proper exclusive NNLO DIS + 1 jet code, requiring a significant
+amount of work. Such a code would also be very slow compared to what
+is in place now, and it would defeat part of the attraction of
+\disorder{} which is its speed. At LO and NLO a user can obtain
+differential results on a laptop running for a just a few minutes, and
+even reasonable NNLO results can be obtained on a single machine
+running for a few hours. \NNNLO{} results will inevitably require
+large resources on a High Performance Cluster.
 
-The code comes with an interface to {\tt fastjet} and {\tt LHAPDF} and
+The code comes with an interface to \fastjet{} and \lhapdf{} and
 is run through a user-friendly command line interface. 
 
 \section*{Acknowledgements}
-The author is grateful for discussions with Gavin Salam regarding {\tt
-  disent}, and for encouragement to publish \disorder{} from Andrea
-Banfi. The idea for the code originated while the author was working
-on Ref.~[].
+The author is grateful for many discussions with Andrea Banfi and
+Gavin Salam regarding \disent{}, and for encouragement to publish
+\disorder{}. The idea for the code originated while the author was
+working on Ref.~\cite{Banfi:2023mhz}.
 
 
 %\begin{appendix}
@@ -756,19 +770,3 @@ on Ref.~[].
 \nolinenumbers
 
 \end{document}
-%============================================================
-% # Total N3LO cross-section (pb)
-% # Summary:
-% # σ(NC)                          =     1859.900603 pb
-% # MC integration uncertainty     =        0.0000 %
-% # QCD scale uncertainty (+)      =        0.5466 %
-% # QCD scale uncertainty (-)      =       -0.1592 %
-% # PDF symmetric uncertainty*     =        0.8460 %
-% # (*PDF uncertainty contains alphas uncertainty if using a  
-% #   PDF set that supports it (eg PDF4LHC15_nnlo_100_pdfas)).
-% 
-% # Reduced N3LO cross-sections (pb)
-% # σ reduced (NC)                 =        0.796872
-% # QCD scale uncertainty (+)      =        0.5466 %
-% # QCD scale uncertainty (-)      =       -0.1592 %
-% ============================================================
