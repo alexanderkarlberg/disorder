@@ -9,12 +9,15 @@
       implicit none
       include 'pwhg_bookhist-multi.h'
       integer xnbins, Q2nbins
+      double precision, parameter :: etbins(9) = (/6d0, 8d0, 10d0, 14d0,
+     $     21d0, 29d0, 47d0, 71d0, 127d0 /)
       
       real * 8 Qmax
 
       Qmax = sqrt(1000d0)
 
-      call bookupeqbins('Etj1',2d0,6d0,106d0)
+!      call bookupeqbins('Etj1',2d0,6d0,106d0)
+      call bookup('Etj1',8,etbins)
       call bookupeqbins('etaj1',0.5d0,-1d0,3d0)
        
       end
@@ -48,8 +51,8 @@
 
       ppartons(:,1:npartons) = plab(:,4:n)
 
-      R = 0.8d0
-      palg = -1d0
+      R = 0.7d0
+      palg = 1d0
       call buildjets(npartons,ppartons,R,palg,pj,njets)
 
       do i=1,njets
