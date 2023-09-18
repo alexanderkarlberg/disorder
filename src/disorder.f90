@@ -193,13 +193,13 @@ contains
    if(scaleuncert) rts = rts * maxval(scales_muf) * xmuf
    if(vnf) then
       call StartStrFct(rts = rts, order_max = order_max, xR = xmur,&
-           & xF = xmuf, sc_choice = scale_choice, cmu = mz,&
+           & xF = xmuf, scale_choice = scale_choice, constant_mu = mz,&
            & param_coefs = .true. , Qmin_PDF = Qmin, wmass = mw,&
            & zmass = mz)
    else
       call StartStrFct(rts = rts, order_max&
            & = order_max, nflav = nflav, xR = xmur, xF = xmuf,&
-           & sc_choice = scale_choice, cmu = mz, param_coefs = .true.&
+           & scale_choice = scale_choice, constant_mu = mz, param_coefs = .true.&
            & , Qmin_PDF = Qmin, wmass = mw, zmass = mz)      
    endif
    call read_PDF()
