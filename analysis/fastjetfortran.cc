@@ -441,6 +441,20 @@ void fastjeteegenkt_(const double * p, const int & npart,
   transfer_cluster_transfer(p,npart,jet_def,f77jets,njets);
 }
 
+/// a routine that provides similar f77 functionality to fastjetppgenkt_, 
+/// but for the e+e- algorithms instead of the pp ones; note this 
+/// only gives the "inclusive" algorithms. The algorithms are as
+/// defined in the FastJet manual.
+void fastjeteekt_(const double * p, const int & npart,                   
+		   double * f77jets, int & njets) {
+    
+  // prepare jet def
+  jet_def = JetDefinition(ee_kt_algorithm, Et_scheme);
+  
+  // do everything
+  transfer_cluster_transfer(p,npart,jet_def,f77jets,njets);
+}
+
 /// same ee generalised-kt as above without the caching (invalidating
 /// calls to constituents, ... but making this call thread-safe)
 void fastjeteegenktnocache_(const double * p, const int & npart,                   

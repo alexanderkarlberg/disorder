@@ -514,19 +514,19 @@ contains
 
    write(idev,'(a)') ' # Summary:'
    if(NC.and.CC) then
-      if(Q2min.eq.Q2max) then
+      if(Q2min.ne.Q2max) then
          write(idev,'(a,f16.6,a)') ' # σ(NC + CC)                     =', central,' pb/GeV^2'
       else
          write(idev,'(a,f16.6,a)') ' # σ(NC + CC)                     =', central,' pb'
       endif
    elseif(NC) then
-      if(Q2min.eq.Q2max) then
+      if(Q2min.ne.Q2max) then
          write(idev,'(a,f16.6,a)') ' # σ(NC)                          =', central,' pb/GeV^2'
       else
          write(idev,'(a,f16.6,a)') ' # σ(NC)                          =', central,' pb'
       endif
    elseif(CC) then
-      if(Q2min.eq.Q2max) then
+      if(Q2min.ne.Q2max) then
          write(idev,'(a,f16.6,a)') ' # σ(CC)                          =', central,' pb/GeV^2'
       else
          write(idev,'(a,f16.6,a)') ' # σ(CC)                          =', central,' pb'
