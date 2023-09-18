@@ -196,6 +196,10 @@ contains
    
    rts = sqrts
    if(scaleuncert) rts = rts * maxval(scales_muf) * xmuf
+   ! Need to start hoppet
+   maxQval = rts 
+   call hoppetStartExtended(ymax_hoppet,dy,minQval,maxQval,dlnlnQ,nloop,&
+        &         order_hoppet,factscheme_MSbar)
    if(vnf) then
       call StartStrFct(rts = rts, order_max = order_max, xR = xmur,&
            & xF = xmuf, scale_choice = scale_choice, constant_mu = mz,&
