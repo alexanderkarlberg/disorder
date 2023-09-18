@@ -38,6 +38,8 @@ module mod_parameters
        & NC_reduced_dsigma(maxscales), CC_reduced_dsigma(maxscales),&
        & NC_reduced_sigma(maxscales), CC_reduced_sigma(maxscales)
   real(dp), public, save :: toy_Q0, Q0pdf, xmuR_PDF, Q2minPDF ! For HOPPET PDF evolution
+    real(dp), public :: dy, dlnlnQ, minQval, maxQval, ymax_hoppet
+  integer, public :: nloop, order_hoppet
   character (len=4), private :: order
   real(dp), private :: Q, x, y
   real(dp), public :: pbornlab(0:3,2+2), preallab(0:3,2+3), prreallab(0:3,2+4)
@@ -298,6 +300,17 @@ contains
     CC_reduced_sigma = 0.0_dp
     NC_reduced_dsigma = 0.0_dp
     CC_reduced_dsigma = 0.0_dp
+
+    ! For hoppetStartExtended. Could think of putting on commandline...
+    ! Streamlined initialization
+    ! including  parameters for x-grid
+    order_hoppet = -6 
+    ymax_hoppet  = 16.0_dp
+    dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
+    dlnlnQ = dy/4.0_dp
+    nloop = min(3,order_max)
+    minQval = min(xmuF*Qmin, Qmin)
+    maxQval = max(xmuF*sqrts, sqrts)
     
     if (.not.CheckAllArgsUsed(0)) then
        call help_message
@@ -311,10 +324,13 @@ contains
     real(dp), intent(in) :: muR
     real(dp) :: muR_lcl, alphasPDF
     muR_lcl = max(muR,Qmin)
-    ! we use alphas from the LHAPDF PDF
-    alphasLocal = alphasPDF(muR_lcl)
+    if(toy_Q0 < 0d0) then
+       ! we use alphas from the LHAPDF PDF
+       alphasLocal = alphasPDF(muR_lcl)
+    else
     ! we use alphas from HOPPET
-    !alphasLocal = CouplingValue(coupling, muR_lcl)
+       alphasLocal = CouplingValue(coupling, muR_lcl)
+    endif
   end function alphasLocal
   
 

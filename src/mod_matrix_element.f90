@@ -17,14 +17,13 @@ contains
     real(dp), intent(in) :: x, yDIS, Qsq
     real(dp)             :: res(maxscales)
     !----------------------------------------------------------------------
-    real(dp) :: y, Qval
+    real(dp) :: Qval
     real(dp) :: muRval, muFval
     real(dp) :: Fx(-6:7,4)
     real(dp) :: F1NC, F2NC, F3NC, F1CC, F2CC, F3CC, sigma(4)
     real(dp) :: overall_norm, propZ, propW, propgZ
     integer  :: i, iscale
 
-    y = -log(x)
 
     Qval = sqrt(Qsq)
 
@@ -47,10 +46,10 @@ contains
        muFval = Qval * scales_muf(iscale)
        
        ! Compute the structure functions
-       Fx(:,1) = F_LO(y, Qval, muRval, muFval)
-       if (order_stop.ge.2) Fx(:,2) = F_NLO(y, Qval, muRval, muFval)
-       if (order_stop.ge.3) Fx(:,3) = F_NNLO(y, Qval, muRval, muFval)
-       if (order_stop.ge.4) Fx(:,4) = F_N3LO(y, Qval, muRval, muFval)
+       Fx(:,1) = F_LO(x, Qval, muRval, muFval)
+       if (order_stop.ge.2) Fx(:,2) = F_NLO(x, Qval, muRval, muFval)
+       if (order_stop.ge.3) Fx(:,3) = F_NNLO(x, Qval, muRval, muFval)
+       if (order_stop.ge.4) Fx(:,4) = F_N3LO(x, Qval, muRval, muFval)
 
        if(NC) then
           propgZ = Qsq / (Qsq + MZ**2) / sin_2thw_sq! Z propagator

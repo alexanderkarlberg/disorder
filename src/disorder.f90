@@ -31,6 +31,9 @@ program disorder
 
   ! set up all constants and parameters from command line arguments
   call set_parameters()
+  ! Need to start hoppet
+  call hoppetStartExtended(ymax_hoppet,dy,minQval,maxQval,dlnlnQ,nloop,&
+       &         order_hoppet,factscheme_MSbar)
   ! Initialise histograms
   call init_histo()
 
@@ -175,11 +178,13 @@ contains
  subroutine initialise_run_structure_functions
    implicit none
    real(dp) :: rts
-
-   write(6,*) "PDF member:",imempdf
-   call InitPDF(imempdf)
-   call getQ2min(0,Qmin)
-   Qmin = sqrt(Qmin)
+   
+   if(toy_Q0 < 0d0) then
+      write(6,*) "PDF member:",imempdf
+      call InitPDF(imempdf)
+      call getQ2min(0,Qmin)
+      Qmin = sqrt(Qmin)
+   endif
 
    if(Qmin.gt.sqrt(Q2min)) then
       print*, 'WARNING: PDF Qmin = ', Qmin
