@@ -36,15 +36,13 @@
       integer n
       double precision x, y, Q2
       integer maxjets
-      parameter (maxjets=3)
+      parameter (maxjets=4)
       double precision ppartons(0:3,maxjets),pj(0:3,maxjets)
-      double precision ptj1, etaj1, Etj1, Elep, Et
-      real * 8 sqrtQ2,sbeams,R, palg, kt, eta
+      double precision ptj1, etaj1, Etj1, Elep, Et, etaj, Etj
+      real * 8 sqrtQ2,sbeams,R, palg, kt, eta, dcut
       real * 8 p_long,p_remn(0:3)
 
       integer i,npartons,njets
-
-      logical hardest
 
       if (y < 0.04d0 .or. Q2 < 25d0 )
      $     return
@@ -53,16 +51,12 @@
 
       if(Elep .lt. 10d0) return
       
-      call filld('sig',0.5d0,dsig)
-      call filld('Q2',Q2,dsig)
-      call filld('x',x,dsig)
-      
 !      sqrtQ2 = sqrt(Q2)
 
       npartons = n - 3
 
-!      ppartons(:,1:npartons) = plab(:,4:n)
-      ppartons(:,2:npartons+1) = plab(:,4:n)
+      ppartons(:,1:npartons) = plab(:,4:n)
+!      ppartons(:,2:npartons+1) = plab(:,4:n)
 
 !     Apparently we need to include the proton remnant in the jet
 !     clustering
@@ -70,54 +64,65 @@
       p_remn = 0d0
       p_remn(3) = p_long - sum(ppartons(3,1:npartons))
       p_remn(0) = p_remn(3)
-      ppartons(:,1) = p_remn(:)
-      npartons = npartons + 1
+!      ppartons(:,1) = p_remn(:)
+!      npartons = npartons + 1
 
-      R = 0.7d0                 ! Not used
-      palg = 1d0                ! Not used
+      dcut = 1d0                ! The Etcut
       !print*, 'npartons', npartons
       !print*, 'p_remn', p_remn
       !do i = 1,npartons
       !   print*, 'ppartons', i , ppartons(:,i)
       !enddo
-      call buildjets(npartons,ppartons,R,palg,pj,njets)
+      call buildjets(npartons,ppartons,dcut,pj,njets)
+      if(njets.lt.1) return
       !if(njets.eq.npartons) then
-      !   print*, 'njets', njets
-      !   do i = 1, njets
-      !      print*, i, pj(:,i)
-      !   enddo
+      !print*, 'njets', njets
+      !do i = 1, njets
+      !   print*, i, pj(:,i)
+      !enddo
        !  stop
       !endif
-      hardest = .true.
+      !print*, npartons, njets
+      Etj1 = -1d100
+      etaj1 = -1d100
       do i=1,njets
-         Etj1 = Et(pj(:,i))
-         etaj1 = eta(pj(:,i))
+         Etj = Et(pj(:,i))
+         etaj = eta(pj(:,i))
 
-         if(Etj1.lt.6d0) cycle
-         if(etaj1.gt.3d0.or.etaj1.lt.-1d0) cycle
+         if(Etj.lt.6d0) cycle
+         if(etaj.gt.3d0.or.etaj.lt.-1d0) cycle
          
-! Always fill inclusive
-         call filld('Etj1inc',Etj1,dsig)
-         call filld('etaj1inc',etaj1,dsig)
-         
-!     Fill hardest
-         if(hardest) then
-            call filld('Etj1',Etj1,dsig)
-            call filld('etaj1',etaj1,dsig)
-            hardest = .false.
+         if(Etj.gt.Etj1) then
+            Etj1 = Etj
+            etaj1 = etaj
          endif
+! Always fill inclusive
+         call filld('Etj1inc',Etj,dsig)
+         call filld('etaj1inc',etaj,dsig)
          
       enddo
+!      print*, Etj1
+
+!     Fill hardest
+      if(Etj1.gt.6d0) then
+         call filld('sig',0.5d0,dsig)
+         call filld('Q2',Q2,dsig)
+         call filld('x',x,dsig)
+         
+         call filld('Etj1',Etj1,dsig)
+         call filld('etaj1',etaj1,dsig)
+      endif
+         
 
      
       end
 
-      subroutine buildjets(n, pin, R, palg, pj, njets)
+      subroutine buildjets(n, pin, dcut, pj, njets)
       implicit none
       integer n
-      double precision pin(0:3,n), R, palg
+      double precision pin(0:3,n), dcut, palg
       integer maxtrack,maxjet
-      parameter (maxtrack=3,maxjet=3)
+      parameter (maxtrack=4,maxjet=4)
 
 !     Output
       double precision pj(0:3,maxjet)
@@ -125,6 +130,8 @@
       integer i, mu, njets, ntracks, ijet, j, jetvec(maxtrack)
       double precision pjet(4,maxjet), ptmin
       double precision ptrack(4,maxtrack)
+      double precision fastjetdmerge, fastjetdmergemax, pcopy(n)
+      integer constituent_indices(n), nconstituents, njets_final
 
       ptrack = 0d0
       pjet = 0d0
@@ -141,26 +148,37 @@
       enddo
 !     Seems to be an issue where the disent momenta are exactly zero and
 !     fastjet is not happy about this. It always happens at the end!
-      do i=1,n
-         if(ptrack(4,i).eq.0d0) ntracks = ntracks -1
-      enddo
-      
-!      call fastjetppgenkt(ptrack,ntracks,r,palg,pjet,njets)
-!      call fastjetppktetscheme(ptrack,ntracks,r,pjet,njets)
-      call fastjeteekt(ptrack,ntracks,pjet,njets)
+!      if(all(ptrack(:,n).eq.0d0)) ntracks = ntracks -1
 
-      if(njets.gt.3.or.njets.lt.1) then
+
+!      call fastjeteekt(ptrack,ntracks,dcut,pjet,njets)
+      call fastjetppktetscheme(ptrack,ntracks,dcut,pjet,njets)
+
+      if(njets.gt.maxjet.or.njets.lt.1) then
          print*, 'njets out of bounds!!', njets
+         do ijet = 1,ntracks
+            print*, ptrack(:,ijet)
+         enddo
+         print*, ''
          stop
       endif
-
+      njets_final = 0
 !     Back to 1:4 index
       do ijet=1,njets
-         do mu=1,3
-            pj(mu,ijet)=pjet(mu,ijet)
-         enddo
-         pj(0,ijet)=pjet(4,ijet)
+!         call fastjetconstituents(ijet,constituent_indices,nconstituents)
+!         if(any(constituent_indices.eq.1)) then
+!     Do nothing this is the proton remnant
+!            njets_final = njets_final + 1
+            
+!         else
+            njets_final = njets_final + 1
+            do mu=1,3
+               pj(mu,njets_final)=pjet(mu,ijet)
+            enddo
+            pj(0,njets_final)=pjet(4,ijet)
+!         endif
       enddo
+      njets = njets_final
       end
 
       double precision function kt(p)

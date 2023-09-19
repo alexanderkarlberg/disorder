@@ -3,7 +3,12 @@ set datafile fortran
 
 set output 'nnlojet-ZEUS.pdf'
 set macros
-
+max(a,b)= a>b ? a:b
+max3(a,b,c)=max(max(a,b),c)
+max7(a,b,c,d,e,f,g) = max(a,max(b,max(c,max(d,max(e,max(f,g))))))
+min(a,b)= a<b ? a:b
+min3(a,b,c)=min(min(a,b),c)
+min7(a,b,c,d,e,f,g) = min(a,min(b,min(c,min(d,min(e,min(f,g))))))
 #linetype 1,  linecolor rgb "dark-violet"  linewidth 1.000 dashtype solid pointtype 1 pointsize default
 #linetype 2,  linecolor rgb "#009e73"  linewidth 1.000 dashtype solid pointtype 2 pointsize default
 #linetype 3,  linecolor rgb "#56b4e9"  linewidth 1.000 dashtype solid pointtype 3 pointsize default
@@ -51,11 +56,11 @@ set yrange [*:*]
 set title '25 GeV^2 < Q^2 < 1000 GeV^2,  0.04 < y < 0.95'
 
 #set label 2 '4 GeV^2 < Q^2 < 5 GeV^2' font "Latin Modern Roman,28" at -8.9,1.7
-set label 28 'e^- (18 GeV) p (275 GeV) → e^- + X' font "Latin Modern Roman,28" at 6, 1.8/1000. left
-set label 29 'MSHT20nnlo\_as118' font "Latin Modern Roman,28" at 6, 1.0/1000. left
-set label 30 'μ_R = μ_F = Q' font "Latin Modern Roman,28" at 6, 0.5555555/1000. left
-set label 31 '7-point variation' font "Latin Modern Roman,28" at 6, .30864197530864197530/1000. left
-set label 38 '|η_j| < 3, anti-k_t, R=0.8' font "Latin Modern Roman,28" at 6, .17146776406035665294/1000. left
+#set label 28 'e^- (18 GeV) p (275 GeV) → e^- + X' font "Latin Modern Roman,28" at 6, 1.8/1000. left
+#set label 29 'MSHT20nnlo\_as118' font "Latin Modern Roman,28" at 6, 1.0/1000. left
+#set label 30 'μ_R = μ_F = Q' font "Latin Modern Roman,28" at 6, 0.5555555/1000. left
+#set label 31 '7-point variation' font "Latin Modern Roman,28" at 6, .30864197530864197530/1000. left
+#set label 38 '|η_j| < 3, anti-k_t, R=0.8' font "Latin Modern Roman,28" at 6, .17146776406035665294/1000. left
 
 set ylabel 'dσ/dp_{t,j} [mb/GeV]'
 set xlabel ''
@@ -69,7 +74,7 @@ set tmargin at screen 0.92
 set bmargin at screen 0.47
 
 
-ii=0
+ii=1
 
 plot  lo i ii u   (($1+$2)/2.):($3/1000.):1:2:($7/1000.):($11/1000.) w @LOfill title 'LO',\
       lo i ii u   (($1+$2)/2.):($3/1000.):1:2 w @LOline not,\
@@ -85,12 +90,12 @@ set nologscale y
 set title ''
 set format x
 set format y
-set ytics 0.6,0.1,1.29
+set ytics 0.2,0.2,1.4
 set mytics 5
 unset label
-set xlabel 'p_{t,j [GeV]'
+set xlabel 'Q^2 [GeV^2]'
 set ylabel 'Ratio to NNLO'
-set yrange [0.6:1.3]
+set yrange [0.15:1.45]
 
 plot  lo i ii u   (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @LOfill not,\
       lo i ii u   (($1+$2)/2.):($3/$15):1:2 w @LOline not,\
@@ -100,25 +105,27 @@ plot  lo i ii u   (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @LOfill not,\
       nnlo i ii u (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @NNLOfill not',\
 
 unset multiplot
+
 reset
 
 set mxtics
 set mytics
 set grid
 set xtics format ""
-#set log y
+set log x
+set log y
 #set format y "10^{%T}"
 set xrange [*:*]
-set yrange [0:*]
+set yrange [*:*]
 #set key at  -5.2,1.095
 
 set title '25 GeV^2 < Q^2 < 1000 GeV^2,  0.04 < y < 0.95'
 
-set label 28 'e^- (18 GeV) p (275 GeV) → e^- + X' font "Latin Modern Roman,28" at -0.6, 1.6 left
-set label 29 'MSHT20nnlo\_as118' font "Latin Modern Roman,28" at -0.6, 1.3 left
-set label 30 'μ_R = μ_F = Q' font "Latin Modern Roman,28" at -0.6, 1.0 left
-set label 31 '7-point variation' font "Latin Modern Roman,28" at -0.6, 0.7 left
-set label 38 '|η_j| < 3, anti-k_t, R=0.8' font "Latin Modern Roman,28" at -0.6, 0.4 left
+#set label 28 'e^- (18 GeV) p (275 GeV) → e^- + X' font "Latin Modern Roman,28" at -0.6, 1.6 left
+#set label 29 'MSHT20nnlo\_as118' font "Latin Modern Roman,28" at -0.6, 1.3 left
+#set label 30 'μ_R = μ_F = Q' font "Latin Modern Roman,28" at -0.6, 1.0 left
+#set label 31 '7-point variation' font "Latin Modern Roman,28" at -0.6, 0.7 left
+#set label 38 '|η_j| < 3, anti-k_t, R=0.8' font "Latin Modern Roman,28" at -0.6, 0.4 left
 
 
 set ylabel 'dσ/dη_{j} [mb]'
@@ -132,7 +139,133 @@ set rmargin at screen 0.95
 set tmargin at screen 0.92
 set bmargin at screen 0.47
 
-ii=1
+ii=2
+
+plot  lo i ii u   (($1+$2)/2.):($3/1000.):1:2:($7/1000.):($11/1000.) w @LOfill title 'LO',\
+      lo i ii u   (($1+$2)/2.):($3/1000.):1:2 w @LOline not,\
+      nlo i ii u  (($1+$2)/2.):($3/1000.):1:2:($7/1000.):($11/1000.) w @NLOfill title 'NLO',\
+      nlo i ii u  (($1+$2)/2.):($3/1000.):1:2 w @NLOline not,\
+      nnlo i ii u (($1+$2)/2.):($3/1000.):1:2 w @NNLOline not,\
+      nnlo i ii u (($1+$2)/2.):($3/1000.):1:2:($7/1000.):($11/1000.) w @NNLOfill title 'NNLO',\
+
+set tmargin at screen 0.47
+set bmargin at screen 0.10
+set nologscale y
+set title ''
+set format x
+set format y
+set ytics -0.4,0.2,1.59
+set mytics 5
+unset label
+set xlabel 'x'
+set ylabel 'Ratio to NNLO'
+set yrange [-0.4:1.6]
+plot  lo i ii u   (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @LOfill not,\
+      lo i ii u   (($1+$2)/2.):($3/$15):1:2 w @LOline not,\
+      nlo i ii u  (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @NLOfill not,\
+      1 lc rgb '#009e73'  not,\
+      nnlo i ii u (($1+$2)/2.):($3/$15):1:2 w @NNLOline not,\
+      nnlo i ii u (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @NNLOfill not',\
+
+unset multiplot 
+
+reset
+
+set mxtics
+set mytics
+set grid
+set xtics format ""
+set log x
+set log y
+#set format y "10^{%T}"
+set xrange [*:*]
+set yrange [*:*]
+#set key at  -5.2,1.095
+
+set title '25 GeV^2 < Q^2 < 1000 GeV^2,  0.04 < y < 0.95'
+
+#set label 28 'e^- (18 GeV) p (275 GeV) → e^- + X' font "Latin Modern Roman,28" at -0.6, 1.6 left
+#set label 29 'MSHT20nnlo\_as118' font "Latin Modern Roman,28" at -0.6, 1.3 left
+#set label 30 'μ_R = μ_F = Q' font "Latin Modern Roman,28" at -0.6, 1.0 left
+#set label 31 '7-point variation' font "Latin Modern Roman,28" at -0.6, 0.7 left
+#set label 38 '|η_j| < 3, anti-k_t, R=0.8' font "Latin Modern Roman,28" at -0.6, 0.4 left
+
+
+set ylabel 'dσ/dη_{j} [mb]'
+
+set multiplot
+set origin 0.0,0.3
+set size 1.0,1.0
+
+set lmargin at screen 0.15
+set rmargin at screen 0.95
+set tmargin at screen 0.92
+set bmargin at screen 0.47
+
+ii=3
+
+plot  lo i ii u   (($1+$2)/2.):($3/1000.):1:2:($7/1000.):($11/1000.) w @LOfill title 'LO',\
+      lo i ii u   (($1+$2)/2.):($3/1000.):1:2 w @LOline not,\
+      nlo i ii u  (($1+$2)/2.):($3/1000.):1:2:($7/1000.):($11/1000.) w @NLOfill title 'NLO',\
+      nlo i ii u  (($1+$2)/2.):($3/1000.):1:2 w @NLOline not,\
+      nnlo i ii u (($1+$2)/2.):($3/1000.):1:2 w @NNLOline not,\
+      nnlo i ii u (($1+$2)/2.):($3/1000.):1:2:($7/1000.):($11/1000.) w @NNLOfill title 'NNLO',\
+
+set tmargin at screen 0.47
+set bmargin at screen 0.10
+set nologscale y
+set title ''
+set format x
+set format y
+set ytics 0.6,0.1,1.29
+set mytics 5
+unset label
+set xlabel 'E_{t,inc}'
+set ylabel 'Ratio to NNLO'
+set yrange [0.6:1.3]
+plot  lo i ii u   (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @LOfill not,\
+      lo i ii u   (($1+$2)/2.):($3/$15):1:2 w @LOline not,\
+      nlo i ii u  (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @NLOfill not,\
+      1 lc rgb '#009e73'  not,\
+      nnlo i ii u (($1+$2)/2.):($3/$15):1:2 w @NNLOline not,\
+      nnlo i ii u (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @NNLOfill not',\
+
+unset multiplot 
+
+reset
+
+set mxtics
+set mytics
+set grid
+set xtics format ""
+#set log x
+#set log y
+#set format y "10^{%T}"
+set xrange [*:*]
+set yrange [0:*]
+#set key at  -5.2,1.095
+
+set title '25 GeV^2 < Q^2 < 1000 GeV^2,  0.04 < y < 0.95'
+
+#set label 28 'e^- (18 GeV) p (275 GeV) → e^- + X' font "Latin Modern Roman,28" at -0.6, 1.6 left
+#set label 29 'MSHT20nnlo\_as118' font "Latin Modern Roman,28" at -0.6, 1.3 left
+#set label 30 'μ_R = μ_F = Q' font "Latin Modern Roman,28" at -0.6, 1.0 left
+#set label 31 '7-point variation' font "Latin Modern Roman,28" at -0.6, 0.7 left
+#set label 38 '|η_j| < 3, anti-k_t, R=0.8' font "Latin Modern Roman,28" at -0.6, 0.4 left
+
+
+set ylabel 'dσ/dη_{j} [mb]'
+
+set multiplot
+set origin 0.0,0.3
+set size 1.0,1.0
+
+set lmargin at screen 0.15
+set rmargin at screen 0.95
+set tmargin at screen 0.92
+set bmargin at screen 0.47
+
+ii=4
 
 plot  lo i ii u   (($1+$2)/2.):($3/1000.):1:2:($7/1000.):($11/1000.) w @LOfill title 'LO',\
       lo i ii u   (($1+$2)/2.):($3/1000.):1:2 w @LOline not,\
@@ -150,7 +283,7 @@ set format y
 set ytics 0.0,0.2,1.59
 set mytics 5
 unset label
-set xlabel 'η_{j}'
+set xlabel 'η_{j,inc}'
 set ylabel 'Ratio to NNLO'
 set yrange [0.0:1.6]
 plot  lo i ii u   (($1+$2)/2.):($3/$15):1:2:($7/$15):($11/$15) w @LOfill not,\

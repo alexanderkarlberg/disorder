@@ -445,14 +445,28 @@ void fastjeteegenkt_(const double * p, const int & npart,
 /// but for the e+e- algorithms instead of the pp ones; note this 
 /// only gives the "inclusive" algorithms. The algorithms are as
 /// defined in the FastJet manual.
-void fastjeteekt_(const double * p, const int & npart,                   
-		   double * f77jets, int & njets) {
+  void fastjeteekt_(const double * p, const int & npart, const double & dcut,                   
+		    double * f77jets, int & njets) {
     
   // prepare jet def
   jet_def = JetDefinition(ee_kt_algorithm, Et_scheme);
   
   // do everything
-  transfer_cluster_transfer(p,npart,jet_def,f77jets,njets);
+  //transfer_cluster_transfer(p,npart,jet_def,f77jets,njets);
+  // transfer p[4*ipart+0..3] -> input_particles[i]  (cached)
+  transfer_input_particles(p, npart);
+
+    // cluster 
+  ClusterSequence *cs_local = cluster_base(input_particles, jet_def);
+  
+  // cache
+  cs.reset(cs_local);
+  // extract jets (into cache)
+  jets = sorted_by_E(cs_local->exclusive_jets(dcut));
+  //jets = sorted_by_E(cs_local->inclusive_jets());
+    
+  // transfer jets -> f77jets[4*ijet+0..3]
+  transfer_jets(f77jets, njets); 
 }
 
 /// same ee generalised-kt as above without the caching (invalidating
