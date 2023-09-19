@@ -52,6 +52,7 @@
 \newcommand{\provbfh}{{\tt proVBFH}}
 \newcommand{\fastjet}{{\tt fastjet}}
 \newcommand{\lhapdf}{{\tt LHAPDF}}
+\newcommand{\nnlojet}{NNLO{\sc{jet}}}
 \newcommand{\disaster}{{\tt disaster++}}
 \newcommand{\nlojet}{{\tt nlojet++}}
 \newcommand{\as}{\alpha_{\mathrm{s}}}
@@ -139,16 +140,16 @@ can be found in
 Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm}.}
 The structure functions can be combined with an exclusive
 next-to-next-to-leading order (NNLO) DIS + 1 jet computation to obtain
-fully differential \NNNLO{} predictions in DIS, as was done by the NNLOJET
+fully differential \NNNLO{} predictions in DIS, as was done by the \nnlojet{}
 collaboration~\cite{Currie:2018fgr,Gehrmann:2018odt}. This computation
 uses the Projection-to-Born (P2B) method, which was first introduced
 in the context of NNLO Vector Boson Fusion (VBF)
 production~\cite{Cacciari:2015jma}.
 
 Despite this impressive theoretical progress, there are few publically
-available computer codes from which one can obtain
-fast and reliable high-order cross section predictions. This paper
-and associated Fortran code seeks to address that.
+available computer codes from which one can obtain fast and reliable
+high-order cross section predictions for DIS. This paper and
+associated Fortran code seeks to address that.
 
 One of the advantages of the P2B method is that it is rather agnostic
 towards the details of the underlying exclusive computation, and it is
@@ -161,7 +162,7 @@ between \disent{} and fixed-order coefficients from analytical
 resummation were initially observed in
 Refs.\cite{Antonelli:1999kx,Dasgupta:2002dc}, and were only recently
 understood to be due to a bug in one of the dipole terms for the gluon
-channel~\cite{Borsa:2020ulb,Borsa:2020yxh}.
+channel in \disent{}~\cite{Borsa:2020ulb,Borsa:2020yxh}.
 
 With the bug fixed we can use \disent{} as the underlying exclusive
 NLO code together with the NNLO structure functions
@@ -170,8 +171,7 @@ combination of \disent{} and \hoppet{} naturally leads to a Fortran
 code. For a C++ alternative, based on publically available codes, one
 could have started from either \disaster{} or \nlojet{} and used the
 structure functions as implemented in
-APFEL++~\cite{Bertone:2013vaa,Bertone:2017gds}, where the reduced
-cross sections have also been implemented.} Advantages of using
+APFEL++~\cite{Bertone:2013vaa,Bertone:2017gds}} Advantages of using
 \disent{} are its well-known efficiency and numerical stability. The
 resulting program is dubbed \disorder{} keeping in the spirit of
 previous names for fixed-order DIS codes.\footnote{{\tt
@@ -180,7 +180,7 @@ this context.} Since the program relies on \hoppet{} for the structure
 functions, the inclusive DIS cross section can actually be obtained
 one order higher, as the structure functions were implemented at
 \NNNLO{} already in the context of the \provbfh{}
-code~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}. The
+codes~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}. The
 \disorder{} program therefore has two more or less separate use cases:
 1. The computation of fully exclusive NNLO photon-mediated DIS 2. The
 computation of inclusive/reduced neutral- (NC) and charged-current
@@ -206,12 +206,12 @@ It should be pointed out that the code provide little theoretical
 advance on its own. As described above, the structure functions
 themselves have been known for a little while, and the P2B method has
 already been applied to DIS, even one order higher than
-here\footnote{It has also been applied in polarised DIS in
-Refs.~\cite{Borsa:2020ulb,Borsa:2020yxh,Borsa:2021afb,Borsa:2022irn,Borsa:2022cap}.}. It
-is however the author's opinion that public code is extremely
-valuable for both the experimental and theoretical communities, and
-that providing documentation in the form of this article will enable
-the wide use of the code.
+here.\footnote{It has also been applied in polarised DIS in
+Refs.~\cite{Borsa:2020ulb,Borsa:2020yxh,Borsa:2021afb,Borsa:2022irn,Borsa:2022cap}.}
+It is however the author's opinion that well-maintained public code is
+extremely valuable for both the experimental and theoretical
+communities, and that providing documentation in the form of this
+article will enable the wide use of the code.
 
 The paper is structured as follows: In section~\ref{sec:dis} we review
 the DIS process and kinematics as implemented in \disorder{}. In
@@ -300,9 +300,8 @@ $\alpha$, $M_W$, and $M_Z$ through the tree-level relations
 \begin{align}
   \sin^2\theta_W = 1-\frac{M_W^2}{M_Z^2}, \qquad G_F = \frac{\pi\alpha}{\sqrt{2}m_W^2\sin^2\theta_W},
 \end{align}
-with $G_F$ the Fermi constant.
-
-Similarly we define the unpolarised CC cross section as
+with $G_F$ the Fermi constant. Similarly we define the unpolarised CC
+cross section as
 \begin{equation}
 \frac{\dd\sigma_{\CC}^\pm}{\dd x \dd Q^2} =   \frac{\pi\alpha^2}{8\sin^4\theta_W x}\left[\frac{1}{M_W^2 + Q^2}\right]^2 \left[y_+ F_2^{\CC} \mp y_- x F_3^\CC - y^2 F_L^\CC\right],\,
 \label{eq:CCsigma}
@@ -315,10 +314,13 @@ are now simply given by the $W$ ones
 The exact definitions of all proton structure functions inside
 \hoppet{} up to \NNNLO{} can be found in
 Refs.~\cite{Salam:2008qg,BertoneKarlberg}. The tabulation of the
-structure functions inside \hoppet{} has a numerical precision of
-$10^{-4}$ for most values of $x$. In DIS it is also customary to
-define the dimensionless \emph{reduced} NC and CC cross sections
-by~\cite{H1:2012qti}
+structure functions inside \hoppet{}, as used in \disorder{}, has a
+relative numerical precision of $10^{-4}$ for most values of $x$,
+which in turn limits the accuracy which can be obtained to the same
+order.
+
+In DIS it is also customary to define the dimensionless
+\emph{reduced} NC and CC cross sections by~\cite{H1:2012qti}
 \begin{align}
   \label{eq:reducedsigma}
   \tilde{\sigma}_\NC^\pm(x,Q^2) &= \frac{xQ^4}{2\pi\alpha^2}\frac{1}{y_+}\frac{\dd\sigma_{\NC}^\pm}{\dd x \dd Q^2} \\ \notag
@@ -329,7 +331,24 @@ eqs.~\eqref{eq:NCsigma},~\eqref{eq:CCsigma},
 and~\eqref{eq:reducedsigma} at \NNNLO{} accuracy. In principle one can
 also access the NC and CC structure functions, although they are
 currently only computed as an intermediate step to construct the cross
-sections.
+sections and are not accessible in the user analysis.
+
+\subsection{A note on the phase space}
+\label{sec:phasespace}
+Since the Born phase space is fully constrained by specifying any two
+of the three DIS variables $x$, $y$, and $Q^2$ there exists more than
+one double-differential cross section. The convention in \disorder{}
+is to always return $\frac{\dd\sigma^2}{\dd x \dd Q^2}$ (in
+pb/$\GEV^2$) regardless of which of the two variables are fixed. The
+user can easily convert to $\frac{\dd\sigma^2}{\dd x \dd y}$ or
+$\frac{\dd\sigma^2}{\dd y \dd Q^2}$ by supplying a factor
+$\frac{Q^2}{y}$ or $\frac{x}{y}$ respectively. If only one of $x$,
+$y$, or $Q^2$ is specified then the appropriate single differential
+cross section is returned, i.e.~$\frac{\dd\sigma}{\dd x}$ in pb,
+$\frac{\dd\sigma}{\dd y}$ in pb, or $\frac{\dd\sigma}{\dd Q^2}$ in
+pb/$\GEV^2$, integrated over the other two variables. If none of the
+variables are fixed then the total cross section integrated over $x$,
+$y$, and $Q^2$ is returned in pb.
 
 \subsection{Applying P2B}
 \label{sec:P2B}
@@ -365,20 +384,22 @@ exclusive predictions for this channel. It should in principle be
 possible to extend the code to include Z-mediation (including
 interferences) and CC, but we leave this for future work.
 
-In principle P2B can be applied to the \disent{} code without any
+In principle P2B could be applied to the \disent{} code without any
 major modifications besides the bug fix mentioned in the
-introduction. The version of \disent{} that we include in \disorder{}
-is based on the version which can be found in {\tt
-  dispatch}~\cite{Dasgupta:2002dc}. In addition to the modifications
-present there, we have also introduced $\alpha$ as an input parameter,
-whereas before it was fixed to $1/137$. A number of parameters can
-also now be set on the command line. Besides coding the actual
-interface to \disent{}, the biggest modification introduced in
-\disorder{} is that the {\tt KPFUNS} subroutine now returns an array
-of weights corresponding to varying the factorisation scale by a
-factor two up and down. This allows for much faster evaluation of
-scale uncertainties compared to running the program three separate
-times.
+introduction. However a few modifications were introduced to allow for
+a more flexible integration of \disent{} into \disorder. The version
+of \disent{} that we include in \disorder{} is based on the version
+which can be found in {\tt dispatch}~\cite{Dasgupta:2002dc}, and which
+already included some minor modifications. In addition to the
+modifications present there, we have also introduced $\alpha$ as an
+input parameter, whereas before it was fixed to $1/137$. A number of
+parameters can also now be set on the command line as described
+below. Besides coding the actual interface to \disent{}, the biggest
+modification introduced in \disorder{} is that the {\tt KPFUNS}
+subroutine now returns an array of weights corresponding to varying
+the factorisation scale by a factor two up and down. This allows for
+much faster evaluation of scale uncertainties compared to running the
+program three separate times.
 
 \section{Running \disorder{}}
 \label{sec:running}
@@ -412,7 +433,10 @@ compiled by
 \begin{lstlisting}
   make aux [-j]
 \end{lstlisting}
-and will be created in the {\tt aux} folder. 
+and will be created in the {\tt aux} folder. The program has bee found
+to compile on a Linux machine using the {\tt gfortran v11.4.0}
+compiler.
+
 \subsubsection{The analysis framework}
 The code uses the {\tt POWHEG-BOX} analysis framework, with some
 minor modifications. A few example analyses are included in the {\tt
@@ -442,11 +466,13 @@ is the maximum number of scales which is supported (currently 7). {\tt
   x}, {\tt y}, and {\tt Q2} are the DIS variables.
 
 Through the module {\tt mod\_analysis} the analysis has access to two
-array of momenta {\tt pbreit(0:3,1:n)} and {\tt plab{0:3,1:n}} which
-the Breit and laboratory frame momenta are stored respectively. The
-output of the analysis will be saved to the disk as outlined below.
-In the {\tt user\_analysis} routine the user should perform their
-analysis and fill histograms like this
+array of momenta {\tt pbreit(0:3,1:n)} and {\tt plab(0:3,1:n)} in
+which the Breit and laboratory frame momenta are stored
+respectively. The first entry is the incoming lepton, the second the
+incoming parton, the third the outgoing lepton and the rest outgoing
+partons. The output of the analysis will be saved to the disk as
+outlined below.  In the {\tt user\_analysis} routine the user should
+perform their analysis and fill histograms like this
 \begin{lstlisting}
   call filld('string_name', obs_value, dsig)
 \end{lstlisting}
@@ -511,7 +537,7 @@ line would run the program with CC processes only using a positron
 
 The order of the calculation is by default NNLO but can be specified
 with one of the flags {\tt -lo/-nlo/-nnlo/-n3lo}. If the user wants to
-compute PDF uncertainties, the flag {\tt pdfuncert} should be
+compute PDF uncertainties, the flag {\tt -pdfuncert} should be
 given. This flag will make \disorder{} loop over all the members in
 the PDF, and combine their errors according to the routine {\tt
   getpdfuncertainty}~\cite{Watt:2011kp}, native to LHAPDF. This also
@@ -669,25 +695,15 @@ In figure~\ref{fig:sigma} we show the NC cross section for fixed
 $Q=10\GEV$ (left) or $x=0.01$ (right), now only at NNLO, \NNNLO{} and
 a\NNNLO{}. The uncertainty bands are obtained as a linear combination
 of the scale uncertainty and the PDF uncertainty, and is typically
-dominated by the latter, in particular at \NNNLO{}. It is interesting
-to observe that although the central prediction at a\NNNLO{} is in
-tension with the \NNNLO{} curve, it is contained within the NNLO scale
-uncertainty band, except at intermediate $x$ values. It will be
-interesting to see, if the inclusion of the exact \NNNLO{} splitting
-functions, when they become available, will ameliorate this tension. 
+dominated by the latter, in particular at \NNNLO{}. We observe that
+although the central prediction at a\NNNLO{} is in tension with the
+\NNNLO{} curve, it is contained within the NNLO scale uncertainty
+band, except at intermediate $x$ values. It will be interesting to
+see, if the inclusion of the exact \NNNLO{} splitting functions, when
+they become available, will ameliorate this tension.
 
 
 \subsection{Exclusive laboratory frame results}
-\begin{figure}[tb!]
-  \centering\includegraphics[width=0.49\textwidth,page=1]{../paper_runs/lab_frame/lab-frame.pdf}
-  \centering\includegraphics[width=0.49\textwidth,page=2]{../paper_runs/lab_frame/lab-frame.pdf}
-  \caption{The NC cross section for fixed $Q=10\GEV$ differential in
-    $\log x$ (left) and for fixed $x=0.01$ and differential in $\log
-    Q$ (right). We show NNLO (purple), \NNNLO{} (green), and a\NNNLO{}
-    (red). The uncertainty band is obtained as the linear combination
-    of scale and PDF uncertainties.}
-  \label{fig:labframe}
-\end{figure}
 To demonstrate the results of the code in P2B mode, we perform a jet
 analysis in laboratory frame, based on Ref.~\cite{Borsa:2022cap}, which
 probes the kinematic range accessible by the upcoming
@@ -702,6 +718,16 @@ satisfy the following transverse momentum and pseudo-rapidity requirements
 \begin{align}
   p_{t,j} > 5 \GEV, \quad |\eta_j| < 3\,.
 \end{align}
+\begin{figure}[tb!]
+  \centering\includegraphics[width=0.49\textwidth,page=1]{../paper_runs/lab_frame/lab-frame.pdf}
+  \centering\includegraphics[width=0.49\textwidth,page=2]{../paper_runs/lab_frame/lab-frame.pdf}
+  \caption{The NC cross section for fixed $Q=10\GEV$ differential in
+    $\log x$ (left) and for fixed $x=0.01$ and differential in $\log
+    Q$ (right). We show NNLO (purple), \NNNLO{} (green), and a\NNNLO{}
+    (red). The uncertainty band is obtained as the linear combination
+    of scale and PDF uncertainties.}
+  \label{fig:labframe}
+\end{figure}
 In Fig.~\ref{fig:labframe} we show the inclusive jet transverse
 momentum and rapidity at LO, NLO, and NNLO, in photon-induced NC
 DIS. For the transverse momentum the higher order corrections are
@@ -713,8 +739,8 @@ do not cover the actual corretions, and it is obvious that one needs
 to go beyond NLO for reliable predictions. Of course one needs the
 full \NNNLO{} to assess the reliability of the NNLO result. However,
 from similar results in Ref.~\cite{Currie:2018fgr} it can be expected
-that the actual \NNNLO{} results will be contained within the scale
-variation band at NNLO.
+that the actual \NNNLO{} results will be mostly contained within the
+scale variation band at NNLO.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -731,22 +757,22 @@ extremely fast, and a user can obtain cross section results at
 from any future developments in \hoppet{}, e.g.~the inclusion of
 massive coefficient functions and 4-loop splitting functions.
 
-In the fully differential mode, only photon-mediated DIS can be
+In the fully differential P2B mode, only photon-mediated DIS can be
 computed, and no PDF variations are currently implemented. It should
 in principle be possible to extend \disent{} to full NC and CC, and
 this is something that is planned for a future release of the
 code. Similarly the PDF variations could also be implemented, however
-this would require some serious restructuring of the code, for it to
-be efficient. The upgrade of the code to handle \NNNLO{} fully
+this would require some serious restructuring of the code for it to be
+efficient. The upgrade of the code to handle \NNNLO{} fully
 differentially is not currently planned. This is mainly due to the
 fact that this would require a complete replacement of \disent{} with
-a proper exclusive NNLO DIS + 1 jet code, requiring a significant
+a proper exclusive NNLO DIS + 1 jet code, entailing a significant
 amount of work. Such a code would also be very slow compared to what
 is in place now, and it would defeat part of the attraction of
 \disorder{} which is its speed. At LO and NLO a user can obtain
 differential results on a laptop running for a just a few minutes, and
-even reasonable NNLO results can be obtained on a single machine
-running for a few hours. \NNNLO{} results will inevitably require
+even reasonable NNLO results can be obtained on a multi-core machine
+running for an hour. \NNNLO{} results would inevitably require
 large resources on a High Performance Cluster.
 
 The code comes with an interface to \fastjet{} and \lhapdf{} and
@@ -755,8 +781,11 @@ is run through a user-friendly command line interface.
 \section*{Acknowledgements}
 The author is grateful for many discussions with Andrea Banfi and
 Gavin Salam regarding \disent{}, and for encouragement to publish
-\disorder{}. The idea for the code originated while the author was
-working on Ref.~\cite{Banfi:2023mhz}.
+\disorder{}. The author also thanks Valerio Bertone for discussions
+about the DIS structure functions and Alex Huss for valuable cross-checks
+against results obtained with the \nnlojet{} code. The idea for the
+code originated while the author was working on
+Ref.~\cite{Banfi:2023mhz}.
 
 
 %\begin{appendix}

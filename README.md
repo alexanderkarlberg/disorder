@@ -15,7 +15,7 @@ compiled using:
 
 in the main directory. This will create an executable "disorder".
 
-No arguments need to bne passed to configure if lhapdf=config and
+No arguments need to be passed to configure if lhapdf-config and
 hoppet-config are both in the user's $PATH.
 
 To compile disorder with a local installation of hoppet or LHAPDF,

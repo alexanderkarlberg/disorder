@@ -31,7 +31,11 @@ FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 CXX = g++
 CXXFLAGS = -O3	
 CXXFLAGS += $(shell $(FASTJET_CONFIG) --cxxflags)
-#CXXLIBS= -lstdc++ -L$(PWD) -Wl,-rpath=$(PWD) -lpanscales
+ifeq ($(shell uname), Darwin)
+    CXXLIBS= -lc++
+  else
+    CXXLIBS= -lstdc++ #with g++
+endif		
 CXXLIBS= -lstdc++
 
 # librairies and flags needed for compilation
@@ -41,7 +45,7 @@ OBJ=$(PWD)/obj
 ANA=$(PWD)/analysis
 VPATH=./:$(SRC):/$(OBJ):/$(ANA)
 
-FFLAGS= -O3 -ffixed-line-length-132 #-Wunused
+FFLAGS= -O3 -ffixed-line-length-132 
 FFLAGS+= $(shell $(HPEXEC) --fflags)
 INCLUDE= -I$(ANA) -I$(SRC) $(wildcard *.h)
 FFLAGS+= $(INCLUDE) -J$(OBJ)
