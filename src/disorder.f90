@@ -286,9 +286,16 @@ contains
    
    Q2minl = Q2min
    Q2maxl = Q2max
-   
-   yminl = ymin
-   ymaxl = ymax
+
+   ! Need to be careful since disent complains if all three variables
+   ! are constrained (even if they are compatible). 
+   if(xmin.eq.xmax.and.Q2min.eq.Q2max) then
+      yminl = 0d0
+      ymaxl = 1d0
+   else
+      yminl = ymin
+      ymaxl = ymax
+   endif
   
  end subroutine dis_cuts
 
@@ -417,7 +424,7 @@ contains
       dsig(1) = totwgt * ncall2
    endif
 
-   if(xmin.eq.xmax) dsig = dsig / x ! Because of convention in DISENT
+   if(xmin.eq.xmax) dsig = dsig / x ! Because of convention in DISENT where it currently returns x dσ/dx when x is fixed.
 
    ! First we transfer the DISENT momenta to our convention
    pbornbreit = 0 ! pborn(0:3,2+2)
@@ -514,19 +521,19 @@ contains
 
    write(idev,'(a)') ' # Summary:'
    if(NC.and.CC) then
-      if(Q2min.ne.Q2max) then
+      if(Q2min.eq.Q2max) then
          write(idev,'(a,f16.6,a)') ' # σ(NC + CC)                     =', central,' pb/GeV^2'
       else
          write(idev,'(a,f16.6,a)') ' # σ(NC + CC)                     =', central,' pb'
       endif
    elseif(NC) then
-      if(Q2min.ne.Q2max) then
+      if(Q2min.eq.Q2max) then
          write(idev,'(a,f16.6,a)') ' # σ(NC)                          =', central,' pb/GeV^2'
       else
          write(idev,'(a,f16.6,a)') ' # σ(NC)                          =', central,' pb'
       endif
    elseif(CC) then
-      if(Q2min.ne.Q2max) then
+      if(Q2min.eq.Q2max) then
          write(idev,'(a,f16.6,a)') ' # σ(CC)                          =', central,' pb/GeV^2'
       else
          write(idev,'(a,f16.6,a)') ' # σ(CC)                          =', central,' pb'
