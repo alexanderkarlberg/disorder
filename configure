@@ -55,6 +55,22 @@ if ! [ -z "$LHAPDF" ]; then LHAPDF+="/"; fi
 LHAPDF+="lhapdf-config"
 if ! [ -z "$HOPPET" ]; then HOPPET+="/"; fi
 HOPPET+="hoppet-config"
+path_to_hoppet=$(which "$HOPPET")
+path_to_lhapdf=$(which "$LHAPDF")
+
+if [ -f "$path_to_hoppet" ]; then
+    echo "found $HOPPET in $path_to_hoppet"
+else 
+    echo "Did not find $HOPPET"
+    exit
+fi
+
+if [ -f "$path_to_lhapdf" ]; then
+    echo "found $LHAPDF in $path_to_lhapdf"
+else 
+    echo "Did not find $LHAPDF"
+    exit
+fi
 
 cat >> $MKF << "BLOCKTEXT"
 ######################################################################
@@ -68,3 +84,8 @@ BLOCKTEXT
 
 echo "# general settings " >> $MKF
 echo "FF="$COMPILER >> $MKF
+
+echo ""
+echo "Makefile.inc configured succesfully. Now run "
+echo ""
+echo " make [-j]"
