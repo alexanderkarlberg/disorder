@@ -6,26 +6,43 @@ To compile disorder, you will need
 * hoppet, v 1.3.0 or newer (https://github.com/gavinsalam/hoppet)
 * LHAPDF (http://lhapdf.hepforge.org/)
 
-Once all dependencies are installed on your machine, disorder can be
-compiled using:
+Optionally you may need fastjet installed as well
+(https://fastjet.fr/).
 
-  ./configure [--with-LHAPDF=DIR --with-hoppet=DIR]
+Once all dependencies are installed on your machine, disorder can be
+compiled using cmake:
+
+  cmake .
 
   make [-j]
 
-in the main directory. This will create an executable "disorder".
+in the main directory. This will create an executable "disorder" along
+with two auxiliary executables, mergedata and getpdfuncert.
 
 No arguments need to be passed to configure if lhapdf-config and
 hoppet-config are both in the user's $PATH.
 
-To compile disorder with a local installation of hoppet or LHAPDF,
-change the "DIR" above in the configure step to the folder containing
-the hoppet-config and lhapdf-config executables respectively.
+If hoppet-config or lhapdf-config are not in the user's path, the full
+path can be specified manually through
 
-Two auxiliary executables, mergedata and getpdfuncert, can be compiled
-with
+cmake -DHOPPET_CONFIG=/path/to/hoppet-config -DLHAPDF_CONFIG=/path/to/lhapdf-config .
 
-  make aux [-j]
+where the path should include the config itself
+(i.e. /usr/local/bin/hoppet-config)
+
+By default fastjet is not linked and only a skeleton analysis
+(analysis/simple_analysis.f) is compiled. To link fastjet run
+
+cmake -DNEEDS_FASTJET=ON [-DFASTJET_CONFIG=/path/to/fastjet-config] .
+
+where the path to fastjet-config only needs to be specified if it is
+not in the user's $PATH.
+
+To compile a different analysis the user should first put it in the
+analysis directory (here we assume it to be called analysis_name.f),
+and then pass it to cmake through
+
+cmake -DANALYSIS=analysis_name .
 
 ----------------------------------------------------------------------
 Usage
