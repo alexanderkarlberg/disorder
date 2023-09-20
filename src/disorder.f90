@@ -508,13 +508,13 @@ contains
    write(idev,*) ''
    write(idev,*) '============================================================'
    if (order_max.eq.1) then 
-      write(idev,'(a,es13.6,a,es13.6,a)') ' # Total LO cross-section (pb)'
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Total LO cross-section'
    else if (order_max.eq.2) then 
-      write(idev,'(a,es13.6,a,es13.6,a)') ' # Total NLO cross-section (pb)'
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Total NLO cross-section'
    else if (order_max.eq.3) then 
-      write(idev,'(a,es13.6,a,es13.6,a)') ' # Total NNLO cross-section (pb)'
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Total NNLO cross-section'
    else if (order_max.eq.4) then 
-      write(idev,'(a,es13.6,a,es13.6,a)') ' # Total N3LO cross-section (pb)'
+      write(idev,'(a,es13.6,a,es13.6,a)') ' # Total N3LO cross-section'
    endif
 
    central = res(0)
