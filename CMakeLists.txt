@@ -23,10 +23,9 @@ set (disorder_LIBRARIES )
 file(GLOB_RECURSE disorder_SOURCES src/* analysis/pwhg_bookhist-multi.*)
 
 # THE ANALYSIS TO BE COMPILED
+file(GLOB_RECURSE disorder_ANALYSIS analysis/simple_analysis.f)
 if(ANALYSIS)
   file(GLOB_RECURSE disorder_ANALYSIS analysis/${ANALYSIS}.f)
-else()
-  file(GLOB_RECURSE disorder_ANALYSIS analysis/simple_analysis)
 endif()
 cmake_print_variables(disorder_ANALYSIS)
 
