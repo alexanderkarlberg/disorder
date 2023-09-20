@@ -12,11 +12,12 @@ Optionally you may need fastjet installed as well
 Once all dependencies are installed on your machine, disorder can be
 compiled using cmake:
 
-  cmake .
+  mkdir build && cd build
+  cmake ..
 
   make [-j]
 
-in the main directory. This will create an executable "disorder" along
+from the main directory. This will create an executable "disorder" along
 with two auxiliary executables, mergedata and getpdfuncert.
 
 No arguments need to be passed to configure if lhapdf-config and
