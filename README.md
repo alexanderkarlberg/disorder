@@ -22,7 +22,7 @@ To compile disorder with a local installation of hoppet or LHAPDF,
 change the "DIR" above in the configure step to the folder containing
 the hoppet-config and lhapdf-config executables respectively.
 
-Two auxiliary executable, mergedata and getpdfuncert, can be compiled
+Two auxiliary executables, mergedata and getpdfuncert, can be compiled
 with
 
   make aux [-j]
