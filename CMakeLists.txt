@@ -14,9 +14,6 @@ set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-SET(CMAKE_Fortran_MODULE_DIRECTORY obj)
-#SET(PROJECT_SOURCE_DIRECTORY src)
-
 set (disorder_INCLUDES )
 set (disorder_SOURCES )
 set (disorder_ANALYSIS )
@@ -24,6 +21,7 @@ set (disorder_LIBRARIES )
 
 # Main sources
 file(GLOB_RECURSE  disorder_SOURCES src/* analysis/pwhg_bookhist-multi.*)
+
 # THE ANALYSIS TO BE COMPILED
 file(GLOB_RECURSE disorder_ANALYSIS analysis/cut_Ecur.f analysis/fastjetfortran.cc)
 cmake_print_variables(disorder_ANALYSIS)
