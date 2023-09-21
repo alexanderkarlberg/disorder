@@ -6,7 +6,7 @@ c When the program starts, it expects as input a list of filenames,
 c one per line, to be merged. An empty lines terminates the list.
       implicit none
       integer maxfiles,maxlines
-      parameter (maxfiles=1000,maxlines=25000)
+      parameter (maxfiles=1000,maxlines=2500)
       character *(100) files(maxfiles)
       character *(500) line(maxlines,maxfiles)
       integer nlines(maxfiles)

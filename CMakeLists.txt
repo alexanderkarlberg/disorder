@@ -7,7 +7,7 @@ IF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 ENDIF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 
 set(CMAKE_Fortran_MODULE_DIRECTORY modules)
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -ffixed-line-length-132 -fPIC -mcmodel=large")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -ffixed-line-length-132 -fPIC")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wextra -fPIC")
 

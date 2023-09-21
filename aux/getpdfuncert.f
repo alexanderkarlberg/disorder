@@ -4,9 +4,9 @@ c beginning of a data set. The file returned has the central PDF value
 c in column 3 and the symmetric PDF error in column 4.
       implicit none
       integer maxfiles,maxlines
-      parameter (maxfiles=1000,maxlines=25000)
+      parameter (maxfiles=1000,maxlines=2500)
       character *(100) files(maxfiles)
-      character *(100) line(maxlines,maxfiles)
+      character *(500) line(maxlines,maxfiles)
       integer nlines(maxfiles),nset
       integer ifile,nfiles,ios,k,ipdf,nmempdf_end
       character *(100) cpdf
