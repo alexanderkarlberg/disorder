@@ -604,7 +604,7 @@ void fastjetconstituents_(const int & ijet,
   vector<PseudoJet> constituents = cs->constituents(jets[ijet-1]);
 
   nconstituents = constituents.size();
-  for (unsigned i = 0; i < nconstituents; i++) {
+  for (int i = 0; i < nconstituents; i++) {
     constituent_indices[i] = constituents[i].cluster_hist_index()+1;
   }
 }

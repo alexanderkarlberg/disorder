@@ -20,13 +20,10 @@ compiled using cmake:
 from the main directory. This will create an executable "disorder" along
 with two auxiliary executables, mergedata and getpdfuncert.
 
-No arguments need to be passed to configure if lhapdf-config and
-hoppet-config are both in the user's $PATH.
-
 If hoppet-config or lhapdf-config are not in the user's path, the full
 path can be specified manually through
 
-cmake -DHOPPET_CONFIG=/path/to/hoppet-config -DLHAPDF_CONFIG=/path/to/lhapdf-config .
+cmake -DHOPPET_CONFIG=/path/to/hoppet-config -DLHAPDF_CONFIG=/path/to/lhapdf-config ..
 
 where the path should include the config itself
 (i.e. /usr/local/bin/hoppet-config)
@@ -34,16 +31,16 @@ where the path should include the config itself
 By default fastjet is not linked and only a skeleton analysis
 (analysis/simple_analysis.f) is compiled. To link fastjet run
 
-cmake -DNEEDS_FASTJET=ON [-DFASTJET_CONFIG=/path/to/fastjet-config] .
+cmake -DNEEDS_FASTJET=ON [-DFASTJET_CONFIG=/path/to/fastjet-config] ..
 
 where the path to fastjet-config only needs to be specified if it is
 not in the user's $PATH.
 
 To compile a different analysis the user should first put it in the
-analysis directory (here we assume it to be called analysis_name.f),
+analysis directory (here we assume it to be called my_analysis.f),
 and then pass it to cmake through
 
-cmake -DANALYSIS=analysis_name .
+cmake -DANALYSIS=my_analysis ..
 
 ----------------------------------------------------------------------
 Usage

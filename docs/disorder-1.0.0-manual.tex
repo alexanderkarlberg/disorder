@@ -410,48 +410,50 @@ command line arguments. The code itself can be obtained from
 \begin{center}\url{https://github.com/alexanderkarlberg/disorder}\end{center}
 
 \subsection{Compiling and prerequisites}
-To compile \disorder{} both \hoppet{} and
+To compile \disorder{} both \hoppet{} ({\tt v1.3.0} or later) and
 \lhapdf{}~\cite{Buckley:2014ana} have to be installed on the
 machine. If both are installed in a location in the {\tt \$PATH} it is
-enough to run\footnote{Despite the name, this has nothing to do with
-{\tt autotools}.}
+enough to run
 \begin{lstlisting}
-  ./configure
-\end{lstlisting}
-For non-standard installation the paths can be specified like this
-\begin{lstlisting}
-  ./configure --with=hoppet=/path/to/hoppet-config --with-lhapdf=/path/to/lhapdf-config
-\end{lstlisting}
-In both cases the file {\tt Makefile.inc} is created which can also be
-modified by hand. The program should now compile with
-\begin{lstlisting}
+  mkdir build && cd build
+  cmake ..
+
   make [-j]
 \end{lstlisting}
-which will result in the binary \disorder{} being created. Two
-auxiliary Fortran programs used to manipulate the histograms can be
-compiled by
+from the main directory. This will create an executable \disorder{}
+along with two auxiliary executables, {\tt mergedata} and {\tt
+  getpdfuncert}. For non-standard installation of \hoppet{} and
+\lhapdf{} the paths can be specified like this
 \begin{lstlisting}
-  make aux [-j]
+  cmake -DHOPPET_CONFIG=/path/to/hoppet-config -DLHAPDF_CONFIG=/path/to/lhapdf-config
 \end{lstlisting}
-and will be created in the {\tt aux} folder. The program has bee found
-to compile on a Linux machine using the {\tt gfortran v11.4.0}
-compiler.
+where the path should include the config itself (i.e. {\tt
+  /usr/local/bin/hoppet-config}). By default \fastjet{} is not linked
+and only a skeleton analysis ({\tt analysis/simple\_analysis.f}) is
+compiled. To link \fastjet{} run
+\begin{lstlisting}
+  cmake -DNEEDS_FASTJET=ON [-DFASTJET_CONFIG=/path/to/fastjet-config]
+\end{lstlisting}
+where the path to {\tt fastjet-config} only needs to be specified if
+it is not in the user's {\tt \$PATH}. To compile a different analysis
+the user should first put it in the {\tt analysis} directory (here we
+assume it to be called {\tt my\_analysis.f}), and then pass it to
+{\tt cmake} through
+\begin{lstlisting}
+cmake -DANALYSIS=my_analysis
+\end{lstlisting}
+The program has been found to compile on a Linux machine using the
+{\tt gfortran v11.4.0} compiler and also on various MacOS systems.
 
 \subsubsection{The analysis framework}
-The code uses the {\tt POWHEG-BOX} analysis framework, with some
-minor modifications. A few example analyses are included in the {\tt
+The code uses the {\tt POWHEG-BOX} analysis framework, with some minor
+modifications. A few example analyses are included in the {\tt
   analysis} directory. Any new analysis should be put here and the
-name of the analysis should be specified in the {\tt Makefile}. For
-example, if the file {\tt my\_analysis.f} is to be compiled one should
-add
-\begin{lstlisting}
-  ANALYSIS += my_analysis
-\end{lstlisting}
-to the {\tt Makefile} in place of the default {\tt
-  simple\_analysis}. There are two mandatory routines in the analysis
-file, {\tt define\_histograms} and {\tt user\_analysis}. In the first
-routine one should define histograms like this (there are also
-routines available to book histograms with varying bins sizes)
+name of the analysis should be passed to {\tt cmake} as described
+above. There are two mandatory routines in the analysis file, {\tt
+  define\_histograms} and {\tt user\_analysis}. In the first routine
+one should define histograms like this (there are also routines
+available to book histograms with varying bins sizes)
 \begin{lstlisting}
   call bookupeqbins('string_name', binsize, min, max)
 \end{lstlisting}
