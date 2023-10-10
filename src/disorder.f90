@@ -321,6 +321,10 @@ contains
    if(order_max.le.2.and.NA.ge.2) return ! Disregard O(αS**2) if we are doing NLO
    if(order_max.le.1.and.NA.ge.1) return ! Disregard O(αS) if we are doing LO
 
+   ! Taken from p2b. SHould work but needs checking.
+   !if(NA.ge.order_max) return
+   !if(NA.lt.order_min-1) return
+   
    if(p2b.and.n.eq.2) return ! If we do p2b we get the Born and
    ! virtuals from the structure functions
    
@@ -356,7 +360,7 @@ contains
          X=ETA*Q2/(2*DOT(P,1,5))
          Y=DOT(P,1,5)/DOT(P,1,6)
          do isc = 1,3
-            as2pi(isc) = alphasLocal(scales_mur(isc)*Qval)/pi * 0.5d0 ! AK change this to alphasLocal at some point
+            as2pi(isc) = alphasLocal(scales_mur(isc)*Qval)/pi * 0.5d0 
          enddo
          ! Then copy the as2pi into the full array
          !real(dp), parameter, public :: scales_mur(1:maxscales) = &
