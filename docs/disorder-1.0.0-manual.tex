@@ -137,7 +137,7 @@ structure functions at the next-to-next-to-next-to-leading order
 (\NNNLO{}).\footnote{Technically the four-loop splitting functions are
 needed to claim this accuracy. Recent progress in determining those
 can be found in
-Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp}.}
+Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj}.}
 The structure functions can be combined with an exclusive
 next-to-next-to-leading order (NNLO) DIS + 1 jet computation to obtain
 fully differential \NNNLO{} predictions in DIS, as was done by the \nnlojet{}
@@ -680,8 +680,9 @@ parametrically of the same order as the NNLO corrections. The PDF
 uncertainties stay more or less constant across all orders, which is
 not unexpected given that we use the same PDF at each order. To give a
 sense of the speed of the code, the combined results presented in the
-table took a total of 3.5 minutes to obtain on a laptop equipped with
-an Intel i9-10885H CPU.
+table, which correpsonds to 325 different PDF members and hence
+structure functions, took a total of 3.5 minutes to obtain on a laptop
+equipped with an Intel i9-10885H CPU.
 \begin{figure}[tb!]
   \centering\includegraphics[width=0.49\textwidth,page=1]{../paper_runs/inclusive_runs/plot/sigma-ratios.pdf}
   \centering\includegraphics[width=0.49\textwidth,page=3]{../paper_runs/inclusive_runs/plot/sigma-ratios.pdf}
@@ -777,8 +778,20 @@ even reasonable NNLO results can be obtained on a multi-core machine
 running for an hour. \NNNLO{} results would inevitably require
 large resources on a High Performance Cluster.
 
-The code comes with an interface to \fastjet{} and \lhapdf{} and
-is run through a user-friendly command line interface. 
+Given the codes dependency on \hoppet{}, any developments therein will
+almost automatically propagate to \disorder{}. In particular it is
+expected the the $\mathcal{O}(\as^4)$ splitting functions will become
+available in \hoppet{} once they have been fully determined. This is
+currently the only missing piece needed to claim full \NNNLO{}
+accuracy for the structure functions. Similarly, were the massive DIS
+coefficient
+functions~\cite{Gottschalk:1980rv,Laenen:1992zk,Laenen:1992xs,Gluck:1997sj,Blumlein:2011zu,Behring:2015roa,Berger:2016inr}
+to be implemented in \hoppet{} the structure functions in \disorder{}
+could immediately be modified to accommodate this.
+
+The code is intended to be user-friendly and to this effect comes with
+an interface to \fastjet{} and \lhapdf{} and is run through a
+command line interface. 
 
 \section*{Acknowledgements}
 The author is grateful for many discussions with Andrea Banfi and
