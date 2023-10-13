@@ -110,8 +110,8 @@ contains
     real(dp), intent(in) :: Q
     muRlcl = zero
     if (scale_choice.le.1) then
-       ! if scale_choice = 0,1 then muR1(Q1,Q2) = muR(Q1)
-       muRlcl = muR(Q)
+       ! if scale_choice = 0,1 then muR1(Q) = muR(Q)
+       muRlcl = sf_muR(Q)
     elseif (scale_choice.eq.2) then
        ! else if scale_choice=2, use Q
        muRlcl = xmur * Q
@@ -124,8 +124,8 @@ contains
     real(dp), intent(in) :: Q
     muFlcl = zero
     if (scale_choice.le.1) then
-       ! if scale_choice = 0,1 then muF1(Q1,Q2) = muF(Q1)
-       muFlcl = muF(Q)
+       ! if scale_choice = 0,1 then muF1(Q) = muF(Q)
+       muFlcl = sf_muF(Q)
     elseif (scale_choice.eq.2) then
        ! else if scale_choice=2, use Q
        muFlcl = xmur * Q
