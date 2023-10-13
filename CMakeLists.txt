@@ -12,6 +12,7 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -ffixed-line-length-132 -fPI
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wextra -fPIC")
 
 set(CMAKE_BUILD_TYPE Release)
+set(prefix ${CMAKE_INSTALL_PREFIX})
 #set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -133,5 +134,7 @@ target_sources(disorder PUBLIC ${disorder_SOURCES})
 target_include_directories(disorder PUBLIC ${disorder_INCLUDES})
 target_link_libraries(disorder ${disorder_LIBRARIES})
 target_link_libraries(getpdfuncert ${LHAPDF_LIBRARY})
+
+install(TARGETS disorder RUNTIME DESTINATION bin)
 
 
