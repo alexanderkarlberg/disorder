@@ -140,11 +140,11 @@ contains
        toy_pdf_at_Q0 = unpolarized_dummy_pdf(xValues(grid))
        if(vnf) then
           call InitRunningCoupling(coupling, toy_alphas_Q0,&
-               & toy_Q0, order_max, -1000000045, quark_masses_sf(4:6)&
+               & toy_Q0, order_max, -1000000045, sf_quark_masses(4:6)&
                &, .true.)
        else
           call InitRunningCoupling(coupling, toy_alphas_Q0,&
-               & toy_Q0, order_max, nflav, quark_masses_sf(4:6)&
+               & toy_Q0, order_max, nflav, sf_quark_masses(4:6)&
                &, .true.)
        endif
        call EvolvePdfTable(tables(0), toy_Q0, toy_pdf_at_Q0, dh,&
@@ -155,20 +155,20 @@ contains
        
        if(vnf) then
           call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-               & -1000000045, quark_masses_sf(4:6), .true.)
+               & -1000000045, sf_quark_masses(4:6), .true.)
        else
           call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-               & nflav, quark_masses_sf(4:6), .true.)
+               & nflav, sf_quark_masses(4:6), .true.)
        end if
        call EvolvePdfTable(tables(0), Q0pdf, pdf_at_Q0, dh, coupling, &
             &  muR_Q=xmuR_PDF, nloop=min(order_max,3))
     else
        if(vnf) then
           call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-               & -1000000045, quark_masses_sf(4:6), .true.)
+               & -1000000045, sf_quark_masses(4:6), .true.)
        else
           call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-               & nflav, quark_masses_sf(4:6), .true.)
+               & nflav, sf_quark_masses(4:6), .true.)
        end if
        call hoppetAssign(EvolvePDF)
     endif

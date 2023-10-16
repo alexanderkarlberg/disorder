@@ -57,20 +57,20 @@ contains
           propZ  = propgZ**2
           do i = order_start,order_stop
              if(noZ) then
-                F1NC = F1NC + Fx(F1EM,i)
-                F2NC = F2NC + Fx(F2EM,i)
+                F1NC = F1NC + Fx(iF1EM,i)
+                F2NC = F2NC + Fx(iF2EM,i)
              elseif(Zonly) then ! No interference or γ
-                F1NC = F1NC +   Ve2_Ae2 * propZ * Fx(F1Z,i) 
-                F2NC = F2NC +   Ve2_Ae2 * propZ * Fx(F2Z,i) 
-                F3NC = F3NC + two_Ve_Ae * propZ * Fx(F3Z,i) 
+                F1NC = F1NC +   Ve2_Ae2 * propZ * Fx(iF1Z,i) 
+                F2NC = F2NC +   Ve2_Ae2 * propZ * Fx(iF2Z,i) 
+                F3NC = F3NC + two_Ve_Ae * propZ * Fx(iF3Z,i) 
              elseif(intonly) then ! No γ/Z
-                F1NC = F1NC  - Ve * propgZ * Fx(F1gZ,i) 
-                F2NC = F2NC  - Ve * propgZ * Fx(F2gZ,i) 
-                F3NC = F3NC  - Ae * propgZ * Fx(F3gZ,i) 
+                F1NC = F1NC  - Ve * propgZ * Fx(iF1gZ,i) 
+                F2NC = F2NC  - Ve * propgZ * Fx(iF2gZ,i) 
+                F3NC = F3NC  - Ae * propgZ * Fx(iF3gZ,i) 
              else
-                F1NC = F1NC + Fx(F1EM,i) - (Ve * propgZ * Fx(F1gZ,i) -   Ve2_Ae2 * propZ * Fx(F1Z,i)) 
-                F2NC = F2NC + Fx(F2EM,i) - (Ve * propgZ * Fx(F2gZ,i) -   Ve2_Ae2 * propZ * Fx(F2Z,i)) 
-                F3NC = F3NC              - (Ae * propgZ * Fx(F3gZ,i) - two_Ve_Ae * propZ * Fx(F3Z,i)) 
+                F1NC = F1NC + Fx(iF1EM,i) - (Ve * propgZ * Fx(iF1gZ,i) -   Ve2_Ae2 * propZ * Fx(iF1Z,i)) 
+                F2NC = F2NC + Fx(iF2EM,i) - (Ve * propgZ * Fx(iF2gZ,i) -   Ve2_Ae2 * propZ * Fx(iF2Z,i)) 
+                F3NC = F3NC               - (Ae * propgZ * Fx(iF3gZ,i) - two_Ve_Ae * propZ * Fx(iF3Z,i)) 
              endif
           enddo
        endif
@@ -82,13 +82,13 @@ contains
           propW = two * (1/(sqrt(two) * four * sin_thw_sq) * Qsq / (Qsq + MW**2))**2 ! W propagator 
           do i = order_start,order_stop
              if(positron) then ! Always W+
-                F1CC = F1CC + propW * Fx(F1Wp,i) 
-                F2CC = F2CC + propW * Fx(F2Wp,i) 
-                F3CC = F3CC - propW * Fx(F3Wp,i)
+                F1CC = F1CC + propW * Fx(iF1Wp,i) 
+                F2CC = F2CC + propW * Fx(iF2Wp,i) 
+                F3CC = F3CC - propW * Fx(iF3Wp,i)
              else
-                F1CC = F1CC + propW * Fx(F1Wm,i) 
-                F2CC = F2CC + propW * Fx(F2Wm,i) 
-                F3CC = F3CC + propW * Fx(F3Wm,i)
+                F1CC = F1CC + propW * Fx(iF1Wm,i) 
+                F2CC = F2CC + propW * Fx(iF2Wm,i) 
+                F3CC = F3CC + propW * Fx(iF3Wm,i)
              endif
           enddo
           
