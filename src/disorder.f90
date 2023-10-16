@@ -212,7 +212,7 @@ contains
            & , Qmin_PDF = Qmin, wmass = mw, zmass = mz)      
    endif
    call read_PDF()
-   call InitStrFct(order_max, separate_orders = .true.)
+   call InitStrFct(order_max, separate_orders = separate_orders)
 
    if(novegas) then ! This means Q and x fixed
       ! Need dummy random numbers

@@ -32,7 +32,7 @@ module mod_parameters
   character(len=50), public :: pdfname, outname, prefix
   integer, public :: nmempdf, outdev
   logical, public, save :: pdfuncert, alphasuncert, fillplots, p2b, noZ, positron,&
-       & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC, vnf, help, do_analysis
+       & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC, vnf, help, do_analysis, separate_orders
   real(dp), public, save :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
        & Eh, El, sigma_all_scales(maxscales),&
        & NC_reduced_dsigma(maxscales), CC_reduced_dsigma(maxscales),&
@@ -103,6 +103,7 @@ contains
     order_min    = int_val_opt ('-order-min',1)
     order_max    = int_val_opt ('-order-max',3)
     order = 'NNLO'
+    separate_orders = log_val_opt("-separate-orders",.false.)
     ! if "-lo/-nlo/-nnlo/-n3lo" command is given, overwrite order_min and order_max accordingly
     if (log_val_opt("-lo")) then
        order_min = 1
@@ -126,6 +127,7 @@ contains
        if(order_max.eq.3) order = 'nnlo'
        if(order_max.eq.4) order = 'n3lo'
     endif
+    if(order_min.ne.1) separate_orders = .true. ! In this case we always need to separate the orders
     NC = log_val_opt("-NC",.true.)
     CC = log_val_opt("-CC",.false.)
     noZ = .not.log_val_opt ("-includeZ",.false.)
@@ -173,6 +175,7 @@ contains
     if(alphasuncert.and..not.pdfuncert) stop "Need -pdfuncert to run with -alphasuncert"
     scaleuncert  = log_val_opt ("-scaleuncert")
     if(scaleuncert) scale_choice = 2
+    if(scale_choice.eq.2) separate_orders = .true.
     if(scaleuncert.and.vnf) then
        print*, 'Cannot currently do automatic scale uncertainties and&
             & vnf. Please run the scale choices individually like&

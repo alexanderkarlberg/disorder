@@ -46,10 +46,15 @@ contains
        muFval = Qval * scales_muf(iscale)
        
        ! Compute the structure functions
-       Fx(:,1) = F_LO(x, Qval, muRval, muFval)
-       if (order_stop.ge.2) Fx(:,2) = F_NLO(x, Qval, muRval, muFval)
-       if (order_stop.ge.3) Fx(:,3) = F_NNLO(x, Qval, muRval, muFval)
-       if (order_stop.ge.4) Fx(:,4) = F_N3LO(x, Qval, muRval, muFval)
+       if(separate_orders) then ! Fill individual structure functions
+          Fx(:,1) = F_LO(x, Qval, muRval, muFval)
+          if (order_stop.ge.2) Fx(:,2) = F_NLO(x, Qval, muRval, muFval)
+          if (order_stop.ge.3) Fx(:,3) = F_NNLO(x, Qval, muRval, muFval)
+          if (order_stop.ge.4) Fx(:,4) = F_N3LO(x, Qval, muRval, muFval)
+       else
+          Fx(:,1) = StrFct(x, Qval, muRval, muFval)
+          if(order_stop.ne.1) stop 'eval_matrix_element called with wrong order_stop'
+       endif
 
        if(NC) then
           propgZ = Qsq / (Qsq + MZ**2) / sin_2thw_sq! Z propagator

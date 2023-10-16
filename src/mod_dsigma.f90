@@ -32,7 +32,11 @@ contains
     
     !     skip phase space points with vanishing jacobian or with Q < Qmin
     if (.not.(jacborn.ne.0d0).and.(Qsq.gt.(Qmin**2))) return
-    dsigma_all_scales = eval_matrix_element(order_min,order_max, x, y, Qsq)
+    if(separate_orders) then
+       dsigma_all_scales = eval_matrix_element(order_min,order_max, x, y, Qsq)
+    else
+       dsigma_all_scales = eval_matrix_element(1,1, x, y, Qsq)
+    endif
     dsigma_all_scales = dsigma_all_scales * gev2pb * jacborn 
     dsigma = dsigma_all_scales(1)
     dsigma_all_scales = dsigma_all_scales * vegas_weight / itmx2
