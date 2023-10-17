@@ -25,7 +25,7 @@ module mod_parameters
   real(dp), public :: mw, mz, w_width, z_width, GF, alpha_em,&
        & sin_thw_sq, sin_2thw_sq
   real(dp), public :: sqrts, S, Q0_cut_sq
-  integer,  public :: order_min, order_max, iseed, scale_choice
+  integer,  public :: order_min, order_max, iseed, scale_choice, scale_choice_hoppet
   integer,  public :: nflav, ipdf, it1, itmx1, itmx2, ncall1, ncall2, nscales
   character * 4, public :: seedstr
   character * 17, public :: scalestr(maxscales)
@@ -149,7 +149,7 @@ contains
     if(p2b.and..not.do_analysis) stop 'Should really be doing an analysis with p2b'
 
     ! Parameters dealing with scale variations
-    scale_choice = 1 !int_val_opt ('-scale-choice',1) ! 1: Use Q. 0: Use MZ. For now fixed.
+    scale_choice = int_val_opt ('-scale-choice',1) ! 1: Use Q. 0: Use MZ. For now fixed.
     xmuf         = dble_val_opt("-xmuf",1.0_dp)
     xmur         = dble_val_opt("-xmur",1.0_dp)
     pdfname      = string_val_opt("-pdf", "")
@@ -174,8 +174,8 @@ contains
     alphasuncert = log_val_opt ("-alphasuncert")
     if(alphasuncert.and..not.pdfuncert) stop "Need -pdfuncert to run with -alphasuncert"
     scaleuncert  = log_val_opt ("-scaleuncert")
-    if(scaleuncert) scale_choice = 2
-    if(scale_choice.eq.2) separate_orders = .true.
+    if(scaleuncert.and.scale_choice.lt.2) scale_choice = 2
+    if(scale_choice.ge.2) separate_orders = .true.
     if(scaleuncert.and.vnf) then
        print*, 'Cannot currently do automatic scale uncertainties and&
             & vnf. Please run the scale choices individually like&
@@ -314,6 +314,8 @@ contains
     nloop = min(3,order_max)
     minQval = min(xmuF*Qmin, Qmin)
     maxQval = max(xmuF*sqrts, sqrts)
+    if(scale_choice.eq.4) maxQval = max(xmuF*sqrt(s), sqrt(s))
+    scale_choice_hoppet = min(2,scale_choice)
     
     if (.not.CheckAllArgsUsed(0)) then
        call help_message

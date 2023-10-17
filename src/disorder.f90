@@ -84,8 +84,8 @@ program disorder
      if(order_max.gt.1) then
         ! Then do the disent run
         call DISENTFULL(ncall2,S,nflav,user,dis_cuts,12345&
-             &+iseed-1,67890+iseed-1,NPOW1,NPOW2,CUTOFF,xmuf&
-             &,order_max-1 ,cflcl,calcl,trlcl,scaleuncert)
+             &+iseed-1,67890+iseed-1,NPOW1,NPOW2,CUTOFF ,order_max-1&
+             &,disent_muf,cflcl,calcl,trlcl,scaleuncert)
         ! Store disent result
         call pwhgaddout
      endif
@@ -194,7 +194,7 @@ contains
 
    scaleuncert_save = scaleuncert
    
-   rts = sqrts
+   rts = sqrt(s)
    if(scaleuncert) rts = rts * maxval(scales_muf) * xmuf
    ! Need to start hoppet
    maxQval = rts 
@@ -202,13 +202,13 @@ contains
         &         order_hoppet,factscheme_MSbar)
    if(vnf) then
       call StartStrFct(rts = rts, order_max = order_max, xR = xmur,&
-           & xF = xmuf, scale_choice = scale_choice, constant_mu = mz,&
+           & xF = xmuf, scale_choice = scale_choice_hoppet, constant_mu = mz,&
            & param_coefs = .true. , Qmin_PDF = Qmin, wmass = mw,&
            & zmass = mz)
    else
       call StartStrFct(rts = rts, order_max&
            & = order_max, nflav = nflav, xR = xmur, xF = xmuf,&
-           & scale_choice = scale_choice, constant_mu = mz, param_coefs = .true.&
+           & scale_choice = scale_choice_hoppet, constant_mu = mz, param_coefs = .true.&
            & , Qmin_PDF = Qmin, wmass = mw, zmass = mz)      
    endif
    call read_PDF()
@@ -299,11 +299,29 @@ contains
   
  end subroutine dis_cuts
 
+  subroutine disent_muf(p,s,muF2)
+   real(dp), intent(in) :: p(4,7),s
+   real(dp), intent(out) :: muF2
+   real(dp) :: dummy,x,y,Q2,Qval
+
+   Q2=ABS(DOT(P,5,5))
+   Qval=sqrt(Q2)
+   Y=DOT(P,1,5)/DOT(P,1,6)
+   X=Q2/(y*S)
+
+   call muR_muF(x,y,Qval,dummy,muF2)
+
+   muF2 = xmuf**2 * muF2 / Q2
+  
+ end subroutine disent_muf
+
  ! user-defined event analysis for disent
- subroutine user(N,NA,NT,P,S,WEIGHT)
+ ! scale is muF, hence it needs to be divided by xmuf if used as a renormalisation scale
+ subroutine user(N,NA,NT,P,S,WEIGHT,SCALE2)
    implicit none
    integer, intent(in) :: N, NA, NT
-   real(dp), intent(in) :: s, p(4,7), weight(-6:6)
+   real(dp), intent(in) :: s, p(4,7), weight(-6:6),scale2
+   real(dp) :: scale
    LOGICAL SCALE_VAR
    DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
    COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
@@ -321,7 +339,7 @@ contains
    if(order_max.le.2.and.NA.ge.2) return ! Disregard O(αS**2) if we are doing NLO
    if(order_max.le.1.and.NA.ge.1) return ! Disregard O(αS) if we are doing LO
 
-   ! Taken from p2b. SHould work but needs checking.
+   ! Taken from p2b. Should work but needs checking.
    !if(NA.ge.order_max) return
    !if(NA.lt.order_min-1) return
    
@@ -340,6 +358,7 @@ contains
    ! few times, so it is worth recomputing eta (which is cheap) and
    ! saving the pdfs (since they are more expensive to recompute).
    ETA=2*DOT(P,1,6)/S
+   SCALE = SQRT(SCALE2)
    if(scaleuncert) then
       ! First we transfer the 3 weights from DISENT (muF variations
       ! into the full array)
@@ -360,7 +379,7 @@ contains
          X=ETA*Q2/(2*DOT(P,1,5))
          Y=DOT(P,1,5)/DOT(P,1,6)
          do isc = 1,3
-            as2pi(isc) = alphasLocal(scales_mur(isc)*Qval)/pi * 0.5d0 
+            as2pi(isc) = alphasLocal(xmur*scales_mur(isc)*scale/xmuf*Qval)/pi * 0.5d0 
          enddo
          ! Then copy the as2pi into the full array
          !real(dp), parameter, public :: scales_mur(1:maxscales) = &
@@ -377,7 +396,7 @@ contains
       if(eta.ne.etasave) then
          etasave = eta
          do isc = 1,3
-            call evolvePDF(eta,scales_muf(isc)*Qval,pdfs(isc,:))
+            call evolvePDF(eta,scales_muf(isc)*scale*Qval,pdfs(isc,:))
          enddo
          ! Then copy the PDFs into the full array
          !real(dp), parameter, public :: scales_muf(1:maxscales) = &
@@ -396,7 +415,7 @@ contains
       !real(dp), parameter, public :: scales_mur(1:maxscales) = &
       ! & (/1.0_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 2.0_dp, 0.5_dp)     
       if(order_max.eq.3.and.NA.eq.1) then ! Doing NLO in DISENT and this is the LO term. Include scale compensation.
-         dsig(:) = dsig(:) * (as2pi(:) + two * as2pi(:)**2 * b0 * log(scales_mur(:)))
+         dsig(:) = dsig(:) * (as2pi(:) + two * as2pi(:)**2 * b0 * log(xmur*scales_mur(:)*scale/xmuf))
       else
          dsig(:) = dsig(:) * as2pi(:)**NA
       endif
@@ -409,7 +428,7 @@ contains
          X=ETA*Q2/(2*DOT(P,1,5))
          Y=DOT(P,1,5)/DOT(P,1,6)
          
-         as2pi(1) = alphasLocal(xmur*Qval)/pi * 0.5d0 
+         as2pi(1) = alphasLocal(xmur*scale/xmuf*Qval)/pi * 0.5d0 
          call p2bmomenta(x,y,Q2,p2bbreit,p2blab)
          Qlab(:) = p2blab(:,1) - p2blab(:,3)
          recompute = .false.
@@ -417,11 +436,11 @@ contains
       
       if(eta.ne.etasave) then
          etasave = eta
-         call evolvePDF(eta,xmuf*Qval,pdfs(1,:))
+         call evolvePDF(eta,scale*Qval,pdfs(1,:))
       endif
       
       if(order_max.eq.3.and.NA.eq.1) then ! Doing NLO in DISENT and this is the LO term. Include scale compensation.
-         totwgt = dot_product(weight,pdfs(1,:))*(as2pi(1) + two * as2pi(1)**2 * b0 * log(xmur))
+         totwgt = dot_product(weight,pdfs(1,:))*(as2pi(1) + two * as2pi(1)**2 * b0 * log(xmur*scale/xmuf))
       else
          totwgt = dot_product(weight,pdfs(1,:))*as2pi(1)**na
       endif

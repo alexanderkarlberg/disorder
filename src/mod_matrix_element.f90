@@ -8,7 +8,7 @@ module mod_matrix_element
   implicit none
 
   private
-  public :: eval_matrix_element
+  public :: eval_matrix_element, muR_muF
 
 contains
   !----------------------------------------------------------------------
@@ -42,8 +42,11 @@ contains
        F2CC  = zero
        F3CC  = zero
        Fx  = zero
-       muRval = Qval * scales_mur(iscale)
-       muFval = Qval * scales_muf(iscale)
+       call muR_muF(x,yDIS,Qval,muRval,muFval)
+       muRval = muRval * scales_mur(iscale)
+       muFval = muFval * scales_muf(iscale)
+!       muRval = Qval * scales_mur(iscale)
+!       muFval = Qval * scales_muf(iscale)
        
        ! Compute the structure functions
        if(separate_orders) then ! Fill individual structure functions
@@ -111,8 +114,8 @@ contains
     
   !----------------------------------------------------------------------
   ! mu_R as a function of Q
-  real(dp) function muRlcl(Q)
-    real(dp), intent(in) :: Q
+  real(dp) function muRlcl(x,y,Q)
+    real(dp), intent(in) :: x,y,Q
     muRlcl = zero
     if (scale_choice.le.1) then
        ! if scale_choice = 0,1 then muR1(Q) = muR(Q)
@@ -120,22 +123,65 @@ contains
     elseif (scale_choice.eq.2) then
        ! else if scale_choice=2, use Q
        muRlcl = xmur * Q
+    elseif (scale_choice.eq.3) then
+       ! else if scale_choice=2, use pt lepton
+       muRlcl = xmur * Q * sqrt(1 - y) 
+    elseif (scale_choice.eq.4) then
+       ! else if scale_choice=2, use Q * (1-x)/x advocated by Stefano Forte
+       muRlcl = xmur * Q * (1 - x) / x
     endif
   end function muRlcl
   
   !----------------------------------------------------------------------
   ! mu_R as a function of Q
-  real(dp) function muFlcl(Q)
-    real(dp), intent(in) :: Q
+  real(dp) function muFlcl(x,y,Q)
+    real(dp), intent(in) :: x,y,Q
     muFlcl = zero
     if (scale_choice.le.1) then
        ! if scale_choice = 0,1 then muF1(Q) = muF(Q)
        muFlcl = sf_muF(Q)
     elseif (scale_choice.eq.2) then
        ! else if scale_choice=2, use Q
-       muFlcl = xmur * Q
+       muFlcl = xmuf * Q
+    elseif (scale_choice.eq.3) then
+       ! else if scale_choice=2, use pt lepton 
+       muFlcl = xmuf * Q * sqrt(1 - y) 
+    elseif (scale_choice.eq.4) then
+       ! else if scale_choice=2, use Q * (1-x)/x advocated by Stefano Forte
+       muFlcl = xmuf * Q * (1 - x) / x
     endif
   end function muFlcl
+
+  subroutine muR_muF(x,y,Q,muR,muF)
+    implicit none
+    real(dp), intent(in)  :: x,y,Q
+    real(dp), intent(out) :: muR, muF
+    real(dp) :: mu
+    if (scale_choice.le.1) then
+       ! if scale_choice = 0,1 then muF1(Q) = muF(Q)
+       muR = sf_muR(Q)
+       muF = sf_muF(Q)
+    elseif (scale_choice.eq.2) then
+       ! else if scale_choice=2, use Q - this is needed for scale variations
+       mu  = Q
+       muR = xmur * mu
+       muF = xmuf * mu
+    elseif (scale_choice.eq.3) then
+       ! else if scale_choice=2, use pt lepton 
+       mu  = Q * sqrt(1 - y) 
+       muR = xmur * mu
+       muF = xmuf * mu
+    elseif (scale_choice.eq.4) then
+       ! else if scale_choice=2, use Q * sqrt((1-x)/x) advocated by Stefano Forte
+       mu  = Q * sqrt((1 - x) / x)
+       muR = xmur * mu
+       muF = xmuf * mu
+    else
+       stop 'Wrong scale choice in muR_muF'
+    endif
+    muR = max(Qmin,muR)
+    muF = max(Qmin,muF)
+  end subroutine muR_muF
 
   ! These are basically taken from 1206.7007 eq.1, 6, 7, 11
   function compute_sigmas(x,y,Qsq,F1NC,F2NC,F3NC,F1CC,F2CC,F3CC) result(res)
