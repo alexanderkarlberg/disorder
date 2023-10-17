@@ -310,8 +310,9 @@ contains
    X=Q2/(y*S)
 
    call muR_muF(x,y,Qval,dummy,muF2)
+   ! muF2 at this point is muf * mu
 
-   muF2 = xmuf**2 * muF2 / Q2
+   muF2 = muF2**2 / Q2
   
  end subroutine disent_muf
 
