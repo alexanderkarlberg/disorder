@@ -387,7 +387,7 @@ interferences) and CC, but we leave this for future work.
 In principle P2B could be applied to the \disent{} code without any
 major modifications besides the bug fix mentioned in the
 introduction. However a few modifications were introduced to allow for
-a more flexible integration of \disent{} into \disorder. The version
+a more flexible integration of \disent{} into \disorder{}. The version
 of \disent{} that we include in \disorder{} is based on the version
 which can be found in {\tt dispatch}~\cite{Dasgupta:2002dc}, and which
 already included some minor modifications. In addition to the
@@ -399,7 +399,10 @@ modification introduced in \disorder{} is that the {\tt KPFUNS}
 subroutine now returns an array of weights corresponding to varying
 the factorisation scale by a factor two up and down. This allows for
 much faster evaluation of scale uncertainties compared to running the
-program three separate times.
+program three separate times. Additionally \disent{} can now also use
+any scale defined in terms of $x$, $y$, and $Q$, and not just some
+multiple of $Q$. We provide a few different scale choices as
+documented below, but more can easily be implemented.
 
 \section{Running \disorder{}}
 \label{sec:running}
@@ -555,22 +558,26 @@ members, and simply separates them from the rest.
 
 Renormalisation, $\mu_R$, and factorisation, $\mu_F$, scale
 uncertainties can be included by specifying the flag {\tt
-  -scaleuncert}. \disorder{} uses the vector boson virtuality, $Q$, as
-its default central scale. The program will then compute a standard
-7-point scale variation varying this scale by a factor of two up and
-down keeping $1/2\le \mu_R/\mu_F\le 2$. On the screen the envelope of
-all 7 runs will be printed. The user can in principle also carry out
-arbitrary variations in individual runs by specifying {\tt -xmur} and
-{\tt -xmuf} on the command line. Here {\tt xmur} is the ratio of
-$\mu_R/Q$ and similarly for {\tt xmuf}.\footnote{In practice it is
-faster to use the {\tt -scaleuncert} flag as the program will only
-recompute what is needed for the variations rather than do a full
-event. However, at \NNNLO{}, in general, this is not true, due to the fact
-that the number of tables needed in \hoppet{} to carry out on-the-fly
-scale variations increases dramatically at this order, compared to
-using a fixed ratio of $Q$. Given how fast the code is, it is still
-the author's opinion that it is more convenient to use the on-the-fly
-variations.}
+  -scaleuncert}. \disorder{} uses the vector boson virtuality, $Q^2$,
+as its default central scale, but can use any scale as long as it is
+defined in terms of $x$, $y$, and $Q$. A few scales are currently
+implemented and can be accessed through the {\tt -scale-choice}
+flag. The options are {\tt 1} (default): $Q^2$, {\tt 2}: $Q^2(1-y)$,
+{\tt 3}: $\frac{Q^2(1-x)}{x}$. The program will then compute a
+standard 7-point scale variation varying this scale by a factor of two
+up and down keeping $1/2\le \mu_R/\mu_F\le 2$. On the screen the
+envelope of all 7 runs will be printed. The user can in principle also
+carry out arbitrary variations in individual runs by specifying {\tt
+  -xmur} and {\tt -xmuf} on the command line. Here {\tt xmur} is the
+ratio of $\mu_R/Q$ and similarly for {\tt xmuf}.\footnote{In practice
+it is faster to use the {\tt -scaleuncert} flag as the program will
+only recompute what is needed for the variations rather than do a full
+event. However, at \NNNLO{}, in general, this is not true, due to the
+fact that the number of tables needed in \hoppet{} to carry out
+on-the-fly scale variations increases dramatically at this order,
+compared to using a fixed ratio of $Q$. Given how fast the code is, it
+is still the author's opinion that it is more convenient to use the
+on-the-fly variations.}
 
 Finally the random seed can be set with the {\tt iseed} flag. When the
 program terminates it will print results to screen but also save a
@@ -780,7 +787,7 @@ large resources on a High Performance Cluster.
 
 Given the codes dependency on \hoppet{}, any developments therein will
 almost automatically propagate to \disorder{}. In particular it is
-expected the the $\mathcal{O}(\as^4)$ splitting functions will become
+expected that the $\mathcal{O}(\as^4)$ splitting functions will become
 available in \hoppet{} once they have been fully determined. This is
 currently the only missing piece needed to claim full \NNNLO{}
 accuracy for the structure functions. Similarly, were the massive DIS
