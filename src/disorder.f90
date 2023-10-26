@@ -140,11 +140,11 @@ contains
        toy_pdf_at_Q0 = unpolarized_dummy_pdf(xValues(grid))
        if(vnf) then
           call InitRunningCoupling(coupling, toy_alphas_Q0,&
-               & toy_Q0, order_max, -1000000045, sf_quark_masses(4:6)&
+               & toy_Q0, order_max, -1000000045, masses(4:6)&
                &, .true.)
        else
           call InitRunningCoupling(coupling, toy_alphas_Q0,&
-               & toy_Q0, order_max, nflav, sf_quark_masses(4:6)&
+               & toy_Q0, order_max, nflav, masses(4:6)&
                &, .true.)
        endif
        call EvolvePdfTable(tables(0), toy_Q0, toy_pdf_at_Q0, dh,&
@@ -155,20 +155,20 @@ contains
        
        if(vnf) then
           call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-               & -1000000045, sf_quark_masses(4:6), .true.)
+               & -1000000045, masses(4:6), .true.)
        else
           call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-               & nflav, sf_quark_masses(4:6), .true.)
+               & nflav, masses(4:6), .true.)
        end if
        call EvolvePdfTable(tables(0), Q0pdf, pdf_at_Q0, dh, coupling, &
             &  muR_Q=xmuR_PDF, nloop=min(order_max,3))
     else
        if(vnf) then
           call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-               & -1000000045, sf_quark_masses(4:6), .true.)
+               & -1000000045, masses(4:6), .true.)
        else
           call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-               & nflav, sf_quark_masses(4:6), .true.)
+               & nflav, masses(4:6), .true.)
        end if
        call hoppetAssign(EvolvePDF)
     endif
@@ -201,15 +201,15 @@ contains
    call hoppetStartExtended(ymax_hoppet,dy,minQval,maxQval,dlnlnQ,nloop,&
         &         order_hoppet,factscheme_MSbar)
    if(vnf) then
-      call StartStrFct(rts = rts, order_max = order_max, xR = xmur,&
-           & xF = xmuf, scale_choice = scale_choice_hoppet, constant_mu = mz,&
+      call StartStrFct(order_max = order_max, xR = xmur, xF = xmuf,&
+           & scale_choice = scale_choice_hoppet, constant_mu = mz,&
            & param_coefs = .true. , Qmin_PDF = Qmin, wmass = mw,&
            & zmass = mz)
    else
-      call StartStrFct(rts = rts, order_max&
-           & = order_max, nflav = nflav, xR = xmur, xF = xmuf,&
-           & scale_choice = scale_choice_hoppet, constant_mu = mz, param_coefs = .true.&
-           & , Qmin_PDF = Qmin, wmass = mw, zmass = mz)      
+      call StartStrFct(order_max = order_max, nflav = nflav, xR =&
+           & xmur, xF = xmuf, scale_choice = scale_choice_hoppet,&
+           & constant_mu = mz, param_coefs = .true. , Qmin_PDF = Qmin&
+           &, wmass = mw, zmass = mz)      
    endif
    call read_PDF()
    call InitStrFct(order_max, separate_orders = separate_orders)
