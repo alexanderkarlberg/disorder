@@ -21,12 +21,12 @@ with two auxiliary executables, `mergedata` and `getpdfuncert`.
 
 `disorder` can also be installed in the user's path by invoking
 
-	 make install
+	make install
 
 This will install disorder in the default location (/usr/local/bin
 typically). The user can change the path by specifying
 
-	  cmake -DCMAKE_INSTALL_PREFIX=/path/to/subdir ..
+	cmake -DCMAKE_INSTALL_PREFIX=/path/to/subdir ..
 
 If `hoppet-config` or `lhapdf-config` are not in the user's path, the full
 path can be specified manually through
@@ -49,8 +49,6 @@ analysis directory (here we assume it to be called `my_analysis.f`),
 and then pass it to `cmake` through
 
 	cmake -DANALYSIS=my_analysis ..
-
-If a user wishes to install disorder 
 
 Usage
 =====
