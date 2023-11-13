@@ -149,6 +149,7 @@ contains
        endif
        call EvolvePdfTable(tables(0), toy_Q0, toy_pdf_at_Q0, dh,&
             & coupling, nloop=min(order_max,3))
+       setup_done(0)  = .true. ! This signals to HOPPET that we have set up the PDFs (since we don't use the streamlined interface)
     elseif (Q0pdf > zero) then
        write(6,*) "WARNING: Using internal HOPPET DGLAP evolution"
        call InitPDF_LHAPDF(grid, pdf_at_Q0, EvolvePDF, Q0pdf)
@@ -160,8 +161,11 @@ contains
           call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
                & nflav, masses(4:6), .true.)
        end if
+       !call EvolvePdfTable(tables(0), Q0pdf, pdf_at_Q0, dh, coupling, &
+       !     &  muR_Q=xmuR_PDF, nloop=min(order_max,3))
        call EvolvePdfTable(tables(0), Q0pdf, pdf_at_Q0, dh, coupling, &
             &  muR_Q=xmuR_PDF, nloop=min(order_max,3))
+       setup_done(0)  = .true. ! This signals to HOPPET that we have set up the PDFs (since we don't use the streamlined interface)
     else
        if(vnf) then
           call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
