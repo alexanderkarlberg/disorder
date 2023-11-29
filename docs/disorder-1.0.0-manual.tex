@@ -560,24 +560,24 @@ Renormalisation, $\mu_R$, and factorisation, $\mu_F$, scale
 uncertainties can be included by specifying the flag {\tt
   -scaleuncert}. \disorder{} uses the vector boson virtuality, $Q^2$,
 as its default central scale, but can use any scale as long as it is
-defined in terms of $x$, $y$, and $Q$. A few scales are currently
-implemented and can be accessed through the {\tt -scale-choice}
-flag. The options are {\tt 1} (default): $Q^2$, {\tt 2}: $Q^2(1-y)$,
-{\tt 3}: $\frac{Q^2(1-x)}{x}$. The program will then compute a
-standard 7-point scale variation varying this scale by a factor of two
-up and down keeping $1/2\le \mu_R/\mu_F\le 2$. On the screen the
-envelope of all 7 runs will be printed. The user can in principle also
-carry out arbitrary variations in individual runs by specifying {\tt
-  -xmur} and {\tt -xmuf} on the command line. Here {\tt xmur} is the
-ratio of $\mu_R/Q$ and similarly for {\tt xmuf}.\footnote{In practice
-it is faster to use the {\tt -scaleuncert} flag as the program will
-only recompute what is needed for the variations rather than do a full
-event. However, at \NNNLO{}, in general, this is not true, due to the
-fact that the number of tables needed in \hoppet{} to carry out
-on-the-fly scale variations increases dramatically at this order,
-compared to using a fixed ratio of $Q$. Given how fast the code is, it
-is still the author's opinion that it is more convenient to use the
-on-the-fly variations.}
+defined in terms of $x$, $y$, and $Q$. A few central scales, $\mu$,
+are currently implemented and can be accessed through the {\tt
+  -scale-choice} flag. The options are {\tt 1} (default): $Q^2$, {\tt
+  2}: $Q^2(1-y)$, {\tt 3}: $\frac{Q^2(1-x)}{x}$. The program will then
+compute a standard 7-point scale variation varying this scale by a
+factor of two up and down keeping $1/2\le \mu_R/\mu_F\le 2$. On the
+screen the envelope of all 7 runs will be printed. The user can in
+principle also carry out arbitrary variations in individual runs by
+specifying {\tt -xmur} and {\tt -xmuf} on the command line. Here {\tt
+  xmur} is the ratio of $\mu_R/\mu$ and similarly for {\tt
+  xmuf}.\footnote{In practice it is faster to use the {\tt
+  -scaleuncert} flag as the program will only recompute what is needed
+for the variations rather than do a full event. However, at \NNNLO{},
+in general, this is not true, due to the fact that the number of
+tables needed in \hoppet{} to carry out on-the-fly scale variations
+increases dramatically at this order, compared to using a fixed ratio
+of $Q$. Given how fast the code is, it is still the author's opinion
+that it is more convenient to use the on-the-fly variations.}
 
 Finally the random seed can be set with the {\tt iseed} flag. When the
 program terminates it will print results to screen but also save a
@@ -589,7 +589,7 @@ sections.
 
 The output of the analysis is printed to a number of {\tt .dat} files,
 the number depending on the input, prefixed by {\tt
-  disorder\_nnlo\_seed001\_pdfmem000} where again the exact prefix
+  disorder\_nnlo\_seed0001\_pdfmem000} where again the exact prefix
 will depend on the input. The output name also contains information on
 the seed, the PDF member and the renormalisation and factorisation
 scales if {\tt -scaleuncert} is on. The user can specify a prefix to
@@ -763,9 +763,7 @@ the program includes all NC and CC contributions and can carry out
 both scale and PDF variations on the fly. Due to the underlying
 tabulation of the structure functions in \hoppet{}, the code is
 extremely fast, and a user can obtain cross section results at
-\NNNLO{} in a matter of seconds. In principle the code will benefit
-from any future developments in \hoppet{}, e.g.~the inclusion of
-massive coefficient functions and 4-loop splitting functions.
+\NNNLO{} in a matter of seconds. 
 
 In the fully differential P2B mode, only photon-mediated DIS can be
 computed, and no PDF variations are currently implemented. It should
