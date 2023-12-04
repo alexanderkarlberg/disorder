@@ -207,13 +207,13 @@ contains
    if(vnf) then
       call StartStrFct(order_max = order_max, xR = xmur, xF = xmuf,&
            & scale_choice = scale_choice_hoppet, constant_mu = mz,&
-           & param_coefs = .true. , Qmin_PDF = Qmin, wmass = mw,&
+           & param_coefs = .true. , wmass = mw,&
            & zmass = mz)
    else
       call StartStrFct(order_max = order_max, nflav = nflav, xR =&
            & xmur, xF = xmuf, scale_choice = scale_choice_hoppet,&
-           & constant_mu = mz, param_coefs = .true. , Qmin_PDF = Qmin&
-           &, wmass = mw, zmass = mz)      
+           & constant_mu = mz, param_coefs = .true., &
+           & wmass = mw, zmass = mz)      
    endif
    call read_PDF()
    call InitStrFct(order_max, separate_orders = separate_orders)
