@@ -2,7 +2,7 @@ Installation
 ============
 
 To compile disorder, you will need
-* hoppet, v 1.3.0 or newer (https://github.com/gavinsalam/hoppet)
+* hoppet, v 1.3.0 or newer (https://github.com/hoppet-code/hoppet)
 * LHAPDF (http://lhapdf.hepforge.org/)
 
 Optionally you may need fastjet installed as well
