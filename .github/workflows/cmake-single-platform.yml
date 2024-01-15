@@ -22,10 +22,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v3
       with:
-        name: hoppet-code/hoppet     <-- clone https://github.com/hoppet-code/hoppet
-        ref: refs/heads/release
+        name: clone https://github.com/hoppet-code/hoppet
+        run: git clone --branch 2024-01-n3lo-splitting-functions https://github.com/hoppet-code/hoppet.git
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
