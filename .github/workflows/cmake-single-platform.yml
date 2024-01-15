@@ -23,7 +23,8 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: clone https://github.com/hoppet-code/hoppet
-    - run: git clone --branch 2024-01-n3lo-splitting-functions https://github.com/hoppet-code/hoppet.git
+    - run: |
+           git clone --branch 2024-01-n3lo-splitting-functions https://github.com/hoppet-code/hoppet.git
            cd hoppet
            ./configure
            make -j
