@@ -107,8 +107,8 @@ if [ $mode = "validate" ]; then
 	file=${file_w_path#../ref_runs/}
 	echo -e Comparing output of ${PURPLE}$file${NC}
 	# First remove some useless lines
-	grep -v "TOTAL TIME" $file_w_path | grep -v "Stamped by" > ${file}.ref
-	grep -v "TOTAL TIME" $file | grep -v "Stamped by" > ${file}.new
+	grep -v "TOTAL TIME" $file_w_path | grep -v "Stamped by" | grep -v "FastJet" > ${file}.ref
+	grep -v "TOTAL TIME" $file | grep -v "Stamped by" | grep -v "FastJet" > ${file}.new
 	diff  ${file}.ref ${file}.new > ${file}.diff
 	checkwc=`cat ${file}.diff| wc -l `
 	if [ $checkwc == "0" ]; then
