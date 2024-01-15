@@ -370,7 +370,8 @@ contains
     write(idev,*) '# Electron energy: ', El, 'GeV'
     write(idev,*) '# Proton energy:   ', Eh, 'GeV'
     write(idev,*) '# COM energy:      ', S, 'GeV^2'
-    write(idev,*) '# PDF:             ', trim(adjustl(pdfname))
+    if(toy_Q0 < zero) write(idev,*) '# PDF:             ', trim(adjustl(pdfname))
+    if(toy_Q0 > zero) write(idev,*) '# PDF:             ', 'LHA toy PDF initialised at', toy_Q0, 'GeV'
     write(idev,*) '# MZ:              ', MZ
     write(idev,*) '# MW:              ', MW
     if(.not.vnf)   write(idev,*) '# nf:              ', nflav
@@ -390,12 +391,12 @@ contains
   subroutine welcome_message
     write(0,'(a)') '-----------------------------------------------------------'
     write(0,'(a)') '               Welcome to disorder v. 1.0.0                '
-    write(0,'(a)') '        Written by Alexander Karlberg (2023-)              '
+    write(0,'(a)') '        Written by Alexander Karlberg (2023-2024           '
     write(0,'(a)') '                                                           '
     write(0,'(a)') ' It is made available under the GNU public license,        '
     write(0,'(a)') ' with the additional request that if you use it or any     '
     write(0,'(a)') ' derivative of it in scientific work then you should cite: '
-    write(0,'(a)') ' A. Karlberg (arXiv:23XX.YYYYY).                           '
+    write(0,'(a)') ' A. Karlberg (arXiv:24XX.YYYYY).                           '
     write(0,'(a)') '                                                           '
     write(0,'(a)') ' You are also encouraged to cite HOPPET, the original      '
     write(0,'(a)') ' references,for LO, NLO and NNLO splitting functions, the  '

@@ -34,6 +34,7 @@ program disorder
   ! Need to start hoppet
   call hoppetStartExtended(ymax_hoppet,dy,minQval,maxQval,dlnlnQ,nloop,&
        &         order_hoppet,factscheme_MSbar)
+  call read_PDF()
   ! Initialise histograms
   call init_histo()
 
@@ -64,8 +65,6 @@ program disorder
         ncall1 = 0 ! turn off the grid computation
      enddo ! end loop over pdfs
   else
-     call InitPDF(0) ! AK Should this not be nmempdf?
-     
      imempdf = nmempdf
      nmempdf_start = nmempdf
      
@@ -400,7 +399,11 @@ contains
       if(eta.ne.etasave) then
          etasave = eta
          do isc = 1,3
-            call evolvePDF(eta,scales_muf(isc)*scale*Qval,pdfs(isc,:))
+            if(toy_Q0 < zero) then
+               call evolvePDF(eta,scales_muf(isc)*scale*Qval,pdfs(isc,:))
+            else
+               call hoppetEval(eta,scales_muf(isc)*scale*Qval,pdfs(isc,:))
+            endif
          enddo
          ! Then copy the PDFs into the full array
          !real(dp), parameter, public :: scales_muf(1:maxscales) = &

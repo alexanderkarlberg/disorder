@@ -61,6 +61,10 @@
 \newcommand{\CC}{\mathrm{CC}}
 \newcommand{\GEV}{\,\mathrm{GeV}}
 \newcommand{\NNNLO}{N$^3$LO}
+\newcommand{\ttt}[1]{\texttt{#1}}
+
+\newcommand{\repolink}[2]{\href{https://github.com/alexanderkarlberg/disorder/blob/master/#1}{\ttt{#2}}}
+\newcommand{\masterlink}[1]{\repolink{#1}{#1}}
 
 \begin{document}
 \begin{flushright}
@@ -435,14 +439,14 @@ along with two auxiliary executables, {\tt mergedata} and {\tt
 \end{lstlisting}
 where the path should include the config itself (i.e. {\tt
   /usr/local/bin/hoppet-config}). By default \fastjet{} is not linked
-and only a skeleton analysis ({\tt analysis/simple\_analysis.f}) is
+and only a skeleton analysis (\masterlink{analysis/simple\_analysis.f}) is
 compiled. To link \fastjet{} run
 \begin{lstlisting}
   cmake -DNEEDS_FASTJET=ON [-DFASTJET_CONFIG=/path/to/fastjet-config]
 \end{lstlisting}
 where the path to {\tt fastjet-config} only needs to be specified if
 it is not in the user's {\tt \$PATH}. To compile a different analysis
-the user should first put it in the {\tt analysis} directory (here we
+the user should first put it in the \masterlink{analysis} directory (here we
 assume it to be called {\tt my\_analysis.f}), and then pass it to
 {\tt cmake} through
 \begin{lstlisting}
@@ -630,7 +634,7 @@ use to be able to control the number of calls to \disent{}. This is
 done through the flag {\tt -ncall2}, introduced already above. 
 
 We provide a small script to run on multiple cores on a single machine
-in {\tt aux/runpar.sh}. 
+in \masterlink{aux/runpar.sh}. 
 
 \section{Benchmarks and results}
 \label{sec:results}
@@ -663,8 +667,8 @@ exhaustive phenomenological analysis, but rather show the capabilities
 of \disorder{} and to provide a few select results that can be used to
 either validate the code when running it, or to validate other
 programs in the future. All analyses used in this section can be found
-in the {\tt analysis} directory, and the raw results can be found in
-the {\tt paper\_runs} folder.
+in the \masterlink{analysis} directory, and the raw results can be found in
+the \masterlink{paper\_runs} folder.
 
 We use {\tt fastjet~v3.4.1} for jet-clustering, and unless otherwise
 stated we collide electrons and protons using the
