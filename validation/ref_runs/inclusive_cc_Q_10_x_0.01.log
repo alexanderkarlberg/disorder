@@ -1,0 +1,104 @@
+#--------------------------------------------------------------------------
+#                         FastJet release 3.4.1
+#                 M. Cacciari, G.P. Salam and G. Soyez                  
+#     A software package for jet finding and analysis at colliders      
+#                           http://fastjet.fr                           
+#	                                                                      
+# Please cite EPJC72(2012)1896 [arXiv:1111.6097] if you use this package
+# for scientific work and optionally PLB641(2006)57 [hep-ph/0512210].   
+#                                                                       
+# FastJet is provided without warranty under the GNU GPL v2 or higher.  
+# It uses T. Chan's closest pair algorithm, S. Fortune's Voronoi code
+# and 3rd party plugin jet algorithms. See COPYING file for details.
+#--------------------------------------------------------------------------
+ WARNING: Using toy PDF
+Starting the structure functions with fixed number of flavours
+nf =  5
+ WARNING: Using toy PDF
+ Outputting results to: inclusive_cc_Q_10_x_0.01_disorder_n3lo_seed0001_pdfmem000
+
+==================== TOTAL TIME :  7.01E+00 s.
+
+-----------------------------------------------------------
+               Welcome to HOPPET v. 1.3.0-devel            
+   Higher Order Perturbative Parton Evolution Toolkit      
+
+                   Written (2001-2023) by                  
+     Frederic Dreyer, Alexander Karlberg, Paolo Nason,     
+      Juan Rojo, Gavin P. Salam and Giulia Zanderighi      
+
+ It is made available under the GNU public license,        
+ with the additional request that if you use it or any     
+ derivative of it in scientific work then you should cite: 
+ G.P. Salam & J. Rojo, CPC 180(2009)120 (arXiv:0804.3755). 
+ and                                                       
+ A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi          
+ & F. Dreyer (arXiv:2401.XXXXX).                           
+ 
+ You are also encouraged to cite the original references,  
+ for LO, NLO and NNLO splitting functions, the QCD         
+ 1, 2, 3, and 4 loop beta functions and the PDF and        
+ coupling mass threshold matching functions. Additionally  
+ the DIS coefficient functions should be cited when used.  
+-----------------------------------------------------------
+WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
+-----------------------------------------------------------
+               Welcome to disorder v. 1.0.0                
+        Written by Alexander Karlberg (2023-2024           
+                                                           
+ It is made available under the GNU public license,        
+ with the additional request that if you use it or any     
+ derivative of it in scientific work then you should cite: 
+ A. Karlberg (arXiv:24XX.YYYYY).                           
+                                                           
+ You are also encouraged to cite HOPPET, the original      
+ references,for LO, NLO and NNLO splitting functions, the  
+ QCD 1, 2, 3 and 4 loop beta functions and the coupling and
+ PDF mass threshold matching functions. You are furthermore
+ encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
+ functions and the disent references.                      
+-----------------------------------------------------------
+ # Stamped by ../build/disorder on 15/01/2024 at 17:19:39
+ #../build/disorder -n3lo -CC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -prefix inclusive_cc_Q_10_x_0.01_
+ # ----------------------------------------------------------
+ # Doing DIS @ n3lo  (e^- + p)
+ # Inclusively in radiation
+ # Including charged current
+ # Including neutral current
+ # With γ only
+ # xmin, xmax:         1.0000000000000000E-002   1.0000000000000000E-002
+ # ymin, ymax:        0.11086474501108648       0.11086474501108648     
+ # Q2min, Q2max:       100.00000000000000        100.00000000000000      GeV^2
+ # Electron energy:    27.500000000000000      GeV
+ # Proton energy:      820.00000000000000      GeV
+ # COM energy:         90200.000000000000      GeV^2
+ # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
+ # MZ:                 91.187600000000003     
+ # MW:                 80.397999999999996     
+ # nf:                         5
+ # CA:                 3.0000000000000000     
+ # CF:                 1.3333333333333333     
+ # TR:                0.50000000000000000     
+ # αS(MZ):            0.12600196316706219     
+ # 1/αEM:              137.00000000000000     
+ # GF:                 1.1267023651653377E-005
+ # sin(θ_W)^2:        0.22264585341299603     
+ # ----------------------------------------------------------
+WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
+ 
+ ============================================================
+ # Total N3LO cross-section
+ # Summary:
+ # σ(NC + CC)                     =     1795.741532 pb/GeV^2
+ # MC integration uncertainty     =        0.0000 %
+ # QCD scale uncertainty (+)      =        0.8290 %
+ # QCD scale uncertainty (-)      =       -0.2946 %
+ 
+ # Reduced N3LO cross-sections
+ # σ reduced (NC)                 =        0.768970
+ # QCD scale uncertainty (+)      =        0.8290 %
+ # QCD scale uncertainty (-)      =       -0.2946 %
+ # σ reduced (CC)                 =        2.529011
+ # QCD scale uncertainty (+)      =        0.7355 %
+ # QCD scale uncertainty (-)      =       -0.2601 %
+ ============================================================

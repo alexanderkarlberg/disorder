@@ -1,0 +1,43 @@
+ # Stamped by ../build/disorder on 15/01/2024 at 17:19:47
+ #../build/disorder -n3lo -CC -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert -prefix inclusive_cc_Q_10_y_0.01_
+ # ----------------------------------------------------------
+ # Doing DIS @ n3lo  (e^- + p)
+ # Inclusively in radiation
+ # Including charged current
+ # Including neutral current
+ # With γ only
+ # xmin, xmax:        0.11086474501108648       0.11086474501108648     
+ # ymin, ymax:         1.0000000000000000E-002   1.0000000000000000E-002
+ # Q2min, Q2max:       100.00000000000000        100.00000000000000      GeV^2
+ # Electron energy:    27.500000000000000      GeV
+ # Proton energy:      820.00000000000000      GeV
+ # COM energy:         90200.000000000000      GeV^2
+ # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
+ # MZ:                 91.187600000000003     
+ # MW:                 80.397999999999996     
+ # nf:                         5
+ # CA:                 3.0000000000000000     
+ # CF:                 1.3333333333333333     
+ # TR:                0.50000000000000000     
+ # αS(MZ):            0.12600196316706219     
+ # 1/αEM:              137.00000000000000     
+ # GF:                 1.1267023651653377E-005
+ # sin(θ_W)^2:        0.22264585341299603     
+ # ----------------------------------------------------------
+ 
+ ============================================================
+ # Total N3LO cross-section
+ # Summary:
+ # σ(NC + CC)                     =       94.921477 pb/GeV^2
+ # MC integration uncertainty     =        0.0000 %
+ # QCD scale uncertainty (+)      =        0.1505 %
+ # QCD scale uncertainty (-)      =       -0.0421 %
+ 
+ # Reduced N3LO cross-sections
+ # σ reduced (NC)                 =        0.407479
+ # QCD scale uncertainty (+)      =        0.1505 %
+ # QCD scale uncertainty (-)      =       -0.0421 %
+ # σ reduced (CC)                 =        1.613090
+ # QCD scale uncertainty (+)      =        0.1444 %
+ # QCD scale uncertainty (-)      =       -0.0386 %
+ ============================================================

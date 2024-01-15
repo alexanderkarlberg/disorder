@@ -1,0 +1,39 @@
+ # Stamped by ../build/disorder on 15/01/2024 at 17:20:07
+ #../build/disorder -n3lo -NC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_nc_Qmin_1_x_0.01_
+ # ----------------------------------------------------------
+ # Doing DIS @ n3lo  (e^- + p)
+ # Inclusively in radiation
+ # Including neutral current
+ # With γ only
+ # xmin, xmax:         1.0000000000000000E-002   1.0000000000000000E-002
+ # ymin, ymax:         0.0000000000000000        1.0000000000000000     
+ # Q2min, Q2max:       1.0000000000000000        902.00000000000000      GeV^2
+ # Electron energy:    27.500000000000000      GeV
+ # Proton energy:      820.00000000000000      GeV
+ # COM energy:         90200.000000000000      GeV^2
+ # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
+ # MZ:                 91.187600000000003     
+ # MW:                 80.397999999999996     
+ # nf:                         5
+ # CA:                 3.0000000000000000     
+ # CF:                 1.3333333333333333     
+ # TR:                0.50000000000000000     
+ # αS(MZ):            0.12600196316706219     
+ # 1/αEM:              137.00000000000000     
+ # GF:                 1.1267023651653377E-005
+ # sin(θ_W)^2:        0.22264585341299603     
+ # ----------------------------------------------------------
+ 
+ ============================================================
+ # Total N3LO cross-section
+ # Summary:
+ # σ(NC)                          =  4755522.467477 pb
+ # MC integration uncertainty     =        0.1267 %
+ # QCD scale uncertainty (+)      =      124.1292 %
+ # QCD scale uncertainty (-)      =-32417747.3662 %
+ 
+ # Reduced N3LO cross-sections
+ # σ reduced (NC)                 =      760.281186
+ # QCD scale uncertainty (+)      =        0.5425 %
+ # QCD scale uncertainty (-)      =    -9977.1620 %
+ ============================================================

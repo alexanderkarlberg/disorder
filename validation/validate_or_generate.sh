@@ -1,0 +1,136 @@
+#!/bin/bash
+# To validate the program run
+# ./validate_or_generate.sh validate
+#
+# To generate new validation runs
+# ./validate_or_generate.sh generate
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+PURPLE='\033[1;35m'
+NC='\033[0m' # No Color
+
+# Clean-up any semaphores and old builds
+rm -rf ~/.parallel/semaphores/* build
+
+prefix="
+inclusive_nc_Q_10_x_0.01_ 
+inclusive_nc_includeZ_Q_10_x_0.01_ 
+inclusive_cc_Q_10_x_0.01_ 
+inclusive_nc_Q_10_ 
+inclusive_nc_includeZ_Q_10_ 
+inclusive_cc_Q_10_ 
+inclusive_nc_Qmin_1_x_0.01_ 
+inclusive_nc_includeZ_Qmin_1_x_0.01_ 
+inclusive_cc_Qmin_1_x_0.01_ 
+inclusive_nc_Q_10_y_0.01_ 
+inclusive_nc_includeZ_Q_10_y_0.01_ 
+inclusive_cc_Q_10_y_0.01_ 
+p2b_nc_Q_10_x_0.01_
+"
+prefixarray=($prefix)
+
+cmdline=(
+    # Some inclusive runs
+    -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
+    -n3lo\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
+    -n3lo\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
+    -n3lo\ -NC\ -toyQ0\ 2.0\ -Qmin\ 1.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Qmin\ 1.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -CC\ -toyQ0\ 2.0\ -Qmin\ 1.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\ 
+    -n3lo\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\  
+    -n3lo\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\ 
+    #Some p2b runs
+    -nnlo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -p2b\ 
+)
+
+if [ "${#prefixarray[@]}" -ne "${#cmdline[@]}" ]; then
+    echo "Arrays are not fo the same size " ${#prefixarray[@]}  ${#cmdline[@]}
+    exit 1
+fi
+
+numJobs=${#prefixarray[@]}
+
+# Now check if we are generating validation runs or validating the code
+mode=$1
+if [ -z "$mode" ]
+then
+    echo "Need to specify either validate or generate, like this"
+    echo "./validate_or_generate.sh validate"
+    exit 1
+fi
+
+if [ $mode = "validate" ]; then
+    dir="test_runs"
+elif [ $mode = "generate" ]; then
+    dir="ref_runs"
+else
+    echo -e Mode not recognised: ${RED}$mode${NC}
+    exit 1
+fi
+
+rm -rf $dir
+mkdir $dir
+
+echo -e You have invoked the script to ${PURPLE}$mode${NC} the code
+
+# Create build directory and compile
+echo -e Building project in ${PURPLE}build${NC}
+mkdir build 
+cd build 
+cmake ../.. -DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis > build.log
+make -j >> build.log
+
+# Move to directory containing reference results
+cd ../$dir
+
+echo -e "Starting ${PURPLE}$numJobs${NC} jobs (in parallel if possible)"
+iJob=1
+for i in $(seq 0 $((numJobs-1)))
+do
+    echo -e Running job number ${iJob}: ${PURPLE}../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]}${NC}
+    sem -j +0 ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
+    ((iJob++))
+done
+sem --wait 
+
+echo -e ${PURPLE}DONE${NC} generating results
+
+# If we are generating then nothing more to do. If we are validating then now is the time!
+if [ $mode = "validate" ]; then
+    for file_w_path in ../ref_runs/*
+    do
+	file=${file_w_path#../ref_runs/}
+	echo -e Comparing output of ${PURPLE}$file${NC}
+	# First remove some useless lines
+	grep -v "TOTAL TIME" $file_w_path | grep -v "Stamped by" > ${file}.ref
+	grep -v "TOTAL TIME" $file | grep -v "Stamped by" > ${file}.new
+	diff  ${file}.ref ${file}.new > ${file}.diff
+	checkwc=`cat ${file}.diff| wc -l `
+	if [ $checkwc == "0" ]; then
+	    echo -e "Comparison                                                                                  ${GREEN}PASSED${NC}"
+	else
+	    echo -e "Comparison                                                                                  ${RED}FAILED${NC}"
+	    failed="true"
+	fi
+    done
+    if [ -z $failed ]; then
+	echo -e All tests ${GREEN}PASSED${NC}
+    else
+	echo -e ERROR: At least one test ${RED}FAILED${NC}
+	exit 1
+    fi
+fi
+
+# Clean up
+echo -e Cleaning up
+
+rm inclusive*disorder*dat *grids* 
+cd ..
+rm -rf build test_runs
+
+exit 0
