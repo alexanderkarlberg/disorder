@@ -94,7 +94,8 @@ mkdir build
 cd build 
 cmake ../.. $CMAKEFLAGS #> build.log
 make -j #>> build.log
-ldd disorder 
+ldd disorder
+ls /usr/local/lib/
 
 # Move to directory containing reference results
 cd ../$dir
@@ -104,8 +105,8 @@ iJob=1
 for i in $(seq 0 $((numJobs-1)))
 do
     echo -e Running job number ${iJob}: ${PURPLE}../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]}${NC}
-#    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
-    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} 2>&1 | tee ${prefixarray[$i]%_}.log
+    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
+#    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} 2>&1 | tee ${prefixarray[$i]%_}.log
     ((iJob++))
 done
 sem --wait 

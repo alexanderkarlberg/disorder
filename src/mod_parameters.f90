@@ -342,6 +342,7 @@ contains
   subroutine print_header(idev)
     implicit none
     integer, intent(in) :: idev
+    real(dp) :: Qmn, Qmx
     write(idev,'(a)',advance='no') ' # '
     call time_stamp(idev)
     write(idev,*) '#'//trim(command_line())
@@ -364,25 +365,27 @@ contains
     else
        write(idev,*) '# And no neutral current'
     endif
-    write(idev,*) '# xmin, xmax:      ', xmin, xmax
-    write(idev,*) '# ymin, ymax:      ', ymin, ymax
-    write(idev,*) '# Q2min, Q2max:    ', Q2min, Q2max, 'GeV^2'
-    write(idev,*) '# Electron energy: ', El, 'GeV'
-    write(idev,*) '# Proton energy:   ', Eh, 'GeV'
-    write(idev,*) '# COM energy:      ', S, 'GeV^2'
-    if(toy_Q0 < zero) write(idev,*) '# PDF:             ', trim(adjustl(pdfname))
-    if(toy_Q0 > zero) write(idev,*) '# PDF:             ', 'LHA toy PDF initialised at', toy_Q0, 'GeV'
-    write(idev,*) '# MZ:              ', MZ
-    write(idev,*) '# MW:              ', MW
-    if(.not.vnf)   write(idev,*) '# nf:              ', nflav
-    if(vnf)   write(idev,*) '# nf:              ', 'variable'
-    write(idev,*) '# CA:              ', CAlcl
-    write(idev,*) '# CF:              ', CFlcl
-    write(idev,*) '# TR:              ', TRlcl
-    write(idev,*) '# αS(MZ):          ', alphasLocal(MZ)
-    write(idev,*) '# 1/αEM:           ', 1.0_dp/alpha_em
-    write(idev,*) '# GF:              ', GF
-    write(idev,*) '# sin(θ_W)^2:      ', sin_thw_sq
+    Qmn = dsqrt(Q2min)
+    Qmx = dsqrt(Q2max)
+    write(idev,'(a,F14.7,F14.7)') ' # xmin, xmax:      ', xmin, xmax
+    write(idev,'(a,F14.7,F14.7)') ' # ymin, ymax:      ', ymin, ymax
+    write(idev,'(a,F14.7,F14.7,a)') ' # Qmin, Qmax:      ', Qmn, Qmx, ' GeV'
+    write(idev,'(a,F14.7,a)') ' # Electron energy: ', El, ' GeV'
+    write(idev,'(a,F14.7,a)') ' # Proton energy:   ', Eh, ' GeV'
+    write(idev,'(a,F14.7,a)') ' # COM energy:      ', S,  ' GeV^2'
+    if(toy_Q0 < zero) write(idev,'(a,a)') ' # PDF:             ', trim(adjustl(pdfname))
+    if(toy_Q0 > zero) write(idev,*) ' # PDF:             ', 'LHA toy PDF initialised at', toy_Q0, 'GeV'
+    write(idev,'(a,F14.7,a)') ' # MZ:              ', MZ, ' GeV'
+    write(idev,'(a,F14.7,a)') ' # MW:              ', MW, ' GeV'
+    if(.not.vnf)   write(idev,'(a,I14)') ' # nf:              ', nflav
+    if(vnf)   write(idev,'(a,a)') ' # nf:              ', 'variable'
+    write(idev,'(a,F14.7)') ' # CA:              ', CAlcl
+    write(idev,'(a,F14.7)') ' # CF:              ', CFlcl
+    write(idev,'(a,F14.7)') ' # TR:              ', TRlcl
+    write(idev,'(a,F14.7)') ' # αS(MZ):          ', alphasLocal(MZ)
+    write(idev,'(a,F14.7)') ' # 1/αEM:           ', 1.0_dp/alpha_em
+    write(idev,'(a,E14.7,a)') ' # GF:                  ', GF,  ' GeV^-2'
+    write(idev,'(a,F14.7)') ' # sin(θ_W)^2:      ', sin_thw_sq
     
     write(idev,*) '# ----------------------------------------------------------'
 
