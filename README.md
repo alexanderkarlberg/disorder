@@ -1,8 +1,9 @@
+[![Build](https://github.com/alexanderkarlberg/disorder/actions/workflows/cmake-single-platform.yml/badge.svg?branch=main)](https://github.com/alexanderkarlberg/disorder/actions/workflows/cmake-single-platform.yml)
 Installation
 ============
 
 To compile `disorder`, you will need
-* <span style="font-variant:small-caps;">Hoppet</span>, v1.3.0 or newer (https://github.com/hoppet-code/hoppet)
+* <span style="font-variant:small-caps;">Hoppet</span>, v1.3.0 or newer (https://github.com/hoppet-code/hoppet) [currently also needs the 2024-01-n3lo-splittings-functions] branch
 * LHAPDF6 (http://lhapdf.hepforge.org/)
 
 Optionally you may need fastjet installed as well
