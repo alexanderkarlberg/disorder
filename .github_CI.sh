@@ -19,7 +19,7 @@ cd fastjet-3.4.2
 ./configure
 make -j
 make check
-make install
+sudo make install
 cd ..
 
 # And LHAPDF
@@ -28,4 +28,4 @@ tar -xzvf LHAPDF-6.5.4.tar.gz
 cd LHAPDF-6.5.4
 ./configure
 make -j
-make install
+sudo make install
