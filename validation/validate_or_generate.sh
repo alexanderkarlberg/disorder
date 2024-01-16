@@ -42,7 +42,7 @@ cmdline=(
     # Some inclusive runs
     -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
     -n3lo\ -NC\ -pdf\ MSHT20an3lo_as118\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -pdfuncert\ -alphasuncert\ 
-    -n3lo\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -NC\ -includeZ\ -positron\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
     -n3lo\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
     -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
     -n3lo\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
@@ -103,7 +103,8 @@ iJob=1
 for i in $(seq 0 $((numJobs-1)))
 do
     echo -e Running job number ${iJob}: ${PURPLE}../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]}${NC}
-    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
+#    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
+    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} 2>&1 | tee ${prefixarray[$i]%_}.log
     ((iJob++))
 done
 sem --wait 
