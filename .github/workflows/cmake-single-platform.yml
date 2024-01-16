@@ -41,5 +41,5 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}
 
     - name: Run validation
-      working-directory: ${{github.workspace}}/validate
+      working-directory: ${{github.workspace}}/validation
       run: chmod 755 validate_or_generate.sh; ./validate_or_generate.sh validate
