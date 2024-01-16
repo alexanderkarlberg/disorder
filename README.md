@@ -1,4 +1,4 @@
-[![Build](https://github.com/alexanderkarlberg/disorder/actions/workflows/cmake-single-platform.yml/badge.svg?branch=main)](https://github.com/alexanderkarlberg/disorder/actions/workflows/cmake-single-platform.yml)
+[![Build Status](https://github.com/alexanderkarlberg/disorder/actions/workflows/cmake-single-platform.yml?label=build&logo=github&style=flat-square)](https://github.com/alexanderkarlberg/disorder/actions/workflows/cmake-single-platform.yml)
 Installation
 ============
 

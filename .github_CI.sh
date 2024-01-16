@@ -31,9 +31,13 @@ cd LHAPDF-6.5.4
 ./configure
 make -j
 sudo make install
-lhapdf install MSHT20an3lo_as118
+wget http://lhapdfsets.web.cern.ch/lhapdfsets/current/MSHT20an3lo_as118.tar.gz
+tar -xzvf MSHT20an3lo_as118.tar.gz
+sudo cp -r MSHT20an3lo_as118 /usr/local/share/LHAPDF/.
 
 # Set dynamic library path
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 export LD_RUN_PATH=$LD_RUN_PATH:/usr/local/lib
 sudo ldconfig
+
+ldconfig -v 2>/dev/null | grep -v ^$'\t'
