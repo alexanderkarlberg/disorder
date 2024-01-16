@@ -96,7 +96,8 @@ Besides the dependencies listed above `disorder` incorporates code from the foll
 
 * The POWHEG-BOX (https://powhegbox.mib.infn.it/) under GPLv2. Specifically the analysis framework and the `mergedata` programs are adapted from there.
 * The command line tools (io_utils.f90 and lcl_dec.f90) are written by Gavin Salam and are under GPLv3. 
-* Some of the code is adapted from proVBFH (https://github.com/fdreyer/proVBFH/) under GPLv3. 
+* Some of the code is adapted from proVBFH (https://github.com/fdreyer/proVBFH/) under GPLv3.
+* The code relies heavily on disent, written by Mike Seymour. 
 
 Bugs
 ====
