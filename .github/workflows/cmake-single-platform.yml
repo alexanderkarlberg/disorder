@@ -29,7 +29,9 @@ jobs:
            ./configure
            make -j
            make check
-           make install
+           sudo make install
+           cd ..
+           sudo apt install fastjet
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
