@@ -94,6 +94,7 @@ mkdir build
 cd build 
 cmake ../.. $CMAKEFLAGS #> build.log
 make -j #>> build.log
+ldd disorder 
 
 # Move to directory containing reference results
 cd ../$dir
