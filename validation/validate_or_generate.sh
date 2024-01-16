@@ -21,6 +21,7 @@ rm -rf ~/.parallel/semaphores/* build
 
 prefix="
 inclusive_nc_Q_10_x_0.01_ 
+inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_
 inclusive_nc_includeZ_Q_10_x_0.01_ 
 inclusive_cc_Q_10_x_0.01_ 
 inclusive_nc_Q_10_ 
@@ -33,12 +34,14 @@ inclusive_nc_Q_10_y_0.01_
 inclusive_nc_includeZ_Q_10_y_0.01_ 
 inclusive_cc_Q_10_y_0.01_ 
 p2b_nc_Q_10_x_0.01_
+p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_
 "
 prefixarray=($prefix)
 
 cmdline=(
     # Some inclusive runs
     -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -NC\ -pdf\ MSHT20an3lo_as118\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -pdfuncert\ -alphasuncert\ 
     -n3lo\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
     -n3lo\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
     -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
@@ -52,6 +55,7 @@ cmdline=(
     -n3lo\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\ 
     #Some p2b runs
     -nnlo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -p2b\ 
+    -nnlo\ -NC\ -pdf\ MSHT20an3lo_as118\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -p2b\ 
 )
 
 if [ "${#prefixarray[@]}" -ne "${#cmdline[@]}" ]; then
@@ -88,8 +92,8 @@ echo -e You have invoked the script to ${PURPLE}$mode${NC} the code
 echo -e Building project in ${PURPLE}build${NC}
 mkdir build 
 cd build 
-cmake ../.. $CMAKEFLAGS > build.log
-make -j >> build.log
+cmake ../.. $CMAKEFLAGS #> build.log
+make -j #>> build.log
 
 # Move to directory containing reference results
 cd ../$dir
