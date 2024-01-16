@@ -29,3 +29,4 @@ cd LHAPDF-6.5.4
 ./configure
 make -j
 sudo make install
+lhapdf install MSHT20an3lo_as118

@@ -40,3 +40,6 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}}
 
+    - name: Run validation
+      working-directory: ${{github.workspace}}/validate
+      run: chmod 755 validate_or_generate.sh; ./validate_or_generate.sh validate
