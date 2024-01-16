@@ -634,7 +634,15 @@ use to be able to control the number of calls to \disent{}. This is
 done through the flag {\tt -ncall2}, introduced already above. 
 
 We provide a small script to run on multiple cores on a single machine
-in \masterlink{aux/runpar.sh}. 
+in \masterlink{aux/runpar.sh}.
+
+\subsection{Validating the code}
+The code comes with a script to validate that the results come out as expected. It can be run by entering \masterlink{validation} and executing
+\begin{lstlisting}
+  ./validate_or_generate.sh validate
+\end{lstlisting}
+The script builds the code and executes a number of tests designed to check the most important features of \disorder{}. The script assumes default installation paths for \hoppet{}, \fastjet{}, and \lhapdf{}. A user can however manually change this by inspecting the script and adding the appropriate {\tt cmake} flags at the beginning. The validation script runs in about 500 CPU seconds.
+
 
 \section{Benchmarks and results}
 \label{sec:results}

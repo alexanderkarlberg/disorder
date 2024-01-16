@@ -35,3 +35,4 @@ lhapdf install MSHT20an3lo_as118
 
 # Set dynamic library path
 LD_LIBRARY_PATH=/usr/local/lib
+LD_RUN_PATH=/usr/local/lib

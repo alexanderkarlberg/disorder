@@ -1,27 +1,27 @@
- # Stamped by ../build/disorder on 16/01/2024 at 09:13:05
+ # Stamped by ../build/disorder on 16/01/2024 at 10:31:03
  #../build/disorder -nnlo -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)
  # Using DISENT with projection-to-Born
  # Including neutral current
  # With γ only
- # xmin, xmax:         1.0000000000000000E-002   1.0000000000000000E-002
- # ymin, ymax:        0.11086474501108648       0.11086474501108648     
- # Q2min, Q2max:       100.00000000000000        100.00000000000000      GeV^2
- # Electron energy:    27.500000000000000      GeV
- # Proton energy:      820.00000000000000      GeV
- # COM energy:         90200.000000000000      GeV^2
- # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
- # MZ:                 91.187600000000003     
- # MW:                 80.397999999999996     
- # nf:                         5
- # CA:                 3.0000000000000000     
- # CF:                 1.3333333333333333     
- # TR:                0.50000000000000000     
- # αS(MZ):            0.12622992329063595     
- # 1/αEM:              137.00000000000000     
- # GF:                 1.1267023651653377E-005
- # sin(θ_W)^2:        0.22264585341299603     
+ # xmin, xmax:           0.0100000     0.0100000
+ # ymin, ymax:           0.1108647     0.1108647
+ # Qmin, Qmax:          10.0000000    10.0000000 GeV
+ # Electron energy:     27.5000000 GeV
+ # Proton energy:      820.0000000 GeV
+ # COM energy:       90200.0000000 GeV^2
+  # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
+ # MZ:                  91.1876000 GeV
+ # MW:                  80.3980000 GeV
+ # nf:                           5
+ # CA:                   3.0000000
+ # CF:                   1.3333333
+ # TR:                   0.5000000
+ # αS(MZ):               0.1262299
+ # 1/αEM:              137.0000000
+ # GF:                   0.1126702E-04 GeV^-2
+ # sin(θ_W)^2:           0.2226459
  # ----------------------------------------------------------
 # sigcut index   0
  0.00000000E+00 0.10000000E+01 0.96150357E+06 0.21878688E+06

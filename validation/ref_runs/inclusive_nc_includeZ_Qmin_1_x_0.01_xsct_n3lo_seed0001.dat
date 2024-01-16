@@ -1,39 +1,39 @@
- # Stamped by ../build/disorder on 16/01/2024 at 09:13:14
+ # Stamped by ../build/disorder on 16/01/2024 at 10:31:04
  #../build/disorder -n3lo -NC -includeZ -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_nc_includeZ_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
  # Inclusively in radiation
  # Including neutral current
  # With γ/Z
- # xmin, xmax:         1.0000000000000000E-002   1.0000000000000000E-002
- # ymin, ymax:         0.0000000000000000        1.0000000000000000     
- # Q2min, Q2max:       1.0000000000000000        902.00000000000000      GeV^2
- # Electron energy:    27.500000000000000      GeV
- # Proton energy:      820.00000000000000      GeV
- # COM energy:         90200.000000000000      GeV^2
- # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
- # MZ:                 91.187600000000003     
- # MW:                 80.397999999999996     
- # nf:                         5
- # CA:                 3.0000000000000000     
- # CF:                 1.3333333333333333     
- # TR:                0.50000000000000000     
- # αS(MZ):            0.12600196316706219     
- # 1/αEM:              137.00000000000000     
- # GF:                 1.1267023651653377E-005
- # sin(θ_W)^2:        0.22264585341299603     
+ # xmin, xmax:           0.0100000     0.0100000
+ # ymin, ymax:           0.0000000     1.0000000
+ # Qmin, Qmax:           1.0000000    30.0333148 GeV
+ # Electron energy:     27.5000000 GeV
+ # Proton energy:      820.0000000 GeV
+ # COM energy:       90200.0000000 GeV^2
+  # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
+ # MZ:                  91.1876000 GeV
+ # MW:                  80.3980000 GeV
+ # nf:                           5
+ # CA:                   3.0000000
+ # CF:                   1.3333333
+ # TR:                   0.5000000
+ # αS(MZ):               0.1260020
+ # 1/αEM:              137.0000000
+ # GF:                   0.1126702E-04 GeV^-2
+ # sin(θ_W)^2:           0.2226459
  # ----------------------------------------------------------
  
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC)                          =  4756661.240098 pb
- # MC integration uncertainty     =        0.1267 %
- # QCD scale uncertainty (+)      =      124.1013 %
- # QCD scale uncertainty (-)      =************** %
+ # σ(NC)                          =  4942721.698389 pb
+ # MC integration uncertainty     =        0.0933 %
+ # QCD scale uncertainty (+)      =      120.3250 %
+ # QCD scale uncertainty (-)      =  -960838.5385 %
  
  # Reduced N3LO cross-sections
- # σ reduced (NC)                 =      769.176842
- # QCD scale uncertainty (+)      =        0.5387 %
- # QCD scale uncertainty (-)      =  -191424.1576 %
+ # σ reduced (NC)                 =      766.318266
+ # QCD scale uncertainty (+)      =        0.4789 %
+ # QCD scale uncertainty (-)      =     -304.9881 %
  ============================================================

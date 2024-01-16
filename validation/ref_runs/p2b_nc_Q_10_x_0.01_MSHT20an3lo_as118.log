@@ -1,0 +1,123 @@
+LHAPDF 6.5.4 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0000.dat
+MSHT20an3lo_as118 PDF set, member #0, version 2; LHAPDF ID = 29100
+#--------------------------------------------------------------------------
+#                         FastJet release 3.4.1
+#                 M. Cacciari, G.P. Salam and G. Soyez                  
+#     A software package for jet finding and analysis at colliders      
+#                           http://fastjet.fr                           
+#	                                                                      
+# Please cite EPJC72(2012)1896 [arXiv:1111.6097] if you use this package
+# for scientific work and optionally PLB641(2006)57 [hep-ph/0512210].   
+#                                                                       
+# FastJet is provided without warranty under the GNU GPL v2 or higher.  
+# It uses T. Chan's closest pair algorithm, S. Fortune's Voronoi code
+# and 3rd party plugin jet algorithms. See COPYING file for details.
+#--------------------------------------------------------------------------
+Thanks for using LHAPDF 6.5.4. Please make sure to cite the paper:
+  Eur.Phys.J. C75 (2015) 3, 132  (http://arxiv.org/abs/1412.7420)
+ PDF member:           0
+Starting the structure functions with fixed number of flavours
+nf =  5
+
+ This is DISENT, a program for calculating jet quantities in
+ deep inelastic scattering to next-to-leading order in alpha_s
+ If you use this program, please reference:
+ S.Catani & M.H.Seymour, Nucl. Phys. B485 (1997) 291
+
+ Written by Mike Seymour, August 1996
+ Version 0.1, October 1997
+
+ Minor modifications by Gavin Salam, August 1999
+ Minor modifications by Alexander Karlberg, March 2023
+ Including bug fix in SUBFOR as reported in
+ 2005.10705 and 2010.07354
+    NEV=    100000
+ CA =  3.000000  CF =  1.333333  TR =  0.500000  nf =  5
+ CUTOFF =   1.0000000000000000E-008
+ SCHEME =           0
+ NPOW =           2           4
+ ORDER =           2
+         0, ISEED=     12345      67890
+ Outputting results to: p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_nnlo_seed0001_pdfmem000
+
+==================== TOTAL TIME :  8.61E+00 s.
+
+-----------------------------------------------------------
+               Welcome to HOPPET v. 1.3.0-devel            
+   Higher Order Perturbative Parton Evolution Toolkit      
+
+                   Written (2001-2023) by                  
+     Frederic Dreyer, Alexander Karlberg, Paolo Nason,     
+      Juan Rojo, Gavin P. Salam and Giulia Zanderighi      
+
+ It is made available under the GNU public license,        
+ with the additional request that if you use it or any     
+ derivative of it in scientific work then you should cite: 
+ G.P. Salam & J. Rojo, CPC 180(2009)120 (arXiv:0804.3755). 
+ and                                                       
+ A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi          
+ & F. Dreyer (arXiv:2401.XXXXX).                           
+ 
+ You are also encouraged to cite the original references,  
+ for LO, NLO and NNLO splitting functions, the QCD         
+ 1, 2, 3, and 4 loop beta functions and the PDF and        
+ coupling mass threshold matching functions. Additionally  
+ the DIS coefficient functions should be cited when used.  
+-----------------------------------------------------------
+WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
+-----------------------------------------------------------
+               Welcome to disorder v. 1.0.0                
+        Written by Alexander Karlberg (2023-2024           
+                                                           
+ It is made available under the GNU public license,        
+ with the additional request that if you use it or any     
+ derivative of it in scientific work then you should cite: 
+ A. Karlberg (arXiv:24XX.YYYYY).                           
+                                                           
+ You are also encouraged to cite HOPPET, the original      
+ references,for LO, NLO and NNLO splitting functions, the  
+ QCD 1, 2, 3 and 4 loop beta functions and the coupling and
+ PDF mass threshold matching functions. You are furthermore
+ encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
+ functions and the disent references.                      
+-----------------------------------------------------------
+ # Stamped by ../build/disorder on 16/01/2024 at 10:30:58
+ #../build/disorder -nnlo -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_
+ # ----------------------------------------------------------
+ # Doing DIS @ nnlo  (e^- + p)
+ # Using DISENT with projection-to-Born
+ # Including neutral current
+ # With γ only
+ # xmin, xmax:           0.0100000     0.0100000
+ # ymin, ymax:           0.1108647     0.1108647
+ # Qmin, Qmax:          10.0000000    10.0000000 GeV
+ # Electron energy:     27.5000000 GeV
+ # Proton energy:      820.0000000 GeV
+ # COM energy:       90200.0000000 GeV^2
+ # PDF:             MSHT20an3lo_as118
+ # MZ:                  91.1876000 GeV
+ # MW:                  80.3980000 GeV
+ # nf:                           5
+ # CA:                   3.0000000
+ # CF:                   1.3333333
+ # TR:                   0.5000000
+ # αS(MZ):               0.1180007
+ # 1/αEM:              137.0000000
+ # GF:                   0.1126702E-04 GeV^-2
+ # sin(θ_W)^2:           0.2226459
+ # ----------------------------------------------------------
+WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
+ 
+ ============================================================
+ # Total NNLO cross-section
+ # Summary:
+ # σ(NC)                          =     1914.329828 pb/GeV^2
+ # MC integration uncertainty     =        0.0000 %
+ # QCD scale uncertainty (+)      =        1.6038 %
+ # QCD scale uncertainty (-)      =       -1.1821 %
+ 
+ # Reduced NNLO cross-sections
+ # σ reduced (NC)                 =        0.820192
+ # QCD scale uncertainty (+)      =        1.6038 %
+ # QCD scale uncertainty (-)      =       -1.1821 %
+ ============================================================

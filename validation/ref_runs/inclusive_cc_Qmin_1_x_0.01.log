@@ -15,14 +15,14 @@ nf =  5
                               xl( 6)=   0.000     xu( 6)=   1.000    
                               xl( 7)=   0.000     xu( 7)=   1.000    
 
- iteration no.  1: integral =  4768681.    +/-  0.37E+05
- all iterations: integral =  4768681.    +/-  0.37E+05 chi**2/it'n =  0.0    
+ iteration no.  1: integral =  4951225.    +/-  0.32E+05
+ all iterations: integral =  4951225.    +/-  0.32E+05 chi**2/it'n =  0.0    
 
- iteration no.  2: integral =  4751187.    +/-  0.24E+05
- all iterations: integral =  4756455.    +/-  0.20E+05 chi**2/it'n = 0.16    
+ iteration no.  2: integral =  4937877.    +/-  0.19E+05
+ all iterations: integral =  4941495.    +/-  0.17E+05 chi**2/it'n = 0.13    
 
- iteration no.  3: integral =  4753191.    +/-  0.21E+05
- all iterations: integral =  4754889.    +/-  0.15E+05 chi**2/it'n = 0.84E-01
+ iteration no.  3: integral =  4946392.    +/-  0.16E+05
+ all iterations: integral =  4944039.    +/-  0.12E+05 chi**2/it'n = 0.86E-01
  ****************************************************
  * Writing out vegas grid to inclusive_cc_Qmin_1_x_0.01_grids-n3lo-0001.dat                            *
  ****************************************************
@@ -52,11 +52,11 @@ nf =  5
                               xl( 6)=   0.000     xu( 6)=   1.000    
                               xl( 7)=   0.000     xu( 7)=   1.000    
 
- iteration no.  1: integral =  4756165.    +/-  0.60E+04
- all iterations: integral =  4756165.    +/-  0.60E+04 chi**2/it'n = 0.23E-07
+ iteration no.  1: integral =  4942223.    +/-  0.46E+04
+ all iterations: integral =  4942223.    +/-  0.46E+04 chi**2/it'n =  0.0    
  Outputting results to: inclusive_cc_Qmin_1_x_0.01_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  2.90E+01 s.
+==================== TOTAL TIME :  3.44E+01 s.
 
 -----------------------------------------------------------
                Welcome to HOPPET v. 1.3.0-devel            
@@ -99,7 +99,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 16/01/2024 at 09:12:50
+ # Stamped by ../build/disorder on 16/01/2024 at 10:30:30
  #../build/disorder -n3lo -CC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_cc_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -107,23 +107,23 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  # Including charged current
  # Including neutral current
  # With γ only
- # xmin, xmax:         1.0000000000000000E-002   1.0000000000000000E-002
- # ymin, ymax:         0.0000000000000000        1.0000000000000000     
- # Q2min, Q2max:       1.0000000000000000        902.00000000000000      GeV^2
- # Electron energy:    27.500000000000000      GeV
- # Proton energy:      820.00000000000000      GeV
- # COM energy:         90200.000000000000      GeV^2
- # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
- # MZ:                 91.187600000000003     
- # MW:                 80.397999999999996     
- # nf:                         5
- # CA:                 3.0000000000000000     
- # CF:                 1.3333333333333333     
- # TR:                0.50000000000000000     
- # αS(MZ):            0.12600196316706219     
- # 1/αEM:              137.00000000000000     
- # GF:                 1.1267023651653377E-005
- # sin(θ_W)^2:        0.22264585341299603     
+ # xmin, xmax:           0.0100000     0.0100000
+ # ymin, ymax:           0.0000000     1.0000000
+ # Qmin, Qmax:           1.0000000    30.0333148 GeV
+ # Electron energy:     27.5000000 GeV
+ # Proton energy:      820.0000000 GeV
+ # COM energy:       90200.0000000 GeV^2
+  # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
+ # MZ:                  91.1876000 GeV
+ # MW:                  80.3980000 GeV
+ # nf:                           5
+ # CA:                   3.0000000
+ # CF:                   1.3333333
+ # TR:                   0.5000000
+ # αS(MZ):               0.1260020
+ # 1/αEM:              137.0000000
+ # GF:                   0.1126702E-04 GeV^-2
+ # sin(θ_W)^2:           0.2226459
  # ----------------------------------------------------------
 WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
 WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
@@ -132,16 +132,16 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC + CC)                     =  4756165.336810 pb
- # MC integration uncertainty     =        0.1267 %
- # QCD scale uncertainty (+)      =   495842.7458 %
- # QCD scale uncertainty (-)      =      -12.6177 %
+ # σ(NC + CC)                     =  4942223.098857 pb
+ # MC integration uncertainty     =        0.0933 %
+ # QCD scale uncertainty (+)      =      120.3356 %
+ # QCD scale uncertainty (-)      =  -466560.5341 %
  
  # Reduced N3LO cross-sections
- # σ reduced (NC)                 =      760.315767
- # QCD scale uncertainty (+)      =      152.6023 %
- # QCD scale uncertainty (-)      =       -0.0728 %
- # σ reduced (CC)                 =     1869.563839
- # QCD scale uncertainty (+)      =      204.8314 %
- # QCD scale uncertainty (-)      =       -0.0655 %
+ # σ reduced (NC)                 =      757.449028
+ # QCD scale uncertainty (+)      =        0.4821 %
+ # QCD scale uncertainty (-)      =     -149.8472 %
+ # σ reduced (CC)                 =     1863.680953
+ # QCD scale uncertainty (+)      =        0.4811 %
+ # QCD scale uncertainty (-)      =     -200.9387 %
  ============================================================
