@@ -33,3 +33,5 @@ make -j
 sudo make install
 lhapdf install MSHT20an3lo_as118
 
+# Set dynamic library path
+LD_LIBRARY_PATH=/usr/local/lib
