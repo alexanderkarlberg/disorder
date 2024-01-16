@@ -1,6 +1,8 @@
 #!/bin/bash
 # This script contains all the commands executed by the CI of github
 
+# Get sem
+sudo apt install parallel
 
 # Clone Hoppet
 git clone --branch 2024-01-n3lo-splittings-functions https://github.com/hoppet-code/hoppet.git
@@ -30,3 +32,4 @@ cd LHAPDF-6.5.4
 make -j
 sudo make install
 lhapdf install MSHT20an3lo_as118
+
