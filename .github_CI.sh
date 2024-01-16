@@ -15,9 +15,9 @@ sudo make install
 cd ..
 
 # Do the same for fastjet
-wget https://fastjet.fr/repo/fastjet-3.4.1.tar.gz
-tar -xzvf fastjet-3.4.1.tar.gz
-cd fastjet-3.4.1
+wget https://fastjet.fr/repo/fastjet-3.4.2.tar.gz
+tar -xzvf fastjet-3.4.2.tar.gz
+cd fastjet-3.4.2
 ./configure
 make -j
 make check
@@ -34,5 +34,6 @@ sudo make install
 lhapdf install MSHT20an3lo_as118
 
 # Set dynamic library path
-LD_LIBRARY_PATH=/usr/local/lib
-LD_RUN_PATH=/usr/local/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+export LD_RUN_PATH=$LD_RUN_PATH:/usr/local/lib
+sudo ldconfig
