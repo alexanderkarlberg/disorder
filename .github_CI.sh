@@ -15,15 +15,14 @@ sudo make install
 cd ..
 
 # Do the same for fastjet
-sudo apt update && sudo apt install fastjet
-#wget https://fastjet.fr/repo/fastjet-3.4.2.tar.gz
-#tar -xzvf fastjet-3.4.2.tar.gz
-#cd fastjet-3.4.2
-#./configure
-#make -j
-#make check
-#sudo make install
-#cd ..
+wget https://fastjet.fr/repo/fastjet-3.4.1.tar.gz
+tar -xzvf fastjet-3.4.1.tar.gz
+cd fastjet-3.4.1
+./configure
+make -j
+make check
+sudo make install
+cd ..
 
 # And LHAPDF
 wget https://lhapdf.hepforge.org/downloads/LHAPDF-6.5.4.tar.gz
