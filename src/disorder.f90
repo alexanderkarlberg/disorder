@@ -147,7 +147,7 @@ contains
                &, .true.)
        endif
        call EvolvePdfTable(tables(0), toy_Q0, toy_pdf_at_Q0, dh,&
-            & coupling, nloop=min(order_max,3))
+            & coupling, nloop=order_max)
        setup_done(0)  = .true. ! This signals to HOPPET that we have set up the PDFs (since we don't use the streamlined interface)
     elseif (Q0pdf > zero) then
        write(6,*) "WARNING: Using internal HOPPET DGLAP evolution"
@@ -163,7 +163,7 @@ contains
        !call EvolvePdfTable(tables(0), Q0pdf, pdf_at_Q0, dh, coupling, &
        !     &  muR_Q=xmuR_PDF, nloop=min(order_max,3))
        call EvolvePdfTable(tables(0), Q0pdf, pdf_at_Q0, dh, coupling, &
-            &  muR_Q=xmuR_PDF, nloop=min(order_max,3))
+            &  muR_Q=xmuR_PDF, nloop=order_max)
        setup_done(0)  = .true. ! This signals to HOPPET that we have set up the PDFs (since we don't use the streamlined interface)
     else
        if(vnf) then

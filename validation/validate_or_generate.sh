@@ -4,7 +4,13 @@
 #
 # To generate new validation runs
 # ./validate_or_generate.sh generate
+#
+# The script is not very flexible as it needs cmake to work with
+# standard paths to hoppet, lhapdf and fastjet. If that is not the
+# case, then the user should modify the below
+CMAKEFLAGS=" -DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis "
 
+# Some colours for printout
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 PURPLE='\033[1;35m'
@@ -82,7 +88,7 @@ echo -e You have invoked the script to ${PURPLE}$mode${NC} the code
 echo -e Building project in ${PURPLE}build${NC}
 mkdir build 
 cd build 
-cmake ../.. -DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis > build.log
+cmake ../.. $CMAKEFLAGS > build.log
 make -j >> build.log
 
 # Move to directory containing reference results
@@ -93,7 +99,7 @@ iJob=1
 for i in $(seq 0 $((numJobs-1)))
 do
     echo -e Running job number ${iJob}: ${PURPLE}../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]}${NC}
-    sem -j +0 ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
+    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
     ((iJob++))
 done
 sem --wait 
