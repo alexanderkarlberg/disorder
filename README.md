@@ -1,11 +1,21 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/alexanderkarlberg/disorder/cmake-single-platform.yml?label=build&logo=github&style=flat-square)](https://github.com/alexanderkarlberg/disorder/actions/workflows/cmake-single-platform.yml)
 
+Welcome to `disorder` - a program to compute fixed order predictions
+at high order in deep inelastic scattering! Below are some
+installation and run instructions. More detailed help can be found in
+the `docs` folder.
+
+Although the code is realsed under GPLv3 or later any scientific use of the code should result in a citation of
+
+Alexander Karlberg, arXiv:2401.XXXXX
+
 Installation
 ============
 
 To compile `disorder`, you will need
-* <span style="font-variant:small-caps;">Hoppet</span>, v1.3.0 or newer (https://github.com/hoppet-code/hoppet) [currently also needs the 2024-01-n3lo-splittings-functions] branch
-* LHAPDF6 (http://lhapdf.hepforge.org/)
+
+* <span style="font-variant:small-caps;">Hoppet</span>, v1.3.0 or newer (https://github.com/hoppet-code/hoppet) [currently also needs the 2024-01-n3lo-splittings-functions branch]
+* LHAPDF6 (http://lhapdf.hepforge.org/) [tested with v6.5.4]
 
 Optionally you may need fastjet installed as well
 (https://fastjet.fr/).
@@ -58,7 +68,7 @@ Usage
 To run `disorder`, use the disorder executable, and pass command
 line arguments to specify inputs. Example:
 
-	./disorder -pdf MSTW2008nlo68cl -nlo -Q 12.0 -x 0.1
+	./disorder -pdf MSTW2008nlo68cl -n3lo -Q 12.0 -x 0.01 -scaleuncert
 
 
 To get a list of parameters which can be specified run
@@ -79,4 +89,16 @@ The full list of possible options can be obtained from
 For a more detailed usage description please look in the manual which
 can be found in the `docs` directory.
 
+Third party code
+================
 
+Besides the dependencies listed above `disorder` incorporates code from the following sources:
+
+* The POWHEG-BOX (https://powhegbox.mib.infn.it/) under GPLv2. Specifically the analysis framework and the `mergedata` programs are adapted from there.
+* The command line tools (io_utils.f90 and lcl_dec.f90) are written by Gavin Salam and are under GPLv3. 
+* Some of the code is adapted from proVBFH (https://github.com/fdreyer/proVBFH/) under GPLv3. 
+
+Bugs
+====
+
+There are no known bugs.

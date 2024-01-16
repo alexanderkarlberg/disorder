@@ -138,16 +138,18 @@ splitting functions~\cite{Moch:2004pa,Vogt:2004mw} and the four-loop
 $\beta$-function~\cite{vanRitbergen:1997va,Czakon:2004bu} for the
 running coupling this allows for the determination of the proton
 structure functions at the next-to-next-to-next-to-leading order
-(\NNNLO{}).\footnote{Technically the four-loop splitting functions are
+(\NNNLO{}).\footnote{\label{n3lo-note}Technically the four-loop splitting functions are
 needed to claim this accuracy. Recent progress in determining those
-can be found in
-Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah}. Phenomenologically
-the first few moments which have been computed therein, with some
-exact pieces also being known, are however in all likelihood enough to
-claim \NNNLO{}. } The structure functions can be combined with an
-exclusive next-to-next-to-leading order (NNLO) DIS + 1 jet computation
-to obtain fully differential \NNNLO{} predictions in DIS, as was done
-by the \nnlojet{}
+and the three-loop massive operator matrix elements can be found in
+Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah}
+and
+\cite{Bierenbaum:2009mv,Kawamura:2012cr,Ablinger:2014vwa,Ablinger:2014nga,Ablinger:2022wbb,Ablinger:2023ahe}
+respectively. Phenomenologically the first few moments which have
+been computed therein, with some exact pieces also being known, are
+however in all likelihood enough to claim \NNNLO{}. } The structure
+functions can be combined with an exclusive next-to-next-to-leading
+order (NNLO) DIS + 1 jet computation to obtain fully differential
+\NNNLO{} predictions in DIS, as was done by the \nnlojet{}
 collaboration~\cite{Currie:2018fgr,Gehrmann:2018odt}. This computation
 uses the Projection-to-Born (P2B) method, which was first introduced
 in the context of NNLO Vector Boson Fusion (VBF)
@@ -187,11 +189,14 @@ this context.} Since the program relies on \hoppet{} for the structure
 functions, the inclusive DIS cross section can actually be obtained
 one order higher, as the structure functions were implemented at
 \NNNLO{} already in the context of the \provbfh{}
-codes~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}. The
-\disorder{} program therefore has two more or less separate use cases:
-1. The computation of fully exclusive NNLO photon-mediated DIS 2. The
-computation of inclusive/reduced neutral- (NC) and charged-current
-(CC) DIS at \NNNLO{} accuracy.
+codes~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}
+and are publically available since {\tt v1.3.0} of
+\hoppet{}~\cite{hoppetv130}\footnote{\hoppet{} implements all known
+approximate and exact ingredients at this order - see footnote
+\ref{n3lo-note}.}. The \disorder{} program therefore has two more or
+less separate use cases: 1. The computation of fully exclusive NNLO
+photon-mediated DIS 2. The computation of inclusive/reduced neutral-
+(NC) and charged-current (CC) DIS at \NNNLO{} accuracy.
 
 The program is designed to be user-friendly with a simple command line
 interface. It prints cross sections and all important run-parameters
@@ -209,7 +214,7 @@ uncertainties typically below the permille level. For exclusive
 quantities the code can be run on a laptop at NLO and depending on the
 analysis, and the laptop, even at NNLO.
 
-It should be pointed out that the code provide little theoretical
+It should be pointed out that the code provides little theoretical
 advance on its own. As described above, the structure functions
 themselves have been known for a little while, and the P2B method has
 already been applied to DIS, even one order higher than
@@ -421,7 +426,7 @@ command line arguments. The code itself can be obtained from
 
 \subsection{Compiling and prerequisites}
 To compile \disorder{} both \hoppet{} ({\tt v1.3.0} or later) and
-\lhapdf{}~\cite{Buckley:2014ana} have to be installed on the
+\lhapdf{} (tested with {\tt v6.5.4})~\cite{Buckley:2014ana} have to be installed on the
 machine. If both are installed in a location in the {\tt \$PATH} it is
 enough to run
 \begin{lstlisting}
@@ -800,14 +805,15 @@ large resources on a High Performance Cluster.
 
 Given the code's dependency on \hoppet{}, any developments therein
 will almost automatically propagate to \disorder{}. In particular it
-is expected that the exact $\mathcal{O}(\as^4)$ splitting functions
-will become available in \hoppet{} once they have been fully
+is expected that the exact $\mathcal{O}(\as^4)$ splitting functions,
+as opposed to the approximations which are currently employed, will
+become available in \hoppet{} once they have been fully
 determined. This is currently the only missing piece needed to
 formally claim full \NNNLO{} accuracy for the structure
 functions. Similarly, were the massive DIS coefficient
 functions~\cite{Gottschalk:1980rv,Laenen:1992zk,Laenen:1992xs,Gluck:1997sj,Blumlein:2011zu,Behring:2015roa,Berger:2016inr,Gao:2017kkx}
 to be implemented in \hoppet{} the structure functions in \disorder{}
-could immediately be modified to accommodate this.
+could immediately be modified to accommodate this. 
 
 The code is intended to be user-friendly and to this effect comes with
 an interface to \fastjet{} and \lhapdf{} and is run through a

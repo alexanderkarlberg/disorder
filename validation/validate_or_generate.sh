@@ -94,8 +94,9 @@ mkdir build
 cd build 
 cmake ../.. $CMAKEFLAGS #> build.log
 make -j #>> build.log
-ldd disorder
-ls /usr/local/lib/
+# Uncomment for CI debug
+#ldd disorder
+#ls /usr/local/lib/
 
 # Move to directory containing reference results
 cd ../$dir
@@ -106,6 +107,7 @@ for i in $(seq 0 $((numJobs-1)))
 do
     echo -e Running job number ${iJob}: ${PURPLE}../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]}${NC}
     sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
+    # Uncomment for CI debug
 #    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} 2>&1 | tee ${prefixarray[$i]%_}.log
     ((iJob++))
 done
@@ -125,9 +127,9 @@ if [ $mode = "validate" ]; then
 	diff  ${file}.ref ${file}.new > ${file}.diff
 	checkwc=`cat ${file}.diff| wc -l `
 	if [ $checkwc == "0" ]; then
-	    echo -e "Comparison                                                                                  ${GREEN}PASSED${NC}"
+	    echo -e "Comparison                                                                                           ${GREEN}PASSED${NC}"
 	else
-	    echo -e "Comparison                                                                                  ${RED}FAILED${NC}"
+	    echo -e "Comparison                                                                                           ${RED}FAILED${NC}"
 	    failed="true"
 	fi
     done
