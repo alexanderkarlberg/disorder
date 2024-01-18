@@ -8,7 +8,7 @@
 # The script is not very flexible as it needs cmake to work with
 # standard paths to hoppet, lhapdf and fastjet. If that is not the
 # case, then the user should modify the below
-CMAKEFLAGS=" -DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis "
+CMAKEFLAGS=" -DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis.f "
 
 # Some colours for printout
 RED='\033[0;31m'

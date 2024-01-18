@@ -60,7 +60,7 @@ To compile a different analysis the user should first put it in the
 analysis directory (here we assume it to be called `my_analysis.f`),
 and then pass it to `cmake` through
 
-	cmake -DANALYSIS=my_analysis ..
+	cmake -DANALYSIS=my_analysis.f ..
 
 Usage
 =====

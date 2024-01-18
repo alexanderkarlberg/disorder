@@ -65,6 +65,7 @@
 
 \newcommand{\repolink}[2]{\href{https://github.com/alexanderkarlberg/disorder/blob/master/#1}{\ttt{#2}}}
 \newcommand{\masterlink}[1]{\repolink{#1}{#1}}
+\newcommand{\email}[1]{\href{mailto:#1}{#1}}
 
 \begin{document}
 \begin{flushright}
@@ -80,13 +81,13 @@ Alexander Karlberg
 
 \begin{center}
 CERN, Theoretical Physics Department, CH-1211 Geneva 23, Switzerland
-\\
-{\small \sf alexander.karlberg@cern.ch}
+\\[0.5cm]
+{\small \sf \email{alexander.karlberg@cern.ch}}
 \end{center}
 
-\begin{center}
-\today
-\end{center}
+%\begin{center}
+%\today
+%\end{center}
 
 % For convenience during refereeing (optional),
 % you can turn on line numbers by uncommenting the next line:
@@ -220,7 +221,9 @@ themselves have been known for a little while, and the P2B method has
 already been applied to DIS, even one order higher than
 here.\footnote{It has also been applied in polarised DIS in
 Refs.~\cite{Borsa:2020ulb,Borsa:2020yxh,Borsa:2021afb,Borsa:2022irn,Borsa:2022cap}.}
-It is however the author's opinion that well-maintained public code is
+It is however the author's opinion that with the renewed interest in
+DIS due to the upcoming Electron-Ion-Collider
+(EIC)~\cite{AbdulKhalek:2022hcn}, well-maintained public code is
 extremely valuable for both the experimental and theoretical
 communities, and that providing documentation in the form of this
 article will enable the wide use of the code.
@@ -230,8 +233,6 @@ the DIS process and kinematics as implemented in \disorder{}. In
 section~\ref{sec:running} we provide details on how to run \disorder{}
 and in section~\ref{sec:results} we show a few results from the
 program. Finally we conclude in section~\ref{sec:conclusion}.
-
-
 
 \section{Basics of the DIS process}
 \label{sec:dis}
@@ -398,23 +399,24 @@ interferences) and CC, but we leave this for future work.
 
 In principle P2B could be applied to the \disent{} code without any
 major modifications besides the bug fix mentioned in the
-introduction. However a few modifications were introduced to allow for
-a more flexible integration of \disent{} into \disorder{}. The version
-of \disent{} that we include in \disorder{} is based on the version
-which can be found in {\tt dispatch}~\cite{Dasgupta:2002dc}, and which
-already included some minor modifications. In addition to the
-modifications present there, we have also introduced $\alpha$ as an
-input parameter, whereas before it was fixed to $1/137$. A number of
-parameters can also now be set on the command line as described
-below. Besides coding the actual interface to \disent{}, the biggest
-modification introduced in \disorder{} is that the {\tt KPFUNS}
-subroutine now returns an array of weights corresponding to varying
-the factorisation scale by a factor two up and down. This allows for
-much faster evaluation of scale uncertainties compared to running the
-program three separate times. Additionally \disent{} can now also use
-any scale defined in terms of $x$, $y$, and $Q$, and not just some
-multiple of $Q$. We provide a few different scale choices as
-documented below, but more can easily be implemented.
+introduction. However a few significant modifications were introduced
+to allow for a more flexible integration of \disent{} into
+\disorder{}. The version of \disent{} that we include in \disorder{}
+is based on the version which can be found in {\tt
+  dispatch}~\cite{Dasgupta:2002dc}, and which already included some
+minor modifications. In addition to the modifications present there,
+we have also introduced $\alpha$ as an input parameter, whereas before
+it was fixed to $1/137$. A number of parameters can also now be set on
+the command line as described below. Besides coding the actual
+interface to \disent{}, the biggest modification introduced in
+\disorder{} is that the {\tt KPFUNS} subroutine now returns an array
+of weights corresponding to varying the factorisation scale by a
+factor two up and down. This allows for much faster evaluation of
+scale uncertainties compared to running the program three separate
+times. Additionally \disent{} can now also use any scale defined in
+terms of $x$, $y$, and $Q$, and not just some multiple of $Q$. We
+provide a few different scale choices as documented below, but more
+can easily be implemented.
 
 \section{Running \disorder{}}
 \label{sec:running}
@@ -455,7 +457,7 @@ the user should first put it in the \masterlink{analysis} directory (here we
 assume it to be called {\tt my\_analysis.f}), and then pass it to
 {\tt cmake} through
 \begin{lstlisting}
-cmake -DANALYSIS=my_analysis
+cmake -DANALYSIS=my_analysis.f
 \end{lstlisting}
 The program has been found to compile on a Linux machine using the
 {\tt gfortran v11.4.0} compiler and also on various MacOS systems.
@@ -646,7 +648,15 @@ The code comes with a script to validate that the results come out as expected. 
 \begin{lstlisting}
   ./validate_or_generate.sh validate
 \end{lstlisting}
-The script builds the code and executes a number of tests designed to check the most important features of \disorder{}. The script assumes default installation paths for \hoppet{}, \fastjet{}, and \lhapdf{}. A user can however manually change this by inspecting the script and adding the appropriate {\tt cmake} flags at the beginning. The validation script runs in about 500 CPU seconds.
+The script builds the code and executes a number of tests designed to
+check the most important features of \disorder{}, including both the
+NC and CC channels, the \fastjet{} and \lhapdf{} interfaces, the
+automated PDF and scale uncertainty features, and P2B. The script
+assumes default installation paths for \hoppet{}, \fastjet{}, and
+\lhapdf{}. A user can however manually change this by inspecting the
+script and adding the appropriate {\tt cmake} flags at the
+beginning. The validation script runs in about 500 CPU seconds, or no
+more than a few minutes on a modern laptop.
 
 
 \section{Benchmarks and results}
@@ -735,10 +745,10 @@ they become available, will ameliorate this tension.
 
 \subsection{Exclusive laboratory frame results}
 To demonstrate the results of the code in P2B mode, we perform a jet
-analysis in laboratory frame, based on Ref.~\cite{Borsa:2022cap}, which
-probes the kinematic range accessible by the upcoming
-Electron-Ion-Collider. For this analysis we set $E_l=18\GEV$,
-$E_h=275\GEV$, and restrict the DIS kinematics by
+analysis in laboratory frame, based on Ref.~\cite{Borsa:2022cap},
+which probes the kinematic range accessible by the upcoming EIC. For
+this analysis we set $E_l=18\GEV$, $E_h=275\GEV$, and restrict the DIS
+kinematics by
 \begin{align}
   25\GEV^2 < Q^2 < 1000 \GEV^2, \quad 0.04 < y < 0.95\,.
 \end{align}
@@ -791,17 +801,21 @@ in principle be possible to extend \disent{} to full NC and CC, and
 this is something that is planned for a future release of the
 code. Similarly the PDF variations could also be implemented, however
 this would require some serious restructuring of the code for it to be
-efficient. The upgrade of the code to handle \NNNLO{} fully
-differentially is not currently planned. This is mainly due to the
-fact that this would require a complete replacement of \disent{} with
-a proper exclusive NNLO DIS + 1 jet code, entailing a significant
-amount of work. Such a code would also be very slow compared to what
-is in place now, and it would defeat part of the attraction of
-\disorder{} which is its speed. At LO and NLO a user can obtain
-differential results on a laptop running for a just a few minutes, and
-even reasonable NNLO results can be obtained on a multi-core machine
-running for an hour. \NNNLO{} results would inevitably require
-large resources on a High Performance Cluster.
+efficient. Extension of the code to handle incoming neutrino beams, of
+relevance to the FASER~\cite{Feng:2017uoz} physics program, is also
+planned.
+
+The upgrade of the code to handle \NNNLO{} fully differentially is
+however not currently planned. This is mainly due to the fact that
+this would require a complete replacement of \disent{} with a proper
+exclusive NNLO DIS + 1 jet code, entailing a significant amount of
+work. Such a code would also be very slow compared to what is in place
+now, and it would defeat part of the attraction of \disorder{} which
+is its speed. At LO and NLO a user can obtain differential results on
+a laptop running for a just a few minutes, and even reasonable NNLO
+results can be obtained on a multi-core machine running for an
+hour. \NNNLO{} results would inevitably require large resources on a
+High Performance Cluster.
 
 Given the code's dependency on \hoppet{}, any developments therein
 will almost automatically propagate to \disorder{}. In particular it
