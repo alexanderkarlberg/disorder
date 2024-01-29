@@ -427,10 +427,11 @@ command line arguments. The code itself can be obtained from
 \begin{center}\url{https://github.com/alexanderkarlberg/disorder}\end{center}
 
 \subsection{Compiling and prerequisites}
-To compile \disorder{} both \hoppet{} ({\tt v1.3.0} or later) and
-\lhapdf{} (tested with {\tt v6.5.4})~\cite{Buckley:2014ana} have to be installed on the
-machine. If both are installed in a location in the {\tt \$PATH} it is
-enough to run
+A user should start by inspecting \masterlink{README.md}. To compile
+\disorder{} both \hoppet{} ({\tt v1.3.0} or later) and \lhapdf{}
+(tested with {\tt v6.5.4})~\cite{Buckley:2014ana} have to be installed
+on the machine. If both are installed in a location in the {\tt
+  \$PATH} it is enough to run
 \begin{lstlisting}
   mkdir build && cd build
   cmake ..
@@ -722,8 +723,8 @@ table, which corresponds to 325 different PDF members and hence
 structure functions, took a total of 3.5 minutes to obtain on a laptop
 equipped with an Intel i9-10885H CPU.
 \begin{figure}[tb!]
-  \centering\includegraphics[width=0.49\textwidth,page=1]{../paper_runs/inclusive_runs/plot/sigma-ratios.pdf}
-  \centering\includegraphics[width=0.49\textwidth,page=3]{../paper_runs/inclusive_runs/plot/sigma-ratios.pdf}
+  \centering\includegraphics[width=0.49\textwidth,page=1]{figures/sigma-ratios.pdf}
+  \centering\includegraphics[width=0.49\textwidth,page=3]{figures/sigma-ratios.pdf}
   \caption{The NC cross section for fixed $Q=10\GEV$ differential in
     $\log x$ (left) and for fixed $x=0.01$ and differential in $\log
     Q$ (right). We show NNLO (purple), \NNNLO{} (green), and a\NNNLO{}
@@ -760,8 +761,8 @@ satisfy the following transverse momentum and pseudo-rapidity requirements
   p_{t,j} > 5 \GEV, \quad |\eta_j| < 3\,.
 \end{align}
 \begin{figure}[tb!]
-  \centering\includegraphics[width=0.49\textwidth,page=1]{../paper_runs/lab_frame/lab-frame.pdf}
-  \centering\includegraphics[width=0.49\textwidth,page=2]{../paper_runs/lab_frame/lab-frame.pdf}
+  \centering\includegraphics[width=0.49\textwidth,page=1]{figures/lab-frame.pdf}
+  \centering\includegraphics[width=0.49\textwidth,page=2]{figures/lab-frame.pdf}
   \caption{The NC cross section for fixed $Q=10\GEV$ differential in
     $\log x$ (left) and for fixed $x=0.01$ and differential in $\log
     Q$ (right). We show NNLO (purple), \NNNLO{} (green), and a\NNNLO{}
