@@ -158,13 +158,13 @@ production~\cite{Cacciari:2015jma}.
 
 Despite this impressive theoretical progress, there are few publically
 available computer codes from which one can obtain fast and reliable
-high-order cross section predictions for DIS. This paper and
-associated Fortran code seeks to address that.
+high-order differential cross section predictions for DIS. This paper
+and associated Fortran code seeks to address that.
 
 One of the advantages of the P2B method is that it is rather agnostic
 towards the details of the underlying exclusive computation, and it is
 hence possible to ``upgrade'' existing fixed-order codes to one order
-higher. Historically the most succesful fixed-order codes have been
+higher. Historically the most successful fixed-order codes have been
 {\tt MEPJET}~\cite{Mirkes:1995ks}, \disent{}~\cite{Catani:1996vz},
 \disaster{}~\cite{Graudenz:1997gv}, and \nlojet{}~\cite{Nagy:2001xb}
 which are all next-to-leading order (NLO) accurate. Discrepancies
@@ -196,8 +196,8 @@ and are publically available since {\tt v1.3.0} of
 approximate and exact ingredients at this order - see footnote
 \ref{n3lo-note}.}. The \disorder{} program therefore has two more or
 less separate use cases: 1. The computation of fully exclusive NNLO
-photon-mediated DIS 2. The computation of inclusive/reduced neutral-
-(NC) and charged-current (CC) DIS at \NNNLO{} accuracy.
+photon-mediated massless DIS 2. The computation of inclusive neutral-
+(NC) and charged-current (CC) massless DIS at \NNNLO{} accuracy.
 
 The program is designed to be user-friendly with a simple command line
 interface. It prints cross sections and all important run-parameters
@@ -247,7 +247,7 @@ the scattering of a massless (anti-)quark $q$ off a massless
 gauge boson $V$ of virtuality $Q^2$. Denoting the external
 four-momenta by $k_i$ (incoming lepton), $k_f$ (outgoing lepton),
 $p_i$ (incoming quark), and $p_f$ (outgoing quark) we can define the
-lorentz invariant DIS variables $x$, $Q^2$, and $y$, given by
+Lorentz invariant DIS variables $x$, $Q^2$, and $y$, given by
 \begin{align}
   Q^2 = -q^2 = -(k_i - k_f)^2, \qquad  x = \frac{Q^2}{2 P \cdot q},
   \qquad  y = \frac{P \cdot q}{P \cdot k_i} = \frac{p_i \cdot q}{p_i \cdot k_i} ,
@@ -326,7 +326,7 @@ are now simply given by the $W$ ones
 \end{equation}
 The exact definitions of all proton structure functions inside
 \hoppet{} up to \NNNLO{} can be found in
-Refs.~\cite{Salam:2008qg,BertoneKarlberg}. The tabulation of the
+Refs.~\cite{Salam:2008qg,hoppetv130,BertoneKarlberg}. The tabulation of the
 structure functions inside \hoppet{}, as used in \disorder{}, has a
 relative numerical precision of $10^{-4}$ for most values of $x$,
 which in turn limits the accuracy which can be obtained to the same
@@ -444,10 +444,11 @@ along with two auxiliary executables, {\tt mergedata} and {\tt
 \begin{lstlisting}
   cmake -DHOPPET_CONFIG=/path/to/hoppet-config -DLHAPDF_CONFIG=/path/to/lhapdf-config
 \end{lstlisting}
-where the path should include the config itself (i.e. {\tt
+where the path should include the config-file itself (i.e. {\tt
   /usr/local/bin/hoppet-config}). By default \fastjet{} is not linked
-and only a skeleton analysis (\masterlink{analysis/simple\_analysis.f}) is
-compiled. To link \fastjet{} run
+and only a skeleton analysis
+(\masterlink{analysis/simple\_analysis.f}) is compiled. To link
+\fastjet{} run
 \begin{lstlisting}
   cmake -DNEEDS_FASTJET=ON [-DFASTJET_CONFIG=/path/to/fastjet-config]
 \end{lstlisting}
@@ -717,7 +718,7 @@ parametrically of the same order as the NNLO corrections. The PDF
 uncertainties stay more or less constant across all orders, which is
 not unexpected given that we use the same PDF at each order. To give a
 sense of the speed of the code, the combined results presented in the
-table, which correpsonds to 325 different PDF members and hence
+table, which corresponds to 325 different PDF members and hence
 structure functions, took a total of 3.5 minutes to obtain on a laptop
 equipped with an Intel i9-10885H CPU.
 \begin{figure}[tb!]
@@ -775,7 +776,7 @@ moderate except for small values and close to the LO threshold of
 $p_{t,j}=Q$. The rapidity distribution on the other hand receives
 larger corrections. This is in part due to hard jets with $p_{t,j}>Q$
 that can only arise at NLO and beyond. Here the scale variation bands
-do not cover the actual corretions, and it is obvious that one needs
+do not cover the actual corrections, and it is obvious that one needs
 to go beyond NLO for reliable predictions. Of course one needs the
 full \NNNLO{} to assess the reliability of the NNLO result. However,
 from similar results in Ref.~\cite{Currie:2018fgr} it can be expected
