@@ -9,6 +9,8 @@ Although the code is realsed under GPLv3 or later any scientific use of the code
 
 Alexander Karlberg, arXiv:2401.XXXXX
 
+More detailed information about the use of the code can be found in the docs folder.
+
 Installation
 ============
 
