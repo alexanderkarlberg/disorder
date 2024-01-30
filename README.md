@@ -5,9 +5,9 @@ at high order in deep inelastic scattering! Below are some
 installation and run instructions. More detailed help can be found in
 the `docs` folder.
 
-Although the code is realsed under GPLv3 or later any scientific use of the code should result in a citation of
+Although the code is released under GPLv3 or later any scientific use of the code should result in a citation of
 
-Alexander Karlberg, arXiv:2401.XXXXX
+Alexander Karlberg, arXiv:2401.XXXXX.
 
 More detailed information about the use of the code can be found in the docs folder.
 
