@@ -7,7 +7,7 @@ the `docs` folder.
 
 Although the code is realsed under GPLv3 or later any scientific use of the code should result in a citation of
 
-Alexander Karlberg, arXiv:2401.XXXXX
+Alexander Karlberg, arXiv:2401.16964
 
 More detailed information about the use of the code can be found in the docs folder.
 
