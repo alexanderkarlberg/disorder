@@ -42,6 +42,7 @@ module mod_parameters
   integer, public :: nloop, order_hoppet
   character (len=4), private :: order
   real(dp), private :: Q, x, y
+  real(dp), public :: xlmin, xlmax
   real(dp), public :: pbornlab(0:3,2+2), preallab(0:3,2+3), prreallab(0:3,2+4)
   real(dp), public :: pbornbreit(0:3,2+2), prealbreit(0:3,2+3), prrealbreit(0:3,2+4)
 
