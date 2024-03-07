@@ -16,7 +16,7 @@ nf =  5
                               xl( 7)=   0.000     xu( 7)=   1.000    
 
  iteration no.  1: integral =  4951225.    +/-  0.32E+05
- all iterations: integral =  4951225.    +/-  0.32E+05 chi**2/it'n =  0.0    
+ all iterations: integral =  4951225.    +/-  0.32E+05 chi**2/it'n = 0.36E-09
 
  iteration no.  2: integral =  4937877.    +/-  0.19E+05
  all iterations: integral =  4941495.    +/-  0.17E+05 chi**2/it'n = 0.13    
@@ -56,7 +56,7 @@ nf =  5
  all iterations: integral =  4942223.    +/-  0.46E+04 chi**2/it'n =  0.0    
  Outputting results to: inclusive_cc_Qmin_1_x_0.01_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  2.57E+01 s.
+==================== TOTAL TIME :  2.49E+01 s.
 
 -----------------------------------------------------------
                Welcome to HOPPET v. 1.3.0-devel            
@@ -99,7 +99,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 31/01/2024 at 10:14:54
+ # Stamped by ../build/disorder on  7/03/2024 at 15:46:56
  #../build/disorder -n3lo -CC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_cc_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -132,16 +132,16 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC + CC)                     =  4942223.098857 pb
+ # σ(NC + CC)                     =  4942223.104815 pb
  # MC integration uncertainty     =        0.0933 %
  # QCD scale uncertainty (+)      =      120.3356 %
- # QCD scale uncertainty (-)      =  -466560.5341 %
+ # QCD scale uncertainty (-)      =  -466570.8601 %
  
  # Reduced N3LO cross-sections
  # σ reduced (NC)                 =      757.449028
  # QCD scale uncertainty (+)      =        0.4821 %
- # QCD scale uncertainty (-)      =     -149.8472 %
+ # QCD scale uncertainty (-)      =     -149.8505 %
  # σ reduced (CC)                 =     1863.680953
  # QCD scale uncertainty (+)      =        0.4811 %
- # QCD scale uncertainty (-)      =     -200.9387 %
+ # QCD scale uncertainty (-)      =     -200.9431 %
  ============================================================

@@ -144,7 +144,7 @@ fi
 # Clean up
 echo -e Cleaning up
 
-rm inclusive*disorder*dat *grids* 
+rm *grids* 
 cd ..
 rm -rf build test_runs
 
