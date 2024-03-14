@@ -13,8 +13,10 @@ module mod_parameters
 
   public print_header, welcome_message, alphasLocal
   
-  real(dp), parameter, public :: gev2pb = 389379660.0_dp
-  real(dp), parameter, public :: gev2nb = 389379.66_dp
+!  real(dp), parameter, public :: gev2pb = 389379660.0_dp
+  real(dp), parameter, public :: gev2pb = 389379372.1_dp
+!  real(dp), parameter, public :: gev2nb = 389379.66_dp
+  real(dp), parameter, public :: gev2nb = 389379.3721_dp
   real(dp), parameter, public :: eps    = 1.0e-14_dp
   integer, parameter, public :: maxscales = 7
   real(dp), parameter, public :: scales_mur(1:maxscales) = &
@@ -146,6 +148,7 @@ contains
     if(vnf.and.p2b) stop 'Cannot run p2b with variable flavour'
     outname      = string_val_opt("-out", "") ! Overwite the prefix of the file name
     prefix       = string_val_opt("-prefix", "") ! Overwite the prefix of the file name
+    if(prefix.eq.'') prefix       = string_val_opt("-out", "") ! Overwite the prefix of the file name
     do_analysis = .not.log_val_opt("-no-analysis",.false.)
     if(p2b.and..not.do_analysis) stop 'Should really be doing an analysis with p2b'
 
@@ -204,7 +207,13 @@ contains
     it1          = int_val_opt("-it1",1)
     itmx1        = int_val_opt ("-itmx1",3)
     itmx2        = 1!int_val_opt ("-itmx2",1)
+    if((int_val_opt("-iseed",1).gt.1) .and. &
+         & (int_val_opt("-irseq",1).gt.1)) stop 'Cannot have both rseq and  &
+         &        iseed on commandline'
     iseed        = int_val_opt ("-iseed",1)
+    if(iseed.eq.1) then
+       iseed        = int_val_opt ("-rseq",1)
+    endif
     write(seedstr,"(I4.4)") iseed
     idum = -iseed ! Initial seed
     if(readin.or.it1.gt.1) then
@@ -413,44 +422,65 @@ contains
 
   subroutine help_message
     call welcome_message
-    write(0,'(a)') ' Some common flags to use are (default values in [] and () '
-    write(0,'(a)') ' means that the flag takes a numerical input. Values are in'
-    write(0,'(a)') ' GeV typically). -pdf is mandatory :                                          '
-    write(0,'(a)') '                                                           '
-    write(0,'(a)') ' -pdf : LHAPDF name (e.g. NNPDF30_nnlo_as_0118_hera)       '
-    write(0,'(a)') ' -lo/-nlo/-nnlo/-n3lo [-nnlo]: Run at LO/NLO/NNLO/N3LO     '
-    write(0,'(a)') ' -Q (dble) : Specify fixed Q                               '
-    write(0,'(a)') ' -Qmin (dble) [10.0] : Specify minimum Q                   '
-    write(0,'(a)') ' -Qmax (dble) : Specify maximum Q                          '
-    write(0,'(a)') ' -x (dble) : Specify fixed x                               '
-    write(0,'(a)') ' -xmin (dble) : Specify minimum x                          '
-    write(0,'(a)') ' -xmax (dble) : Specify maximum x                          '
-    write(0,'(a)') ' -y (dble) : Specify fixed y                               '
-    write(0,'(a)') ' -ymin (dble) : Specify minimum y                          '
-    write(0,'(a)') ' -ymax (dble) : Specify maximum y                          '
-    write(0,'(a)') ' -Elep (dble) [27.5] : Energy of lepton in lab frame       '
-    write(0,'(a)') ' -Ehad (dble) [820.0] : Energy of hadron in lab frame      '
-    write(0,'(a)') ' -scaleuncert [false]: Do 7-point scale variation around Q '
-    write(0,'(a)') ' -pdfuncert [false] : Compute pdf uncertainties            '
-    write(0,'(a)') ' -CC [false] : Include charged current processes           '
-    write(0,'(a)') ' -NC [true] : Include neutral current processes            '
-    write(0,'(a)') ' -includeZ [false] : Include Z and interferences           '
-    write(0,'(a)') ' -positron [false] : Incoming positron                     '
-    write(0,'(a)') ' -prefix (string) : Add a prefix to all output             '
-    write(0,'(a)') ' -ncall2 [100000] : Number of calls to disent              '
-    write(0,'(a)') ' -iseed [1] : The seed                                     '
-    write(0,'(a)') ' -p2b [false] : Turn on disent and projection-to-Born      '
-    write(0,'(a)') ' -help : Print this help message                           '
-    write(0,'(a)') '                                                           '
-    write(0,'(a)') ' More specialised flags and helpful information can be     '
-    write(0,'(a)') ' found in src/mod_parameters.f90. Logical flags are set to '
-    write(0,'(a)') ' true if present on the command line (-p2b turns on p2b).  '
-    write(0,'(a)') ' They can be set to false by prefixing with "no", for      '
-    write(0,'(a)') ' instance like this : -noNC.                               '
-    write(0,'(a)') '                                                           '
-    write(0,'(a)') ' Example command line:                                     '
-    write(0,'(a)') '                                                           '
-    write(0,'(a)') ' ./disorder -pdf MSHT20nnlo_as118 -Q 20.0 -noNC  -CC       '
+    write(0,'(a)') ' Some common flags to use are (default values in [] and ()   '
+    write(0,'(a)') ' means that the flag takes an input (dble/int/string).       '
+    write(0,'(a)') ' Values are in GeV typically). -pdf is mandatory :           '
+    write(0,'(a)') '                                                             '
+    write(0,'(a)') ' # DIS setup:                                                '
+    write(0,'(a)') ' -Q (dble) : Specify fixed Q OR                              '
+    write(0,'(a)') ' -Qmin (dble) [10.0] : Specify minimum Q                     '
+    write(0,'(a)') ' -Qmax (dble) : Specify maximum Q                            '
+    write(0,'(a)') ' -x (dble) : Specify fixed x OR                              '
+    write(0,'(a)') ' -xmin (dble) : Specify minimum x                            '
+    write(0,'(a)') ' -xmax (dble) : Specify maximum x                            '
+    write(0,'(a)') ' -y (dble) : Specify fixed y OR                              '
+    write(0,'(a)') ' -ymin (dble) : Specify minimum y                            '
+    write(0,'(a)') ' -ymax (dble) : Specify maximum y                            '
+    write(0,'(a)') ' -CC [false] : Include charged current processes             '
+    write(0,'(a)') ' -NC [true] : Include neutral current processes              '
+    write(0,'(a)') ' -includeZ [false] : Include Z and interferences             '
+    write(0,'(a)') ' -positron [false] : Incoming positron                       '
+    write(0,'(a)') ' -Elep (dble) [27.5] : Energy of lepton in lab frame         '
+    write(0,'(a)') ' -Ehad (dble) [820.0] : Energy of hadron in lab frame        '
+    write(0,'(a)') '                                                             '
+    write(0,'(a)') ' # QCD setup:                                                '
+    write(0,'(a)') ' -pdf : LHAPDF name (e.g. NNPDF30_nnlo_as_0118_hera)         '
+    write(0,'(a)') ' -lo/-nlo/-nnlo/-n3lo [-nnlo]: Run at LO/NLO/NNLO/N3LO       '
+    write(0,'(a)') ' -scale-choice (int) [1]: Central scale: 0: MZ, 1: Q,        '
+    write(0,'(a)') '                          3: Q*sqrt(1-y), 4: Q*(1-x)/x       '
+    write(0,'(a)') ' -scaleuncert [false]: Do 7-point scale variation around Q   '
+    write(0,'(a)') ' -pdfuncert [false] : Compute pdf uncertainties              '
+    write(0,'(a)') ' -p2b [false] : Turn on disent and projection-to-Born        '
+    write(0,'(a)') '                                                             '
+    write(0,'(a)') ' # EW parameters:                                            '
+    write(0,'(a)') ' -one-over-alpha (dble) [137.] : 1/αEM                       '
+    write(0,'(a)') ' -mz (dble) [91.1876] : mass of Z boson                      '
+    write(0,'(a)') ' -mw (dble) [80.398]  : mass of W boson                      '
+    write(0,'(a)') '                                                             '
+    write(0,'(a)') ' # Run parameters:                                           '
+    write(0,'(a)') ' -prefix (string) : Add a prefix to all output               '
+    write(0,'(a)') ' -ncall1 (int) [100000] : Number of calls to VEGAS warmup    '
+    write(0,'(a)') ' -itmx1 (int) [3]  : Number of iterations in VEGAS warmup    '
+    write(0,'(a)') ' -ncall2 (int) [100000] : Number of calls to VEGAS production'
+    write(0,'(a)') ' -iseed/-rseq (int) [1] : The seed                           '
+    write(0,'(a)') ' -no-analysis [false] : Turn off the analysis                ' 
+    write(0,'(a)') ' -help : Print this help message                             '
+    write(0,'(a)') '                                                             '
+    write(0,'(a)') ' # Toy PDF parameters:                                       '
+    write(0,'(a)') ' -toy_Q0 (dble) [-1.0]: If > 0 then uses the HERALHC initial '
+    write(0,'(a)') ' condition at that scale and evolves using Hoppet            '
+    write(0,'(a)') ' -Q0pdf (dble) [-1.0]: If > 0 then read in LHAPDF at that    '
+    write(0,'(a)') ' scale and evolve using Hoppet                               '
+    write(0,'(a)') '                                                             '
+    write(0,'(a)') ' More specialised flags and helpful information can be       '
+    write(0,'(a)') ' found in src/mod_parameters.f90. Logical flags are set to   '
+    write(0,'(a)') ' true if present on the command line (-p2b turns on p2b).    '
+    write(0,'(a)') ' They can be set to false by prefixing with "no", for        '
+    write(0,'(a)') ' instance like this : -noNC.                                 '
+    write(0,'(a)') '                                                             '
+    write(0,'(a)') ' Example command line:                                       '
+    write(0,'(a)') '                                                             '
+    write(0,'(a)') ' ./disorder -pdf MSHT20nnlo_as118 -Q 20.0 -noNC -CC          '
   end subroutine help_message
 
 end module mod_parameters
