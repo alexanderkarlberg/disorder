@@ -12,10 +12,10 @@ module mod_parameters
   private
 
   public print_header, welcome_message, alphasLocal
-  
-!  real(dp), parameter, public :: gev2pb = 389379660.0_dp
+
+  !  real(dp), parameter, public :: gev2pb = 389379660.0_dp
   real(dp), parameter, public :: gev2pb = 389379372.1_dp
-!  real(dp), parameter, public :: gev2nb = 389379.66_dp
+  !  real(dp), parameter, public :: gev2nb = 389379.66_dp
   real(dp), parameter, public :: gev2nb = 389379.3721_dp
   real(dp), parameter, public :: eps    = 1.0e-14_dp
   integer, parameter, public :: maxscales = 7
@@ -40,7 +40,7 @@ module mod_parameters
        & NC_reduced_dsigma(maxscales), CC_reduced_dsigma(maxscales),&
        & NC_reduced_sigma(maxscales), CC_reduced_sigma(maxscales)
   real(dp), public, save :: toy_Q0, Q0pdf, xmuR_PDF, Q2minPDF ! For HOPPET PDF evolution
-    real(dp), public :: dy, dlnlnQ, minQval, maxQval, ymax_hoppet
+  real(dp), public :: dy, dlnlnQ, minQval, maxQval, ymax_hoppet
   integer, public :: nloop, order_hoppet
   character (len=4), private :: order
   real(dp), private :: Q, x, y
@@ -52,12 +52,12 @@ module mod_parameters
 
   real(dp), public :: Ve, Ae, Ve2, Ae2, Ve2_Ae2, two_Ve_Ae ! Vector and axial couplings of the electron
 
-    ! VEGAS common blocks
+  ! VEGAS common blocks
   integer, public :: ilast
   common/last_integ/ilast
   integer, public :: saveseed,idum
   COMMON /ranno/idum
-  
+
   public :: set_parameters
 
 contains
@@ -72,7 +72,7 @@ contains
        call help_message
        call exit()
     endif
-    
+
     ! Some physical parameters and constants
     mw           = dble_val_opt("-mw",80.398_dp)
     mz           = dble_val_opt("-mz",91.1876_dp)
@@ -88,8 +88,8 @@ contains
     b0 = (11.0_dp * CAlcl - 4.0_dp * nflav * TRlcl) / 6.0_dp
     sin_thw_sq = 1.0_dp - (mw/mz)**2
     sin_2thw_sq = 4.0_dp * (1.0_dp - sin_thw_sq) * sin_thw_sq
-!    GF           = 1.1663787D-5 
-!    GF           =  3.14159265359_dp * alpha_em / sqrt(2.0_dp) / mw**2/sin_thw_sq
+    !    GF           = 1.1663787D-5 
+    !    GF           =  3.14159265359_dp * alpha_em / sqrt(2.0_dp) / mw**2/sin_thw_sq
     GF           =  4.0_dp * atan(1.0_dp) * alpha_em / sqrt(2.0_dp) / mw**2/sin_thw_sq
     positron = log_val_opt ("-positron",.false.)
     ! For a positron the Axial coupling flips sign
@@ -157,7 +157,7 @@ contains
     xmuf         = dble_val_opt("-xmuf",1.0_dp)
     xmur         = dble_val_opt("-xmur",1.0_dp)
     pdfname      = string_val_opt("-pdf", "")
-    
+
     toy_Q0       = dble_val_opt("-toyQ0",-1d0)
     Q0pdf        = dble_val_opt("-Q0pdf",-1d0)
     xmuR_PDF     = dble_val_opt("-xmuRPDF",1d0)
@@ -197,7 +197,7 @@ contains
     scalestr(6) = '_μR_2.0_μF_1.0'
     scalestr(7) = '_μR_0.5_μF_1.0'
 
-     
+
     if(p2b.and.pdfuncert) stop "Cannot do pdf uncertainties with p2b"
 
     ! Some parameters setting up the VEGAS run
@@ -235,27 +235,37 @@ contains
     !     Read in bounds on x,y,Q2
     Q = dble_val_opt("-Q",-1.0_dp)
     if(Q.lt.0.0_dp) then
-      Q2min = (dble_val_opt("-Qmin",sqrt(Q2minPDF)))**2
-      Q2max = (dble_val_opt("-Qmax",1d100))**2
+       if(dble_val_opt("-Qmin",-1d0) .gt. 0d0) then
+          Q2min = (dble_val_opt("-Qmin",sqrt(Q2minPDF)))**2
+       else
+          Q2min = dble_val_opt("-Q2min",Q2minPDF)
+       endif
+       if(dble_val_opt("-Qmax",-1d0) .gt. 0d0) then
+          Q2max = (dble_val_opt("-Qmax",1d100))**2
+       else
+          Q2max = dble_val_opt("-Q2max",1d200)
+       endif
     else 
-      Q2min = Q**2
-      Q2max = Q2min
+       Q2min = Q**2
+       Q2max = Q2min
     endif
+
+
     x = dble_val_opt("-x",-1.0_dp)
     if(x.lt.0.0_dp) then
-      xmin = dble_val_opt("-xmin",0.0_dp)
-      xmax = dble_val_opt("-xmax",1.0_dp)
+       xmin = dble_val_opt("-xmin",0.0_dp)
+       xmax = dble_val_opt("-xmax",1.0_dp)
     else
-      xmin = x
-      xmax = xmin
+       xmin = x
+       xmax = xmin
     endif
     y = dble_val_opt("-y",-1.0_dp)
     if(y.lt.0.0_dp) then
-      ymin = dble_val_opt("-ymin",0.0_dp)
-      ymax = dble_val_opt("-ymax",1.0_dp)
+       ymin = dble_val_opt("-ymin",0.0_dp)
+       ymax = dble_val_opt("-ymax",1.0_dp)
     else
-      ymin = y
-      ymax = ymin
+       ymin = y
+       ymax = ymin
     endif
 
     !     Set centre of mass energy
@@ -326,7 +336,7 @@ contains
     maxQval = max(xmuF*sqrts, sqrts)
     if(scale_choice.eq.4) maxQval = max(xmuF*sqrt(s), sqrt(s))
     scale_choice_hoppet = min(2,scale_choice)
-    
+
     if (.not.CheckAllArgsUsed(0)) then
        call help_message
        call exit()
@@ -343,11 +353,11 @@ contains
        ! we use alphas from the LHAPDF PDF
        alphasLocal = alphasPDF(muR_lcl)
     else
-    ! we use alphas from HOPPET
+       ! we use alphas from HOPPET
        alphasLocal = CouplingValue(coupling, muR_lcl)
     endif
   end function alphasLocal
-  
+
 
   subroutine print_header(idev)
     implicit none
@@ -396,7 +406,7 @@ contains
     write(idev,'(a,F14.7)') ' # 1/αEM:           ', 1.0_dp/alpha_em
     write(idev,'(a,E14.7,a)') ' # GF:                  ', GF,  ' GeV^-2'
     write(idev,'(a,F14.7)') ' # sin(θ_W)^2:      ', sin_thw_sq
-    
+
     write(idev,*) '# ----------------------------------------------------------'
 
   end subroutine print_header
@@ -428,8 +438,10 @@ contains
     write(0,'(a)') '                                                             '
     write(0,'(a)') ' # DIS setup:                                                '
     write(0,'(a)') ' -Q (dble) : Specify fixed Q OR                              '
-    write(0,'(a)') ' -Qmin (dble) [10.0] : Specify minimum Q                     '
+    write(0,'(a)') ' -Qmin (dble) [QminPDF] : Specify minimum Q                  '
     write(0,'(a)') ' -Qmax (dble) : Specify maximum Q                            '
+    write(0,'(a)') ' -Q2min (dble) [Q2minPDF] : Specify minimum Q2               '
+    write(0,'(a)') ' -Q2max (dble) : Specify maximum Q2                          '
     write(0,'(a)') ' -x (dble) : Specify fixed x OR                              '
     write(0,'(a)') ' -xmin (dble) : Specify minimum x                            '
     write(0,'(a)') ' -xmax (dble) : Specify maximum x                            '
