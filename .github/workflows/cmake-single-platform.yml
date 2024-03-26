@@ -7,6 +7,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  schedule:
+    - cron: '00 8 * * 1,2,3,4,5'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
