@@ -109,7 +109,7 @@ if (NEEDS_FASTJET)
     message( FATAL_ERROR "Could not find hoppet-config in ${FASTJET_CONFIG}")
   endif()
   
-  set(FASTJET_INCLUDE_DIR "${FASTJET_INCLUDE_DIR}/include/fastjet")
+  set(FASTJET_INCLUDE_DIR "${FASTJET_INCLUDE_DIR}/include")
   cmake_print_variables(FASTJET_INCLUDE_DIR)
   
   execute_process(
