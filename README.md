@@ -37,7 +37,7 @@ with two auxiliary executables, `mergedata` and `getpdfuncert`.
 
 	make install
 
-This will install disorder in the default location (/usr/local/bin
+This will install `disorder` in the default location (/usr/local/bin
 typically). The user can change the path by specifying
 
 	cmake -DCMAKE_INSTALL_PREFIX=/path/to/subdir ..
