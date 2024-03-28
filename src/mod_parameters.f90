@@ -41,7 +41,7 @@ module mod_parameters
        & NC_reduced_sigma(maxscales), CC_reduced_sigma(maxscales)
   real(dp), public, save :: toy_Q0, Q0pdf, xmuR_PDF, Q2minPDF ! For HOPPET PDF evolution
   real(dp), public :: dy, dlnlnQ, minQval, maxQval, ymax_hoppet
-  integer, public :: nloop, order_hoppet
+  integer, public :: nloop, order_hoppet, orderPDF
   character (len=4), private :: order
   real(dp), private :: Q, x, y
   real(dp), public :: xlmin, xlmax
@@ -171,6 +171,7 @@ contains
        ! Initialise PDF
        call initPDFSetByName(pdfname)
        call getQ2min(0,Q2minPDF)
+       call getorderas(orderPDF) ! NB: LHAPDF returns 0 for 1-loop running, 1 for 2-loop etc.
     endif
 
     nmempdf      = int_val_opt ("-nmempdf",0)
@@ -341,6 +342,15 @@ contains
        call help_message
        call exit()
     endif
+    if(orderPDF+1.ne.order_max) then
+       write(*,*) '# ----------------------------------------------------------'
+       write(*,*) '# WARNING!: The order of the PDF, ', trim(adjustl(pdfname)), 'is not'
+       write(*,*) '# the same as the perturbative order, ',trim(order), 'being computed,'
+       write(*,*) '# which is the order at which disorder initialises a running'
+       write(*,*) '# coupling. Make sure results are consistent!'
+       write(*,*) '# ----------------------------------------------------------'
+       call sleep(1)
+    endif
 
   end subroutine set_parameters
 
@@ -349,13 +359,13 @@ contains
     real(dp), intent(in) :: muR
     real(dp) :: muR_lcl, alphasPDF
     muR_lcl = max(muR,Qmin)
-    if(toy_Q0 < 0d0) then
+    !if(toy_Q0 < 0d0) then
        ! we use alphas from the LHAPDF PDF
-       alphasLocal = alphasPDF(muR_lcl)
-    else
+    !   alphasLocal = alphasPDF(muR_lcl)
+    !else
        ! we use alphas from HOPPET
-       alphasLocal = CouplingValue(coupling, muR_lcl)
-    endif
+    alphasLocal = CouplingValue(coupling, muR_lcl)
+    !endif
   end function alphasLocal
 
 
@@ -403,6 +413,7 @@ contains
     write(idev,'(a,F14.7)') ' # CF:              ', CFlcl
     write(idev,'(a,F14.7)') ' # TR:              ', TRlcl
     write(idev,'(a,F14.7)') ' # αS(MZ):          ', alphasLocal(MZ)
+    write(idev,'(a,I1,a)')  ' #        with ',order_max,'-loop running'
     write(idev,'(a,F14.7)') ' # 1/αEM:           ', 1.0_dp/alpha_em
     write(idev,'(a,E14.7,a)') ' # GF:                  ', GF,  ' GeV^-2'
     write(idev,'(a,F14.7)') ' # sin(θ_W)^2:      ', sin_thw_sq

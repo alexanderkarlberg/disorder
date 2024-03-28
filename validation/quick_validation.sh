@@ -111,6 +111,7 @@ do
 	echo -e "Comparison                                                                                           ${GREEN}PASSED${NC}"
     else
 	echo -e "Comparison                                                                                           ${RED}FAILED${NC}"
+	cat ${file}.diff
 	failed="true"
     fi
 done

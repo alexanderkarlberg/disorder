@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 14/03/2024 at 10:50:42
+ # Stamped by ../build/disorder on 28/03/2024 at 10:47:22
  #../build/disorder -n3lo -NC -includeZ -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert -prefix inclusive_nc_includeZ_Q_10_y_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -19,6 +19,7 @@
  # CF:                   1.3333333
  # TR:                   0.5000000
  # αS(MZ):               0.1260020
+ #        with 4-loop running
  # 1/αEM:              137.0000000
  # GF:                   0.1126702E-04 GeV^-2
  # sin(θ_W)^2:           0.2226459

@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 14/03/2024 at 10:55:51
+ # Stamped by ../build/disorder on 28/03/2024 at 10:52:50
  #../build/disorder -n3lo -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -pdfuncert -alphasuncert -prefix inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -19,6 +19,7 @@
  # CF:                   1.3333333
  # TR:                   0.5000000
  # αS(MZ):               0.1180007
+ #        with 4-loop running
  # 1/αEM:              137.0000000
  # GF:                   0.1126702E-04 GeV^-2
  # sin(θ_W)^2:           0.2226459
