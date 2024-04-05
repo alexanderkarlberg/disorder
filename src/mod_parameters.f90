@@ -354,7 +354,7 @@ contains
     if(toy_Q0.lt.0d0.and.orderPDF+1.ne.order_max) then
        write(*,*) '# ----------------------------------------------------------'
        write(*,*) '# WARNING!: The order of the PDF, ', trim(adjustl(pdfname)), ' is not'
-       write(*,*) '# the same as the perturbative order, ',trim(order), 'being computed,'
+       write(*,*) '# the same as the perturbative order, ',trim(order), ' being computed,'
        write(*,*) '# which is the order at which disorder initialises a running'
        write(*,*) '# coupling. Make sure results are consistent!'
        write(*,*) '# ----------------------------------------------------------'
