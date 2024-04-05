@@ -98,7 +98,8 @@ contains
     ! For a positron the Axial coupling flips sign
     Ae = - 0.5_dp
     if(positron) Ae = - Ae
-    Ve = - 0.5_dp + 2.0_dp * sin_thw_sq 
+    Ve = - 0.5_dp + 2.0_dp * sin_thw_sq
+    if(neutrino) Ve = 0.5_dp
     Ae2 = Ae**2
     Ve2 = Ve**2
     Ve2_Ae2 = Ve2 + Ae2
@@ -141,6 +142,11 @@ contains
     intonly = .false.
     if(.not.noZ) Zonly = log_val_opt ("-Zonly",.false.)
     if(.not.noZ) intonly = log_val_opt ("-intonly",.false.)
+    if(neutrino.and.NC) then
+       Zonly = .true.
+       noZ = .false.
+       intonly = .false.
+    endif
     if(Zonly.and.intonly) stop 'Cannot run with both Z and interference ONLY flags'
     if(.not.NC.and..not.CC) stop 'Need to run with either or/both of NC and CC'
     p2b = log_val_opt("-p2b",.false.)
