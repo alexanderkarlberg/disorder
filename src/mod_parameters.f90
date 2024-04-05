@@ -33,8 +33,10 @@ module mod_parameters
   character * 17, public :: scalestr(maxscales)
   character(len=50), public :: pdfname, outname, prefix
   integer, public :: nmempdf, outdev
-  logical, public, save :: pdfuncert, alphasuncert, fillplots, p2b, noZ, positron,&
-       & Zonly, intonly, scaleuncert, inclusive, novegas, NC, CC, vnf, help, do_analysis, separate_orders
+  logical, public, save :: pdfuncert, alphasuncert, fillplots, p2b,&
+       & noZ, positron, neutrino, Zonly, intonly, scaleuncert,&
+       & inclusive, novegas, NC, CC, vnf, help, do_analysis,&
+       & separate_orders
   real(dp), public, save :: Q2min, Q2max, xmin, xmax, ymin, ymax,ymn,ymx,&
        & Eh, El, sigma_all_scales(maxscales),&
        & NC_reduced_dsigma(maxscales), CC_reduced_dsigma(maxscales),&
@@ -92,6 +94,7 @@ contains
     !    GF           =  3.14159265359_dp * alpha_em / sqrt(2.0_dp) / mw**2/sin_thw_sq
     GF           =  4.0_dp * atan(1.0_dp) * alpha_em / sqrt(2.0_dp) / mw**2/sin_thw_sq
     positron = log_val_opt ("-positron",.false.)
+    neutrino = log_val_opt ("-neutrino",.false.)
     ! For a positron the Axial coupling flips sign
     Ae = - 0.5_dp
     if(positron) Ae = - Ae
@@ -342,9 +345,9 @@ contains
        call help_message
        call exit()
     endif
-    if(orderPDF+1.ne.order_max) then
+    if(toy_Q0.lt.0d0.and.orderPDF+1.ne.order_max) then
        write(*,*) '# ----------------------------------------------------------'
-       write(*,*) '# WARNING!: The order of the PDF, ', trim(adjustl(pdfname)), 'is not'
+       write(*,*) '# WARNING!: The order of the PDF, ', trim(adjustl(pdfname)), ' is not'
        write(*,*) '# the same as the perturbative order, ',trim(order), 'being computed,'
        write(*,*) '# which is the order at which disorder initialises a running'
        write(*,*) '# coupling. Make sure results are consistent!'
@@ -378,8 +381,13 @@ contains
     write(idev,*) '#'//trim(command_line())
     write(idev,*) '# ----------------------------------------------------------'
     write(idev,'(a,a)',advance='no') ' # Doing DIS @ ', trim(order)
-    if(.not.positron) write(idev,*) ' (e^- + p)'
-    if(positron) write(idev,*) ' (e^+ + p)'
+    if(neutrino) then
+       if(.not.positron) write(idev,*) ' (νe + p)'
+       if(positron) write(idev,*) ' (νebar + p)'
+    else
+       if(.not.positron) write(idev,*) ' (e^- + p)'
+       if(positron) write(idev,*) ' (e^+ + p)'
+    endif
     if(.not.p2b) then
        write(idev,*) '# Inclusively in radiation'
     elseif(p2b) then
@@ -490,7 +498,7 @@ contains
     write(0,'(a)') ' -help : Print this help message                             '
     write(0,'(a)') '                                                             '
     write(0,'(a)') ' # Toy PDF parameters:                                       '
-    write(0,'(a)') ' -toy_Q0 (dble) [-1.0]: If > 0 then uses the HERALHC initial '
+    write(0,'(a)') ' -toyQ0 (dble) [-1.0]: If > 0 then uses the HERALHC initial '
     write(0,'(a)') ' condition at that scale and evolves using Hoppet            '
     write(0,'(a)') ' -Q0pdf (dble) [-1.0]: If > 0 then read in LHAPDF at that    '
     write(0,'(a)') ' scale and evolve using Hoppet                               '
