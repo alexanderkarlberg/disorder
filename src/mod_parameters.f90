@@ -99,7 +99,10 @@ contains
     Ae = - 0.5_dp
     if(positron) Ae = - Ae
     Ve = - 0.5_dp + 2.0_dp * sin_thw_sq
-    if(neutrino) Ve = 0.5_dp
+    if(neutrino) then
+       Ve = 0.5_dp
+       Ae = -Ae
+    endif
     Ae2 = Ae**2
     Ve2 = Ve**2
     Ve2_Ae2 = Ve2 + Ae2
