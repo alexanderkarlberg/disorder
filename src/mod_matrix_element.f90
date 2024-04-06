@@ -344,7 +344,7 @@ contains
     res = half * res 
   end function compute_sigmas
   
-  ! These are basically taken from 1206.7007 eq.1, 6, 7, 11
+  ! These are basically taken from 1206.7007 eq.1, 6, 7, 11 and eq. 18.16 in the PDG
   function compute_sigmas_new(x,y,Qsq,F1NC,F2NC,F3NC,F1CC,F2CC,F3CC) result(res)
     implicit none
     real(dp), intent(in) :: x, y, Qsq, F1NC, F2NC, F3NC, F1CC, F2CC,&

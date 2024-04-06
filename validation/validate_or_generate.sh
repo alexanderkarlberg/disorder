@@ -33,6 +33,10 @@ inclusive_cc_Qmin_1_x_0.01_
 inclusive_nc_Q_10_y_0.01_ 
 inclusive_nc_includeZ_Q_10_y_0.01_ 
 inclusive_cc_Q_10_y_0.01_ 
+inclusive_nc_Q_10_x_0.01_neutrino_ 
+inclusive_nc_Q_10_x_0.01_neutrino_positron_ 
+inclusive_cc_Q_10_x_0.01_neutrino_ 
+inclusive_cc_Q_10_x_0.01_neutrino_positron_ 
 p2b_nc_Q_10_x_0.01_
 p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_
 "
@@ -53,6 +57,11 @@ cmdline=(
     -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\ 
     -n3lo\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\  
     -n3lo\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\ 
+    # Some neutrino runs
+    -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ 
+    -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ -poistron\
+    -n3lo\ -noNC\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ 
+    -n3lo\ -noNC\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ -positron\
     #Some p2b runs
     -nnlo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -p2b\ 
     -nnlo\ -NC\ -pdf\ MSHT20an3lo_as118\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -p2b\ 

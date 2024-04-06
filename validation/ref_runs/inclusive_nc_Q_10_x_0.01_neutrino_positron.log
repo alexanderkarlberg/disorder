@@ -1,0 +1,81 @@
+ ==============================================================
+ WARNING / ERROR: the following args were not recognized
+ -poistron
+ ==============================================================
+-----------------------------------------------------------
+               Welcome to disorder v. 1.0.0                
+        Written by Alexander Karlberg (2023-2024)          
+                                                           
+ It is made available under the GNU public license,        
+ with the additional request that if you use it or any     
+ derivative of it in scientific work then you should cite: 
+ A. Karlberg (arXiv:2401.16964).                           
+                                                           
+ You are also encouraged to cite HOPPET, the original      
+ references,for LO, NLO and NNLO splitting functions, the  
+ QCD 1, 2, 3 and 4 loop beta functions and the coupling and
+ PDF mass threshold matching functions. You are furthermore
+ encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
+ functions and the disent references.                      
+-----------------------------------------------------------
+ Some common flags to use are (default values in [] and ()   
+ means that the flag takes an input (dble/int/string).       
+ Values are in GeV typically). -pdf is mandatory :           
+                                                             
+ # DIS setup:                                                
+ -Q (dble) : Specify fixed Q OR                              
+ -Qmin (dble) [QminPDF] : Specify minimum Q                  
+ -Qmax (dble) : Specify maximum Q                            
+ -Q2min (dble) [Q2minPDF] : Specify minimum Q2               
+ -Q2max (dble) : Specify maximum Q2                          
+ -x (dble) : Specify fixed x OR                              
+ -xmin (dble) : Specify minimum x                            
+ -xmax (dble) : Specify maximum x                            
+ -y (dble) : Specify fixed y OR                              
+ -ymin (dble) : Specify minimum y                            
+ -ymax (dble) : Specify maximum y                            
+ -CC [false] : Include charged current processes             
+ -NC [true] : Include neutral current processes              
+ -includeZ [false] : Include Z and interferences             
+ -positron [false] : Incoming positron                       
+ -Elep (dble) [27.5] : Energy of lepton in lab frame         
+ -Ehad (dble) [820.0] : Energy of hadron in lab frame        
+                                                             
+ # QCD setup:                                                
+ -pdf : LHAPDF name (e.g. NNPDF30_nnlo_as_0118_hera)         
+ -lo/-nlo/-nnlo/-n3lo [-nnlo]: Run at LO/NLO/NNLO/N3LO       
+ -scale-choice (int) [1]: Central scale: 0: MZ, 1: Q,        
+                          3: Q*sqrt(1-y), 4: Q*(1-x)/x       
+ -scaleuncert [false]: Do 7-point scale variation around Q   
+ -pdfuncert [false] : Compute pdf uncertainties              
+ -p2b [false] : Turn on disent and projection-to-Born        
+                                                             
+ # EW parameters:                                            
+ -one-over-alpha (dble) [137.] : 1/αEM                       
+ -mz (dble) [91.1876] : mass of Z boson                      
+ -mw (dble) [80.398]  : mass of W boson                      
+                                                             
+ # Run parameters:                                           
+ -prefix (string) : Add a prefix to all output               
+ -ncall1 (int) [100000] : Number of calls to VEGAS warmup    
+ -itmx1 (int) [3]  : Number of iterations in VEGAS warmup    
+ -ncall2 (int) [100000] : Number of calls to VEGAS production
+ -iseed/-rseq (int) [1] : The seed                           
+ -no-analysis [false] : Turn off the analysis                
+ -help : Print this help message                             
+                                                             
+ # Toy PDF parameters:                                       
+ -toyQ0 (dble) [-1.0]: If > 0 then uses the HERALHC initial 
+ condition at that scale and evolves using Hoppet            
+ -Q0pdf (dble) [-1.0]: If > 0 then read in LHAPDF at that    
+ scale and evolve using Hoppet                               
+                                                             
+ More specialised flags and helpful information can be       
+ found in src/mod_parameters.f90. Logical flags are set to   
+ true if present on the command line (-p2b turns on p2b).    
+ They can be set to false by prefixing with "no", for        
+ instance like this : -noNC.                                 
+                                                             
+ Example command line:                                       
+                                                             
+ ./disorder -pdf MSHT20nnlo_as118 -Q 20.0 -noNC -CC          
