@@ -549,13 +549,16 @@ $Q$ the program simply evaluates one point and returns the answer.
 One can further specify the energy of the incoming lepton through {\tt
   -Elep}, the incoming hadron through {\tt -Ehad}. By default the
 lepton is taken to be an electron but specifying {\tt -positron} on
-the command line will change that. The code computes the
-photon-mediated NC cross section only by default. To include the $Z$
-one can specify {\tt -includeZ} and to include CC processes one can
-specify {\tt -CC}. The inclusion of NC processes can also be
-controlled through the {\tt -NC} flag. In fact, all logical flags can
-be prefixed by ``{\tt{no}}'' to turn them off. Hence the below command
-line would run the program with CC processes only using a positron
+the command line will change that. To use an incoming neutrino the
+user should specify {\tt -neutrino}. If {\tt -positron} is also
+specified the incoming lepton will be an anti-neutrino. The code
+computes the photon-mediated NC cross section only by default. To
+include the $Z$ one can specify {\tt -includeZ} and to include CC
+processes one can specify {\tt -CC}. The inclusion of NC processes can
+also be controlled through the {\tt -NC} flag. In fact, all logical
+flags can be prefixed by ``{\tt{no}}'' to turn them off. Hence the
+below command line would run the program with CC processes only using
+a positron
 \begin{lstlisting}
   ./disorder -Q 20 -xmin 0.01 -noNC -CC -positron -pdf LHAPDF_name
 \end{lstlisting}
@@ -636,7 +639,7 @@ To turn on P2B it is enough to specify {\tt -p2b} on the command
 line. Many of the flags described above can also be specified in this
 mode, with a few limitations
 \begin{itemize}
-\item {\tt -CC} and {\tt -includeZ} are not supported
+\item {\tt -CC}, {\tt -neutrino}, and {\tt -includeZ} are not supported
 \item {\tt -n3lo} is not supported
 \item {\tt -pdfuncert} and {\tt -alphasuncert} are not supported
 \end{itemize}

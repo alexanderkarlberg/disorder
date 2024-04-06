@@ -480,6 +480,8 @@ contains
     write(0,'(a)') ' -NC [true] : Include neutral current processes              '
     write(0,'(a)') ' -includeZ [false] : Include Z and interferences             '
     write(0,'(a)') ' -positron [false] : Incoming positron                       '
+    write(0,'(a)') ' -neutrino [false] : Incoming neutrino (anti-neutrino if     '
+    write(0,'(a)') '                     -positron is also specified)            '
     write(0,'(a)') ' -Elep (dble) [27.5] : Energy of lepton in lab frame         '
     write(0,'(a)') ' -Ehad (dble) [820.0] : Energy of hadron in lab frame        '
     write(0,'(a)') '                                                             '
