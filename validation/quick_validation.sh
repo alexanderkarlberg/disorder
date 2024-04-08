@@ -57,7 +57,7 @@ cmdline=(
     -n3lo\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\
     # Some neutrino runs
     -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ 
-    -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ -poistron\
+    -n3lo\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ -positron\
     -n3lo\ -noNC\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ 
     -n3lo\ -noNC\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ -positron\
     #Some p2b runs
