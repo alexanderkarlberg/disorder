@@ -168,6 +168,7 @@ contains
           ! sin_2thw_sq = 4 * (1 - sin_thw_sq) * sin_thw_sq
           ! propgZ = (GF*MZ**2/(2*sqrt(2)*pi*alpha_em)) * Qsq / (Qsq + MZ**2)
           propZ  = propgZ**2
+          if(neutrino) propZ = two * propZ ! Polarisation sum is 1, not 1/2.
           do i = order_start,order_stop
              ! Eqs. 18.11-18.12
              if(noZ) then
