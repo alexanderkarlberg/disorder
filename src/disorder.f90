@@ -367,8 +367,9 @@ contains
       ! into the full array)
       !real(dp), parameter, public :: scales_muf(1:maxscales) = &
       !& (/1.0_dp, 2.0_dp, 0.5_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp/)
+      ! We also correct alpha_em which is hardcoded to 1/137 in DISENT.
       do isc = 1,3
-         wgt_array(isc,:) = scl_weight(isc,:) * weight(:)
+         wgt_array(isc,:) = scl_weight(isc,:) * weight(:) * (137.0d0 * alpha_em)**2
       enddo
       wgt_array(4,:) = wgt_array(2,:)
       wgt_array(5,:) = wgt_array(3,:)
