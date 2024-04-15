@@ -179,6 +179,7 @@ contains
           print*, '-pdf must be specified!'
           call exit()
        endif
+       orderPDF = order_max - 1
     else
        ! Initialise PDF
        call initPDFSetByName(pdfname)
@@ -354,10 +355,10 @@ contains
        call help_message
        call exit()
     endif
-    if(toy_Q0.lt.0d0.and.orderPDF+1.ne.order_max) then
+    if(orderPDF+1.ne.order_max) then
        write(*,*) '# ----------------------------------------------------------'
-       write(*,*) '# WARNING!: The order of the PDF, ', trim(adjustl(pdfname)), ' is not'
-       write(*,*) '# the same as the perturbative order, ',trim(order), ' being computed,'
+       write(*,*) '# WARNING!: The order of the PDF, ', trim(adjustl(pdfname)), ', is'
+       write(*,*) '# not the same as the perturbative order, ',trim(order), ', being computed,'
        write(*,*) '# which is the order at which disorder initialises a running'
        write(*,*) '# coupling. Make sure results are consistent!'
        write(*,*) '# ----------------------------------------------------------'
