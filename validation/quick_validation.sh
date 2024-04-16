@@ -88,7 +88,8 @@ iJob=1
 for i in $(seq 0 $((numJobs-1)))
 do
     echo -e Running job number ${iJob}: ${PURPLE}../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]}${NC}
-    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
+#    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
+    sem --use-cores-instead-of-threads -j +0 ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} &> ${prefixarray[$i]%_}.log
     # Uncomment for CI debug
 #    sem -j 50% ../build/disorder ${cmdline[$i]} -prefix ${prefixarray[$i]} 2>&1 | tee ${prefixarray[$i]%_}.log
     ((iJob++))
