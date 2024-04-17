@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 16/04/2024 at 14:26:30
+ # Stamped by ../build/disorder on 17/04/2024 at 09:09:04
  #../build/disorder -n3lo -CC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -prefix inclusive_cc_Q_10_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -29,16 +29,16 @@
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC + CC)                     =     1783.988269 pb/GeV^2
+ # σ(NC + CC)                     =     1783.854661 pb/GeV^2
  # MC integration uncertainty     =        0.0000 %
- # QCD scale uncertainty (+)      =        0.7425 %
- # QCD scale uncertainty (-)      =       -0.1348 %
+ # QCD scale uncertainty (+)      =        0.7448 %
+ # QCD scale uncertainty (-)      =       -0.1363 %
  
  # Reduced N3LO cross-sections
- # σ reduced (NC)                 =        0.763937
- # QCD scale uncertainty (+)      =        0.7426 %
- # QCD scale uncertainty (-)      =       -0.1348 %
- # σ reduced (CC)                 =        2.514353
- # QCD scale uncertainty (+)      =        0.6584 %
- # QCD scale uncertainty (-)      =       -0.1184 %
+ # σ reduced (NC)                 =        0.763880
+ # QCD scale uncertainty (+)      =        0.7448 %
+ # QCD scale uncertainty (-)      =       -0.1363 %
+ # σ reduced (CC)                 =        2.514185
+ # QCD scale uncertainty (+)      =        0.6603 %
+ # QCD scale uncertainty (-)      =       -0.1197 %
  ============================================================

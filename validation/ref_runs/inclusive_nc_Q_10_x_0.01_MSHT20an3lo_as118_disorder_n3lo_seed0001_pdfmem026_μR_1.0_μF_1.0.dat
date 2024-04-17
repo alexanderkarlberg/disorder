@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 16/04/2024 at 14:28:46
+ # Stamped by ../build/disorder on 17/04/2024 at 09:11:21
  #../build/disorder -n3lo -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -pdfuncert -alphasuncert -prefix inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
