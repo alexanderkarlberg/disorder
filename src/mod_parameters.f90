@@ -431,6 +431,7 @@ contains
     write(idev,'(a,F14.7)') ' # CF:              ', CFlcl
     write(idev,'(a,F14.7)') ' # TR:              ', TRlcl
     write(idev,'(a,F14.7)') ' # αS(MZ):          ', alphasLocal(MZ)
+    write(idev,'(a,F14.7)') ' # αS(Qmin):        ', alphasLocal(Qmn)
     write(idev,'(a,I1,a)')  ' #        with ',order_max,'-loop running'
     write(idev,'(a,F14.7)') ' # 1/αEM:           ', 1.0_dp/alpha_em
     write(idev,'(a,E14.7,a)') ' # GF:                  ', GF,  ' GeV^-2'
