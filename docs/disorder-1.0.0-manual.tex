@@ -99,19 +99,18 @@ CERN, Theoretical Physics Department, CH-1211 Geneva 23, Switzerland
 % TODO: write your abstract here.
 We present a Fortran 77/95 code capable of computing QCD corrections
 in deep inelastic scattering (DIS). The code uses the
-Projection-to-Born method to combine an exclusive DIS + 1 jet
-calculation with the inclusive DIS structure functions, thereby
-obtaining fully differential DIS predictions at
-$\mathcal{O}(\as^2)$. The code is lightweight and fast, and yet
-includes the most common functionalities found in typical perturbative
-QCD programs, like automatic renormalisation and factorisation scale
-uncertainties, options to run and combine multiple seeds, and
-interfaces to \fastjet{} and \lhapdf{}. Due to the underlying
-exclusive DIS + 1 jet code, the program also provides stable results
-in the infrared, relevant for extracting logarithmic coefficients for
-analytic resummations. As a by-product the code provides access
-to the DIS structure functions and (reduced) cross sections up to
-$\mathcal{O}(\as^3)$.}
+Projection-to-Born method to obtain $\mathcal{O}(\as^2)$ predictions
+in neutral-current photon-mediated DIS, fully differential in the jet
+and lepton kinematics, both in the Breit and laboratory frames. The
+code is lightweight and fast, and yet includes the most common
+functionalities found in typical perturbative QCD programs, like
+automatic renormalisation and factorisation scale uncertainties,
+options to run and combine multiple seeds, and interfaces to
+\fastjet{} and \lhapdf{}. Due to the underlying \disent{} and
+\hoppet{} codes, the program also provides stable results in the
+infrared, relevant for extracting logarithmic coefficients for
+analytic resummations, and access to the DIS structure functions and
+(reduced) cross sections up to $\mathcal{O}(\as^3)$.}
 
 
 % TODO: include a table of contents (optional)
@@ -138,25 +137,29 @@ Ref.~\cite{Moch:2022frw}. Together with the three-loop results for the
 splitting functions~\cite{Moch:2004pa,Vogt:2004mw,Blumlein:2021enk}
 and the four-loop
 $\beta$-function~\cite{vanRitbergen:1997va,Czakon:2004bu} for the
-running coupling this allows for the determination of the proton
-structure functions at the next-to-next-to-next-to-leading order
-(\NNNLO{}).\footnote{\label{n3lo-note}Technically the four-loop
+running coupling this allows for the determination of the massless
+proton structure functions at the next-to-next-to-next-to-leading
+order (\NNNLO{}).\footnote{\label{n3lo-note}Technically the four-loop
 splitting functions are needed to claim this accuracy. Recent progress
 in determining those and the three-loop massive operator matrix
-elements can be found in
-Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah}
+elements, needed for the variable-flavour-number
+scheme~\cite{Buza:1996wv}, can be found in
+Refs.~\cite{Moch:2021qrk,Falcioni:2023luc,Falcioni:2023vqq,Gehrmann:2023cqm,Falcioni:2023tzp,Moch:2023tdj,Gehrmann:2023iah,Falcioni:2024xyt}
 and
-\cite{Bierenbaum:2009mv,Kawamura:2012cr,ABLINGER2014263,Ablinger:2014vwa,Ablinger:2014nga,Ablinger:2022wbb,Ablinger:2023ahe}
+\cite{Bierenbaum:2009mv,Kawamura:2012cr,ABLINGER2014263,Ablinger:2014vwa,Ablinger:2014nga,Ablinger:2022wbb,Ablinger:2023ahe,Ablinger:2024xtt}
 respectively. Phenomenologically the first few moments which have been
 computed therein, with some exact pieces also being known, are however
 in all likelihood enough to claim \NNNLO{}. } The structure functions
 can be combined with an exclusive next-to-next-to-leading order (NNLO)
-DIS + 1 jet computation to obtain fully differential \NNNLO{}
-predictions in DIS, as was done by the \nnlojet{}
-collaboration~\cite{Currie:2018fgr,Gehrmann:2018odt}. This computation
-uses the Projection-to-Born (P2B) method, which was first introduced
-in the context of NNLO Vector Boson Fusion (VBF)
-production~\cite{Cacciari:2015jma}.
+dijet DIS computation to obtain fully differential \NNNLO{}
+predictions for single-jet DIS production, as was done by the
+\nnlojet{}
+collaboration~\cite{Currie:2016ytq,Currie:2018fgr,Gehrmann:2018odt}. This
+computation uses the Projection-to-Born (P2B) method, which was first
+introduced in the context of NNLO Vector Boson Fusion (VBF)
+production~\cite{Cacciari:2015jma}, and has since also been extended
+to \NNNLO{} colour-singlet production in proton-proton
+collisions~\cite{Chen:2021isd,Chen:2021vtu}.
 
 Despite this impressive theoretical progress, there are few publically
 available computer codes from which one can obtain fast and reliable
@@ -165,28 +168,29 @@ and associated Fortran code seeks to address that.
 
 One of the advantages of the P2B method is that it is rather agnostic
 towards the details of the underlying exclusive computation, and it is
-hence possible to ``upgrade'' existing fixed-order codes to one order
-higher. Historically the most successful fixed-order codes have been
+hence possible to augment the validity of existing fixed-order
+codes. Historically the most successful fixed-order codes have been
 {\tt MEPJET}~\cite{Mirkes:1995ks}, \disent{}~\cite{Catani:1996vz},
 \disaster{}~\cite{Graudenz:1997gv}, and \nlojet{}~\cite{Nagy:2001xb}
-which are all next-to-leading order (NLO) accurate. Discrepancies
-between \disent{} and fixed-order coefficients from analytical
-resummation were initially observed in
+which are all next-to-leading order (NLO) accurate for DIS dijet
+production. Discrepancies between \disent{} and fixed-order
+coefficients from analytical resummation were initially observed in
 Refs.\cite{Antonelli:1999kx,Dasgupta:2002dc}, and were only recently
 understood to be due to a bug in one of the dipole terms for the gluon
 channel in \disent{}~\cite{Borsa:2020ulb,Borsa:2020yxh}.
 
 With the bug fixed we can use \disent{} as the underlying exclusive
-NLO code together with the NNLO structure functions
-from~\hoppet{}~\cite{Salam:2008qg,BertoneKarlberg}.\footnote{The
+dijet NLO code together with the NNLO structure functions
+from~\hoppet{}~\cite{Salam:2008qg,BertoneKarlberg},\footnote{The
 combination of \disent{} and \hoppet{} naturally leads to a Fortran
 code. For a C++ alternative, based on publically available codes, one
 could have started from either \disaster{} or \nlojet{} and used the
 structure functions as implemented in
-APFEL++~\cite{Bertone:2013vaa,Bertone:2017gds}} Advantages of using
-\disent{} are its well-known efficiency and numerical stability. The
-resulting program is dubbed \disorder{} keeping in the spirit of
-previous names for fixed-order DIS codes.\footnote{{\tt
+APFEL++~\cite{Bertone:2013vaa,Bertone:2017gds}} to obtain fully
+differential single-jet DIS predictions. Advantages of using \disent{}
+are its well-known efficiency and numerical stability. The resulting
+program is dubbed \disorder{} keeping in the spirit of previous names
+for fixed-order DIS codes.\footnote{{\tt
   dispatch}~\cite{Dasgupta:2002dc} deserves an honorable mentioning in
 this context.} Since the program relies on \hoppet{} for the structure
 functions, the inclusive DIS cross section can actually be obtained
@@ -194,17 +198,39 @@ one order higher, as the structure functions were implemented at
 \NNNLO{} already in the context of the \provbfh{}
 codes~\cite{Cacciari:2015jma,Dreyer:2016oyx,Dreyer:2018qbw,Dreyer:2018rfu}
 and are publically available since {\tt v1.3.0} of
-\hoppet{}~\cite{hoppetv130}\footnote{\hoppet{} implements all known
+\hoppet{}~\cite{hoppetv130}.\footnote{\hoppet{} implements all known
 approximate and exact ingredients at this order - see footnote
-\ref{n3lo-note}.}. The \disorder{} program therefore has two more or
-less separate use cases: 1. The computation of fully exclusive NNLO
-photon-mediated massless DIS 2. The computation of inclusive neutral-
-(NC) and charged-current (CC) massless DIS at \NNNLO{} accuracy.
+\ref{n3lo-note}.} The \disorder{} program therefore has two more or
+less separate use cases: 1. The computation of fully exclusive
+$\mathcal{O}(\as^2)$ photon-mediated massless DIS 2. The computation
+of inclusive neutral- (NC) and charged-current (CC) massless DIS at
+\NNNLO{} accuracy.
 
-The program is designed to be user-friendly with a simple command line
-interface. It prints cross sections and all important run-parameters
-to the screen and disk, allowing a user to acquire cross sections with
-very little effort. It comes with an interface to
+DIS is peculiar in-so-far that despite having a final-state parton
+already at the lowest order, the existence of a non-trivial jet, at
+this order, is highly frame-dependent. The majority of jet analyses
+are performed in the Breit-frame, as was for instance the case at
+HERA~\cite{ZEUS:2006xvn,H1:2009pqp,ZEUS:2010vyw,H1:2014cbm,Baghdasaryan:2015yha,H1:2016goa}. In
+this frame the incoming proton collides head-on with the photon, and
+the resulting jet has zero transverse momentum. At NLO, the
+real-emission diagram can instead give rise to two jets with equal and
+opposite transverse momentum, provided the two partons are not
+clustered together. As a consequence, the first non-trivial jet
+process that can be described in the Breit-frame is dijet
+production. In contrast, in the laboratory frame (or virtually any
+other frame than the Breit-frame) there will always be at least one
+jet present. The P2B method therefore only meaningfully augments the
+\disent{} program in the laboratory frame, where single-jet production
+is well-defined. Hence, when analysing the output of \disorder{} in
+the Breit-frame it will essentially be identical to that which one
+would obtain by running a stand-alone version of \disent{}, with the
+exception that the inclusive NNLO cross section is computed correctly
+at the same time.
+
+The \disorder{} program is designed to be user-friendly with a simple
+command line interface. It prints cross sections and all important
+run-parameters to the screen and disk, allowing a user to acquire
+cross sections with very little effort. It comes with an interface to
 \fastjet{}~\cite{Cacciari:2011ma} and \lhapdf{}~\cite{Buckley:2014ana}
 and uses the histogramming package from the {\tt
   POWHEG-BOX}~\cite{Alioli:2010xd} for easy analysis. The code can
@@ -223,12 +249,14 @@ themselves have been known for a little while, and the P2B method has
 already been applied to DIS, even one order higher than
 here.\footnote{It has also been applied in polarised DIS in
 Refs.~\cite{Borsa:2020ulb,Borsa:2020yxh,Borsa:2021afb,Borsa:2022irn,Borsa:2022cap}.}
-It is however the author's opinion that with the renewed interest in
-DIS due to the upcoming Electron-Ion-Collider
-(EIC)~\cite{AbdulKhalek:2022hcn}, well-maintained public code is
-extremely valuable for both the experimental and theoretical
-communities, and that providing documentation in the form of this
-article will enable the wide use of the code.
+In addition only photon-mediated DIS can be computed fully
+deferentially at the moment. It is however the author's opinion that
+with the renewed interest in DIS due to the upcoming
+Electron-Ion-Collider (EIC)~\cite{AbdulKhalek:2022hcn},
+well-maintained public code is extremely valuable for both the
+experimental and theoretical communities, and that providing
+documentation in the form of this article will enable the wide use of
+the code.
 
 The paper is structured as follows: In section~\ref{sec:dis} we review
 the DIS process and kinematics as implemented in \disorder{}. In
@@ -266,27 +294,32 @@ component and is anti-aligned with the incoming parton. Explicitly in
 \disorder{} the Breit-frame at LO is
 \begin{align}
   \label{eq:BreitLO}
-k_i &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,-1 \right), \quad  p_i = \frac{Q}{2}\left(1,0,0,+1 \right) \\ \notag
-k_f &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,+1 \right), \quad  p_f = \frac{Q}{2}\left(1,0,0,-1 \right) 
+k_i &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,-1 \right)\,, \quad  p_i = \frac{Q}{2}\left(1,0,0,+1 \right)\,, \\ \notag
+k_f &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,+1 \right)\,, \quad  p_f = \frac{Q}{2}\left(1,0,0,-1 \right)\,, 
 \end{align}
 where four-momenta are given as $(E,p_x,p_y,p_z)$. The resulting
-vector $q$ is hence given by $(0,0,0,-Q)$. In the laboratory frame we align
-the parton with the positive $z$-axis and hence the lepton with the
-negative
+vector $q$ is hence given by $(0,0,0,-Q)$. It is clear from
+eq.~\eqref{eq:BreitLO} that the outgoing parton in the Breit-frame has
+zero transverse momentum. In the laboratory frame we align the parton
+with the positive $z$-axis and hence the lepton with the negative
 \begin{align}
-\tilde{k}_i &= E_\mathrm{l}\left(1,0,0,-1 \right), \quad  \tilde{p}_i = x E_\mathrm{h}\left(1,0,0,+1 \right) 
+\tilde{k}_i &= E_\mathrm{l}\left(1,0,0,-1 \right), \quad  \tilde{p}_i = x E_\mathrm{h}\left(1,0,0,+1 \right)\,, 
 \end{align}
 where $E_\mathrm{h}$ is the energy of the incoming hadron. Using the
 definitions of eq.~\eqref{eq:dis-variables} one finds that in the lab
 frame
 \begin{equation}
-  \tilde{q} = \left(y(E_\mathrm{l} - x E_\mathrm{h}), -Q\sqrt{1-y},0, -y(E_\mathrm{l} - x E_\mathrm{h})\right) 
+  \tilde{q} = \left(y(E_\mathrm{l} - x E_\mathrm{h}), -Q\sqrt{1-y},0, -y(E_\mathrm{l} - x E_\mathrm{h})\right)\,, 
 \end{equation}
 and the outgoing momenta then simply follow from momentum conservation
 \begin{equation}
   \label{eq:LabLO}
   \tilde{k}_f = \tilde{k}_i - \tilde{q}, \quad   \tilde{p}_f = \tilde{p}_i + \tilde{q}\,. 
 \end{equation}
+Conversely, in the laboratory frame, the outgoing parton always has
+transverse momentum of magnitude $Q\sqrt{1-y}$. In \disorder{} both
+the Breit-frame and laboratory frame momenta can be accessed by the
+analysis at the same time.
 
 The inclusive cross section for DIS can be split into a NC
 contribution, from $e^\pm p \to e^\pm + X$ scattering, and a CC
@@ -340,7 +373,7 @@ In DIS it is also customary to define the dimensionless
 \emph{reduced} NC and CC cross sections by~\cite{H1:2012qti}
 \begin{align}
   \label{eq:reducedsigma}
-  \tilde{\sigma}_\NC^\pm(x,Q^2) &= \frac{xQ^4}{2\pi\alpha^2}\frac{1}{y_+}\frac{\dd\sigma_{\NC}^\pm}{\dd x \dd Q^2} \notag \\
+  \tilde{\sigma}_\NC^\pm(x,Q^2) &= \frac{xQ^4}{2\pi\alpha^2}\frac{1}{y_+}\frac{\dd\sigma_{\NC}^\pm}{\dd x \dd Q^2}\,, \notag \\
   \tilde{\sigma}_\CC^\pm(x,Q^2) &= \frac{8\sin^4\theta_W x}{\pi\alpha^2}\left[M_W^2+Q^2\right]^2\frac{\dd\sigma_{\CC}^\pm}{\dd x \dd Q^2}\,.
 \end{align}
 \disorder{} provides direct access to all the cross sections in
@@ -374,23 +407,35 @@ and can therefore only provide predictions for quantities, like the
 inclusive cross sections, which depend on the Born kinematics of
 eq.~\eqref{eq:dis-variables} only. If we instead evaluate the
 structure functions on an observable sensitive to emissions, e.g. the
-transverse momentum of the hardest jet in the laboratory frame, we see that
-this will not give the right answer, as the real emissions are not
-included with their correct kinematics. 
-
+transverse momentum of the hardest jet in the laboratory frame, we see
+that this will not give the right answer, as the real emissions are
+not included with their correct-kinematics. In fact, when computing
+the coefficient functions that enter the structure functions, the
+real-emission diagrams are explicitly projected onto the Born
+kinematics.
 
 The P2B method lifts this restriction by effectively replacing the
 Born-kinematics real-emission contributions in the structure functions
 with the correct kinematics ones. In practice whenever \disent{}
 returns an event with some weight, we bin it once according to the
 true kinematics, and again projecting the kinematics to the underlying
-Born changing the sign of the weight. This last term, upon integration,
-will exactly cancel the real contribution in the structure functions,
-whereas the first term will provide the correct real matrix element.
+Born changing the sign of the weight. This last term, upon
+integration, will exactly cancel the real contribution in the
+structure functions, whereas the first term will provide the correct
+real matrix element. A detailed discussion of the method can be found
+in section 2 of Ref.~\cite{Currie:2018fgr}.
 
-The projections themselves are trivial because, as outlined above, the
-Born kinematics are fully specified at all orders by the lepton (and
-proton) momenta, as given in
+As mentioned already in the Introduction, this procedure is trivial
+when applied to the Breit-frame kinematics. In this frame the outgoing
+parton has zero transverse momentum, and will therefore not contribute
+to any jet-sensitive observable, like the well-known thrust
+event-shape~\cite{Antonelli:1999kx}. In the laboratory frame however,
+the jet kinematics are non-trivial even at Born-level,
+cf. eq.~\eqref{eq:LabLO}, and the P2B method as applied here will
+correctly describe single-jet production in this frame. The
+projections themselves are trivial because, as outlined in the section
+above, the Born kinematics are fully specified at all orders by the
+lepton (and proton) momenta, as given in
 eqs.~\eqref{eq:BreitLO}--\eqref{eq:LabLO}. Hence computing the
 projections adds very little computational effort to the cross section
 calculation.
@@ -402,12 +447,12 @@ possible to extend the code to include Z-mediation (including
 interferences) and CC, but we leave this for future work.
 
 In principle P2B could be applied to the \disent{} code without any
-major modifications besides the bug fix mentioned in the
-introduction. However a few significant modifications were introduced
-to allow for a more flexible integration of \disent{} into
-\disorder{}. The version of \disent{} that we include in \disorder{}
-is based on the version which can be found in {\tt
-  dispatch}~\cite{Dasgupta:2002dc}, and which already included some
+major modifications besides the bug fix mentioned in the introduction,
+and which has been implemented here. However a few significant
+modifications were introduced to allow for a more flexible integration
+of \disent{} into \disorder{}. The version of \disent{} that we
+include in \disorder{} is based on the version which can be found in
+{\tt dispatch}~\cite{Dasgupta:2002dc}, and which already included some
 minor modifications. In addition to the modifications present there,
 we have also introduced $\alpha$ as an input parameter, whereas before
 it was fixed to $1/137$. A number of parameters can also now be set on
@@ -665,7 +710,8 @@ assumes default installation paths for \hoppet{}, \fastjet{}, and
 \lhapdf{}. A user can however manually change this by inspecting the
 script and adding the appropriate {\tt cmake} flags at the
 beginning. The validation script runs in about 500 CPU seconds, or no
-more than a few minutes on a modern laptop.
+more than a few minutes on a modern laptop, utilising the {\tt
+  parallel} program~\cite{tange_2021_5233953}.
 
 
 \section{Benchmarks and results}
@@ -796,7 +842,7 @@ scale variation band at NNLO.
 In this paper we have presented version 1.0.0 of a Fortran code,
 \disorder{}, capable of computing massless DIS cross sections fully
 differentially at NNLO and inclusively at \NNNLO{}. The code combines
-the structure functions from \hoppet{} and the exclusive DIS + 1 jet
+the structure functions from \hoppet{} and the NLO dijet
 calculation of \disent{}, using the P2B method. In the inclusive mode
 the program includes all NC and CC contributions and can carry out
 both scale and PDF variations on the fly. Due to the underlying
@@ -817,7 +863,7 @@ program, is also planned.
 The upgrade of the code to handle \NNNLO{} fully differentially is
 however not currently planned. This is mainly due to the fact that
 this would require a complete replacement of \disent{} with a proper
-exclusive NNLO DIS + 1 jet code, entailing a significant amount of
+NNLO dijet code, entailing a significant amount of
 work. Such a code would also be very slow compared to what is in place
 now, and it would defeat part of the attraction of \disorder{} which
 is its speed. At LO and NLO a user can obtain differential results on
@@ -836,7 +882,7 @@ formally claim full \NNNLO{} accuracy for the structure
 functions. Similarly, were the massive DIS coefficient
 functions~\cite{Gottschalk:1980rv,Laenen:1992zk,Laenen:1992xs,Gluck:1997sj,Blumlein:2011zu,Behring:2015roa,Berger:2016inr,Gao:2017kkx}
 to be implemented in \hoppet{} the structure functions in \disorder{}
-could immediately be modified to accommodate this. 
+could immediately be modified to accommodate this.
 
 The code is intended to be user-friendly and to this effect comes with
 an interface to \fastjet{} and \lhapdf{} and is run through a
