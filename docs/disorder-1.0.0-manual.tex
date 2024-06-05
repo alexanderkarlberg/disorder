@@ -99,9 +99,9 @@ CERN, Theoretical Physics Department, CH-1211 Geneva 23, Switzerland
 % TODO: write your abstract here.
 We present a Fortran 77/95 code capable of computing QCD corrections
 in deep inelastic scattering (DIS). The code uses the
-Projection-to-Born method to obtain $\mathcal{O}(\as^2)$ predictions
-in neutral-current photon-mediated DIS, fully differential in the jet
-and lepton kinematics, both in the Breit and laboratory frames. The
+Projection-to-Born method to augment an existing $\mathcal{O}(\as^2)$
+dijet DIS code, thereby obtaining predictions in photon-mediated
+neutral-current single-jet DIS production in the laboratory frame. The
 code is lightweight and fast, and yet includes the most common
 functionalities found in typical perturbative QCD programs, like
 automatic renormalisation and factorisation scale uncertainties,
@@ -109,8 +109,8 @@ options to run and combine multiple seeds, and interfaces to
 \fastjet{} and \lhapdf{}. Due to the underlying \disent{} and
 \hoppet{} codes, the program also provides stable results in the
 infrared, relevant for extracting logarithmic coefficients for
-analytic resummations, and access to the DIS structure functions and
-(reduced) cross sections up to $\mathcal{O}(\as^3)$.}
+analytic resummations, and access to the massless DIS structure
+functions and (reduced) cross sections up to $\mathcal{O}(\as^3)$.}
 
 
 % TODO: include a table of contents (optional)
@@ -134,7 +134,7 @@ an impressive three
 loops~\cite{SanchezGuillen:1990iq,vanNeerven:1991nn,Zijlstra:1992qd,Zijlstra:1992kj,vanNeerven:1999ca,vanNeerven:2000uj,Moch:1999eb,Moch:2004xu,Vermaseren:2005qc,Vogt:2006bt,Moch:2007rq,Davies:2016ruz,Blumlein:2022gpp}
 with progress on the four loop results presented recently in
 Ref.~\cite{Moch:2022frw}. Together with the three-loop results for the
-splitting functions~\cite{Moch:2004pa,Vogt:2004mw,Blumlein:2021enk}
+DGLAP splitting functions~\cite{Moch:2004pa,Vogt:2004mw,Blumlein:2021enk}
 and the four-loop
 $\beta$-function~\cite{vanRitbergen:1997va,Czakon:2004bu} for the
 running coupling this allows for the determination of the massless
@@ -201,10 +201,10 @@ and are publically available since {\tt v1.3.0} of
 \hoppet{}~\cite{hoppetv130}.\footnote{\hoppet{} implements all known
 approximate and exact ingredients at this order - see footnote
 \ref{n3lo-note}.} The \disorder{} program therefore has two more or
-less separate use cases: 1. The computation of fully exclusive
-$\mathcal{O}(\as^2)$ photon-mediated massless DIS 2. The computation
-of inclusive neutral- (NC) and charged-current (CC) massless DIS at
-\NNNLO{} accuracy.
+less separate use cases: 1. The computation of fully differential
+$\mathcal{O}(\as^2)$ photon-mediated neutral-current (NC) massless DIS
+and 2. The computation of inclusive and charged-current (CC) massless
+DIS at \NNNLO{} accuracy.
 
 DIS is peculiar in-so-far that despite having a final-state parton
 already at the lowest order, the existence of a non-trivial jet, at
@@ -224,7 +224,7 @@ jet present. The P2B method therefore only meaningfully augments the
 is well-defined. Hence, when analysing the output of \disorder{} in
 the Breit-frame it will essentially be identical to that which one
 would obtain by running a stand-alone version of \disent{}, with the
-exception that the inclusive NNLO cross section is computed correctly
+addition that the inclusive NNLO cross section is computed correctly
 at the same time.
 
 The \disorder{} program is designed to be user-friendly with a simple
@@ -245,9 +245,9 @@ analysis, and the laptop, even at NNLO.
 
 It should be pointed out that the code provides little theoretical
 advance on its own. As described above, the structure functions
-themselves have been known for a little while, and the P2B method has
-already been applied to DIS, even one order higher than
-here.\footnote{It has also been applied in polarised DIS in
+themselves have been known for a while, and the P2B method has already
+been applied to DIS, even one order higher than here.\footnote{It has
+also been applied in polarised DIS in
 Refs.~\cite{Borsa:2020ulb,Borsa:2020yxh,Borsa:2021afb,Borsa:2022irn,Borsa:2022cap}.}
 In addition only photon-mediated DIS can be computed fully
 deferentially at the moment. It is however the author's opinion that
@@ -269,7 +269,7 @@ program. Finally we conclude in section~\ref{sec:conclusion}.
 In this section we first give some standard definitions for kinematics
 and cross sections in DIS. Along the way we specify the conventions
 that are used in the \disorder{} code, and provide some details on the
-P2B method as applied here.
+P2B method as applied there.
 
 At leading order (LO) the DIS process is
 the scattering of a massless (anti-)quark $q$ off a massless
@@ -285,13 +285,14 @@ Lorentz invariant DIS variables $x$, $Q^2$, and $y$, given by
 \end{align}
 where $P$ is the hadron four-momentum. As can be seen these kinematics
 are fully specified by the hadron and lepton momenta. This is also
-true beyond LO. DIS is most often analysed in the Breit-frame
-which is specified\footnote{For the explicit transformation between
-lab- and Breit-frames we follow Appendix 7.11 in
-Ref.~\cite{Devenish:2004pb}.}  by requiring that $2 x \vec{P} +
-\vec{q} = 0$. In this frame the mediated vector boson has zero energy
-component and is anti-aligned with the incoming parton. Explicitly in
-\disorder{} the Breit-frame at LO is
+true beyond LO.
+
+DIS is most often analysed in the Breit-frame which is specified by
+requiring that $2 x \vec{P} + \vec{q} = 0$.\footnote{For the explicit
+transformation between lab- and Breit-frames we follow Appendix 7.11
+in Ref.~\cite{Devenish:2004pb}.} In this frame the mediated vector
+boson has zero energy component and is anti-aligned with the incoming
+parton. Explicitly in \disorder{} the Breit-frame at LO is
 \begin{align}
   \label{eq:BreitLO}
 k_i &= \frac{Q}{2}\left(\frac{2-y}{y},\frac{2\sqrt{1-y}}{y},0,-1 \right)\,, \quad  p_i = \frac{Q}{2}\left(1,0,0,+1 \right)\,, \\ \notag
@@ -323,12 +324,12 @@ analysis at the same time.
 
 The inclusive cross section for DIS can be split into a NC
 contribution, from $e^\pm p \to e^\pm + X$ scattering, and a CC
-contribution from $e^\pm p \to \nu + X$\footnote{Here
+contribution from $e^\pm p \to \nu + X$ scattering.\footnote{Here
 $\nu=\{\nu_e,\bar{\nu}_e\}$ for $e^-$ and $e^+$ respectively. One can
 of course also consider incoming neutrinos which does not change the
 discussion here, except adding a factor $2$ in eq.~\eqref{eq:CCsigma}
 and changing the vector and axial-vector couplings to $v_e = \frac12$
-and $a_e=-\frac12$.} scattering. The unpolarised NC cross section can
+and $a_e=-\frac12$.} The unpolarised NC cross section can
 be written as
 \begin{equation}
 \frac{\dd\sigma_{\NC}^\pm}{\dd x \dd Q^2} =   \frac{2\pi\alpha^2}{xQ^4} \left[y_+ F_2^{\NC} \mp y_- x F_3^\NC - y^2 F_L^\NC\right],\,
@@ -341,10 +342,10 @@ functions
   F_{i}^\NC &= F_{i}^\gamma  - v_e \Gamma_{\gamma Z} F_{i}^{\gamma Z} + (v_e^2 + a_e^2)\Gamma_{Z} F_{i}^{Z},\, \quad i =2,L \\ \notag
   F_{3}^\NC &= - a_e \Gamma_{\gamma Z} F_{3}^{\gamma Z} + 2v_e a_e\Gamma_{Z} F_{3}^{Z}\,.
 \end{align}
-Here $v_e = -\frac12 + 2 \sin^2\theta_W$ is the vector and
-$a_e=\frac12$ is the axial-vector coupling, $M_Z$ is the Z boson mass,
-$\Gamma_{\gamma Z} = \frac{Q^2}{\sin^2 2\theta_W(Q^2+M_Z^2)}$, and
-$\Gamma_Z=\Gamma_{\gamma Z}^2$. $\theta_W$ is the weak mixing
+Here $v_e = -\frac12 + 2 \sin^2\theta_W$ and $a_e=\frac12$ are the
+vector and axial-vector couplings respectively, $M_Z$ is the Z boson
+mass, $\Gamma_{\gamma Z} = \frac{Q^2}{\sin^2 2\theta_W(Q^2+M_Z^2)}$,
+and $\Gamma_Z=\Gamma_{\gamma Z}^2$. $\theta_W$ is the weak mixing
 angle. In \disorder{} the electroweak parameters are fixed by
 $\alpha$, $M_W$, and $M_Z$ through the tree-level relations
 \begin{align}
@@ -442,13 +443,13 @@ calculation.
 
 At this point it is worth reminding the reader that \disent{} only
 includes the photon-mediated NC, and hence \disorder{} only provides
-exclusive predictions for this channel. It should in principle be
-possible to extend the code to include Z-mediation (including
-interferences) and CC, but we leave this for future work.
+exclusive predictions for this channel. It should be possible to
+extend the code to include Z-mediation (including interferences) and
+CC, but we leave this for future work.
 
 In principle P2B could be applied to the \disent{} code without any
 major modifications besides the bug fix mentioned in the introduction,
-and which has been implemented here. However a few significant
+which has been implemented here. However a few significant
 modifications were introduced to allow for a more flexible integration
 of \disent{} into \disorder{}. The version of \disent{} that we
 include in \disorder{} is based on the version which can be found in
@@ -508,15 +509,14 @@ the user should first put it in the \masterlink{analysis} directory (here we
 assume it to be called {\tt my\_analysis.f}), and then pass it to
 {\tt cmake} through
 \begin{lstlisting}
-cmake -DANALYSIS=my_analysis.f
+  cmake -DANALYSIS=my_analysis.f
 \end{lstlisting}
 The program has been found to compile on a Linux machine using the
 {\tt gfortran v11.4.0} compiler and also on various MacOS systems.
 
 \subsubsection{The analysis framework}
 The code uses the {\tt POWHEG-BOX} analysis framework, with some minor
-modifications. A few example analyses are included in the {\tt
-  analysis} directory. Any new analysis should be put here and the
+modifications. A few example analyses are included in the \masterlink{analysis} directory. Any new analysis should be put here and the
 name of the analysis should be passed to {\tt cmake} as described
 above. There are two mandatory routines in the analysis file, {\tt
   define\_histograms} and {\tt user\_analysis}. In the first routine
@@ -536,7 +536,7 @@ is the maximum number of scales which is supported (currently 7). {\tt
   x}, {\tt y}, and {\tt Q2} are the DIS variables.
 
 Through the module {\tt mod\_analysis} the analysis has access to two
-array of momenta {\tt pbreit(0:3,1:n)} and {\tt plab(0:3,1:n)} in
+arrays of momenta {\tt pbreit(0:3,1:n)} and {\tt plab(0:3,1:n)} in
 which the Breit and laboratory frame momenta are stored
 respectively. The first entry is the incoming lepton, the second the
 incoming parton, the third the outgoing lepton and the rest outgoing
@@ -575,8 +575,8 @@ command line by running
   ./disorder -help
 \end{lstlisting}
 Here we describe the most common flags, but for a complete list of all
-parameters, and their use, the user should look through the file {\tt
-  src/mod\_parameters.f90}.
+parameters, and their use, the user should look through the file
+\masterlink{src/mod\_parameters.f90}.
 
 The program allows the user to specify limits on $x$, $y$, and $Q$
 through {\tt -xmin}, {\tt -xmax}, {\tt -ymin}, {\tt -ymax}, {\tt
@@ -630,22 +630,23 @@ uncertainties can be included by specifying the flag {\tt
 as its default central scale, but can use any scale as long as it is
 defined in terms of $x$, $y$, and $Q$. A few central scales, $\mu$,
 are currently implemented and can be accessed through the {\tt
-  -scale-choice} flag. The options are {\tt 1} (default): $Q^2$, {\tt
-  2}: $Q^2(1-y)$, {\tt 3}: $\frac{Q^2(1-x)}{x}$. The program will then
-compute a standard 7-point scale variation varying this scale by a
-factor of two up and down keeping $1/2\le \mu_R/\mu_F\le 2$. On the
-screen the envelope of all 7 runs will be printed. The user can in
-principle also carry out arbitrary variations in individual runs by
-specifying {\tt -xmur} and {\tt -xmuf} on the command line. Here {\tt
-  xmur} is the ratio of $\mu_R/\mu$ and similarly for {\tt
-  xmuf}.\footnote{In practice it is faster to use the {\tt
-  -scaleuncert} flag as the program will only recompute what is needed
-for the variations rather than do a full event. However, at \NNNLO{},
-in general, this is not true, due to the fact that the number of
-tables needed in \hoppet{} to carry out on-the-fly scale variations
-increases dramatically at this order, compared to using a fixed ratio
-of $Q$. Given how fast the code is, it is still the author's opinion
-that it is more convenient to use the on-the-fly variations.}
+  -scale-choice} flag. The options are {\tt 0}: $M_Z$, {\tt 1}
+(default): $Q^2$, {\tt 2}: $Q^2(1-y)$, {\tt 3}:
+$\frac{Q^2(1-x)}{x}$. The program will then compute a standard 7-point
+scale variation varying this scale by a factor of two up and down
+keeping $1/2\le \mu_R/\mu_F\le 2$. On the screen the envelope of all 7
+runs will be printed. The user can in principle also carry out
+arbitrary variations in individual runs by specifying {\tt -xmur} and
+{\tt -xmuf} on the command line. Here {\tt xmur} is the ratio of
+$\mu_R/\mu$ and similarly for {\tt xmuf}.\footnote{In practice it is
+faster to use the {\tt -scaleuncert} flag as the program will only
+recompute what is needed for the variations rather than do a full
+event. However, at \NNNLO{}, in general, this is not true, due to the
+fact that the number of tables needed in \hoppet{} to carry out
+on-the-fly scale variations increases dramatically at this order,
+compared to using a fixed ratio of $Q$. Given how fast the code is, it
+is still the author's opinion that it is more convenient to use the
+on-the-fly variations.}
 
 Finally the random seed can be set with the {\tt iseed} flag. When the
 program terminates it will print results to screen but also save a
@@ -698,7 +699,9 @@ We provide a small script to run on multiple cores on a single machine
 in \masterlink{aux/runpar.sh}.
 
 \subsection{Validating the code}
-The code comes with a script to validate that the results come out as expected. It can be run by entering \masterlink{validation} and executing
+The code comes with a script to validate that the results come out as
+expected. It can be run by entering \masterlink{validation} and
+executing
 \begin{lstlisting}
   ./validate_or_generate.sh validate
 \end{lstlisting}
@@ -842,23 +845,26 @@ scale variation band at NNLO.
 In this paper we have presented version 1.0.0 of a Fortran code,
 \disorder{}, capable of computing massless DIS cross sections fully
 differentially at NNLO and inclusively at \NNNLO{}. The code combines
-the structure functions from \hoppet{} and the NLO dijet
-calculation of \disent{}, using the P2B method. In the inclusive mode
-the program includes all NC and CC contributions and can carry out
-both scale and PDF variations on the fly. Due to the underlying
-tabulation of the structure functions in \hoppet{}, the code is
-extremely fast, and a user can obtain cross section results at
-\NNNLO{} in a matter of seconds.
+the NNLO structure functions from \hoppet{} and the NLO dijet
+calculation of \disent{}, using the P2B method, thereby obtaining
+fully differential single-jet DIS predictions in the laboratory
+frame. In the inclusive mode the program includes all NC and CC
+contributions and can carry out both scale and PDF variations on the
+fly. Due to the underlying tabulation of the structure functions in
+\hoppet{}, the code is extremely fast, and a user can obtain cross
+section results at \NNNLO{} in a matter of seconds.
 
 In the fully differential P2B mode, only photon-mediated DIS can be
 computed, and no PDF variations are currently implemented. It should
 in principle be possible to extend \disent{} to full NC and CC, and
 this is something that is planned for a future release of the
-code. Similarly the PDF variations could also be implemented, however
-this would require some serious restructuring of the code for it to be
-efficient. Extension of the code to handle incoming neutrino beams in
-the P2B mode, of relevance to the FASER~\cite{Feng:2017uoz} physics
-program, is also planned.
+code. The extension to CC would in fact be very beneficial, as the
+Breit-frame cannot be reliably determined due to the undetected
+neutrino. Similarly the PDF variations could also be implemented,
+however this would require some serious restructuring of the code for
+it to be efficient. Extension of the code to handle incoming neutrino
+beams in the P2B mode, of relevance to the FASER~\cite{Feng:2017uoz}
+physics program, is also planned.
 
 The upgrade of the code to handle \NNNLO{} fully differentially is
 however not currently planned. This is mainly due to the fact that
