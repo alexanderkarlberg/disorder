@@ -37,7 +37,7 @@ nf =  5
          0, ISEED=     12345      67890
  Outputting results to: p2b_nc_Q_10_x_0.01_disorder_nnlo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  8.78E+00 s.
+==================== TOTAL TIME :  9.28E+00 s.
 
 -----------------------------------------------------------
                Welcome to HOPPET v. 1.3.0-devel            
@@ -78,7 +78,7 @@ WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on  5/06/2024 at 10:50:20
+ # Stamped by ../build/disorder on  5/06/2024 at 11:01:07
  #../build/disorder -nnlo -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)
