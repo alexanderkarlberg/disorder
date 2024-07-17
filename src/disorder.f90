@@ -32,6 +32,11 @@ program disorder
   ! set up all constants and parameters from command line arguments
   call set_parameters()
   ! Need to start hoppet
+  if(vnf) then
+    call hoppetSetPoleMassVFN(mc, mb, mt)
+  else
+    call hoppetSetFFN(nflav)
+  endif
   call hoppetStartExtended(ymax_hoppet,dy,minQval,maxQval,dlnlnQ,nloop,&
        &         order_hoppet,factscheme_MSbar)
   call read_PDF()

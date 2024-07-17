@@ -33,6 +33,7 @@ module mod_parameters
   character * 17, public :: scalestr(maxscales)
   character(len=50), public :: pdfname, outname, prefix
   integer, public :: nmempdf, outdev
+  real(dp), public, save :: mc = 1.51_dp, mb = 4.92_dp, mt = 172.0_dp ! Mass thresholds
   logical, public, save :: pdfuncert, alphasuncert, fillplots, p2b,&
        & noZ, positron, neutrino, Zonly, intonly, scaleuncert,&
        & inclusive, novegas, NC, CC, vnf, help, do_analysis,&
@@ -185,6 +186,9 @@ contains
        call initPDFSetByName(pdfname)
        call getQ2min(0,Q2minPDF)
        call getorderas(orderPDF) ! NB: LHAPDF returns 0 for 1-loop running, 1 for 2-loop etc.
+       call getthreshold(4,mc)
+       call getthreshold(5,mb)
+       call getthreshold(6,mt)
     endif
 
     nmempdf      = int_val_opt ("-nmempdf",0)
