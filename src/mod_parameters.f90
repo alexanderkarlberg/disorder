@@ -419,27 +419,27 @@ contains
     endif
     Qmn = dsqrt(Q2min)
     Qmx = dsqrt(Q2max)
-    write(idev,'(a,F14.7,F14.7)') ' # xmin, xmax:      ', xmin, xmax
-    write(idev,'(a,F14.7,F14.7)') ' # ymin, ymax:      ', ymin, ymax
-    write(idev,'(a,F14.7,F14.7,a)') ' # Qmin, Qmax:      ', Qmn, Qmx, ' GeV'
-    write(idev,'(a,F14.7,a)') ' # Electron energy: ', El, ' GeV'
-    write(idev,'(a,F14.7,a)') ' # Proton energy:   ', Eh, ' GeV'
-    write(idev,'(a,F14.7,a)') ' # COM energy:      ', S,  ' GeV^2'
+    write(idev,'(a,F16.9,F16.9)') ' # xmin, xmax:      ', xmin, xmax
+    write(idev,'(a,F16.9,F16.9)') ' # ymin, ymax:      ', ymin, ymax
+    write(idev,'(a,F16.9,F16.9,a)') ' # Qmin, Qmax:      ', Qmn, Qmx, ' GeV'
+    write(idev,'(a,F16.9,a)') ' # Electron energy: ', El, ' GeV'
+    write(idev,'(a,F16.9,a)') ' # Proton energy:   ', Eh, ' GeV'
+    write(idev,'(a,F16.9,a)') ' # COM energy:      ', S,  ' GeV^2'
     if(toy_Q0 < zero) write(idev,'(a,a)') ' # PDF:             ', trim(adjustl(pdfname))
     if(toy_Q0 > zero) write(idev,*) ' # PDF:             ', 'LHA toy PDF initialised at', toy_Q0, 'GeV'
-    write(idev,'(a,F14.7,a)') ' # MZ:              ', MZ, ' GeV'
-    write(idev,'(a,F14.7,a)') ' # MW:              ', MW, ' GeV'
+    write(idev,'(a,F16.9,a)') ' # MZ:              ', MZ, ' GeV'
+    write(idev,'(a,F16.9,a)') ' # MW:              ', MW, ' GeV'
     if(.not.vnf)   write(idev,'(a,I14)') ' # nf:              ', nflav
     if(vnf)   write(idev,'(a,a)') ' # nf:              ', 'variable'
-    write(idev,'(a,F14.7)') ' # CA:              ', CAlcl
-    write(idev,'(a,F14.7)') ' # CF:              ', CFlcl
-    write(idev,'(a,F14.7)') ' # TR:              ', TRlcl
-    write(idev,'(a,F14.7)') ' # αS(MZ):          ', alphasLocal(MZ)
-    write(idev,'(a,F14.7)') ' # αS(Qmin):        ', alphasLocal(Qmn)
+    write(idev,'(a,F16.9)') ' # CA:              ', CAlcl
+    write(idev,'(a,F16.9)') ' # CF:              ', CFlcl
+    write(idev,'(a,F16.9)') ' # TR:              ', TRlcl
+    write(idev,'(a,F16.9)') ' # αS(MZ):          ', alphasLocal(MZ)
+    write(idev,'(a,F16.9)') ' # αS(Qmin):        ', alphasLocal(Qmn)
     write(idev,'(a,I1,a)')  ' #        with ',order_max,'-loop running'
-    write(idev,'(a,F14.7)') ' # 1/αEM:           ', 1.0_dp/alpha_em
-    write(idev,'(a,E14.7,a)') ' # GF:                  ', GF,  ' GeV^-2'
-    write(idev,'(a,F14.7)') ' # sin(θ_W)^2:      ', sin_thw_sq
+    write(idev,'(a,F16.9)') ' # 1/αEM:           ', 1.0_dp/alpha_em
+    write(idev,'(a,E16.9,a)') ' # GF:                  ', GF,  ' GeV^-2'
+    write(idev,'(a,F16.9)') ' # sin(θ_W)^2:      ', sin_thw_sq
 
     write(idev,*) '# ----------------------------------------------------------'
 

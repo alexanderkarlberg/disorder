@@ -1,29 +1,29 @@
- # Stamped by ../build/disorder on 20/06/2024 at 16:44:27
+ # Stamped by ../build/disorder on 18/07/2024 at 14:13:50
  #../build/disorder -n3lo -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -pdfuncert -alphasuncert -prefix inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
  # Inclusively in radiation
  # Including neutral current
  # With γ only
- # xmin, xmax:           0.0100000     0.0100000
- # ymin, ymax:           0.1108647     0.1108647
- # Qmin, Qmax:          10.0000000    10.0000000 GeV
- # Electron energy:     27.5000000 GeV
- # Proton energy:      820.0000000 GeV
- # COM energy:       90200.0000000 GeV^2
+ # xmin, xmax:           0.010000000     0.010000000
+ # ymin, ymax:           0.110864745     0.110864745
+ # Qmin, Qmax:          10.000000000    10.000000000 GeV
+ # Electron energy:     27.500000000 GeV
+ # Proton energy:      820.000000000 GeV
+ # COM energy:       90200.000000000 GeV^2
  # PDF:             MSHT20an3lo_as118
- # MZ:                  91.1876000 GeV
- # MW:                  80.3980000 GeV
+ # MZ:                  91.187600000 GeV
+ # MW:                  80.398000000 GeV
  # nf:                           5
- # CA:                   3.0000000
- # CF:                   1.3333333
- # TR:                   0.5000000
- # αS(MZ):               0.1180007
- # αS(Qmin):             0.1782324
+ # CA:                   3.000000000
+ # CF:                   1.333333333
+ # TR:                   0.500000000
+ # αS(MZ):               0.118000729
+ # αS(Qmin):             0.178232438
  #        with 4-loop running
- # 1/αEM:              137.0000000
- # GF:                   0.1126702E-04 GeV^-2
- # sin(θ_W)^2:           0.2226459
+ # 1/αEM:              137.000000000
+ # GF:                   0.112670237E-04 GeV^-2
+ # sin(θ_W)^2:           0.222645853
  # ----------------------------------------------------------
 # sigcut index   0
  0.00000000E+00 0.10000000E+01 0.19051147E+04 0.00000000E+00

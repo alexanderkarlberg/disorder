@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 20/06/2024 at 16:39:06
+ # Stamped by ../build/disorder on 18/07/2024 at 14:08:20
  #../build/disorder -n3lo -CC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_cc_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -6,25 +6,25 @@
  # Including charged current
  # Including neutral current
  # With γ only
- # xmin, xmax:           0.0100000     0.0100000
- # ymin, ymax:           0.0000000     1.0000000
- # Qmin, Qmax:           1.0000000    30.0333148 GeV
- # Electron energy:     27.5000000 GeV
- # Proton energy:      820.0000000 GeV
- # COM energy:       90200.0000000 GeV^2
+ # xmin, xmax:           0.010000000     0.010000000
+ # ymin, ymax:           0.000000000     1.000000000
+ # Qmin, Qmax:           1.000000000    30.033314835 GeV
+ # Electron energy:     27.500000000 GeV
+ # Proton energy:      820.000000000 GeV
+ # COM energy:       90200.000000000 GeV^2
   # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
- # MZ:                  91.1876000 GeV
- # MW:                  80.3980000 GeV
+ # MZ:                  91.187600000 GeV
+ # MW:                  80.398000000 GeV
  # nf:                           5
- # CA:                   3.0000000
- # CF:                   1.3333333
- # TR:                   0.5000000
- # αS(MZ):               0.1260020
- # αS(Qmin):             0.5502911
+ # CA:                   3.000000000
+ # CF:                   1.333333333
+ # TR:                   0.500000000
+ # αS(MZ):               0.126001963
+ # αS(Qmin):             0.550291107
  #        with 4-loop running
- # 1/αEM:              137.0000000
- # GF:                   0.1126702E-04 GeV^-2
- # sin(θ_W)^2:           0.2226459
+ # 1/αEM:              137.000000000
+ # GF:                   0.112670237E-04 GeV^-2
+ # sin(θ_W)^2:           0.222645853
  # ----------------------------------------------------------
 # sigcut index   0
  0.00000000E+00 0.10000000E+01 0.45728867E+06 0.44849914E+04
