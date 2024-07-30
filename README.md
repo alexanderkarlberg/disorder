@@ -7,7 +7,7 @@ the `docs` folder.
 
 Although the code is released under GPLv3 or later any scientific use of the code should result in a citation of
 
-Alexander Karlberg, arXiv:2401.16964
+Karlberg, A. (2024). disorder: Deep inelastic scattering at high orders. SciPost Physics Codebases. https://doi.org/10.21468/scipostphyscodeb.32, [arXiv:2401.16964](https://arxiv.org/abs/2401.16964).
 
 More detailed information about the use of the code can be found in the docs folder.
 
@@ -99,7 +99,26 @@ Besides the dependencies listed above `disorder` incorporates code from the foll
 * The POWHEG-BOX (https://powhegbox.mib.infn.it/) under GPLv2. Specifically the analysis framework and the `mergedata` programs are adapted from there.
 * The command line tools (io_utils.f90 and lcl_dec.f90) are written by Gavin Salam and are under GPLv3. 
 * Some of the code is adapted from proVBFH (https://github.com/fdreyer/proVBFH/) under GPLv3.
-* The code relies heavily on disent, written by Mike Seymour. 
+* The code relies heavily on disent, written by Mike Seymour.
+
+Citation policy
+===============
+
+It is difficult to give an exhaustive list of references for all use-cases of `disorder`. The following should therefore be seen as a minimal set:
+
+Any use of the code should always result in a citation of
+
+* Karlberg, A. (2024). disorder: Deep inelastic scattering at high orders. SciPost Physics Codebases. https://doi.org/10.21468/scipostphyscodeb.32, [arXiv:2401.16964](https://arxiv.org/abs/2401.16964).
+
+<span style="font-variant:small-caps;">Hoppet</span> should also always be cited
+
+* G.P. Salam, J. Rojo, A Higher Order Perturbative Parton Evolution Toolkit (HOPPET), [arXiv:0804.3755](https://arxiv.org/abs/0804.3755).
+
+along with references for the DIS coefficient functions at the appropriate order (see Refs. [3]-[15] in the paper).  
+
+Whenever the code is run in the P2B mode the following paper should also be cited
+
+* S. Catani, M.H. Seymour, A General algorithm for calculating jet cross-sections in NLO QCD, [arXiv:hep-ph/9605323](https://arxiv.org/abs/hep-ph/9605323).
 
 Bugs
 ====
