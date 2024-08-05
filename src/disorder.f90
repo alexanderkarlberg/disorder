@@ -124,7 +124,7 @@ contains
   ! fill the streamlined interface PDF table for the structure
   ! functions only.
   subroutine read_PDF()
-    use dummy_pdfs
+    use toy_pdfs
     use streamlined_interface
     real(dp), external :: alphasPDF
     interface
@@ -141,7 +141,14 @@ contains
     
     if (toy_Q0 > zero) then
        write(6,*) "WARNING: Using toy PDF"
-       toy_pdf_at_Q0 = unpolarized_dummy_pdf(xValues(grid))
+       if(pdfname.eq.'toyHERALHC') then
+          toy_pdf_at_Q0 = unpolarized_dummy_pdf(xValues(grid))
+       elseif(pdfname.eq.'toyNF5') then
+          toy_pdf_at_Q0 = unpolarized_toy_nf5_pdf(xValues(grid))
+       else
+          print*, 'Did not recognise toy PDF:', pdfname
+          call exit()
+       end if
        if(vnf) then
           call InitRunningCoupling(coupling, toy_alphas_Q0,&
                & toy_Q0, order_max, -1000000045, masses(4:6)&

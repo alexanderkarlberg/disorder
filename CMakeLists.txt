@@ -56,6 +56,9 @@ execute_process(
   OUTPUT_VARIABLE HOPPET_LIBRARY
   OUTPUT_STRIP_TRAILING_WHITESPACE
   )
+set(HOPPET_LIB_DIR "${HOPPET_INCLUDE_DIR}/lib")
+set(HOPPET_LIBRARY "${HOPPET_LIBRARY} -Wl,-rpath,${HOPPET_LIB_DIR}")
+
 cmake_print_variables(HOPPET_LIBRARY)
 
 list(APPEND disorder_INCLUDES ${HOPPET_INCLUDE_DIR})
@@ -84,6 +87,8 @@ execute_process(
   OUTPUT_VARIABLE LHAPDF_LIBRARY
   OUTPUT_STRIP_TRAILING_WHITESPACE
   )
+set(LHAPDF_LIB_DIR "${LHAPDF_INCLUDE_DIR}/lib")
+set(LHAPDF_LIBRARY "${LHAPDF_LIBRARY} -Wl,-rpath,${LHAPDF_LIB_DIR}")
 cmake_print_variables(LHAPDF_LIBRARY)
 
 list(APPEND disorder_INCLUDES ${LHAPDF_INCLUDE_DIR})
@@ -121,6 +126,7 @@ if (NEEDS_FASTJET)
   
   list(APPEND disorder_INCLUDES ${FASTJET_INCLUDE_DIR})
   list(APPEND disorder_LIBRARIES ${FASTJET_LIBRARY})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
 cmake_print_variables(disorder_INCLUDES)
@@ -134,6 +140,9 @@ target_sources(disorder PUBLIC ${disorder_SOURCES})
 target_include_directories(disorder PUBLIC ${disorder_INCLUDES})
 target_link_libraries(disorder ${disorder_LIBRARIES})
 target_link_libraries(getpdfuncert ${LHAPDF_LIBRARY})
+
+cmake_print_variables(CMAKE_CXX_FLAGS)
+cmake_print_variables(CMAKE_Fortran_FLAGS)
 
 install(TARGETS disorder RUNTIME DESTINATION bin)
 

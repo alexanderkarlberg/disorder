@@ -2,7 +2,7 @@
       implicit none
       include 'pwhg_bookhist-multi.h'
       
-      call inihists
+
       call bookupeqbins('sigtot', 1d0, 0d0,1d0) 
       call bookupeqbins('sig(log(ptj1) > -5)', 1d0, 0d0, 1d0)
       call bookupeqbins('Q2', 5d2, 0d0,1d4)  

@@ -6,7 +6,8 @@ module mod_parameters
   use integration
   use types
   use streamlined_interface, CouplingValue => Value
-  use dummy_pdfs
+  !  use toy_pdfs
+  use structure_functions
   implicit none
 
   private
@@ -172,12 +173,21 @@ contains
     pdfname      = string_val_opt("-pdf", "")
 
     toy_Q0       = dble_val_opt("-toyQ0",-1d0)
+    toy_alphas_Q0= dble_val_opt("-toy-alphas-Q0",0.35d0)
     Q0pdf        = dble_val_opt("-Q0pdf",-1d0)
     xmuR_PDF     = dble_val_opt("-xmuRPDF",1d0)
     if(pdfname.eq.'') then
        if(toy_Q0.lt.0d0) then
           call help_message
-          print*, '-pdf must be specified!'
+          print*, '-pdf or -toyQ0 must be specified!'
+          call exit()
+       endif
+       pdfname = 'toyHERALHC'
+       orderPDF = order_max - 1
+    elseif(pdfname(1:3).eq.'toy') then
+       if(toy_Q0.lt.0d0) then
+          call help_message
+          print*, '-pdf toy must be accompanied by -toyQ0!'
           call exit()
        endif
        orderPDF = order_max - 1
