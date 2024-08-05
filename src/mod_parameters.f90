@@ -184,6 +184,9 @@ contains
        endif
        pdfname = 'toyHERALHC'
        orderPDF = order_max - 1
+       mc = dble_val_opt("-mc",mc)
+       mb = dble_val_opt("-mb",mb)
+       mt = dble_val_opt("-mt",mt)
     elseif(pdfname(1:3).eq.'toy') then
        if(toy_Q0.lt.0d0) then
           call help_message
@@ -191,6 +194,9 @@ contains
           call exit()
        endif
        orderPDF = order_max - 1
+       mc = dble_val_opt("-mc",mc)
+       mb = dble_val_opt("-mb",mb)
+       mt = dble_val_opt("-mt",mt)
     else
        ! Initialise PDF
        call initPDFSetByName(pdfname)
