@@ -351,26 +351,23 @@ contains
    logical, save :: recompute = .true.
    double precision, save ::  p2blab(0:3,2+2), p2bbreit(0:3,2+2), Qlab(0:3)
 
-   if(order_max.le.2.and.NA.ge.2) return ! Disregard O(αS**2) if we are doing NLO
-   if(order_max.le.1.and.NA.ge.1) return ! Disregard O(αS) if we are doing LO
-
-   if(order_min.gt.2.and.NA.lt.2) return ! Disregard O(αS) if we are doing NNLO only
-   if(order_min.gt.1.and.NA.lt.1) return ! Disregard O(αS) if we are doing LO
-
-   ! Taken from p2b. Should work but needs checking.
-   !if(NA.ge.order_max) return
-   !if(NA.lt.order_min-1) return
-   
-   if(p2b.and.n.eq.2) return ! If we do p2b we get the Born and
-   ! virtuals from the structure functions
-   
    if (n.eq.0) then ! Disent is done with one event cycle
       call pwhgaccumup
       recompute = .true. ! Signals that next time we have a new event cycle
-!      stop
       return
    endif
  
+   if(p2b.and.n.eq.2) return ! If we do p2b we get the Born and
+                             ! virtuals from the structure functions
+
+   ! The following lines are invoked if the user specify only the
+   ! nlocoeff or nnlocoeff on the command line
+   if(order_max.le.2.and.NA.ge.2) return ! Disregard O(αS**2) if we are doing NLO
+   if(order_max.le.1.and.NA.ge.1) return ! Disregard O(αS) if we are doing LO
+
+   if(order_min.gt.2.and.NA.lt.2) return ! Disregard O(αS) if we are doing NNLO coeff
+   if(order_min.gt.1.and.NA.lt.1) return ! Disregard O(1) if we are doing NLO coeff
+
    ! It looks like, in a given set of calls (ie born + real + ...) eta
    ! can change, but x,y,Q2 stay the same. Eta however only changes a
    ! few times, so it is worth recomputing eta (which is cheap) and
