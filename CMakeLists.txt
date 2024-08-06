@@ -15,6 +15,8 @@ set(CMAKE_BUILD_TYPE Release)
 set(prefix ${CMAKE_INSTALL_PREFIX})
 #set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(INSTALL_RPATH_USE_LINK_PATH true) # For non-standard installations
+				      # outside user's path
 
 set (disorder_INCLUDES )
 set (disorder_SOURCES )
