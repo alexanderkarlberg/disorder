@@ -354,6 +354,9 @@ contains
    if(order_max.le.2.and.NA.ge.2) return ! Disregard O(αS**2) if we are doing NLO
    if(order_max.le.1.and.NA.ge.1) return ! Disregard O(αS) if we are doing LO
 
+   if(order_min.gt.2.and.NA.lt.2) return ! Disregard O(αS) if we are doing NNLO only
+   if(order_min.gt.1.and.NA.lt.1) return ! Disregard O(αS) if we are doing LO
+
    ! Taken from p2b. Should work but needs checking.
    !if(NA.ge.order_max) return
    !if(NA.lt.order_min-1) return
