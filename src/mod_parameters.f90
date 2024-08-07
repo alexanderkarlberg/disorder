@@ -46,7 +46,7 @@ module mod_parameters
   real(dp), public, save :: toy_Q0, Q0pdf, xmuR_PDF, Q2minPDF ! For HOPPET PDF evolution
   real(dp), public :: dy, dlnlnQ, minQval, maxQval, ymax_hoppet
   integer, public :: nloop, order_hoppet, orderPDF
-  character (len=4), private :: order
+  character (len=8), public :: order
   real(dp), private :: Q, x, y
   real(dp), public :: xlmin, xlmax
   real(dp), public :: pbornlab(0:3,2+2), preallab(0:3,2+3), prreallab(0:3,2+4)
@@ -112,32 +112,46 @@ contains
 
     ! The order at which we are running is read here along with
     ! whether or not we are doing inclsuvie/p2b and NC/CC.
-    order_min    = int_val_opt ('-order-min',1)
-    order_max    = int_val_opt ('-order-max',3)
-    order = 'NNLO'
+    !order_min    = int_val_opt ('-order-min',1)
+    !order_max    = int_val_opt ('-order-max',3)
+    !order = 'nnlo'
     separate_orders = log_val_opt("-separate-orders",.false.)
     ! if "-lo/-nlo/-nnlo/-n3lo" command is given, overwrite order_min and order_max accordingly
     if (log_val_opt("-lo")) then
        order_min = 1
        order_max = 1
-       order = '  lo'
+       order = '      lo'
     elseif (log_val_opt("-nlo")) then
        order_min = 1
        order_max = 2
-       order = ' nlo'
+       order = '     nlo'
     elseif (log_val_opt("-nnlo")) then
        order_min = 1
        order_max = 3
-       order = 'nnlo'
+       order = '    nnlo'
     elseif (log_val_opt("-n3lo")) then
        order_min = 1
        order_max = 4
-       order = 'n3lo'
+       order = '    n3lo'
+    elseif (log_val_opt("-nlocoef")) then
+       order_min = 2
+       order_max = 2
+       order = ' nlocoef'
+    elseif (log_val_opt("-nnlocoef")) then
+       order_min = 3
+       order_max = 3
+       order = 'nnlocoef'
+    elseif (log_val_opt("-n3locoef")) then
+       order_min = 4
+       order_max = 4
+       order = 'n3locoef'
     else
-       if(order_max.eq.1) order = '  lo'
-       if(order_max.eq.2) order = ' nlo'
-       if(order_max.eq.3) order = 'nnlo'
-       if(order_max.eq.4) order = 'n3lo'
+       order_min    = int_val_opt ('-order-min',1)
+       order_max    = int_val_opt ('-order-max',3)
+       if(order_max.eq.1) order = '      lo'
+       if(order_max.eq.2) order = '     nlo'
+       if(order_max.eq.3) order = '    nnlo'
+       if(order_max.eq.4) order = '    n3lo'
     endif
     if(order_min.ne.1) separate_orders = .true. ! In this case we always need to separate the orders
     NC = log_val_opt("-NC",.true.)
@@ -378,7 +392,7 @@ contains
     if(orderPDF+1.ne.order_max) then
        write(*,*) '# ----------------------------------------------------------'
        write(*,*) '# WARNING!: The order of the PDF, ', trim(adjustl(pdfname)), ', is'
-       write(*,*) '# not the same as the perturbative order, ',trim(order), ', being computed,'
+       write(*,*) '# not the same as the perturbative order, ',trim(adjustl(order)), ', being computed,'
        write(*,*) '# which is the order at which disorder initialises a running'
        write(*,*) '# coupling. Make sure results are consistent!'
        write(*,*) '# ----------------------------------------------------------'
@@ -410,7 +424,7 @@ contains
     call time_stamp(idev)
     write(idev,*) '#'//trim(command_line())
     write(idev,*) '# ----------------------------------------------------------'
-    write(idev,'(a,a)',advance='no') ' # Doing DIS @ ', trim(order)
+    write(idev,'(a,a)',advance='no') ' # Doing DIS @ ', trim(adjustl(order))
     if(neutrino) then
        if(.not.positron) write(idev,*) ' (νe + p)'
        if(positron) write(idev,*) ' (νebar + p)'

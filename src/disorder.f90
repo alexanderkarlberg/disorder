@@ -98,16 +98,8 @@ program disorder
   endif ! inclusive
 
   analysis_name='xsct'
-  if (order_max.eq.1) then
-     analysis_name=trim(prefix)//"xsct_lo_seed"//seedstr//".dat"
-  else if (order_max.eq.2) then
-     analysis_name=trim(prefix)//"xsct_nlo_seed"//seedstr//".dat"
-  else if (order_max.eq.3) then
-     analysis_name=trim(prefix)//"xsct_nnlo_seed"//seedstr//".dat"
-  else if (order_max.eq.4) then
-     analysis_name=trim(prefix)//"xsct_n3lo_seed"//seedstr//".dat"
-  endif
-
+  analysis_name=trim(prefix)//"xsct_"//trim(adjustl(order))//"_seed"//seedstr//".dat"
+  
   call print_results(0, '')
   call print_results(11, analysis_name)
 
@@ -526,16 +518,8 @@ contains
    ! construct name of output file
    write(pdf_string,"(I3.3)") imempdf
    scale_string = "_pdfmem"//trim(pdf_string)
-   if (order_max.eq.1) then
-      histo_name="disorder_lo_seed"//seedstr//scale_string//".dat"
-   else if (order_max.eq.2) then
-      histo_name="disorder_nlo_seed"//seedstr//scale_string//".dat"
-   else if (order_max.eq.3) then
-      histo_name="disorder_nnlo_seed"//seedstr//scale_string//".dat"
-   else if (order_max.eq.4) then
-      histo_name="disorder_n3lo_seed"//seedstr//scale_string//".dat"
-   endif
-
+   histo_name="disorder_"//trim(adjustl(order))//"_seed"//seedstr//scale_string//".dat"
+   
    call pwhgtopout(histo_name)
    call resethists
 
