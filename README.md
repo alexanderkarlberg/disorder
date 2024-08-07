@@ -127,7 +127,7 @@ There are no known bugs at the moment.
 
 In the past there have been bugs, discovered by myself and others. I would in particular like to thank
 
-Melissa van Beekveld
-Silvia Ferrario Ravasio
+* Melissa van Beekveld
+* Silvia Ferrario Ravasio
 
 for reporting a number of them!
