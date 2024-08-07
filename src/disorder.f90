@@ -459,12 +459,14 @@ contains
          call evolvePDF(eta,scale*Qval,pdfs(1,:))
       endif
       
+
       if(order_max.eq.3.and.NA.eq.1) then ! Doing NLO in DISENT and this is the LO term. Include scale compensation.
          totwgt = dot_product(weight,pdfs(1,:))*(as2pi(1) + two * as2pi(1)**2 * b0 * log(xmur*scale/xmuf))
       else
          totwgt = dot_product(weight,pdfs(1,:))*as2pi(1)**na
       endif
-      dsig(1) = totwgt * ncall2
+      ! We correct alpha_em which is hardcoded to 1/137 in DISENT.
+      dsig(1) = totwgt * ncall2 * (137.0d0 * alpha_em)**2
    endif
 
    if(xmin.eq.xmax) dsig = dsig / x ! Because of convention in DISENT where it currently returns x dσ/dx when x is fixed.
