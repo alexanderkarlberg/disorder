@@ -2,8 +2,8 @@
       implicit none
       include 'pwhg_bookhist-multi.h'
       
-      call bookupeqbins('lntauzQ',0.5d0,-20d0,0d0)
-      call bookupeqbins('lnBzQ',0.5d0,-20d0,0d0)
+      call bookupeqbins('lntauzQ',0.25d0,-30d0,0d0)
+      call bookupeqbins('lnBzQ',0.25d0,-20d0,0d0)
 
       end subroutine
       

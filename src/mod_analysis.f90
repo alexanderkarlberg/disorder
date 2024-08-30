@@ -20,9 +20,10 @@ contains
   
   subroutine analysis(n,dsigma,x,y,Qsq)
     implicit none
-    integer n
-    double precision dsigma(maxscales), x, y, Qsq
-
+    integer, intent(in) :: n
+    double precision, intent(in) :: dsigma(maxscales), x, y, Qsq
+    integer i
+    
     if(all(dsigma.eq.0d0)) return
     
     ! Now fill the momenta
@@ -39,6 +40,21 @@ contains
        stop 'Wrong n in analysis'
     endif
     
+    if(any(dsigma.ne.dsigma)) then
+       print*, 'Encountered NaN:', dsigma
+       print*, 'n, x, y, Qsq',n,x,y,Qsq
+       print*, 'Breit frame momenta'
+       print*, 'incoming lepton: ', pbreit(:,1)
+       print*, 'incoming parton: ', pbreit(:,2)
+       print*, 'outcoming lepton:', pbreit(:,3)
+       print*, 'outcoming parton:', pbreit(:,4)
+       do i=5,n
+          print*, 'emitted parton:  ', pbreit(:,i)
+       enddo
+       return ! Protection against NaN which can happen when running
+              ! with a very small cut off in disent
+    endif
+
     call user_analysis(n,dsigma,x,y,Qsq)
   end subroutine analysis
   
