@@ -448,7 +448,12 @@ contains
       
       if(eta.ne.etasave) then
          etasave = eta
-         call evolvePDF(eta,scale*Qval,pdfs(1,:))
+         if(toy_Q0 < zero) then
+               call evolvePDF(eta,scale*Qval,pdfs(1,:))
+            else
+               call hoppetEval(eta,scale*Qval,pdfs(1,:))
+            endif
+!            call evolvePDF(eta,scale*Qval,pdfs(1,:))
       endif
       
 
