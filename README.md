@@ -7,7 +7,7 @@ the `docs` folder.
 
 Although the code is released under GPLv3 or later any scientific use of the code should result in a citation of
 
-Karlberg, A. (2024). disorder: Deep inelastic scattering at high orders. [SciPost Phys. Codebases 32 (2024)](https://doi.org/10.21468/scipostphyscodeb.32), [arXiv:2401.16964](https://arxiv.org/abs/2401.16964).
+Karlberg, A., disorder: Deep inelastic scattering at high orders. [SciPost Phys. Codebases 32 (2024)](https://doi.org/10.21468/scipostphyscodeb.32), [arXiv:2401.16964](https://arxiv.org/abs/2401.16964).
 
 More detailed information about the use of the code can be found in the docs folder.
 
