@@ -7,7 +7,7 @@ the `docs` folder.
 
 Although the code is released under GPLv3 or later any scientific use of the code should result in a citation of
 
-Karlberg, A. (2024). disorder: Deep inelastic scattering at high orders. SciPost Physics Codebases. https://doi.org/10.21468/scipostphyscodeb.32, [arXiv:2401.16964](https://arxiv.org/abs/2401.16964).
+Karlberg, A., disorder: Deep inelastic scattering at high orders. [SciPost Phys. Codebases 32 (2024)](https://doi.org/10.21468/scipostphyscodeb.32), [arXiv:2401.16964](https://arxiv.org/abs/2401.16964).
 
 More detailed information about the use of the code can be found in the docs folder.
 
@@ -16,11 +16,10 @@ Installation
 
 To compile `disorder`, you will need
 
-* <span style="font-variant:small-caps;">Hoppet</span>, v1.3.0 or newer (https://github.com/hoppet-code/hoppet) [currently also needs the 2024-01-n3lo-splittings-functions branch]
-* LHAPDF6 (http://lhapdf.hepforge.org/) [tested with v6.5.4]
+* [<span style="font-variant:small-caps;">Hoppet</span>](https://github.com/hoppet-code/hoppet), v1.3.0 or newer [currently also needs the [2024-01-n3lo-splittings-functions](https://github.com/hoppet-code/hoppet/tree/2024-01-n3lo-splittings-functions) branch]
+* [LHAPDF6](http://lhapdf.hepforge.org/) [tested with v6.5.4]
 
-Optionally you may need fastjet installed as well
-(https://fastjet.fr/).
+Optionally you may need [fastjet](https://fastjet.fr/) installed as well.
 
 Once all dependencies are installed on your machine, disorder can be
 compiled using `cmake`:
@@ -96,10 +95,10 @@ Third party code
 
 Besides the dependencies listed above `disorder` incorporates code from the following sources:
 
-* The POWHEG-BOX (https://powhegbox.mib.infn.it/) under GPLv2. Specifically the analysis framework and the `mergedata` programs are adapted from there.
+* The [POWHEG-BOX](https://powhegbox.mib.infn.it/) under GPLv2. Specifically the analysis framework and the `mergedata` programs are adapted from there.
 * The command line tools (io_utils.f90 and lcl_dec.f90) are written by Gavin Salam and are under GPLv3. 
-* Some of the code is adapted from proVBFH (https://github.com/fdreyer/proVBFH/) under GPLv3.
-* The code relies heavily on disent, written by Mike Seymour.
+* Some of the code is adapted from [proVBFH](https://github.com/fdreyer/proVBFH/) under GPLv3.
+* The code relies heavily on disent, written by Mike Seymour. The version included here is based on the one included with v1.0.5 of [dispatch](https://github.com/gavinsalam/dispatch), but has received significant additional modifications.
 
 Citation policy
 ===============
