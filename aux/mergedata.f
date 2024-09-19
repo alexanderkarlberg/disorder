@@ -166,7 +166,7 @@ c load data
       if((imethod.eq.8).or.(imethod.eq.9)) then
          write(*,*) 'Input scale to multiply/divide by:'
          read(*,*) scale
-         write(*,*), 'Scale is:', scale
+         write(*,*) 'Scale is:', scale
       endif
       if(imethod.eq.12) then
          write(*,*) 'Input tolerance for outliers 
@@ -377,7 +377,8 @@ c     err=sqrt(err/(last_index-first_index))
             return
          endif
 
-      do k=1,nlines(1)
+!      do k=1,nlines(1)
+      do k=2,nlines(1)
          N_NaN=0
          read(unit=line(k,1),fmt=*,iostat=ios) v1,v2,v3,v4
          read(unit=line(k-1,1),fmt=*,iostat=ios2) vp1,vp2,vp3,vp4
