@@ -143,15 +143,15 @@ contains
        end if
        if(vnf) then
           call InitRunningCoupling(coupling, toy_alphas_Q0,&
-               & toy_Q0, order_max, -1000000045, masses(4:6)&
+               & toy_Q0, nloop, -1000000045, masses(4:6)&
                &, .true.)
        else
           call InitRunningCoupling(coupling, toy_alphas_Q0,&
-               & toy_Q0, order_max, nflav, masses(4:6)&
+               & toy_Q0, nloop, nflav, masses(4:6)&
                &, .true.)
        endif
        call EvolvePdfTable(tables(0), toy_Q0, toy_pdf_at_Q0, dh,&
-            & coupling, nloop=order_max)
+            & coupling, nloop=nloop)
        setup_done(0)  = .true. ! This signals to HOPPET that we have set up the PDFs (since we don't use the streamlined interface)
     elseif (Q0pdf > zero) then
        write(6,*) "WARNING: Using internal HOPPET DGLAP evolution"
