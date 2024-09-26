@@ -466,7 +466,7 @@ contains
     write(idev,'(a,F16.9)') ' # TR:              ', TRlcl
     write(idev,'(a,F16.9)') ' # αS(MZ):          ', alphasLocal(MZ)
     write(idev,'(a,F16.9)') ' # αS(Qmin):        ', alphasLocal(Qmn)
-    write(idev,'(a,I1,a)')  ' #        with ',order_max,'-loop running'
+    write(idev,'(a,I1,a)')  ' #        with ',nloop,'-loop running'
     write(idev,'(a,F16.9)') ' # 1/αEM:           ', 1.0_dp/alpha_em
     write(idev,'(a,E16.9,a)') ' # GF:                  ', GF,  ' GeV^-2'
     write(idev,'(a,F16.9)') ' # sin(θ_W)^2:      ', sin_thw_sq
