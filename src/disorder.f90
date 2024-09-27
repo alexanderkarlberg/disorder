@@ -404,11 +404,11 @@ contains
       if(eta.ne.etasave) then
          etasave = eta
          do isc = 1,3
-            if(toy_Q0 < zero) then
-               call evolvePDF(eta,scales_muf(isc)*scale*Qval,pdfs(isc,:))
-            else
+            !if(toy_Q0 < zero) then
+            !   call evolvePDF(eta,scales_muf(isc)*scale*Qval,pdfs(isc,:))
+            !else
                call hoppetEval(eta,scales_muf(isc)*scale*Qval,pdfs(isc,:))
-            endif
+            !endif
          enddo
          ! Then copy the PDFs into the full array
          !real(dp), parameter, public :: scales_muf(1:maxscales) = &
@@ -448,12 +448,12 @@ contains
       
       if(eta.ne.etasave) then
          etasave = eta
-         if(toy_Q0 < zero) then
-               call evolvePDF(eta,scale*Qval,pdfs(1,:))
-            else
-               call hoppetEval(eta,scale*Qval,pdfs(1,:))
-            endif
-!            call evolvePDF(eta,scale*Qval,pdfs(1,:))
+         !if(toy_Q0 < zero) then
+         !   call evolvePDF(eta,scale*Qval,pdfs(1,:))
+         !else
+            call hoppetEval(eta,scale*Qval,pdfs(1,:))
+         !endif
+         !            call evolvePDF(eta,scale*Qval,pdfs(1,:))
       endif
       
 

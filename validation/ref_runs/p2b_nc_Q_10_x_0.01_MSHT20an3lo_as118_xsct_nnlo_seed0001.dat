@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 18/07/2024 at 14:08:26
+ # Stamped by ../build/disorder on 27/09/2024 at 13:31:35
  #../build/disorder -nnlo -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)
