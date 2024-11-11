@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 27/09/2024 at 13:31:34
+ # Stamped by ../build/disorder on 11/11/2024 at 09:58:04
  #../build/disorder -nnlo -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)
