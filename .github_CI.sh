@@ -28,7 +28,7 @@ cd ..
 wget https://lhapdf.hepforge.org/downloads/LHAPDF-6.5.4.tar.gz
 tar -xzvf LHAPDF-6.5.4.tar.gz
 cd LHAPDF-6.5.4
-./configure
+./configure --disable-python
 make -j
 sudo make install
 wget http://lhapdfsets.web.cern.ch/lhapdfsets/current/MSHT20an3lo_as118.tar.gz
