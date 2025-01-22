@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 11/11/2024 at 09:58:02
+ # Stamped by ../build/disorder on 21/01/2025 at 16:35:12
  #../build/disorder -n3lo -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino -positron -prefix inclusive_nc_Q_10_x_0.01_neutrino_positron_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (νebar + p)
@@ -21,6 +21,7 @@
  # αS(MZ):               0.126001963
  # αS(Qmin):             0.197758439
  #        with 4-loop running
+ # With Q as central scale
  # 1/αEM:              137.000000000
  # GF:                   0.112670237E-04 GeV^-2
  # sin(θ_W)^2:           0.222645853

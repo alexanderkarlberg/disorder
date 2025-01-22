@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 11/11/2024 at 09:58:01
+ # Stamped by ../build/disorder on 21/01/2025 at 16:35:16
  #../build/disorder -n3lo -CC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_cc_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -22,6 +22,7 @@
  # αS(MZ):               0.126001963
  # αS(Qmin):             0.550291107
  #        with 4-loop running
+ # With Q as central scale
  # 1/αEM:              137.000000000
  # GF:                   0.112670237E-04 GeV^-2
  # sin(θ_W)^2:           0.222645853

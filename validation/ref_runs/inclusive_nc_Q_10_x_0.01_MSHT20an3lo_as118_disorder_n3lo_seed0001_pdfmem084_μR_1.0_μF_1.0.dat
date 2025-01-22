@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 11/11/2024 at 10:03:32
+ # Stamped by ../build/disorder on 21/01/2025 at 16:42:27
  #../build/disorder -n3lo -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -pdfuncert -alphasuncert -prefix inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -21,6 +21,7 @@
  # αS(MZ):               0.118000729
  # αS(Qmin):             0.178232438
  #        with 4-loop running
+ # With Q as central scale
  # 1/αEM:              137.000000000
  # GF:                   0.112670237E-04 GeV^-2
  # sin(θ_W)^2:           0.222645853
