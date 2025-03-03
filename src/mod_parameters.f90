@@ -384,6 +384,8 @@ contains
     maxQval = max(xmuF*sqrts, sqrts)
     if(scale_choice.eq.4) maxQval = max(xmuF*sqrt(s), sqrt(s))
     scale_choice_hoppet = min(2,scale_choice)
+    ! To turn off slow n3lo mass thresholds in hoppet for the validations
+    call hoppetSetN3LOnfthresholds(int_val_opt('-vfns3-option',0)) 
 
     if (.not.CheckAllArgsUsed(0)) then
        call help_message
