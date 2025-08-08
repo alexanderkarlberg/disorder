@@ -25,9 +25,9 @@ sudo make install
 cd ..
 
 # And LHAPDF
-wget https://lhapdf.hepforge.org/downloads/LHAPDF-6.5.4.tar.gz
-tar -xzvf LHAPDF-6.5.4.tar.gz
-cd LHAPDF-6.5.4
+wget https://lhapdf.hepforge.org/downloads/LHAPDF-6.5.5.tar.gz
+tar -xzvf LHAPDF-6.5.5.tar.gz
+cd LHAPDF-6.5.5
 ./configure --disable-python
 make -j
 sudo make install
