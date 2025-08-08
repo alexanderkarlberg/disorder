@@ -16,7 +16,7 @@ Installation
 
 To compile `disorder`, you will need
 
-* [<span style="font-variant:small-caps;">Hoppet</span>](https://github.com/hoppet-code/hoppet), v1.3.0 or newer [currently also needs the [2024-01-n3lo-splittings-functions](https://github.com/hoppet-code/hoppet/tree/2024-01-n3lo-splittings-functions) branch]
+* [<span style="font-variant:small-caps;">Hoppet</span>](https://github.com/hoppet-code/hoppet), v2.0.0 
 * [LHAPDF6](http://lhapdf.hepforge.org/) [tested with v6.5.4]
 
 Optionally you may need [fastjet](https://fastjet.fr/) installed as well.
