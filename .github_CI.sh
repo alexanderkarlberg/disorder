@@ -5,7 +5,6 @@
 sudo apt install parallel
 
 # Clone Hoppet
-#git clone --branch 2024-01-n3lo-splittings-functions https://github.com/hoppet-code/hoppet.git
 git clone https://github.com/hoppet-code/hoppet.git
 cd hoppet
 # Compile, check and install Hoppet
