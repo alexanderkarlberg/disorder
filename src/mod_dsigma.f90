@@ -1,5 +1,5 @@
 module mod_dsigma
-  use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   use mod_parameters
   use mod_analysis
   use types

@@ -1,5 +1,5 @@
 program disorder
-  use hoppet_v1, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  use hoppet, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   use sub_defs_io
   !use dummy_pdfs
   use mod_matrix_element

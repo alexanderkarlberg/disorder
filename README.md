@@ -16,7 +16,7 @@ Installation
 
 To compile `disorder`, you will need
 
-* [<span style="font-variant:small-caps;">Hoppet</span>](https://github.com/hoppet-code/hoppet), v2.0.0 
+* [<span style="font-variant:small-caps;">Hoppet</span>](https://github.com/hoppet-code/hoppet), v2.0.0 (the code will not compile with older versions). 
 * [LHAPDF6](http://lhapdf.hepforge.org/) [tested with v6.5.4]
 
 Optionally you may need [fastjet](https://fastjet.fr/) installed as well.

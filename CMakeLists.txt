@@ -63,6 +63,37 @@ set(HOPPET_LIBRARY "${HOPPET_LIBRARY} -Wl,-rpath,${HOPPET_LIB_DIR}")
 
 cmake_print_variables(HOPPET_LIBRARY)
 
+# Execute the command to get version
+execute_process(
+    COMMAND hoppet-config --version
+    OUTPUT_VARIABLE HOPPET_VERSION_RAW
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE HOPPET_CONFIG_RESULT
+)
+
+# Check if the command succeeded
+if(NOT HOPPET_CONFIG_RESULT EQUAL 0)
+    message(FATAL_ERROR "Failed to run hoppet-config --version")
+endif()
+
+# Extract just the version number (remove any suffix like "-devel")
+string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" HOPPET_VERSION_MATCH "${HOPPET_VERSION_RAW}")
+set(HOPPET_VERSION "${CMAKE_MATCH_0}")
+
+# Set individual version components
+set(HOPPET_VERSION_MAJOR "${CMAKE_MATCH_1}")
+set(HOPPET_VERSION_MINOR "${CMAKE_MATCH_2}")
+set(HOPPET_VERSION_PATCH "${CMAKE_MATCH_3}")
+
+message(STATUS "Found HOPPET version: ${HOPPET_VERSION}")
+
+# Check if version is at least 2.0.0
+if(HOPPET_VERSION VERSION_LESS "2.0.0")
+    message(FATAL_ERROR "HOPPET version ${HOPPET_VERSION} is too old. Required: 2.0.0 or newer. Please clone most recent version of hoppet git repository.")
+endif()
+
+message(STATUS "HOPPET version ${HOPPET_VERSION} meets requirements")
+
 list(APPEND disorder_INCLUDES ${HOPPET_INCLUDE_DIR})
 list(APPEND disorder_LIBRARIES ${HOPPET_LIBRARY})
 

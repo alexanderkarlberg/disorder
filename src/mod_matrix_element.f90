@@ -2,7 +2,7 @@
 ! x and Q (and y) as given in eq. 4.5 in the pink book (Ellis,
 ! Stirling, Webber). Equations also taken from PDG Review Chapter 18.
 module mod_matrix_element
-  use hoppet_v1!, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
+  use hoppet!, EvolvePDF_hoppet => EvolvePDF, InitPDF_hoppet => InitPDF
   use streamlined_interface
   use mod_parameters
   implicit none
