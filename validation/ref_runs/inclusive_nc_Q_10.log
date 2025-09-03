@@ -56,11 +56,11 @@ nf =  5
  all iterations: integral =  86.72546    +/-  0.29E-01 chi**2/it'n =  0.0    
  Outputting results to: inclusive_nc_Q_10_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  3.27E+01 s.
+==================== TOTAL TIME :  3.81E+01 s.
 
 -----------------------------------------------------------
-               Welcome to HOPPET v. 2.0.0-devel            
-   Higher Order Perturbative Parton Evolution Toolkit      
+              Welcome to HOPPET v. 2.0.0-devel             
+    Higher Order Perturbative Parton Evolution Toolkit     
 
                    Written (2001-2025) by                  
      Frederic Dreyer, Alexander Karlberg, Paolo Nason,     
@@ -75,7 +75,7 @@ nf =  5
  & F. Dreyer (arXiv:2509.XXXXX).                           
  
  You are also encouraged to cite the original references,  
- for LO, NLO and NNLO splitting functions, the QCD         
+ for LO, NLO, NNLO, and N3LO splitting functions, the QCD  
  1, 2, 3, and 4 loop beta functions and the PDF and        
  coupling mass threshold matching functions. Additionally  
  the DIS coefficient functions should be cited when used.  
@@ -102,7 +102,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on  8/08/2025 at 14:48:50
+ # Stamped by ../build/disorder on  3/09/2025 at 10:36:01
  #../build/disorder -n3lo -NC -toyQ0 2.0 -Q 10.0 -scaleuncert -prefix inclusive_nc_Q_10_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)

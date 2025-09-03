@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on  8/08/2025 at 14:49:29
+ # Stamped by ../build/disorder on  3/09/2025 at 10:36:53
  #../build/disorder -n3lo -NC -includeZ -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_nc_includeZ_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
