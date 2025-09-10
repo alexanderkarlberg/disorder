@@ -170,13 +170,14 @@ contains
             &  muR_Q=xmuR_PDF, nloop=order_max)
        setup_done(0)  = .true. ! This signals to HOPPET that we have set up the PDFs (since we don't use the streamlined interface)
     else
-       if(vnf) then
-          call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-               & -1000000045, masses(4:6), .true.)
-       else
-          call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
-               & nflav, masses(4:6), .true.)
-       end if
+!       if(vnf) then
+!          call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
+!               & -1000000045, masses(4:6), .true.)
+!       else
+!          call InitRunningCoupling(coupling, alphasPDF(MZ) , MZ , order_max,&
+!               & nflav, masses(4:6), .true.)
+       !       end if
+       call hoppetSetCoupling(alphasPDF(MZ), MZ, order_max)
        call hoppetAssign(EvolvePDF)
     endif
 
