@@ -644,7 +644,7 @@ nf =  5
 Thanks for using LHAPDF 6.5.5. Please make sure to cite the paper:
   Eur.Phys.J. C75 (2015) 3, 132  (http://arxiv.org/abs/1412.7420)
 
-==================== TOTAL TIME :  4.59E+02 s.
+==================== TOTAL TIME :  4.43E+02 s.
 
 -----------------------------------------------------------
               Welcome to HOPPET v. 2.0.0-devel             
@@ -690,8 +690,8 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 10/09/2025 at 10:56:19
- #../build/disorder -n3lo -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -pdfuncert -alphasuncert -prefix inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_
+ # Stamped by ../build/disorder on 10/09/2025 at 11:39:01
+ #../build/disorder -n3lo -yorder -1 -lnlnQorder 4 -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -pdfuncert -alphasuncert -prefix inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
  # Inclusively in radiation
@@ -731,10 +731,10 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC)                          =     1905.155827 pb/GeV^2
+ # σ(NC)                          =     1905.156901 pb/GeV^2
  # MC integration uncertainty     =        0.0000 %
- # QCD scale uncertainty (+)      =        0.7052 %
- # QCD scale uncertainty (-)      =       -0.4881 %
+ # QCD scale uncertainty (+)      =        0.7054 %
+ # QCD scale uncertainty (-)      =       -0.4857 %
  # PDF symmetric uncertainty*     =        0.9723 %
  # Pure PDF symmetric uncertainty =        0.9723 %
  # Pure αS symmetric uncertainty  =        0.0008 %
@@ -743,6 +743,6 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  
  # Reduced N3LO cross-sections
  # σ reduced (NC)                 =        0.816262
- # QCD scale uncertainty (+)      =        0.7052 %
- # QCD scale uncertainty (-)      =       -0.4881 %
+ # QCD scale uncertainty (+)      =        0.7054 %
+ # QCD scale uncertainty (-)      =       -0.4857 %
  ============================================================

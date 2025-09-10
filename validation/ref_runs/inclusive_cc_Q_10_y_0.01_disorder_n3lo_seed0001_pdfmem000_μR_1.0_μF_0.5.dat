@@ -1,5 +1,5 @@
- # Stamped by ../build/disorder on 10/09/2025 at 10:56:45
- #../build/disorder -n3lo -CC -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert -prefix inclusive_cc_Q_10_y_0.01_
+ # Stamped by ../build/disorder on 10/09/2025 at 11:39:30
+ #../build/disorder -n3lo -yorder -1 -lnlnQorder 4 -CC -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert -prefix inclusive_cc_Q_10_y_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
  # Inclusively in radiation

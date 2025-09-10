@@ -376,8 +376,8 @@ contains
     ! Streamlined initialization
     ! including  parameters for x-grid
     order_hoppet = -6
-    yorder = 2
-    lnlnQorder = 2
+    yorder = int_val_opt("-yorder", 2)
+    lnlnQorder = int_val_opt("-lnlnQorder", 2)
     ! To get faster interpolation in hoppet
     call hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder)
     ymax_hoppet  = 16.0_dp

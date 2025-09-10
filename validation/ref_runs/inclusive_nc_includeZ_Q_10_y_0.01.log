@@ -4,7 +4,7 @@ nf =  5
  WARNING: Using toy PDF
  Outputting results to: inclusive_nc_includeZ_Q_10_y_0.01_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  7.21E+00 s.
+==================== TOTAL TIME :  7.16E+00 s.
 
 -----------------------------------------------------------
               Welcome to HOPPET v. 2.0.0-devel             
@@ -50,8 +50,8 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 10/09/2025 at 10:56:39
- #../build/disorder -n3lo -NC -includeZ -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert -prefix inclusive_nc_includeZ_Q_10_y_0.01_
+ # Stamped by ../build/disorder on 10/09/2025 at 11:39:16
+ #../build/disorder -n3lo -yorder -1 -lnlnQorder 4 -NC -includeZ -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert -prefix inclusive_nc_includeZ_Q_10_y_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
  # Inclusively in radiation
@@ -84,13 +84,13 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC)                          =       94.928053 pb/GeV^2
+ # σ(NC)                          =       94.928030 pb/GeV^2
  # MC integration uncertainty     =        0.0000 %
  # QCD scale uncertainty (+)      =        0.1500 %
  # QCD scale uncertainty (-)      =       -0.0429 %
  
  # Reduced N3LO cross-sections
- # σ reduced (NC)                 =        0.407746
+ # σ reduced (NC)                 =        0.407745
  # QCD scale uncertainty (+)      =        0.1500 %
  # QCD scale uncertainty (-)      =       -0.0429 %
  ============================================================

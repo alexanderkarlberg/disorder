@@ -15,14 +15,14 @@ nf =  5
                               xl( 6)=   0.000     xu( 6)=   1.000    
                               xl( 7)=   0.000     xu( 7)=   1.000    
 
- iteration no.  1: integral =  4924663.    +/-  0.33E+05
- all iterations: integral =  4924663.    +/-  0.33E+05 chi**2/it'n = 0.36E-09
+ iteration no.  1: integral =  4924659.    +/-  0.33E+05
+ all iterations: integral =  4924659.    +/-  0.33E+05 chi**2/it'n = 0.36E-09
 
- iteration no.  2: integral =  4910955.    +/-  0.20E+05
- all iterations: integral =  4914737.    +/-  0.17E+05 chi**2/it'n = 0.13    
+ iteration no.  2: integral =  4910951.    +/-  0.20E+05
+ all iterations: integral =  4914733.    +/-  0.17E+05 chi**2/it'n = 0.13    
 
- iteration no.  3: integral =  4918643.    +/-  0.17E+05
- all iterations: integral =  4916735.    +/-  0.12E+05 chi**2/it'n = 0.77E-01
+ iteration no.  3: integral =  4918639.    +/-  0.17E+05
+ all iterations: integral =  4916731.    +/-  0.12E+05 chi**2/it'n = 0.77E-01
  ****************************************************
  * Writing out vegas grid to inclusive_cc_Qmin_1_x_0.01_grids-n3lo-0001.dat                            *
  ****************************************************
@@ -52,11 +52,11 @@ nf =  5
                               xl( 6)=   0.000     xu( 6)=   1.000    
                               xl( 7)=   0.000     xu( 7)=   1.000    
 
- iteration no.  1: integral =  4914991.    +/-  0.48E+04
- all iterations: integral =  4914991.    +/-  0.48E+04 chi**2/it'n =  0.0    
+ iteration no.  1: integral =  4914987.    +/-  0.48E+04
+ all iterations: integral =  4914987.    +/-  0.48E+04 chi**2/it'n =  0.0    
  Outputting results to: inclusive_cc_Qmin_1_x_0.01_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  1.63E+01 s.
+==================== TOTAL TIME :  3.47E+01 s.
 
 -----------------------------------------------------------
               Welcome to HOPPET v. 2.0.0-devel             
@@ -102,8 +102,8 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 10/09/2025 at 10:56:27
- #../build/disorder -n3lo -CC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_cc_Qmin_1_x_0.01_
+ # Stamped by ../build/disorder on 10/09/2025 at 11:39:08
+ #../build/disorder -n3lo -yorder -1 -lnlnQorder 4 -CC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_cc_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
  # Inclusively in radiation
@@ -137,16 +137,16 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC + CC)                     =  4914991.312523 pb
+ # σ(NC + CC)                     =  4914987.123795 pb
  # MC integration uncertainty     =        0.0983 %
- # QCD scale uncertainty (+)      =      122.7768 %
- # QCD scale uncertainty (-)      =  -199859.2621 %
+ # QCD scale uncertainty (+)      =      122.7770 %
+ # QCD scale uncertainty (-)      =  -210092.4460 %
  
  # Reduced N3LO cross-sections
- # σ reduced (NC)                 =      755.774700
+ # σ reduced (NC)                 =      755.773482
  # QCD scale uncertainty (+)      =        0.4886 %
- # QCD scale uncertainty (-)      =      -64.0181 %
- # σ reduced (CC)                 =     1860.158771
+ # QCD scale uncertainty (-)      =      -67.2925 %
+ # σ reduced (CC)                 =     1860.156655
  # QCD scale uncertainty (+)      =        0.4874 %
- # QCD scale uncertainty (-)      =      -85.7880 %
+ # QCD scale uncertainty (-)      =      -90.1772 %
  ============================================================

@@ -1,5 +1,5 @@
- # Stamped by ../build/disorder on 10/09/2025 at 10:56:45
- #../build/disorder -n3lo -NC -includeZ -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert -prefix inclusive_nc_includeZ_Q_10_y_0.01_
+ # Stamped by ../build/disorder on 10/09/2025 at 11:39:22
+ #../build/disorder -n3lo -yorder -1 -lnlnQorder 4 -NC -includeZ -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert -prefix inclusive_nc_includeZ_Q_10_y_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
  # Inclusively in radiation
@@ -30,13 +30,13 @@
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC)                          =       94.928053 pb/GeV^2
+ # σ(NC)                          =       94.928030 pb/GeV^2
  # MC integration uncertainty     =        0.0000 %
  # QCD scale uncertainty (+)      =        0.1500 %
  # QCD scale uncertainty (-)      =       -0.0429 %
  
  # Reduced N3LO cross-sections
- # σ reduced (NC)                 =        0.407746
+ # σ reduced (NC)                 =        0.407745
  # QCD scale uncertainty (+)      =        0.1500 %
  # QCD scale uncertainty (-)      =       -0.0429 %
  ============================================================
