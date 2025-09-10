@@ -17,7 +17,7 @@ nf =  5
  WARNING: Using toy PDF
  Outputting results to: inclusive_nc_Q_10_x_0.01_neutrino_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  1.11E+01 s.
+==================== TOTAL TIME :  9.12E+00 s.
 
 -----------------------------------------------------------
               Welcome to HOPPET v. 2.0.0-devel             
@@ -63,7 +63,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on  3/09/2025 at 10:36:40
+ # Stamped by ../build/disorder on 10/09/2025 at 10:56:39
  #../build/disorder -n3lo -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino -prefix inclusive_nc_Q_10_x_0.01_neutrino_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (νe + p)

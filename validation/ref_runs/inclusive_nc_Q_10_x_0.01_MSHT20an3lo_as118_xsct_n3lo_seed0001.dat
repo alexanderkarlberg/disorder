@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on  3/09/2025 at 10:45:14
+ # Stamped by ../build/disorder on 10/09/2025 at 11:03:57
  #../build/disorder -n3lo -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -pdfuncert -alphasuncert -prefix inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -30,10 +30,10 @@
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC)                          =     1905.156901 pb/GeV^2
+ # σ(NC)                          =     1905.155827 pb/GeV^2
  # MC integration uncertainty     =        0.0000 %
- # QCD scale uncertainty (+)      =        0.7054 %
- # QCD scale uncertainty (-)      =       -0.4857 %
+ # QCD scale uncertainty (+)      =        0.7052 %
+ # QCD scale uncertainty (-)      =       -0.4881 %
  # PDF symmetric uncertainty*     =        0.9723 %
  # Pure PDF symmetric uncertainty =        0.9723 %
  # Pure αS symmetric uncertainty  =        0.0008 %
@@ -42,6 +42,6 @@
  
  # Reduced N3LO cross-sections
  # σ reduced (NC)                 =        0.816262
- # QCD scale uncertainty (+)      =        0.7054 %
- # QCD scale uncertainty (-)      =       -0.4857 %
+ # QCD scale uncertainty (+)      =        0.7052 %
+ # QCD scale uncertainty (-)      =       -0.4881 %
  ============================================================

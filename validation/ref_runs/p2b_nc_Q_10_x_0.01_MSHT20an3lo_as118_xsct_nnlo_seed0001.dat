@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on  3/09/2025 at 10:36:58
+ # Stamped by ../build/disorder on 10/09/2025 at 10:56:53
  #../build/disorder -nnlo -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)
@@ -30,13 +30,13 @@
  ============================================================
  # Total NNLO cross-section
  # Summary:
- # σ(NC)                          =     1914.328413 pb/GeV^2
+ # σ(NC)                          =     1914.329515 pb/GeV^2
  # MC integration uncertainty     =        0.0000 %
  # QCD scale uncertainty (+)      =        1.6038 %
- # QCD scale uncertainty (-)      =       -1.1821 %
+ # QCD scale uncertainty (-)      =       -1.1845 %
  
  # Reduced NNLO cross-sections
  # σ reduced (NC)                 =        0.820192
  # QCD scale uncertainty (+)      =        1.6038 %
- # QCD scale uncertainty (-)      =       -1.1821 %
+ # QCD scale uncertainty (-)      =       -1.1845 %
  ============================================================

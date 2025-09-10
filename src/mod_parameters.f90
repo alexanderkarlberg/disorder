@@ -45,7 +45,7 @@ module mod_parameters
        & NC_reduced_sigma(maxscales), CC_reduced_sigma(maxscales)
   real(dp), public, save :: toy_Q0, Q0pdf, xmuR_PDF, Q2minPDF ! For HOPPET PDF evolution
   real(dp), public :: dy, dlnlnQ, minQval, maxQval, ymax_hoppet
-  integer, public :: nloop, order_hoppet, orderPDF
+  integer, public :: nloop, order_hoppet, orderPDF, yorder, lnlnQorder 
   character (len=8), public :: order
   real(dp), private :: Q, x, y
   real(dp), public :: xlmin, xlmax
@@ -375,7 +375,11 @@ contains
     ! For hoppetStartExtended. Could think of putting on commandline...
     ! Streamlined initialization
     ! including  parameters for x-grid
-    order_hoppet = -6 
+    order_hoppet = -6
+    yorder = 2
+    lnlnQorder = 2
+    ! To get faster interpolation in hoppet
+    call hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder)
     ymax_hoppet  = 16.0_dp
     dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
     dlnlnQ = dy/4.0_dp
