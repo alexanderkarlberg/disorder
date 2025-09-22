@@ -53,10 +53,10 @@ nf =  5
                               xl( 7)=   0.000     xu( 7)=   1.000    
 
  iteration no.  1: integral =  4914346.    +/-  0.48E+04
- all iterations: integral =  4914346.    +/-  0.48E+04 chi**2/it'n = 0.12E-07
+ all iterations: integral =  4914346.    +/-  0.48E+04 chi**2/it'n =  0.0    
  Outputting results to: inclusive_nc_Qmin_1_x_0.01_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  3.54E+01 s.
+==================== TOTAL TIME :  2.74E+01 s.
 
 -----------------------------------------------------------
               Welcome to HOPPET v. 2.0.0-devel             
@@ -102,8 +102,8 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 10/09/2025 at 11:39:02
- #../build/disorder -n3lo -yorder -1 -lnlnQorder 4 -NC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_nc_Qmin_1_x_0.01_
+ # Stamped by ../build/disorder on 22/09/2025 at 15:34:59
+ #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_nc_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
  # Inclusively in radiation

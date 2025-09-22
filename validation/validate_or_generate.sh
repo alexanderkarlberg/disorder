@@ -44,27 +44,27 @@ prefixarray=($prefix)
 
 cmdline=(
     # Some inclusive runs
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -pdf\ MSHT20an3lo_as118\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -pdfuncert\ -alphasuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -includeZ\ -positron\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Qmin\ 1.0\ -x\ 0.01\ -scaleuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Qmin\ 1.0\ -x\ 0.01\ -scaleuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -CC\ -toyQ0\ 2.0\ -Qmin\ 1.0\ -x\ 0.01\ -scaleuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\  
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -pdf\ MSHT20an3lo_as118\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -pdfuncert\ -alphasuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -includeZ\ -positron\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Qmin\ 1.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Qmin\ 1.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -CC\ -toyQ0\ 2.0\ -Qmin\ 1.0\ -x\ 0.01\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -includeZ\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\  
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -y\ 0.01\ -scaleuncert\ 
     # Some neutrino runs
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ -positron\
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -noNC\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ 
-    -n3lo\ -yorder\ -1\ -lnlnQorder\ 4\ -noNC\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ -positron\
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ -positron\
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -noNC\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ 
+    -n3lo\ -yorder\ 5\ -lnlnQorder\ 4\ -noNC\ -CC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -neutrino\ -positron\
     #Some p2b runs
-    -nnlo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -p2b\ 
-    -nnlo\ -yorder\ -1\ -lnlnQorder\ 4\ -NC\ -pdf\ MSHT20an3lo_as118\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -p2b\ 
+    -nnlo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -toyQ0\ 2.0\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -p2b\ 
+    -nnlo\ -yorder\ 5\ -lnlnQorder\ 4\ -NC\ -pdf\ MSHT20an3lo_as118\ -Q\ 10.0\ -x\ 0.01\ -scaleuncert\ -p2b\ 
 )
 
 if [ "${#prefixarray[@]}" -ne "${#cmdline[@]}" ]; then

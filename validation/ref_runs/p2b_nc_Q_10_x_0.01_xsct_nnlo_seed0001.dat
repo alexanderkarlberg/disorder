@@ -1,5 +1,5 @@
- # Stamped by ../build/disorder on 10/09/2025 at 11:39:38
- #../build/disorder -nnlo -yorder -1 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_
+ # Stamped by ../build/disorder on 22/09/2025 at 15:35:39
+ #../build/disorder -nnlo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)
  # Using DISENT with projection-to-Born
