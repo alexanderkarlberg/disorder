@@ -1,0 +1,35 @@
+# CITATION.cff
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "disorder: Deep inelastic scattering at high orders"
+authors:
+  - family-names: Karlberg
+    given-names: Alexander
+    orcid: "https://orcid.org/0000-0003-0422-5891"  
+version: "2.0.0"  
+date-released: "2024-08-12"  
+url: "https://github.com/alexanderkarlberg/disorder"
+repository-code: "https://github.com/alexanderkarlberg/disorder"
+license: "GPL-3.0-or-later"  
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Karlberg
+      given-names: Alexander
+  title: "disorder: Deep inelastic scattering at high orders"
+  journal: "SciPost Physics Codebases"
+  volume: "2024"
+  pages: "32"
+  year: 2024
+  doi: "10.21468/SciPostPhysCodeb.32"
+  url: "https://arxiv.org/abs/2401.16964"
+identifiers:
+  - type: doi
+    value: "10.21468/SciPostPhysCodeb.32"
+  - type: url
+    value: "https://arxiv.org/abs/2401.16964"
+keywords:
+  - "deep inelastic scattering"
+  - "high orders"
+  - "particle physics"
+  - "perturbative calculations"
