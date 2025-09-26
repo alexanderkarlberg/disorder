@@ -644,7 +644,7 @@ nf =  5
 Thanks for using LHAPDF 6.5.5. Please make sure to cite the paper:
   Eur.Phys.J. C75 (2015) 3, 132  (http://arxiv.org/abs/1412.7420)
 
-==================== TOTAL TIME :  4.95E+02 s.
+==================== TOTAL TIME :  4.75E+02 s.
 
 -----------------------------------------------------------
               Welcome to HOPPET v. 2.0.0-devel             
@@ -690,7 +690,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 22/09/2025 at 15:34:57
+ # Stamped by ../build/disorder on 26/09/2025 at 14:26:29
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -pdfuncert -alphasuncert -prefix inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)

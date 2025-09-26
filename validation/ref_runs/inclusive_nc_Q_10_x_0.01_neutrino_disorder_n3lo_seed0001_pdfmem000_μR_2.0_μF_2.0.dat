@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 22/09/2025 at 15:35:33
+ # Stamped by ../build/disorder on 26/09/2025 at 14:26:59
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino -prefix inclusive_nc_Q_10_x_0.01_neutrino_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (νe + p)

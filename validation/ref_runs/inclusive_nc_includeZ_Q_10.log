@@ -56,7 +56,7 @@ nf =  5
  all iterations: integral =  86.82655    +/-  0.29E-01 chi**2/it'n =  0.0    
  Outputting results to: inclusive_nc_includeZ_Q_10_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  2.62E+01 s.
+==================== TOTAL TIME :  2.33E+01 s.
 
 -----------------------------------------------------------
               Welcome to HOPPET v. 2.0.0-devel             
@@ -102,7 +102,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 22/09/2025 at 15:34:58
+ # Stamped by ../build/disorder on 26/09/2025 at 14:26:30
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -NC -includeZ -toyQ0 2.0 -Q 10.0 -scaleuncert -prefix inclusive_nc_includeZ_Q_10_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)

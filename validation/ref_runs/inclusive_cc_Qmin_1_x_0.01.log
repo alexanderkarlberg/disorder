@@ -56,7 +56,7 @@ nf =  5
  all iterations: integral =  4914987.    +/-  0.48E+04 chi**2/it'n =  0.0    
  Outputting results to: inclusive_cc_Qmin_1_x_0.01_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  2.82E+01 s.
+==================== TOTAL TIME :  2.21E+01 s.
 
 -----------------------------------------------------------
               Welcome to HOPPET v. 2.0.0-devel             
@@ -102,7 +102,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 22/09/2025 at 15:35:06
+ # Stamped by ../build/disorder on 26/09/2025 at 14:26:38
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -CC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_cc_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -137,16 +137,16 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC + CC)                     =  4914987.123795 pb
+ # σ(NC + CC)                     =  4914987.123271 pb
  # MC integration uncertainty     =        0.0983 %
- # QCD scale uncertainty (+)      =      122.7770 %
- # QCD scale uncertainty (-)      =  -210092.4460 %
+ # QCD scale uncertainty (+)      =   549357.9195 %
+ # QCD scale uncertainty (-)      =      -17.3590 %
  
  # Reduced N3LO cross-sections
  # σ reduced (NC)                 =      755.773482
- # QCD scale uncertainty (+)      =        0.4886 %
- # QCD scale uncertainty (-)      =      -67.2925 %
+ # QCD scale uncertainty (+)      =      175.9965 %
+ # QCD scale uncertainty (-)      =       -0.0505 %
  # σ reduced (CC)                 =     1860.156655
- # QCD scale uncertainty (+)      =        0.4874 %
- # QCD scale uncertainty (-)      =      -90.1772 %
+ # QCD scale uncertainty (+)      =      235.9681 %
+ # QCD scale uncertainty (-)      =       -0.0472 %
  ============================================================
