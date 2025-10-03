@@ -2,7 +2,7 @@
 # This script contains all the commands executed by the CI of github
 
 # Get sem
-sudo apt install parallel
+sudo apt install parallel cmake
 
 # Clone Hoppet
 git clone https://github.com/hoppet-code/hoppet.git
@@ -13,7 +13,7 @@ cd hoppet
 #make check
 #sudo make install
 mkdir build
-cmake -S . -B build <extra flags>
+cmake -S . -B build 
 cmake --build  build -j 
 ctest --test-dir build  -j
 cmake --install build
