@@ -8,16 +8,24 @@ sudo apt install parallel
 git clone https://github.com/hoppet-code/hoppet.git
 cd hoppet
 # Compile, check and install Hoppet
-./configure
-make -j
-make check
-sudo make install
+#./configure
+#make -j
+#make check
+#sudo make install
+mkdir build
+cmake -S . -B build <extra flags>
+cmake --build  build -j 
+ctest --test-dir build  -j
+cmake --install build
 cd ..
 
 # Do the same for fastjet
-wget https://fastjet.fr/repo/fastjet-3.4.2.tar.gz
-tar -xzvf fastjet-3.4.2.tar.gz
-cd fastjet-3.4.2
+#wget https://fastjet.fr/repo/fastjet-3.4.2.tar.gz
+#tar -xzvf fastjet-3.4.2.tar.gz
+#cd fastjet-3.4.2
+wget https://fastjet.fr/repo/fastjet-3.5.1.tar.gz
+tar -xzvf fastjet-3.5.1.tar.gz
+cd fastjet-3.5.1
 ./configure
 make -j
 make check
