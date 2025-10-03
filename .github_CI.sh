@@ -16,7 +16,7 @@ mkdir build
 cmake -S . -B build 
 cmake --build  build -j 
 ctest --test-dir build  -j
-cmake --install build
+sudo cmake --install build
 cd ..
 
 # Do the same for fastjet
