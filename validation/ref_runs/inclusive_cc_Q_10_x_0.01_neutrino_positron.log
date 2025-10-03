@@ -1,8 +1,8 @@
 #--------------------------------------------------------------------------
-#                         FastJet release 3.4.2
+#                         FastJet release 3.5.1
 #                 M. Cacciari, G.P. Salam and G. Soyez                  
 #     A software package for jet finding and analysis at colliders      
-#                           http://fastjet.fr                           
+#                           https://fastjet.fr                           
 #	                                                                      
 # Please cite EPJC72(2012)1896 [arXiv:1111.6097] if you use this package
 # for scientific work and optionally PLB641(2006)57 [hep-ph/0512210].   
@@ -17,7 +17,7 @@ nf =  5
  WARNING: Using toy PDF
  Outputting results to: inclusive_cc_Q_10_x_0.01_neutrino_positron_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  7.04E+00 s.
+==================== TOTAL TIME :  7.71E+00 s.
 
 -----------------------------------------------------------[1m
              Welcome to HOPPET v. 2.0.0-devel
@@ -61,7 +61,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on  1/10/2025 at 10:21:56
+ # Stamped by ../build/disorder on  3/10/2025 at 13:14:44
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -noNC -CC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino -positron -prefix inclusive_cc_Q_10_x_0.01_neutrino_positron_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (νebar + p)

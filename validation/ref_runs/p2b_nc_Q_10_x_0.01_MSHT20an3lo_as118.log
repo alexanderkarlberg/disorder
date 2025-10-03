@@ -1,10 +1,10 @@
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0000.dat
 MSHT20an3lo_as118 PDF set, member #0, version 2; LHAPDF ID = 29100
 #--------------------------------------------------------------------------
-#                         FastJet release 3.4.2
+#                         FastJet release 3.5.1
 #                 M. Cacciari, G.P. Salam and G. Soyez                  
 #     A software package for jet finding and analysis at colliders      
-#                           http://fastjet.fr                           
+#                           https://fastjet.fr                           
 #	                                                                      
 # Please cite EPJC72(2012)1896 [arXiv:1111.6097] if you use this package
 # for scientific work and optionally PLB641(2006)57 [hep-ph/0512210].   
@@ -46,7 +46,7 @@ nf =  5
          0, ISEED=     12345      67890
  Outputting results to: p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_nnlo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  6.74E+00 s.
+==================== TOTAL TIME :  6.87E+00 s.
 
 -----------------------------------------------------------[1m
              Welcome to HOPPET v. 2.0.0-devel
@@ -85,7 +85,7 @@ WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on  1/10/2025 at 10:22:00
+ # Stamped by ../build/disorder on  3/10/2025 at 13:14:48
  #../build/disorder -nnlo -yorder 5 -lnlnQorder 4 -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)
