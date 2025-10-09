@@ -380,7 +380,8 @@ contains
     lnlnQorder = int_val_opt("-lnlnQorder", 2)
     ! To get faster interpolation in hoppet
     call hoppetSetYLnlnQInterpOrders(yorder, lnlnQorder)
-    ymax_hoppet  = 16.0_dp
+    ymax_hoppet = real(ceiling(-log(xmin)), kind=dp) ! To get a nice value of ymax that can contain the full LHAPDF grid
+    !ymax_hoppet  = 16.0_dp
     dy    = 0.05_dp  ! dble_val_opt("-dy",0.1_dp)
     dlnlnQ = dy/4.0_dp
     nloop = int_val_opt("-nloop",order_max)
