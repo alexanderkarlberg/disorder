@@ -403,7 +403,7 @@ contains
        write(*,*) '# which is the order at which disorder initialises a running'
        write(*,*) '# coupling. Make sure results are consistent!'
        write(*,*) '# ----------------------------------------------------------'
-       call sleep(1)
+!       call sleep(1)
     endif
 
   end subroutine set_parameters
