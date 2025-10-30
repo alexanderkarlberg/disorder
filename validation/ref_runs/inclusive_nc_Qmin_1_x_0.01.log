@@ -56,10 +56,10 @@ nf =  5
  all iterations: integral =  4914346.    +/-  0.48E+04 chi**2/it'n = 0.12E-07
  Outputting results to: inclusive_nc_Qmin_1_x_0.01_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  2.17E+01 s.
+==================== TOTAL TIME :  1.84E+01 s.
 
 -----------------------------------------------------------[1m
-             Welcome to HOPPET v. 2.0.0-devel
+                Welcome to HOPPET v. 2.1.0
     Higher Order Perturbative Parton Evolution Toolkit     [0m
 -----------------------------------------------------------
                   Written (2001-2025) by                   
@@ -70,7 +70,7 @@ nf =  5
  If using it for scientific work, please cite              
  G.P. Salam & J. Rojo, CPC 180(2009)120 (arXiv:0804.3755). 
  and A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi      
- & F. Dreyer (arXiv:2510.XXXXX).                           
+ & F. Dreyer (arXiv:2510.09310).                           
  
  You are also encouraged to cite the original references,  
  for LO, NLO, NNLO, and N3LO splitting functions, the QCD  
@@ -80,6 +80,8 @@ nf =  5
 -----------------------------------------------------------
 WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
 WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
+WARNING in InitMTMN3LO: n3lo_nfthreshold = off not recommended for nloop=4
+----- No more such warnings will be issued ------
 WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
 ----- No more such warnings will be issued ------
 WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
@@ -100,7 +102,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on  3/10/2025 at 13:14:20
+ # Stamped by ../build/disorder on 30/10/2025 at 09:36:28
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_nc_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)

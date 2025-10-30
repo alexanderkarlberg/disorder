@@ -46,10 +46,10 @@ nf =  5
          0, ISEED=     12345      67890
  Outputting results to: p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_nnlo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  6.87E+00 s.
+==================== TOTAL TIME :  5.33E+00 s.
 
 -----------------------------------------------------------[1m
-             Welcome to HOPPET v. 2.0.0-devel
+                Welcome to HOPPET v. 2.1.0
     Higher Order Perturbative Parton Evolution Toolkit     [0m
 -----------------------------------------------------------
                   Written (2001-2025) by                   
@@ -60,7 +60,7 @@ nf =  5
  If using it for scientific work, please cite              
  G.P. Salam & J. Rojo, CPC 180(2009)120 (arXiv:0804.3755). 
  and A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi      
- & F. Dreyer (arXiv:2510.XXXXX).                           
+ & F. Dreyer (arXiv:2510.09310).                           
  
  You are also encouraged to cite the original references,  
  for LO, NLO, NNLO, and N3LO splitting functions, the QCD  
@@ -85,7 +85,7 @@ WARNING in InitMTMNNLO: using parametrisation  (less accurate) for A2PShg
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on  3/10/2025 at 13:14:48
+ # Stamped by ../build/disorder on 30/10/2025 at 09:36:46
  #../build/disorder -nnlo -yorder 5 -lnlnQorder 4 -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)
