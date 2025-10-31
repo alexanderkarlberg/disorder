@@ -133,7 +133,9 @@ option(NEEDS_FASTJET "To link fastjet libraries" OFF)
 cmake_print_variables(NEEDS_FASTJET)
 if (NEEDS_FASTJET)
   file(GLOB_RECURSE fastjet_SOURCE  analysis/fastjetfortran.cc)
+  file(GLOB_RECURSE discambridge_SOURCE  analysis/DISCambridgePlugin/*)
   list(APPEND disorder_SOURCES ${fastjet_SOURCE})
+  list(APPEND disorder_SOURCES ${discambridge_SOURCE})
   find_file(FASTJET_CONFIG fastjet-config)
   cmake_print_variables(FASTJET_CONFIG)
   execute_process(
@@ -158,6 +160,9 @@ if (NEEDS_FASTJET)
   cmake_print_variables(FASTJET_LIBRARY)
   
   list(APPEND disorder_INCLUDES ${FASTJET_INCLUDE_DIR})
+  # Add the plugin source directory with an absolute path so headers included as
+  # "analysis/DISCambridgePlugin/DISCambridgePlugin.hh" are found when compiling
+  list(APPEND disorder_INCLUDES "${CMAKE_SOURCE_DIR}/analysis/DISCambridgePlugin")
   list(APPEND disorder_LIBRARIES ${FASTJET_LIBRARY})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()

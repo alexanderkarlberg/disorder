@@ -33,6 +33,8 @@
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/Selector.hh"
 #include "fastjet/SISConePlugin.hh"
+#include "DISCambridgePlugin.hh"
+
 
 // Many calls below rely on caching information (input particles,
 // ClusterSequence, jets) in fastjet structures so that one can query
@@ -567,6 +569,18 @@ void fastjetppgenktwithareanocache_(const double * p, const int & npart,
   
   // do everything
   cluster_nocache(p,npart,jet_def_local,f77jets,njets,ghost_rapmax,nrepeat,ghost_area);
+}
+
+void fastjetdiscambridge_(const double * p, const int & npart,                   
+                          const double & kT2, const double & palg,  
+                          const int & pz_beam_sign, double * f77jets, 
+                          int & njets) {  
+  // prepare jet def
+  plugin.reset(new fastjet::contrib::DISCambridgePlugin(kT2,palg,pz_beam_sign));
+  jet_def = plugin.get();
+  
+  // do everything
+  transfer_cluster_transfer(p,npart,jet_def,f77jets,njets);
 }
 
 
