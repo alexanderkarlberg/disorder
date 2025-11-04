@@ -34,6 +34,8 @@
 #include "fastjet/Selector.hh"
 #include "fastjet/SISConePlugin.hh"
 #include "DISCambridgePlugin.hh"
+#include "fastjet/contrib/Centauro.hh"
+
 
 
 // Many calls below rely on caching information (input particles,
@@ -54,6 +56,7 @@
 
 using namespace std;
 using namespace fastjet;
+using namespace fastjet::contrib;
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -576,7 +579,18 @@ void fastjetdiscambridge_(const double * p, const int & npart,
                           const int & pz_beam_sign, double * f77jets, 
                           int & njets) {  
   // prepare jet def
-  plugin.reset(new fastjet::contrib::DISCambridgePlugin(kT2,palg,pz_beam_sign));
+  plugin.reset(new DISCambridgePlugin(kT2,palg,pz_beam_sign));
+  jet_def = plugin.get();
+  
+  // do everything
+  transfer_cluster_transfer(p,npart,jet_def,f77jets,njets);
+}
+
+void fastjetcentauro_(const double * p, const int & npart,                   
+                          const double & R, double * f77jets, 
+                          int & njets) {  
+  // prepare jet def
+  plugin.reset(new CentauroPlugin(R));
   jet_def = plugin.get();
   
   // do everything

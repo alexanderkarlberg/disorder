@@ -56,6 +56,12 @@ module mod_parameters
 
   real(dp), public :: Ve, Ae, Ve2, Ae2, Ve2_Ae2, two_Ve_Ae ! Vector and axial couplings of the electron
 
+  ! For fastjet analysis
+  character (len=10), public :: jetalg ! Can be Cambridge or Centauro
+  integer, public :: jetordering ! 0: longitudinal ordering, 1: rapidity ordering
+  real(dp), public :: kT2cut, palg ! kT^2 cut for jet algo if using Cambridge and palg (0: C/A, 1: kt)
+  
+
   ! VEGAS common blocks
   integer, public :: ilast
   common/last_integ/ilast
@@ -179,7 +185,11 @@ contains
     if(prefix.eq.'') prefix       = string_val_opt("-out", "") ! Overwite the prefix of the file name
     do_analysis = .not.log_val_opt("-no-analysis",.false.)
     if(p2b.and..not.do_analysis) stop 'Should really be doing an analysis with p2b'
-
+    jetalg = string_val_opt("-jetalg","Cambridge") ! Jet algorithm for analysis
+    jetordering = int_val_opt("-jetordering",0) ! 0: longitudinal ordering, 1: rapidity ordering
+    kT2cut = dble_val_opt("-kT2cut",0.0_dp) ! kT^2 cut for jet algo if using Cambridge
+    palg = dble_val_opt("-palg",1.0_dp) ! 0: C/A, 1: kt
+    
     ! Parameters dealing with scale variations
     scale_choice = int_val_opt ('-scale-choice',1) ! 1: Use Q. 0: Use MZ. For now fixed.
     xmuf         = dble_val_opt("-xmuf",1.0_dp)
