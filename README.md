@@ -16,7 +16,7 @@ Installation
 
 To compile `disorder`, you will need
 
-* [<span style="font-variant:small-caps;">Hoppet</span>](https://github.com/hoppet-code/hoppet), v2.0.0 (the code will not compile with older versions). 
+* [<span style="font-variant:small-caps;">Hoppet</span>](https://github.com/hoppet-code/hoppet), v2.1.0 or newer. 
 * [LHAPDF6](http://lhapdf.hepforge.org/) [tested with v6.5.4]
 
 Optionally you may need [fastjet](https://fastjet.fr/) installed as well.
@@ -107,17 +107,18 @@ It is difficult to give an exhaustive list of references for all use-cases of `d
 
 Any use of the code should always result in a citation of
 
-* Karlberg, A. (2024). disorder: Deep inelastic scattering at high orders. SciPost Physics Codebases. https://doi.org/10.21468/scipostphyscodeb.32, [arXiv:2401.16964](https://arxiv.org/abs/2401.16964).
+* A. Karlberg, disorder: Deep inelastic scattering at high orders. [SciPost Phys.Codeb. 2024 (2024) 32](https://doi.org/10.21468/scipostphyscodeb.32), [arXiv:2401.16964](https://arxiv.org/abs/2401.16964).
 
 <span style="font-variant:small-caps;">Hoppet</span> should also always be cited
 
-* G.P. Salam, J. Rojo, A Higher Order Perturbative Parton Evolution Toolkit (HOPPET), [arXiv:0804.3755](https://arxiv.org/abs/0804.3755).
+* G.P. Salam, J. Rojo, A Higher Order Perturbative Parton Evolution Toolkit (HOPPET), [Comput.Phys.Commun. 180 (2009) 120-156](https://doi.org/10.1016/j.cpc.2008.08.010), [arXiv:0804.3755](https://arxiv.org/abs/0804.3755).
+* A. Karlberg, P. Nason, G. P. Salam, G. Zanderighi, F. Dreyer, HOPPET v2 release note, [arXiv:2510.09310](https://arxiv.org/abs/2510.09310).
 
 along with references for the DIS coefficient functions at the appropriate order (see Refs. [3]-[15] in the paper).  
 
-Whenever the code is run in the P2B mode the following paper should also be cited
+Whenever the code is run in the P2B mode the following paper must also be cited
 
-* S. Catani, M.H. Seymour, A General algorithm for calculating jet cross-sections in NLO QCD, [arXiv:hep-ph/9605323](https://arxiv.org/abs/hep-ph/9605323).
+* S. Catani, M.H. Seymour, A General algorithm for calculating jet cross-sections in NLO QCD, [Nucl.Phys.B 485 (1997) 291-419](https://doi.org/10.1016/S0550-3213(96)00589-5) [arXiv:hep-ph/9605323](https://arxiv.org/abs/hep-ph/9605323).
 
 Bugs
 ====
