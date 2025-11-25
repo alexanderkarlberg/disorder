@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 30/10/2025 at 09:36:43
+ # Stamped by ../build/disorder on 25/11/2025 at 12:31:33
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -CC -toyQ0 2.0 -Q 10.0 -scaleuncert -prefix inclusive_cc_Q_10_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
