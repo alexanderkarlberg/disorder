@@ -51,8 +51,11 @@ LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118
 MSHT20an3lo_as118 PDF set, member #18, version 2; LHAPDF ID = 29118
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0019.dat
 MSHT20an3lo_as118 PDF set, member #19, version 2; LHAPDF ID = 29119
-LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0020.dat
-MSHT20an3lo_as118 PDF set, member #20, version 2; LHAPDF ID = 29120
+Initialisation of Mass Threshold Matrices with code from libOME
+*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,
+*     A. von Manteuffel, C. Schneider, and K. Schönwald,
+*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",
+*     arXiv:2510.02175 (DESY 24-037), 2512.13508, https://gitlab.com/libome/libome
  PDF member:           0
 Starting the structure functions with fixed number of flavours
 nf =  5
@@ -131,12 +134,8 @@ nf =  5
  Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem018
  PDF member:          19
 Starting the structure functions with fixed number of flavours
-nf =  5
- Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem019
- PDF member:          20
-Starting the structure functions with fixed number of flavours
-nf =  5
- Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem020
+LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0020.dat
+MSHT20an3lo_as118 PDF set, member #20, version 2; LHAPDF ID = 29120
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0021.dat
 MSHT20an3lo_as118 PDF set, member #21, version 2; LHAPDF ID = 29121
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0022.dat
@@ -177,8 +176,12 @@ LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118
 MSHT20an3lo_as118 PDF set, member #39, version 2; LHAPDF ID = 29139
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0040.dat
 MSHT20an3lo_as118 PDF set, member #40, version 2; LHAPDF ID = 29140
-LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0041.dat
-MSHT20an3lo_as118 PDF set, member #41, version 2; LHAPDF ID = 29141
+nf =  5
+ Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem019
+ PDF member:          20
+Starting the structure functions with fixed number of flavours
+nf =  5
+ Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem020
  PDF member:          21
 Starting the structure functions with fixed number of flavours
 nf =  5
@@ -257,12 +260,8 @@ nf =  5
  Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem039
  PDF member:          40
 Starting the structure functions with fixed number of flavours
-nf =  5
- Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem040
- PDF member:          41
-Starting the structure functions with fixed number of flavours
-nf =  5
- Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem041
+LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0041.dat
+MSHT20an3lo_as118 PDF set, member #41, version 2; LHAPDF ID = 29141
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0042.dat
 MSHT20an3lo_as118 PDF set, member #42, version 2; LHAPDF ID = 29142
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0043.dat
@@ -303,8 +302,12 @@ LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118
 MSHT20an3lo_as118 PDF set, member #60, version 2; LHAPDF ID = 29160
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0061.dat
 MSHT20an3lo_as118 PDF set, member #61, version 2; LHAPDF ID = 29161
-LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0062.dat
-MSHT20an3lo_as118 PDF set, member #62, version 2; LHAPDF ID = 29162
+nf =  5
+ Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem040
+ PDF member:          41
+Starting the structure functions with fixed number of flavours
+nf =  5
+ Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem041
  PDF member:          42
 Starting the structure functions with fixed number of flavours
 nf =  5
@@ -383,12 +386,8 @@ nf =  5
  Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem060
  PDF member:          61
 Starting the structure functions with fixed number of flavours
-nf =  5
- Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem061
- PDF member:          62
-Starting the structure functions with fixed number of flavours
-nf =  5
- Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem062
+LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0062.dat
+MSHT20an3lo_as118 PDF set, member #62, version 2; LHAPDF ID = 29162
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0063.dat
 MSHT20an3lo_as118 PDF set, member #63, version 2; LHAPDF ID = 29163
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0064.dat
@@ -429,8 +428,12 @@ LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118
 MSHT20an3lo_as118 PDF set, member #81, version 2; LHAPDF ID = 29181
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0082.dat
 MSHT20an3lo_as118 PDF set, member #82, version 2; LHAPDF ID = 29182
-LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0083.dat
-MSHT20an3lo_as118 PDF set, member #83, version 2; LHAPDF ID = 29183
+nf =  5
+ Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem061
+ PDF member:          62
+Starting the structure functions with fixed number of flavours
+nf =  5
+ Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem062
  PDF member:          63
 Starting the structure functions with fixed number of flavours
 nf =  5
@@ -509,12 +512,8 @@ nf =  5
  Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem081
  PDF member:          82
 Starting the structure functions with fixed number of flavours
-nf =  5
- Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem082
- PDF member:          83
-Starting the structure functions with fixed number of flavours
-nf =  5
- Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem083
+LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0083.dat
+MSHT20an3lo_as118 PDF set, member #83, version 2; LHAPDF ID = 29183
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0084.dat
 MSHT20an3lo_as118 PDF set, member #84, version 2; LHAPDF ID = 29184
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0085.dat
@@ -555,8 +554,12 @@ LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118
 MSHT20an3lo_as118 PDF set, member #102, version 2; LHAPDF ID = 29202
 LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0103.dat
 MSHT20an3lo_as118 PDF set, member #103, version 2; LHAPDF ID = 29203
-LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0104.dat
-MSHT20an3lo_as118 PDF set, member #104, version 2; LHAPDF ID = 29204
+nf =  5
+ Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem082
+ PDF member:          83
+Starting the structure functions with fixed number of flavours
+nf =  5
+ Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem083
  PDF member:          84
 Starting the structure functions with fixed number of flavours
 nf =  5
@@ -635,19 +638,21 @@ nf =  5
  Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem102
  PDF member:         103
 Starting the structure functions with fixed number of flavours
+LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0104.dat
+MSHT20an3lo_as118 PDF set, member #104, version 2; LHAPDF ID = 29204
+Thanks for using LHAPDF 6.5.5. Please make sure to cite the paper:
+  Eur.Phys.J. C75 (2015) 3, 132  (http://arxiv.org/abs/1412.7420)
 nf =  5
  Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem103
  PDF member:         104
 Starting the structure functions with fixed number of flavours
 nf =  5
  Outputting results to: inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_n3lo_seed0001_pdfmem104
-Thanks for using LHAPDF 6.5.5. Please make sure to cite the paper:
-  Eur.Phys.J. C75 (2015) 3, 132  (http://arxiv.org/abs/1412.7420)
 
-==================== TOTAL TIME :  1.91E+02 s.
+==================== TOTAL TIME :  3.22E+02 s.
 
 -----------------------------------------------------------[1m
-                Welcome to HOPPET v. 2.1.1
+              Welcome to HOPPET v. 2.2.0-dev0
     Higher Order Perturbative Parton Evolution Toolkit     [0m
 -----------------------------------------------------------
                   Written (2001-2025) by                   
@@ -666,10 +671,6 @@ Thanks for using LHAPDF 6.5.5. Please make sure to cite the paper:
  coupling mass threshold matching functions. Additionally  
  the DIS coefficient functions should be cited when used.  
 -----------------------------------------------------------
-WARNING in InitMTMN3LO: n3lo_nfthreshold = off not recommended for nloop=4
------ No more such warnings will be issued ------
-WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
-           6
 -----------------------------------------------------------
                Welcome to disorder v. 1.0.0                
         Written by Alexander Karlberg (2023-2024)          
@@ -686,7 +687,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 25/11/2025 at 12:31:19
+ # Stamped by ../build/disorder on 22/01/2026 at 09:41:25
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -pdfuncert -alphasuncert -prefix inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -714,15 +715,6 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  # GF:                   0.112670237E-04 GeV^-2
  # sin(θ_W)^2:           0.222645853
  # ----------------------------------------------------------
-WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
-           6
-WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
-           6
-WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
-           6
-WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
-           6
------ No more such warnings will be issued ------
  
  ============================================================
  # Total N3LO cross-section

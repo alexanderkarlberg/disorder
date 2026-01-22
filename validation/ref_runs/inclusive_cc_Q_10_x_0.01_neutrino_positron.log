@@ -11,16 +11,21 @@
 # It uses T. Chan's closest pair algorithm, S. Fortune's Voronoi code
 # and 3rd party plugin jet algorithms. See COPYING file for details.
 #--------------------------------------------------------------------------
+Initialisation of Mass Threshold Matrices with code from libOME
+*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,
+*     A. von Manteuffel, C. Schneider, and K. Schönwald,
+*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",
+*     arXiv:2510.02175 (DESY 24-037), 2512.13508, https://gitlab.com/libome/libome
  WARNING: Using toy PDF
 Starting the structure functions with fixed number of flavours
 nf =  5
  WARNING: Using toy PDF
  Outputting results to: inclusive_cc_Q_10_x_0.01_neutrino_positron_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  3.00E+00 s.
+==================== TOTAL TIME :  6.80E+00 s.
 
 -----------------------------------------------------------[1m
-                Welcome to HOPPET v. 2.1.1
+              Welcome to HOPPET v. 2.2.0-dev0
     Higher Order Perturbative Parton Evolution Toolkit     [0m
 -----------------------------------------------------------
                   Written (2001-2025) by                   
@@ -39,10 +44,6 @@ nf =  5
  coupling mass threshold matching functions. Additionally  
  the DIS coefficient functions should be cited when used.  
 -----------------------------------------------------------
-WARNING in InitMTMN3LO: n3lo_nfthreshold = off not recommended for nloop=4
------ No more such warnings will be issued ------
-WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
-           6
 -----------------------------------------------------------
                Welcome to disorder v. 1.0.0                
         Written by Alexander Karlberg (2023-2024)          
@@ -59,7 +60,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 25/11/2025 at 12:31:33
+ # Stamped by ../build/disorder on 22/01/2026 at 09:41:53
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -noNC -CC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino -positron -prefix inclusive_cc_Q_10_x_0.01_neutrino_positron_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (νebar + p)
@@ -87,19 +88,17 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  # GF:                   0.112670237E-04 GeV^-2
  # sin(θ_W)^2:           0.222645853
  # ----------------------------------------------------------
-WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
-           6
  
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(CC)                          =        1.894912 pb/GeV^2
+ # σ(CC)                          =        1.894899 pb/GeV^2
  # MC integration uncertainty     =        0.0000 %
- # QCD scale uncertainty (+)      =        0.6713 %
- # QCD scale uncertainty (-)      =       -0.1192 %
+ # QCD scale uncertainty (+)      =        0.6716 %
+ # QCD scale uncertainty (-)      =       -0.1195 %
  
  # Reduced N3LO cross-sections
- # σ reduced (CC)                 =        4.967552
- # QCD scale uncertainty (+)      =        0.6713 %
- # QCD scale uncertainty (-)      =       -0.1192 %
+ # σ reduced (CC)                 =        4.967517
+ # QCD scale uncertainty (+)      =        0.6716 %
+ # QCD scale uncertainty (-)      =       -0.1195 %
  ============================================================

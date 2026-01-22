@@ -1,3 +1,8 @@
+Initialisation of Mass Threshold Matrices with code from libOME
+*     J. Ablinger, A. Behring, J. Blümlein, A. De Freitas,
+*     A. von Manteuffel, C. Schneider, and K. Schönwald,
+*     "The Single-Mass Variable Flavor Number Scheme at Three-Loop Order",
+*     arXiv:2510.02175 (DESY 24-037), 2512.13508, https://gitlab.com/libome/libome
  WARNING: Using toy PDF
 Starting the structure functions with fixed number of flavours
 nf =  5
@@ -15,14 +20,14 @@ nf =  5
                               xl( 6)=   0.000     xu( 6)=   1.000    
                               xl( 7)=   0.000     xu( 7)=   1.000    
 
- iteration no.  1: integral =  86.97018    +/-  0.18    
- all iterations: integral =  86.97018    +/-  0.18     chi**2/it'n =  0.0    
+ iteration no.  1: integral =  86.96708    +/-  0.18    
+ all iterations: integral =  86.96708    +/-  0.18     chi**2/it'n =  0.0    
 
- iteration no.  2: integral =  86.71968    +/-  0.13    
- all iterations: integral =  86.80417    +/-  0.11     chi**2/it'n =  1.2    
+ iteration no.  2: integral =  86.71660    +/-  0.13    
+ all iterations: integral =  86.80109    +/-  0.11     chi**2/it'n =  1.2    
 
- iteration no.  3: integral =  86.62191    +/-  0.10    
- all iterations: integral =  86.71235    +/-  0.74E-01 chi**2/it'n =  1.4    
+ iteration no.  3: integral =  86.61884    +/-  0.10    
+ all iterations: integral =  86.70927    +/-  0.74E-01 chi**2/it'n =  1.4    
  ****************************************************
  * Writing out vegas grid to inclusive_nc_Q_10_grids-n3lo-0001.dat                                     *
  ****************************************************
@@ -52,14 +57,14 @@ nf =  5
                               xl( 6)=   0.000     xu( 6)=   1.000    
                               xl( 7)=   0.000     xu( 7)=   1.000    
 
- iteration no.  1: integral =  86.72546    +/-  0.29E-01
- all iterations: integral =  86.72546    +/-  0.29E-01 chi**2/it'n =  0.0    
+ iteration no.  1: integral =  86.72238    +/-  0.29E-01
+ all iterations: integral =  86.72238    +/-  0.29E-01 chi**2/it'n =  0.0    
  Outputting results to: inclusive_nc_Q_10_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  1.45E+01 s.
+==================== TOTAL TIME :  2.28E+01 s.
 
 -----------------------------------------------------------[1m
-                Welcome to HOPPET v. 2.1.1
+              Welcome to HOPPET v. 2.2.0-dev0
     Higher Order Perturbative Parton Evolution Toolkit     [0m
 -----------------------------------------------------------
                   Written (2001-2025) by                   
@@ -78,10 +83,6 @@ nf =  5
  coupling mass threshold matching functions. Additionally  
  the DIS coefficient functions should be cited when used.  
 -----------------------------------------------------------
-WARNING in InitMTMN3LO: n3lo_nfthreshold = off not recommended for nloop=4
------ No more such warnings will be issued ------
-WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
-           6
 -----------------------------------------------------------
                Welcome to disorder v. 1.0.0                
         Written by Alexander Karlberg (2023-2024)          
@@ -98,7 +99,7 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 25/11/2025 at 12:31:19
+ # Stamped by ../build/disorder on 22/01/2026 at 09:41:26
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -scaleuncert -prefix inclusive_nc_Q_10_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -126,16 +127,14 @@ WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
  # GF:                   0.112670237E-04 GeV^-2
  # sin(θ_W)^2:           0.222645853
  # ----------------------------------------------------------
-WARNING in InitSplitMatN3LO: nf_int > 5, setting to 5; nf_int was
-           6
  
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC)                          =       86.725456 pb/GeV^2
+ # σ(NC)                          =       86.722378 pb/GeV^2
  # MC integration uncertainty     =        0.0334 %
- # QCD scale uncertainty (+)      =        0.5897 %
- # QCD scale uncertainty (-)      =       -0.1056 %
+ # QCD scale uncertainty (+)      =        0.5901 %
+ # QCD scale uncertainty (-)      =       -0.1057 %
  
  # Reduced N3LO cross-sections
  # σ reduced (NC)                 =        0.170539
