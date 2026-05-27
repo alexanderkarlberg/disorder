@@ -59,7 +59,7 @@ module mod_parameters
   ! For fastjet analysis
   character (len=10), public :: jetalg ! Can be Cambridge or Centauro
   integer, public :: jetordering ! 0: longitudinal ordering, 1: rapidity ordering
-  real(dp), public :: kT2cut, palg ! kT^2 cut for jet algo if using Cambridge and palg (0: C/A, 1: kt)
+  real(dp), public :: Radius, palg ! kT^2 cut for jet algo if using Cambridge and palg (0: C/A, 1: kt)
   
 
   ! VEGAS common blocks
@@ -187,7 +187,7 @@ contains
     if(p2b.and..not.do_analysis) stop 'Should really be doing an analysis with p2b'
     jetalg = string_val_opt("-jetalg","Cambridge") ! Jet algorithm for analysis
     jetordering = int_val_opt("-jetordering",0) ! 0: longitudinal ordering, 1: rapidity ordering
-    kT2cut = dble_val_opt("-kT2cut",0.0_dp) ! kT^2 cut for jet algo if using Cambridge
+    Radius = dble_val_opt("-R",0.8_dp) ! kT^2 cut for jet algo if using Cambridge
     palg = dble_val_opt("-palg",1.0_dp) ! 0: C/A, 1: kt
     
     ! Parameters dealing with scale variations

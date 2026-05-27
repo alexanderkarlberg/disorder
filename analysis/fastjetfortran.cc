@@ -33,7 +33,7 @@
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/Selector.hh"
 #include "fastjet/SISConePlugin.hh"
-#include "DISCambridgePlugin.hh"
+#include "DISGenkt.hh"
 #include "fastjet/contrib/Centauro.hh"
 
 
@@ -574,12 +574,12 @@ void fastjetppgenktwithareanocache_(const double * p, const int & npart,
   cluster_nocache(p,npart,jet_def_local,f77jets,njets,ghost_rapmax,nrepeat,ghost_area);
 }
 
-void fastjetdiscambridge_(const double * p, const int & npart,                   
-                          const double & kT2, const double & palg,  
+void fastjetdiscambridge_(const double * p, const int & npart,                  
+                          const double & R, const double & palg,  
                           const int & pz_beam_sign, double * f77jets, 
                           int & njets) {  
   // prepare jet def
-  plugin.reset(new DISCambridgePlugin(kT2,palg,pz_beam_sign));
+  plugin.reset(new DISGenktPlugin(palg,pz_beam_sign, R));
   jet_def = plugin.get();
   
   // do everything

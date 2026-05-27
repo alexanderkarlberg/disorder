@@ -4,6 +4,9 @@ c     You can substitute these  with your favourite ones
 c     init   :  opens the histograms
 c     topout :  closes them
 c     pwhgfill  :  fills the histograms with data
+!     Call with
+      ! ./build/disorder -pdf NNPDF40MC_nnlo_as_01180 -nlo -p2b
+      ! -ncall2 1000000 -Qmin 12 -jetordering 0 -R 0.666666666666666
 
       subroutine define_histograms
       use mod_parameters
@@ -11,10 +14,29 @@ c     pwhgfill  :  fills the histograms with data
       include 'pwhg_bookhist-multi.h'
       integer xnbins, Q2nbins
       
-      call bookupeqbins('sigincl',1d0,0d0,1d0)
-      call bookupeqbins('E/Q/2macro',10d0,0d0,sqrts)
-      call bookupeqbins('logE/Q/2macro',0.2d0,-5.5d0,4.5d0)
-      call bookupeqbins('etamacro',0.5d0,-40d0,15d0)
+      call bookupeqbins('cent-E/Q/2macro',10d0,0d0,sqrts)
+      call bookupeqbins('cent-logE/Q/2macro',0.2d0,-5.5d0,4.5d0)
+      call bookupeqbins('cent-etamacro',0.5d0,-40d0,15d0)
+      call bookupeqbins('cent-zmacro',0.01d0,0d0,1d0)
+      call bookupeqbins('cent-Njets',1d0,0.5d0,3.5d0)
+      
+      call bookupeqbins('ankt-E/Q/2macro',10d0,0d0,sqrts)
+      call bookupeqbins('ankt-logE/Q/2macro',0.2d0,-5.5d0,4.5d0)
+      call bookupeqbins('ankt-etamacro',0.5d0,-40d0,15d0)
+      call bookupeqbins('ankt-zmacro',0.01d0,0d0,1d0)
+      call bookupeqbins('ankt-Njets',1d0,0.5d0,3.5d0)
+      
+      call bookupeqbins('camb-E/Q/2macro',10d0,0d0,sqrts)
+      call bookupeqbins('camb-logE/Q/2macro',0.2d0,-5.5d0,4.5d0)
+      call bookupeqbins('camb-etamacro',0.5d0,-40d0,15d0)
+      call bookupeqbins('camb-zmacro',0.01d0,0d0,1d0)
+      call bookupeqbins('camb-Njets',1d0,0.5d0,3.5d0)
+      
+      call bookupeqbins('ktee-E/Q/2macro',10d0,0d0,sqrts)
+      call bookupeqbins('ktee-logE/Q/2macro',0.2d0,-5.5d0,4.5d0)
+      call bookupeqbins('ktee-etamacro',0.5d0,-40d0,15d0)
+      call bookupeqbins('ktee-zmacro',0.01d0,0d0,1d0)
+      call bookupeqbins('ktee-Njets',1d0,0.5d0,3.5d0)
       
       end
       
@@ -30,53 +52,53 @@ c     pwhgfill  :  fills the histograms with data
       parameter (maxjets=3)
       double precision ppartons(0:3,maxjets),pj(0:3,maxjets),q(0:3)
       double precision ptj1, etaj1
-      real * 8 sqrtQ2,sbeams, kt, eta, Ej, etaj
+      real * 8 sqrtQ2,sbeams, kt, eta, Ej, etaj, zj
 
       integer i,npartons,njets,beam_sign, imacrojet, macro_jet_index
-
-      double precision Ecut, Ecur
-      logical Ecur_lt_Ecut, CutDIS_Ecur
-
-      call filld('sigincl',0.5d0,dsig)
-
+      character * 4 algo(-1:1)
+      parameter (algo = (/'ankt','camb','ktee'/))
       sqrtQ2 = sqrt(Q2)
-      Ecut = 0d0                ! sqrtQ2/10d0
 
       npartons = n - 3
+
+      if(npartons.lt.2) return
 c     Fill the parton momenta array with breit frame partons
       q = pbreit(:,1) - pbreit(:,3)
       ppartons(:,1:npartons) = pbreit(:,4:n)
 
-      Ecur_lt_Ecut = CutDIS_Ecur(npartons, ppartons(:,:), q, Ecut, Ecur)
 
-      if(Ecur_lt_Ecut) return
-
-      !palg = 1d0                ! 0: C/A, 1: kT like
-      !kT2 = kT2cut              ! in GeV^2
       beam_sign = sign(1d0,pbreit(2,1)) ! proton beam direction
-!print*, 'Clustering jets with DIS Cambridge algorithm, kT2=', kT2, ' palg=', palg, ' beam_sign=', beam_sign
-      if(trim(jetalg).eq."Centauro") then
-         call buildjetscentauro(npartons,ppartons,1d0,pj,njets)
-      else  
-         call buildjets(npartons,ppartons,kT2cut,palg,beam_sign,pj,njets)
-      endif 
 
-!print*, '--- Event analysis ---' 
-!print*, 'Q, x, y:', sqrtQ2, x, y
-!print*, 'Number of jets found:', njets
-!do i =1,njets
-!   print*, 'Jet', i, 'E, pT, eta:', pj(0,i), kt(pj(:,i)), eta(pj(:,i))
-!enddo
-!print*, ''
-
-! Select the macro jet as the jet with the largest z component
+      call buildjetscentauro(npartons,ppartons,Radius,pj,njets)
       imacrojet = macro_jet_index(pj,njets,beam_sign,jetordering)
       etaj = eta(pj(:,imacrojet))
       Ej = pj(0,imacrojet)
+      zj = (Ej - pj(3,imacrojet))/sqrtQ2
+      
+      call filld('cent-E/Q/2macro',Ej/(sqrtQ2/2d0),dsig)
+      call filld('cent-logE/Q/2macro',log10(Ej/(sqrtQ2/2d0)),dsig)
+      call filld('cent-etamacro',max(-5d100+1d-10,etaj),dsig)
+      call filld('cent-zmacro',zj,dsig)
+      call filld('cent-Njets',1d0*njets,dsig)
+      
+!     Select the macro jet as the jet with the largest z component
 
-      call filld('E/Q/2macro',Ej/(sqrtQ2/2d0),dsig)
-      call filld('logE/Q/2macro',log10(Ej/(sqrtQ2/2d0)),dsig)
-      call filld('etamacro',max(-5d100+1d-10,etaj),dsig)
+      do i = -1,1
+         palg = 1d0 * i
+         call buildjets(npartons,ppartons,Radius*3.141592*0.5,palg
+     $        ,beam_sign,pj,njets)
+         imacrojet = macro_jet_index(pj,njets,beam_sign,jetordering)
+         etaj = eta(pj(:,imacrojet))
+         Ej = pj(0,imacrojet)
+         zj = (Ej - pj(3,imacrojet))/sqrtQ2
+         
+         call filld(algo(i)//'-E/Q/2macro',Ej/(sqrtQ2/2d0),dsig)
+         call filld(algo(i)//'-logE/Q/2macro',log10(Ej/(sqrtQ2/2d0)),dsig)
+         call filld(algo(i)//'-etamacro',max(-5d100+1d-10,etaj),dsig)
+         call filld(algo(i)//'-zmacro',zj,dsig)
+         call filld(algo(i)//'-Njets',1d0*njets,dsig)
+
+      enddo
       end
 
 c     For Ecut < Q*(sqrt(2)-1) this selects only events with no
@@ -100,10 +122,10 @@ c     radiation is involved, hence the cut selects DIS two-jet events
       
       end function CutDIS_Ecur
 
-      subroutine buildjets(n, pin, kT2, palg, beam_sign, pj, njets)
+      subroutine buildjets(n, pin, R, palg, beam_sign, pj, njets)
       implicit none
       integer n
-      double precision pin(0:3,n), kT2, palg
+      double precision pin(0:3,n), R, palg
       integer maxtrack,maxjet
       parameter (maxtrack=3,maxjet=3)
 
@@ -129,7 +151,7 @@ c     radiation is involved, hence the cut selects DIS two-jet events
          ptrack(mu,1:n)=pin(mu,1:n)
       enddo
 
-      call fastjetdiscambridge(ptrack,ntracks,kT2,palg,beam_sign,pjet,njets)
+      call fastjetdiscambridge(ptrack,ntracks,R,palg,beam_sign,pjet,njets)
 
       if(njets.gt.3.or.njets.lt.1) then
          print*, 'njets out of bounds!!', njets
