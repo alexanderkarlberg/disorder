@@ -109,7 +109,7 @@ execute_process(
   )
 
 if(NOT ret EQUAL "0")
-    message( FATAL_ERROR "Could not find hoppet-config in ${LHAPDF_CONFIG}")
+    message( FATAL_ERROR "Could not find lhapdf-config in ${LHAPDF_CONFIG}")
 endif()
 
 set(LHAPDF_INCLUDE_DIR "${LHAPDF_INCLUDE_DIR}")
