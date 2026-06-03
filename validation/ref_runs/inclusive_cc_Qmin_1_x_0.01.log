@@ -20,14 +20,14 @@ nf =  5
                               xl( 6)=   0.000     xu( 6)=   1.000    
                               xl( 7)=   0.000     xu( 7)=   1.000    
 
- iteration no.  1: integral =  4922038.    +/-  0.33E+05
- all iterations: integral =  4922038.    +/-  0.33E+05 chi**2/it'n =  0.0    
+ iteration no.  1: integral =  4922027.    +/-  0.33E+05
+ all iterations: integral =  4922027.    +/-  0.33E+05 chi**2/it'n =  0.0    
 
- iteration no.  2: integral =  4908294.    +/-  0.20E+05
- all iterations: integral =  4912093.    +/-  0.17E+05 chi**2/it'n = 0.13    
+ iteration no.  2: integral =  4908283.    +/-  0.20E+05
+ all iterations: integral =  4912082.    +/-  0.17E+05 chi**2/it'n = 0.13    
 
- iteration no.  3: integral =  4915884.    +/-  0.17E+05
- all iterations: integral =  4914029.    +/-  0.12E+05 chi**2/it'n = 0.76E-01
+ iteration no.  3: integral =  4915873.    +/-  0.17E+05
+ all iterations: integral =  4914018.    +/-  0.12E+05 chi**2/it'n = 0.76E-01
  ****************************************************
  * Writing out vegas grid to inclusive_cc_Qmin_1_x_0.01_grids-n3lo-0001.dat                            *
  ****************************************************
@@ -57,14 +57,14 @@ nf =  5
                               xl( 6)=   0.000     xu( 6)=   1.000    
                               xl( 7)=   0.000     xu( 7)=   1.000    
 
- iteration no.  1: integral =  4912298.    +/-  0.49E+04
- all iterations: integral =  4912298.    +/-  0.49E+04 chi**2/it'n =  0.0    
+ iteration no.  1: integral =  4912287.    +/-  0.49E+04
+ all iterations: integral =  4912287.    +/-  0.49E+04 chi**2/it'n =  0.0    
  Outputting results to: inclusive_cc_Qmin_1_x_0.01_disorder_n3lo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  2.52E+01 s.
+==================== TOTAL TIME :  1.87E+01 s.
 
 -----------------------------------------------------------[1m
-              Welcome to HOPPET v. 2.2.0-dev0
+              Welcome to HOPPET v. 2.3.1-dev0
     Higher Order Perturbative Parton Evolution Toolkit     [0m
 -----------------------------------------------------------
                   Written (2001-2025) by                   
@@ -83,6 +83,14 @@ nf =  5
  coupling mass threshold matching functions. Additionally  
  the DIS coefficient functions should be cited when used.  
 -----------------------------------------------------------
+WARNING in Parametrised N3LO splitting functions not yet available for Pqg2nf. Using approximation instead.
+----- No more such warnings will be issued ------
+WARNING in Parametrised N3LO splitting functions not yet available for Pgg. Using approximation instead.
+----- No more such warnings will be issued ------
+WARNING in Parametrised N3LO splitting functions not yet available for Pgq. Using approximation instead.
+----- No more such warnings will be issued ------
+WARNING in Parametrised N3LO splitting functions not yet available for PPS. Using approximation instead.
+----- No more such warnings will be issued ------
 -----------------------------------------------------------
                Welcome to disorder v. 1.0.0                
         Written by Alexander Karlberg (2023-2024)          
@@ -99,7 +107,7 @@ nf =  5
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on 22/01/2026 at 09:41:32
+ # Stamped by ../build/disorder on  3/06/2026 at 15:01:38
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -CC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert -prefix inclusive_cc_Qmin_1_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (e^- + p)
@@ -132,16 +140,16 @@ nf =  5
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC + CC)                     =  4912298.301398 pb
+ # σ(NC + CC)                     =  4912287.392047 pb
  # MC integration uncertainty     =        0.0989 %
- # QCD scale uncertainty (+)      =126320518.8668 %
- # QCD scale uncertainty (-)      =      -17.2907 %
+ # QCD scale uncertainty (+)      =245788719.9890 %
+ # QCD scale uncertainty (-)      =      -17.2908 %
  
  # Reduced N3LO cross-sections
- # σ reduced (NC)                 =      755.763462
- # QCD scale uncertainty (+)      =    40425.0313 %
+ # σ reduced (NC)                 =      755.761745
+ # QCD scale uncertainty (+)      =    78656.5823 %
  # QCD scale uncertainty (-)      =       -0.0502 %
- # σ reduced (CC)                 =     1860.135525
- # QCD scale uncertainty (+)      =    54189.4044 %
+ # σ reduced (CC)                 =     1860.131045
+ # QCD scale uncertainty (+)      =   105438.3462 %
  # QCD scale uncertainty (-)      =       -0.0469 %
  ============================================================

@@ -1,4 +1,4 @@
- # Stamped by ../build/disorder on 22/01/2026 at 09:41:54
+ # Stamped by ../build/disorder on  3/06/2026 at 15:01:57
  #../build/disorder -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino -positron -prefix inclusive_nc_Q_10_x_0.01_neutrino_positron_
  # ----------------------------------------------------------
  # Doing DIS @ n3lo  (νebar + p)
@@ -30,7 +30,7 @@
  ============================================================
  # Total N3LO cross-section
  # Summary:
- # σ(NC)                          =        0.693866 pb/GeV^2
+ # σ(NC)                          =        0.693865 pb/GeV^2
  # MC integration uncertainty     =        0.0000 %
  # QCD scale uncertainty (+)      =        0.7874 %
  # QCD scale uncertainty (-)      =       -0.1454 %
