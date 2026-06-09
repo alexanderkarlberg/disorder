@@ -111,6 +111,8 @@ contains
     Ve2_Ae2 = Ve2 + Ae2
     two_Ve_Ae = 2.0_dp * Ve * Ae
 
+    call set_ew_constants(alpha_em, sin_thw_sq, sin_2thw_sq, Ve, Ae, Ve2, Ae2, Ve2_Ae2, two_Ve_Ae, mz, mw, GF)
+    
     ! The order at which we are running is read here along with
     ! whether or not we are doing inclsuvie/p2b and NC/CC.
     !order_min    = int_val_opt ('-order-min',1)

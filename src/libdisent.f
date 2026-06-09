@@ -619,10 +619,12 @@ C   CONFIGURATION.
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
+      double precision ew_nc_factor
       Q=4*(4*PI/137)**2/DOT(P,5,5)**2*
      $     (DOT(P,1,6)**2+DOT(P,1,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2)
       DO I=-6,6
-        M(I)=EQ(I)**2*Q
+!     M(I)=EQ(I)**2*Q
+         M(I) = ew_nc_factor(i,Q)*Q
       ENDDO
       END
 C-----------------------------------------------------------------------
@@ -3128,3 +3130,38 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
+!     AK Some helper functions to facilitate full NC and CC
+      double precision function ew_nc_factor(flavour, q2)
+      use mod_ew_state
+      implicit none
+      integer, intent(in) :: flavour
+      double precision, intent(in) :: q2
+      double precision :: eq, propgZ, propZ
+      integer :: iflav
+      
+!     Map flavor -> electric charge
+      iflav = abs(flavour)
+      select case (iflav)
+      case (1,3,5)              ! d,s,b
+         eq = -1.0D0/3.0D0
+      case (2,4,6)              ! u,c,t
+         eq =  2.0D0/3.0D0
+      case default
+         eq = 0.0D0
+      end select
+      
+! For now: keep the mode switch explicit.
+      select case (ew_nc_mode)
+      case (1)
+         ew_nc_factor = eq**2
+      case (2)
+! interference-only placeholder
+         ew_nc_factor = 0.0D0
+      case (3)
+! Z-only placeholder
+         ew_nc_factor = 0.0D0
+      case default
+! full NC placeholder
+         ew_nc_factor = eq**2
+      end select
+      end function ew_nc_factor
