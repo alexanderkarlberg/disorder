@@ -37,6 +37,7 @@
       SUBROUTINE DISENTFULL(NEV,S, NFL,USER,CUTS,USD1,USD2,NPOW1,NPOW2
      $     ,CUTOFF_IN, ORDER, get_muf,CF_in,CA_in,TR_in
      $     ,SCALE_VAR_in)
+      use mod_ew_state ! Contains info on the incoming lepton
       IMPLICIT NONE
 C---CALCULATE DIS EVENT FEATURES TO NEXT-TO-LEADING ORDER
 C   ACCORDING TO THE METHOD OF CATANI AND SEYMOUR NPB485 (1997) 291
@@ -609,6 +610,7 @@ C-----------------------------------------------------------------------
       END
 C-----------------------------------------------------------------------
       SUBROUTINE MATTWO(P,M)
+      use mod_ew_state
       IMPLICIT NONE
 C---EVALUATE THE TWO-PARTON MATRIX ELEMENT SQUARED FOR THE GIVEN
 C   CONFIGURATION.
@@ -625,6 +627,7 @@ C   CONFIGURATION.
       END
 C-----------------------------------------------------------------------
       SUBROUTINE MATTHR(P,M)
+      use mod_ew_state
       IMPLICIT NONE
 C---EVALUATE THE THREE-PARTON MATRIX ELEMENT SQUARED FOR THE GIVEN
 C   CONFIGURATION.
@@ -692,6 +695,7 @@ C      VV=V(4)**2-V(3)**2-V(2)**2-V(1)**2
       END
 C-----------------------------------------------------------------------
       SUBROUTINE MATFOR(P,M)
+      use mod_ew_state
       IMPLICIT NONE
 C---EVALUATE THE FOUR-PARTON MATRIX ELEMENT SQUARED FOR THE GIVEN
 C   CONFIGURATION.

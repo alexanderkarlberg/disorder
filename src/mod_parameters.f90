@@ -8,6 +8,7 @@ module mod_parameters
   use streamlined_interface, CouplingValue => Value
   !  use toy_pdfs
   use structure_functions
+  use mod_ew_state
   implicit none
 
   private
@@ -166,6 +167,9 @@ contains
        noZ = .false.
        intonly = .false.
     endif
+    ! Save the EW state for disent
+    call set_ew_state(NC, CC, positron, neutrino, noZ, Zonly, intonly)
+    
     if(Zonly.and.intonly) stop 'Cannot run with both Z and interference ONLY flags'
     if(.not.NC.and..not.CC) stop 'Need to run with either or/both of NC and CC'
     p2b = log_val_opt("-p2b",.false.)
