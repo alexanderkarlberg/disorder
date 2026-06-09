@@ -176,7 +176,7 @@ contains
     if(.not.NC.and..not.CC) stop 'Need to run with either or/both of NC and CC'
     p2b = log_val_opt("-p2b",.false.)
     inclusive = .not.p2b 
-    if(.not.noZ.and.p2b) stop 'Cannot do Z in p2b yet'
+!    if(.not.noZ.and.p2b) stop 'Cannot do Z in p2b yet'
     if(CC.and.p2b) stop 'Cannot do CC in p2b yet'
     if(order_max.ge.4.and.p2b) stop 'Cannot run p2b at N3LO yet'
     if(vnf.and.p2b) stop 'Cannot run p2b with variable flavour'

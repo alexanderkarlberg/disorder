@@ -184,23 +184,34 @@ C---  GENERATE A TWO-PARTON STATE
          ! Computes muF**2/Q2. Right now it is only called once which
          ! means the scale must depend on x,y,Q only.
          call get_muf(P,S,SCALE)
-C---  EVALUATE THE TWO-PARTON TREE-LEVEL MATRIX ELEMENT
-!         CALL MATTWO(P,MTWO)
-C---  GIVE IT TO THE USER
-!         CALL VECMUL(13,NRM*WTWO/NEV,MTWO,WEIGHT)
-!         CALL USER(2,0,0,P,S,WEIGHT)
          
+!     COMMENT
+C---  EVALUATE THE TWO-PARTON TREE-LEVEL MATRIX ELEMENT
+         CALL MATTWO(P,MTWO)
+C---  GIVE IT TO THE USER
+         CALL VECMUL(13,NRM*WTWO/NEV,MTWO,WEIGHT)
+         CALL USER(2,0,0,P,S,WEIGHT,SCALE)
+!     COMMENT
+
          IF(ORDER.GE.1) THEN
 C---  EVALUATE THE TWO-PARTON ONE-LOOP MATRIX ELEMENT
             CALL VIRTWO(S,P,VTWO,*1000)
+
+!     COMMENT
 C---  GIVE IT TO THE USER
-!            CALL VECMUL(13,NRM*WTWO/NEV,VTWO,WEIGHT)
-!            CALL USER(2,1,2,P,S,WEIGHT)
+            CALL VECMUL(13,NRM*WTWO/NEV,VTWO,WEIGHT)
+            CALL USER(2,1,2,P,S,WEIGHT,SCALE)
 C---  EVALUATE THE THREE-PARTON COLLINEAR SUBTRACTION
+!     COMMENT
+            
             CALL COLTHR(S,P,CTHR,*1000)
+
+!     COMMENT
 C---  GIVE IT TO THE USER
-!            CALL VECMUL(13,NRM*WTWO/NEV,CTHR,WEIGHT)
-!            CALL USER(3,1,3,P,S,WEIGHT)
+            CALL VECMUL(13,NRM*WTWO/NEV,CTHR,WEIGHT)
+            CALL USER(3,1,3,P,S,WEIGHT,SCALE)
+!     COMMENT
+            
 C---  GENERATE A THREE-PARTON STATE
             CALL GENTHR(P,WTHR,*1000)
 C---  CALCULATE THE JACOBIAN FACTOR AND SUBTRACTION CONFIGURATIONS
@@ -214,11 +225,15 @@ C---  EVALUATE THE THREE-PARTON TREE-LEVEL MATRIX ELEMENT
 C---  GIVE IT TO THE USER
             CALL VECMUL(13,NRM*WTWO*WTHR/JTHR/NEV,MTHR,WEIGHT)
             CALL USER(3,1,0,P,S,WEIGHT,SCALE)
+
+!     COMMENT
 C---  GIVE THE SUBTRACTION CONFIGURATIONS TO THE USER
-!            DO J=1,NPERM3
-!               CALL VECMUL(13,-NRM*WTWO*WTHR/JTHR/NEV,STHR(-6,J),WEIGHT)
-!               CALL USER(3,1,1,Q(1,1,J),S,WEIGHT)
-!            ENDDO
+            DO J=1,NPERM3
+               CALL VECMUL(13,-NRM*WTWO*WTHR/JTHR/NEV,STHR(-6,J),WEIGHT)
+               CALL USER(3,1,1,Q(1,1,J),S,WEIGHT,SCALE)
+            ENDDO
+!     COMMENT
+            
          ENDIF
 C---  GPS MODIFICATION --------------------
          IF(ORDER.GE.2) THEN
@@ -609,110 +624,56 @@ C-----------------------------------------------------------------------
       EPS3=S(I)*(AA(1)*BB(2)-AA(2)*BB(1))
       END
 C-----------------------------------------------------------------------
-      subroutine MATTWO(P,M)
+            subroutine MATTWO(P,M)
       use mod_ew_state
       implicit none
+
       double precision, intent(in)  :: P(4,7)
       double precision, intent(out) :: M(-6:6)
-      
-      double precision :: MEM(-6:6), MINT(-6:6), MZ(-6:6)
 
-      call MATTWO_EM(P,  MEM)
-      call MATTWO_INT(P, MINT)
-      call MATTWO_Z(P,   MZ)
-      
-      select case (ew_nc_mode)
-      case (1)                  ! photon only
-         M = MEM
-      case (2)                  ! interference only
-         M = MINT
-      case (3)                  ! Z only
-         M = MZ
-      case default              ! full NC
-         M = MEM + MINT + MZ
-      end select
+      integer :: i
+      double precision :: q2, d16, d17, d26, d27
+      double precision :: kplus, kminus, pref, dot 
+      double precision :: c_em, c_int_v, c_int_a, c_z_v, c_z_a
+      double precision, parameter :: pi = 4d0*atan(1d0)
+
+      M = 0d0
+
+      if (.not. ew_nc) return
+
+      q2  = abs(DOT(P,5,5))
+      d16 = DOT(P,1,6)
+      d17 = DOT(P,1,7)
+      d26 = DOT(P,2,6)
+      d27 = DOT(P,2,7)
+
+C     Symmetric and antisymmetric kinematic combinations
+      kplus  = d16**2 + d17**2 + d26**2 + d27**2
+      kminus = d17**2 + d26**2 - d16**2 - d27**2
+
+C     Keep the photon normalization consistent with the validated limit
+      pref = 4d0 * (4d0*pi*ew_alpha_em)**2 / q2**2
+
+      do i = -6, 6
+         call ew_nc_coeffs(i, q2, c_em, c_int_v, c_int_a,
+     $                     c_z_v, c_z_a)
+
+         select case (ew_nc_mode)
+         case (1)
+            M(i) = pref * c_em * kplus
+         case (2)
+            M(i) = pref * (c_int_v * kplus + c_int_a * kminus)
+         case (3)
+            M(i) = pref * (c_z_v * kplus + c_z_a * kminus)
+         case default
+            M(i) = pref * ( (c_em + c_int_v + c_z_v) * kplus +
+     $                      (c_int_a + c_z_a) * kminus )
+         end select
+      end do
+
       end subroutine MATTWO
 
-      subroutine MATTWO_EM(P,M)
-      use mod_ew_state
-      implicit none
-      double precision, intent(in)  :: P(4,7)
-      double precision, intent(out) :: M(-6:6)
-      
-      integer :: i
-      double precision :: q2, k, eq, dot, quark_charge
-      double precision, parameter ::  PI = ATAN(1D0)*4
-      
-      q2 = abs(DOT(P,5,5))
-      k  = 4d0 * (4d0*pi*ew_alpha_em)**2 / q2**2
-      k  = k * (DOT(P,1,6)**2 + DOT(P,1,7)**2 + DOT(P,2,7)**2 + DOT(P,2,6)**2)
-      
-      do i = -6, 6
-         eq = quark_charge(abs(i))
-         M(i) = k * eq**2
-      end do
-      end subroutine MATTWO_EM
-
-      subroutine MATTWO_INT(P,M)
-      use mod_ew_state
-      implicit none
-      double precision, intent(in)  :: P(4,7)
-      double precision, intent(out) :: M(-6:6)
-      
-      integer :: i
-      double precision :: q2, chiZ, k, eq, t3, vq, aq
-      double precision :: c_even, c_odd, dot
-      double precision, parameter ::  PI = ATAN(1D0)*4
-      
-      q2   = abs(DOT(P,5,5))
-      chiZ = q2 / (q2 + ew_mz**2) / ew_sin_2thw_sq
-      
-      k  = 4d0 * (4d0*pi*ew_alpha_em)**2 / q2**2
-      k  = k * (DOT(P,1,6)**2 + DOT(P,1,7)**2 + DOT(P,2,7)**2 + DOT(P,2
-     $     ,6)**2)
-      
-      do i = -6, 6
-         call quark_nc_couplings(abs(i), eq, t3, vq, aq)
-
-!        parity-even gamma/Z interference piece
-         c_even = -2d0 * eq * ew_ve * vq * chiZ
-
-!        parity-odd piece (the xF3-like part)
-         c_odd  = -2d0 * eq * ew_ae * aq * chiZ
-
-         M(i) = k * (c_even + c_odd)
-      end do
-      end subroutine MATTWO_INT
-
-      subroutine MATTWO_Z(P,M)
-      use mod_ew_state
-      implicit none
-      double precision, intent(in)  :: P(4,7)
-      double precision, intent(out) :: M(-6:6)
-      
-      integer :: i
-      double precision :: q2, chiZ, k, eq, t3, vq, aq
-      double precision :: c_even, c_odd, chiZ2, dot
-      double precision, parameter ::  PI = ATAN(1D0)*4
-      
-      q2    = abs(DOT(P,5,5))
-      chiZ  = q2 / (q2 + ew_mz**2) / ew_sin_2thw_sq
-      chiZ2 = chiZ**2
-      if (ew_neutrino) chiZ2 = 2d0 * chiZ2
-      
-      k  = 4d0 * (4d0*pi*ew_alpha_em)**2 / q2**2
-      k  = k * (DOT(P,1,6)**2 + DOT(P,1,7)**2 + DOT(P,2,7)**2 + DOT(P,2,6)**2)
-      
-      do i = -6, 6
-         call quark_nc_couplings(abs(i), eq, t3, vq, aq)
-
-         c_even = (ew_ve2 + ew_ae2) * (vq**2 + aq**2) * chiZ2
-         c_odd  = (2d0 * ew_two_ve_ae) * (vq * aq) * chiZ2
-         
-         M(i) = k * (c_even + c_odd)
-      end do
-      end subroutine MATTWO_Z
-
+!     
 !      SUBROUTINE MATTWO(P,M)
 !      use mod_ew_state
 !      IMPLICIT NONE
@@ -727,8 +688,8 @@ C-----------------------------------------------------------------------
 !      Q=4*(4*PI/137)**2/DOT(P,5,5)**2*
 !     $     (DOT(P,1,6)**2+DOT(P,1,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2)
 !      DO I=-6,6
-!!     M(I)=EQ(I)**2*Q
-!         M(I) = ew_nc_factor(i)*Q
+!         M(I)=EQ(I)**2*Q
+!         !M(I) = ew_nc_factor(i)*Q
 !      ENDDO
 !      END
 C-----------------------------------------------------------------------
@@ -3245,7 +3206,7 @@ C-----------------------------------------------------------------------
       use mod_ew_state
       implicit none
       integer, intent(in) :: flavour
-!      double precision, intent(in) :: q2
+!     double precision, intent(in) :: q2
       double precision :: eq, propgZ, propZ
       integer :: iflav
       
@@ -3260,44 +3221,76 @@ C-----------------------------------------------------------------------
          eq = 0.0D0
       end select
       
-! For now: keep the mode switch explicit.
+!     For now: keep the mode switch explicit.
       select case (ew_nc_mode)
       case (1)
          ew_nc_factor = eq**2
       case (2)
-! interference-only placeholder
+!     interference-only placeholder
          ew_nc_factor = 0.0D0
       case (3)
-! Z-only placeholder
+!     Z-only placeholder
          ew_nc_factor = 0.0D0
       case default
-! full NC placeholder
+!     full NC placeholder
          ew_nc_factor = eq**2
       end select
       end function ew_nc_factor
 
-      double precision function quark_charge(iflav)
-      integer, intent(in) :: iflav
-      select case (iflav)
-      case (1,3,5)
-         quark_charge = -1d0/3d0
-      case (2,4,6)
-         quark_charge =  2d0/3d0
-      case default
-         quark_charge = 0d0
-      end select
-      end function quark_charge
+      subroutine ew_nc_coeffs(iflav, q2, c_em, c_int_v, c_int_a,
+     $                        c_z_v, c_z_a)
+      use mod_ew_state
+      implicit none
 
-      subroutine quark_nc_couplings(iflav, eq, t3, vq, aq)
       integer, intent(in) :: iflav
-      double precision, intent(out) :: eq, t3, vq, aq
-      if (mod(iflav,2) == 1) then
+      double precision, intent(in) :: q2
+      double precision, intent(out) :: c_em, c_int_v, c_int_a,
+     $                                 c_z_v, c_z_a
+
+      integer :: ifabs
+      double precision :: eq, t3, vq, aq, chi, flavsgn
+
+      ifabs = abs(iflav)
+
+      flavsgn = 0d0
+      if (iflav.gt.0) flavsgn = 1d0
+      if (iflav.lt.0) flavsgn = -1d0
+
+      select case (ifabs)
+      case (1,3,5)
          eq = -1d0/3d0
          t3 = -0.5d0
-      else
+      case (2,4,6)
          eq =  2d0/3d0
          t3 =  0.5d0
+      case default
+         eq = 0d0
+         t3 = 0d0
+      end select
+
+      vq  = t3 - 2d0*eq*ew_sin_thw_sq
+      aq  = t3
+      chi = q2 / (q2 + ew_mz**2) / ew_sin_2thw_sq
+
+C     Photon
+      c_em    = eq*eq
+
+C     Gamma/Z interference: even piece goes with kplus, odd piece with kminus
+      c_int_v = -2d0 * eq * ew_ve * vq * chi
+      c_int_a = 2d0 * flavsgn * eq * ew_ae * aq * chi
+
+C     Z-only
+      c_z_v   = (ew_ve2 + ew_ae2) * (vq*vq + aq*aq) * chi*chi
+      c_z_a   = -2d0 * flavsgn * ew_two_ve_ae * vq * aq * chi*chi
+
+C     Neutrino NC: no photon or interference; Z propagator doubled
+      if (ew_neutrino) then
+         c_em    = 0d0
+         c_int_v = 0d0
+         c_int_a = 0d0
+         c_z_v   = 2d0 * c_z_v
+         c_z_a   = 2d0 * c_z_a
       end if
-      vq = t3 - 2d0 * eq * ew_sin_thw_sq
-      aq = t3
-      end subroutine quark_nc_couplings
+
+      end subroutine ew_nc_coeffs
+

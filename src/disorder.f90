@@ -81,11 +81,11 @@ program disorder
      ncall2 = max(100000,ncall2)/10
 
      call initialise_run_structure_functions
-     call pwhgaddout
-
+!     call pwhgaddout
+     call resethists
      ncall2 = ncall2_save
 
-     if(order_max.gt.1) then
+     if(order_max.gt.0) then
         ! Then do the disent run
         call DISENTFULL(ncall2,S,nflav,user,dis_cuts,12345&
              &+iseed-1,67890+iseed-1,NPOW1,NPOW2,CUTOFF ,order_max-1&
@@ -343,14 +343,12 @@ contains
    ! For p2b
    logical, save :: recompute = .true.
    double precision, save ::  p2blab(0:3,2+2), p2bbreit(0:3,2+2), Qlab(0:3)
-
    if (n.eq.0) then ! Disent is done with one event cycle
       call pwhgaccumup
       recompute = .true. ! Signals that next time we have a new event cycle
       return
    endif
- 
-   if(p2b.and.n.eq.2) return ! If we do p2b we get the Born and
+   !if(p2b.and.n.eq.2) return ! If we do p2b we get the Born and
                              ! virtuals from the structure functions
 
    ! The following lines are invoked if the user specify only the
@@ -452,7 +450,7 @@ contains
          !if(toy_Q0 < zero) then
          !   call evolvePDF(eta,scale*Qval,pdfs(1,:))
          !else
-            call hoppetEval(eta,scale*Qval,pdfs(1,:))
+         call hoppetEval(eta,scale*Qval,pdfs(1,:))
          !endif
          !            call evolvePDF(eta,scale*Qval,pdfs(1,:))
       endif
@@ -505,7 +503,7 @@ contains
    ! projection-to-Born analysis call
    pbornbreit = p2bbreit
    pbornlab   = p2blab
-   call analysis(2+2, -dsig, x, y, Q2)
+!   call analysis(2+2, -dsig, x, y, Q2)
  END subroutine user
 
  ! Taken directly from DISENT
