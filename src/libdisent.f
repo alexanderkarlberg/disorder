@@ -624,7 +624,7 @@ C-----------------------------------------------------------------------
       EPS3=S(I)*(AA(1)*BB(2)-AA(2)*BB(1))
       END
 C-----------------------------------------------------------------------
-            subroutine MATTWO(P,M)
+      subroutine MATTWO(P,M)
       use mod_ew_state
       implicit none
 
@@ -712,11 +712,11 @@ C   CONFIGURATION.
      $     (DOT(P,3,6)**2+DOT(P,3,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2)
      $     *16*PISQ*TR/(-4*DOT(P,2,1)*DOT(P,3,1)*DOT(P,5,5))
       DO I=-6,6
-        M(I)=ew_nc_factor(i)*QQ
+        M(I)=EQ(I)**2*QQ
       ENDDO
       M(0)=0
       DO I=1,NF
-        M(0)=M(0)+ew_nc_factor(i)*GQ
+        M(0)=M(0)+EQ(I)**2*GQ
       ENDDO
       END
 C-----------------------------------------------------------------------
