@@ -609,24 +609,128 @@ C-----------------------------------------------------------------------
       EPS3=S(I)*(AA(1)*BB(2)-AA(2)*BB(1))
       END
 C-----------------------------------------------------------------------
-      SUBROUTINE MATTWO(P,M)
+      subroutine MATTWO(P,M)
       use mod_ew_state
-      IMPLICIT NONE
-C---EVALUATE THE TWO-PARTON MATRIX ELEMENT SQUARED FOR THE GIVEN
-C   CONFIGURATION.
-      INTEGER I
-      DOUBLE PRECISION P(4,7),M(-6:6),Q,DOT
-      INTEGER SCHEME,NF
-      DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
-      COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
-      double precision ew_nc_factor
-      Q=4*(4*PI/137)**2/DOT(P,5,5)**2*
-     $     (DOT(P,1,6)**2+DOT(P,1,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2)
-      DO I=-6,6
-!     M(I)=EQ(I)**2*Q
-         M(I) = ew_nc_factor(i)*Q
-      ENDDO
-      END
+      implicit none
+      double precision, intent(in)  :: P(4,7)
+      double precision, intent(out) :: M(-6:6)
+      
+      double precision :: MEM(-6:6), MINT(-6:6), MZ(-6:6)
+
+      call MATTWO_EM(P,  MEM)
+      call MATTWO_INT(P, MINT)
+      call MATTWO_Z(P,   MZ)
+      
+      select case (ew_nc_mode)
+      case (1)                  ! photon only
+         M = MEM
+      case (2)                  ! interference only
+         M = MINT
+      case (3)                  ! Z only
+         M = MZ
+      case default              ! full NC
+         M = MEM + MINT + MZ
+      end select
+      end subroutine MATTWO
+
+      subroutine MATTWO_EM(P,M)
+      use mod_ew_state
+      implicit none
+      double precision, intent(in)  :: P(4,7)
+      double precision, intent(out) :: M(-6:6)
+      
+      integer :: i
+      double precision :: q2, k, eq, dot, quark_charge
+      double precision, parameter ::  PI = ATAN(1D0)*4
+      
+      q2 = abs(DOT(P,5,5))
+      k  = 4d0 * (4d0*pi*ew_alpha_em)**2 / q2**2
+      k  = k * (DOT(P,1,6)**2 + DOT(P,1,7)**2 + DOT(P,2,7)**2 + DOT(P,2,6)**2)
+      
+      do i = -6, 6
+         eq = quark_charge(abs(i))
+         M(i) = k * eq**2
+      end do
+      end subroutine MATTWO_EM
+
+      subroutine MATTWO_INT(P,M)
+      use mod_ew_state
+      implicit none
+      double precision, intent(in)  :: P(4,7)
+      double precision, intent(out) :: M(-6:6)
+      
+      integer :: i
+      double precision :: q2, chiZ, k, eq, t3, vq, aq
+      double precision :: c_even, c_odd, dot
+      double precision, parameter ::  PI = ATAN(1D0)*4
+      
+      q2   = abs(DOT(P,5,5))
+      chiZ = q2 / (q2 + ew_mz**2) / ew_sin_2thw_sq
+      
+      k  = 4d0 * (4d0*pi*ew_alpha_em)**2 / q2**2
+      k  = k * (DOT(P,1,6)**2 + DOT(P,1,7)**2 + DOT(P,2,7)**2 + DOT(P,2
+     $     ,6)**2)
+      
+      do i = -6, 6
+         call quark_nc_couplings(abs(i), eq, t3, vq, aq)
+
+!        parity-even gamma/Z interference piece
+         c_even = -2d0 * eq * ew_ve * vq * chiZ
+
+!        parity-odd piece (the xF3-like part)
+         c_odd  = -2d0 * eq * ew_ae * aq * chiZ
+
+         M(i) = k * (c_even + c_odd)
+      end do
+      end subroutine MATTWO_INT
+
+      subroutine MATTWO_Z(P,M)
+      use mod_ew_state
+      implicit none
+      double precision, intent(in)  :: P(4,7)
+      double precision, intent(out) :: M(-6:6)
+      
+      integer :: i
+      double precision :: q2, chiZ, k, eq, t3, vq, aq
+      double precision :: c_even, c_odd, chiZ2, dot
+      double precision, parameter ::  PI = ATAN(1D0)*4
+      
+      q2    = abs(DOT(P,5,5))
+      chiZ  = q2 / (q2 + ew_mz**2) / ew_sin_2thw_sq
+      chiZ2 = chiZ**2
+      if (ew_neutrino) chiZ2 = 2d0 * chiZ2
+      
+      k  = 4d0 * (4d0*pi*ew_alpha_em)**2 / q2**2
+      k  = k * (DOT(P,1,6)**2 + DOT(P,1,7)**2 + DOT(P,2,7)**2 + DOT(P,2,6)**2)
+      
+      do i = -6, 6
+         call quark_nc_couplings(abs(i), eq, t3, vq, aq)
+
+         c_even = (ew_ve2 + ew_ae2) * (vq**2 + aq**2) * chiZ2
+         c_odd  = (2d0 * ew_two_ve_ae) * (vq * aq) * chiZ2
+         
+         M(i) = k * (c_even + c_odd)
+      end do
+      end subroutine MATTWO_Z
+
+!      SUBROUTINE MATTWO(P,M)
+!      use mod_ew_state
+!      IMPLICIT NONE
+!C---EVALUATE THE TWO-PARTON MATRIX ELEMENT SQUARED FOR THE GIVEN
+!C   CONFIGURATION.
+!      INTEGER I
+!      DOUBLE PRECISION P(4,7),M(-6:6),Q,DOT
+!      INTEGER SCHEME,NF
+!      DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
+!      COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
+!      double precision ew_nc_factor
+!      Q=4*(4*PI/137)**2/DOT(P,5,5)**2*
+!     $     (DOT(P,1,6)**2+DOT(P,1,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2)
+!      DO I=-6,6
+!!     M(I)=EQ(I)**2*Q
+!         M(I) = ew_nc_factor(i)*Q
+!      ENDDO
+!      END
 C-----------------------------------------------------------------------
       SUBROUTINE MATTHR(P,M)
       use mod_ew_state
@@ -3171,3 +3275,29 @@ C-----------------------------------------------------------------------
          ew_nc_factor = eq**2
       end select
       end function ew_nc_factor
+
+      double precision function quark_charge(iflav)
+      integer, intent(in) :: iflav
+      select case (iflav)
+      case (1,3,5)
+         quark_charge = -1d0/3d0
+      case (2,4,6)
+         quark_charge =  2d0/3d0
+      case default
+         quark_charge = 0d0
+      end select
+      end function quark_charge
+
+      subroutine quark_nc_couplings(iflav, eq, t3, vq, aq)
+      integer, intent(in) :: iflav
+      double precision, intent(out) :: eq, t3, vq, aq
+      if (mod(iflav,2) == 1) then
+         eq = -1d0/3d0
+         t3 = -0.5d0
+      else
+         eq =  2d0/3d0
+         t3 =  0.5d0
+      end if
+      vq = t3 - 2d0 * eq * ew_sin_thw_sq
+      aq = t3
+      end subroutine quark_nc_couplings
