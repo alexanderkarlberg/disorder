@@ -624,7 +624,7 @@ C   CONFIGURATION.
      $     (DOT(P,1,6)**2+DOT(P,1,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2)
       DO I=-6,6
 !     M(I)=EQ(I)**2*Q
-         M(I) = ew_nc_factor(i,Q)*Q
+         M(I) = ew_nc_factor(i)*Q
       ENDDO
       END
 C-----------------------------------------------------------------------
@@ -638,6 +638,8 @@ C   CONFIGURATION.
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
+      double precision ew_nc_factor
+
       QQ=8*(4*PI/137)**2*
      $     (DOT(P,1,6)**2+DOT(P,1,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2)
      $     *16*PISQ*CF/(-4*DOT(P,2,3)*DOT(P,1,3)*DOT(P,5,5))
@@ -645,11 +647,11 @@ C   CONFIGURATION.
      $     (DOT(P,3,6)**2+DOT(P,3,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2)
      $     *16*PISQ*TR/(-4*DOT(P,2,1)*DOT(P,3,1)*DOT(P,5,5))
       DO I=-6,6
-        M(I)=EQ(I)**2*QQ
+        M(I)=ew_nc_factor(i)*QQ
       ENDDO
       M(0)=0
       DO I=1,NF
-        M(0)=M(0)+EQ(I)**2*GQ
+        M(0)=M(0)+ew_nc_factor(i)*GQ
       ENDDO
       END
 C-----------------------------------------------------------------------
@@ -708,6 +710,8 @@ C   CONFIGURATION.
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
+      double precision ew_nc_factor
+
       EMSQ=-DOT(P,5,5)
       A=2*(LEIA(P,P(1,6),-1,2,3,4)+LEIA(P,P(1,6),2,-1,3,4)
      $    +LEIA(P,P(1,6),-1,2,4,3)+LEIA(P,P(1,6),2,-1,4,3))-EMSQ/2*(
@@ -763,14 +767,14 @@ C---INCLUDE EXTERNAL FACTORS
       QQ=QQ*256*PI**4*CF/EMSQ
       QQ=QQ*(4*PI/137)**2*4/EMSQ
       DO I=-6,6
-        M(I)=EQ(I)**2*Q
+        M(I)=ew_nc_factor(i)*Q
         DO J=1,NF
           M(I)=M(I)+EQ(J)**2*QQ
         ENDDO
       ENDDO
       M(0)=0
       DO I=1,NF
-        M(0)=M(0)+EQ(I)**2*G
+        M(0)=M(0)+ew_nc_factor(i)*G
       ENDDO
       END
 C-----------------------------------------------------------------------
@@ -866,6 +870,8 @@ C---CALCULATE THE THREE-PARTON MATRIX-ELEMENT AT NEXT-TO-LEADING ORDER
       DOUBLE PRECISION QQscl(3) ,GQscl(3),QGscl(3) ,GGscl(3)
       LOGICAL SCALE_VAR
       COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
+      double precision ew_nc_factor
+
       EMSQ=-DOT(P,5,5)
       L12=LOG(2*DOT(P,1,2)/EMSQ)
       L13=LOG(2*DOT(P,1,3)/EMSQ)
@@ -878,11 +884,11 @@ C---THE NON-FACTORIZING VIRTUAL CROSS-SECTION
       GG=TR/CF*((4*PI/137)**2*4/EMSQ)*
      $     (2*LEIV(P,P(1,6),2,3,-1)-EMSQ/2*ERTV(P,2,3,-1))
       DO I=-6,6
-        V(I)=EQ(I)**2*QQ
+        V(I)=ew_nc_factor(i)*QQ
       ENDDO
       V(0)=0
       DO I=1,NF
-        V(0)=V(0)+EQ(I)**2*GG
+        V(0)=V(0)+ew_nc_factor(i)*GG
       ENDDO
 C---SUM OF FACTORIZING VIRTUAL CROSS-SECTION AND SUBTRACTION COUNTERTERM
       QQ=CF*2+CA*50D0/9-TR*NF*16D0/9-CF*PISQ
@@ -3131,11 +3137,11 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 !     AK Some helper functions to facilitate full NC and CC
-      double precision function ew_nc_factor(flavour, q2)
+      double precision function ew_nc_factor(flavour)
       use mod_ew_state
       implicit none
       integer, intent(in) :: flavour
-      double precision, intent(in) :: q2
+!      double precision, intent(in) :: q2
       double precision :: eq, propgZ, propZ
       integer :: iflav
       
