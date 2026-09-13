@@ -131,3 +131,8 @@ In the past there have been bugs, discovered by myself and others. I would in pa
 * Silvia Ferrario Ravasio
 
 for reporting a number of them!
+
+Acknowledgments
+===============
+
+This work was started while working on the POWHEG generator for DIS presented in [arxiv:2309.02127](https://arxiv.org/abs/2309.02127). I'd like to thank my collaborators on that project (Andrea Banfi, Silvia Ferrario Ravasio, Barbara Jäger, Felix Reichenbach, Giulia Zanderighi) for many fruitful discussions and for giving me a good reason to develop the software and publish it.
