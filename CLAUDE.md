@@ -53,18 +53,19 @@ configurations and diffing the output against committed reference results.
 
 ```
 cd validation
-./validate_or_generate.sh validate   # build + run + diff against validation/ref_runs
+./validate_or_generate.sh validate   # full matrix: build + run + diff against ref_runs/
+./validate_or_generate.sh quick      # smaller/faster subset, diff against ref_runs_quick/
 ```
 
-- `validate_or_generate.sh generate` re-runs the same matrix and overwrites `ref_runs/` — only
+- `validate_or_generate.sh generate` re-runs the full matrix and overwrites `ref_runs/` — only
   do this deliberately, when a physics/numerical change is intended and reviewed, since it
   redefines "correct".
-- `quick_validation.sh` runs a smaller/faster subset against `ref_runs_quick/` and is what CI
-  (`.github/workflows/cmake-single-platform.yml`, driven by `.github_CI.sh`) executes as
-  `validate_or_generate.sh validate` after building.
-- Both scripts hardcode a list of command-line configurations (`prefix`/`cmdline` arrays) paired
-  positionally with files in `ref_runs`/`ref_runs_quick`; diffs ignore volatile lines (timing,
-  version banners) via `grep -v`.
+- CI (`.github/workflows/cmake-single-platform.yml`, driven by `.github_CI.sh`) builds then runs
+  `validate_or_generate.sh validate` (the full matrix), not the quick one.
+- All three modes hardcode command-line configurations (`prefix_full`/`cmdline_full` for
+  `validate`/`generate`, `prefix_quick`/`cmdline_quick` for `quick`) paired positionally with
+  files in `ref_runs`/`ref_runs_quick`; diffs ignore volatile lines (timing, version banners) via
+  `grep -v`.
 - `ctest` in the CMake build itself defines no tests (`disorder`'s CMakeLists.txt has no
   `enable_testing()`/`add_test`) — the CI's `ctest` step is a no-op for this repo; the real check
   is the validation script.
