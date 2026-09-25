@@ -477,7 +477,7 @@ contains
     if(scale_choice .eq. 0) write(idev,*) '# With MZ as central scale'
     if(scale_choice .eq. 1 .or. scale_choice .eq. 2) write(idev,*) '# With Q as central scale'
     if(scale_choice .eq. 3) write(idev,*) '# With Q*sqrt(1-y) as central scale'
-    if(scale_choice .eq. 4) write(idev,*) '# With Q*(1-x)/x as central scale'
+    if(scale_choice .eq. 4) write(idev,*) '# With Q*sqrt((1-x)/x) as central scale'
     write(idev,'(a,F16.9)') ' # 1/αEM:           ', 1.0_dp/alpha_em
     write(idev,'(a,E16.9,a)') ' # GF:                  ', GF,  ' GeV^-2'
     write(idev,'(a,F16.9)') ' # sin(θ_W)^2:      ', sin_thw_sq
@@ -537,7 +537,7 @@ contains
     write(0,'(a)') ' -lo/-nlo/-nnlo/-n3lo [-nnlo]: Run at LO/NLO/NNLO/N3LO       '
     write(0,'(a)') ' -nlocoef/-nnlocoef/-n3locoef : Run only NLO/NNLO/N3LO coef. '
     write(0,'(a)') ' -scale-choice (int) [1]: Central scale: 0: MZ, 1: Q,        '
-    write(0,'(a)') '                          3: Q*sqrt(1-y), 4: Q*(1-x)/x       '
+    write(0,'(a)') '                          3: Q*sqrt(1-y), 4: Q*sqrt((1-x)/x) '
     write(0,'(a)') ' -scaleuncert [false]: Do 7-point scale variation around Q   '
     write(0,'(a)') ' -pdfuncert [false] : Compute pdf uncertainties              '
     write(0,'(a)') ' -p2b [false] : Turn on disent and projection-to-Born        '

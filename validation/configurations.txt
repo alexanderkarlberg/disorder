@@ -1,0 +1,25 @@
+# The validation matrix: one disorder run per line, compared against the
+# files in ref_runs/ whose names start with the prefix (see run_validation.py).
+# Format:  labels | prefix | command-line arguments
+# Tests labelled 'slow' are skipped by './validate_or_generate.sh quick'
+# and by 'ctest -LE slow'.
+
+fast | inclusive_nc_Q_10_x_0.01_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert
+slow | inclusive_nc_Q_10_x_0.01_MSHT20an3lo_as118_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -pdfuncert -alphasuncert
+fast | inclusive_nc_includeZ_Q_10_x_0.01_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -includeZ -positron -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert
+fast | inclusive_cc_Q_10_x_0.01_ | -n3lo -yorder 5 -lnlnQorder 4 -CC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert
+fast | inclusive_nc_Q_10_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -scaleuncert
+fast | inclusive_nc_includeZ_Q_10_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -includeZ -toyQ0 2.0 -Q 10.0 -scaleuncert
+fast | inclusive_cc_Q_10_ | -n3lo -yorder 5 -lnlnQorder 4 -CC -toyQ0 2.0 -Q 10.0 -scaleuncert
+fast | inclusive_nc_Qmin_1_x_0.01_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert
+fast | inclusive_nc_includeZ_Qmin_1_x_0.01_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -includeZ -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert
+fast | inclusive_cc_Qmin_1_x_0.01_ | -n3lo -yorder 5 -lnlnQorder 4 -CC -toyQ0 2.0 -Qmin 1.0 -x 0.01 -scaleuncert
+fast | inclusive_nc_Q_10_y_0.01_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert
+fast | inclusive_nc_includeZ_Q_10_y_0.01_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -includeZ -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert
+fast | inclusive_cc_Q_10_y_0.01_ | -n3lo -yorder 5 -lnlnQorder 4 -CC -toyQ0 2.0 -Q 10.0 -y 0.01 -scaleuncert
+fast | inclusive_nc_Q_10_x_0.01_neutrino_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino
+fast | inclusive_nc_Q_10_x_0.01_neutrino_positron_ | -n3lo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino -positron
+fast | inclusive_cc_Q_10_x_0.01_neutrino_ | -n3lo -yorder 5 -lnlnQorder 4 -noNC -CC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino
+fast | inclusive_cc_Q_10_x_0.01_neutrino_positron_ | -n3lo -yorder 5 -lnlnQorder 4 -noNC -CC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino -positron
+fast | p2b_nc_Q_10_x_0.01_ | -nnlo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -p2b
+fast | p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_ | -nnlo -yorder 5 -lnlnQorder 4 -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -p2b

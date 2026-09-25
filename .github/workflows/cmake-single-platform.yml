@@ -9,6 +9,7 @@ on:
     branches: [ "main" ]
   schedule:
     - cron: '00 8 * * 1,2,3,4,5'
+  workflow_dispatch:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -22,26 +23,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    
+    - uses: actions/checkout@v4
+
     - name: Install dependencies
       run: chmod 755 ${{github.workspace}}/.github_CI.sh; ${{github.workspace}}/.github_CI.sh
 
     - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      # Configured as for the reference results in validation/ref_runs, so
+      # that ctest also runs the validation matrix.
+      run: >
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        -DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis.f
 
     - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j $(nproc)
 
     - name: Test
+      # Unit tests and the full validation matrix (see validation/)
       working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+      run: ctest -C ${{env.BUILD_TYPE}} -j $(nproc) --output-on-failure
 
-    - name: Run validation
-      working-directory: ${{github.workspace}}/validation
-      run: chmod 755 validate_or_generate.sh; ./validate_or_generate.sh validate
+  keepalive:
+    # GitHub disables scheduled workflows after 60 days without activity in
+    # the repository. Re-enabling the workflow through the API resets that
+    # timer, without the need for dummy commits.
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+    - name: Re-enable this workflow
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: >
+        gh api --method PUT
+        "repos/${{ github.repository }}/actions/workflows/cmake-single-platform.yml/enable"

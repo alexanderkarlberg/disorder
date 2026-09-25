@@ -240,46 +240,6 @@ contains
     enddo
   end function eval_matrix_element_new
     
-  !----------------------------------------------------------------------
-  ! mu_R as a function of Q
-  real(dp) function muRlcl(x,y,Q)
-    real(dp), intent(in) :: x,y,Q
-    muRlcl = zero
-    if (scale_choice.le.1) then
-       ! if scale_choice = 0,1 then muR1(Q) = muR(Q)
-       muRlcl = sf_muR(Q)
-    elseif (scale_choice.eq.2) then
-       ! else if scale_choice=2, use Q
-       muRlcl = xmur * Q
-    elseif (scale_choice.eq.3) then
-       ! else if scale_choice=2, use pt lepton
-       muRlcl = xmur * Q * sqrt(1 - y) 
-    elseif (scale_choice.eq.4) then
-       ! else if scale_choice=2, use Q * (1-x)/x advocated by Stefano Forte
-       muRlcl = xmur * Q * (1 - x) / x
-    endif
-  end function muRlcl
-  
-  !----------------------------------------------------------------------
-  ! mu_R as a function of Q
-  real(dp) function muFlcl(x,y,Q)
-    real(dp), intent(in) :: x,y,Q
-    muFlcl = zero
-    if (scale_choice.le.1) then
-       ! if scale_choice = 0,1 then muF1(Q) = muF(Q)
-       muFlcl = sf_muF(Q)
-    elseif (scale_choice.eq.2) then
-       ! else if scale_choice=2, use Q
-       muFlcl = xmuf * Q
-    elseif (scale_choice.eq.3) then
-       ! else if scale_choice=2, use pt lepton 
-       muFlcl = xmuf * Q * sqrt(1 - y) 
-    elseif (scale_choice.eq.4) then
-       ! else if scale_choice=2, use Q * (1-x)/x advocated by Stefano Forte
-       muFlcl = xmuf * Q * (1 - x) / x
-    endif
-  end function muFlcl
-
   subroutine muR_muF(x,y,Q,muR,muF)
     implicit none
     real(dp), intent(in)  :: x,y,Q
@@ -300,7 +260,7 @@ contains
        muR = xmur * mu
        muF = xmuf * mu
     elseif (scale_choice.eq.4) then
-       ! else if scale_choice=2, use Q * sqrt((1-x)/x) advocated by Stefano Forte
+       ! else if scale_choice=4, use mu^2 = Q^2 * (1-x)/x advocated by Stefano Forte
        mu  = Q * sqrt((1 - x) / x)
        muR = xmur * mu
        muF = xmuf * mu

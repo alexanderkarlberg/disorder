@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7.0)
+cmake_minimum_required(VERSION 3.12)
 include(CMakePrintHelpers)
 project(disorder VERSION 1.0.0 LANGUAGES CXX Fortran)
 
@@ -6,7 +6,7 @@ IF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     MESSAGE(FATAL_ERROR "Fortran compiler does not support F90")
 ENDIF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 
-set(CMAKE_Fortran_MODULE_DIRECTORY modules)
+set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -ffixed-line-length-132 -fPIC -flto -Wno-maybe-uninitialized")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -fPIC -flto -Wno-maybe-uninitialized")
@@ -23,8 +23,9 @@ set (disorder_SOURCES )
 set (disorder_ANALYSIS )
 set (disorder_LIBRARIES )
 
-# Main sources
+# Main sources (everything but the main program, which is added below)
 file(GLOB_RECURSE disorder_SOURCES src/* analysis/pwhg_bookhist-multi.*)
+list(REMOVE_ITEM disorder_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/disorder.f90)
 
 # THE ANALYSIS TO BE COMPILED
 file(GLOB_RECURSE disorder_ANALYSIS analysis/simple_analysis.f)
@@ -33,7 +34,6 @@ if(ANALYSIS)
 endif()
 cmake_print_variables(disorder_ANALYSIS)
 
-list(APPEND disorder_SOURCES ${disorder_ANALYSIS})
 
 ##################################################################################
 # Needs hoppet
@@ -133,7 +133,7 @@ option(NEEDS_FASTJET "To link fastjet libraries" OFF)
 cmake_print_variables(NEEDS_FASTJET)
 if (NEEDS_FASTJET)
   file(GLOB_RECURSE fastjet_SOURCE  analysis/fastjetfortran.cc)
-  list(APPEND disorder_SOURCES ${fastjet_SOURCE})
+  list(APPEND disorder_ANALYSIS ${fastjet_SOURCE})
   find_file(FASTJET_CONFIG fastjet-config)
   cmake_print_variables(FASTJET_CONFIG)
   execute_process(
@@ -165,14 +165,27 @@ endif()
 cmake_print_variables(disorder_INCLUDES)
 cmake_print_variables(disorder_LIBRARIES)
 
-add_executable(disorder src/disorder.f90)
+# The physics code is built once and shared by disorder and the tests.
+# The analysis is kept separate, since the tests link their own.
+add_library(disorder_core OBJECT ${disorder_SOURCES})
+target_include_directories(disorder_core PUBLIC ${disorder_INCLUDES})
+
+add_executable(disorder src/disorder.f90 ${disorder_ANALYSIS})
 add_executable(mergedata aux/mergedata.f)
 add_executable(getpdfuncert aux/getpdfuncert.f)
 
-target_sources(disorder PUBLIC ${disorder_SOURCES})
 target_include_directories(disorder PUBLIC ${disorder_INCLUDES})
-target_link_libraries(disorder ${disorder_LIBRARIES})
+target_link_libraries(disorder disorder_core ${disorder_LIBRARIES})
 target_link_libraries(getpdfuncert ${LHAPDF_LIBRARY})
+
+##################################################################################
+# Tests: unit tests in tests/, the validation matrix in validation/
+option(DISORDER_TESTS "Build and register the tests with ctest" ON)
+if(DISORDER_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+  add_subdirectory(validation)
+endif()
 
 cmake_print_variables(CMAKE_CXX_FLAGS)
 cmake_print_variables(CMAKE_Fortran_FLAGS)

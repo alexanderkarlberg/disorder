@@ -1,8 +1,8 @@
 #!/bin/bash
 # This script contains all the commands executed by the CI of github
 
-# Get sem
-sudo apt install parallel cmake
+# Get cmake
+sudo apt install cmake
 
 # Clone Hoppet
 git clone https://github.com/hoppet-code/hoppet.git
