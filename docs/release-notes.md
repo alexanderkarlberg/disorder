@@ -6,13 +6,31 @@ where it no longer applies, this file says so.
 
 ## Unreleased
 
+### Physics
+
+- **p2b at NLO for all NC and CC processes.** DISENT's three-parton
+  tree-level matrix element (`MATTHR` in `src/libdisent.f`) now includes Z
+  and W exchange: NC with γ, Z or γ/Z (`-includeZ`, `-Zonly`, `-intonly`),
+  CC, charged-lepton and neutrino beams of either charge (`-positron`,
+  `-neutrino`). `-p2b` can therefore be combined with `-includeZ` and `-CC`
+  (and NC neutrino beams) up to NLO, giving differential O(αs) predictions
+  (jets, event shapes) for all these processes. Beyond NLO p2b is still
+  restricted to photon exchange; the guards say so ("Cannot do Z/CC in p2b
+  beyond NLO yet"). The electroweak couplings are the same as in the
+  inclusive (structure-function) mode. For photon exchange the results are
+  bitwise identical to before. The derivation (FORM) is in
+  `derivations/matthr/`; the NLO distributions were validated against
+  NNLOJET 1.0.2 and POWHEG-BOX-RES for all processes each code supports.
+
 ### Testing and validation
 
 - **Unit tests.** `ctest` now runs unit tests of the Born phase-space
   generator, the lab ↔ Breit frame transformations, the matrix element (at LO
   against the quark-parton-model expressions for NC γ/Z/γZ exchange, CC, and
   neutrino beams; beyond LO the combination of structure functions), the
-  interface to DISENT, and the refusal of unsupported option combinations.
+  interface to DISENT, DISENT's three-parton matrix element for every
+  process (`test_matthr`), and the refusal of unsupported option
+  combinations.
   They take about a second: `ctest -L unit`.
 - **Validation through ctest.** Each configuration of the validation matrix
   (now listed in `validation/configurations.txt`) is a ctest test, compared

@@ -9,6 +9,7 @@ module mod_matrix_element
 
   private
   public :: eval_matrix_element, eval_matrix_element_new, muR_muF
+  public :: parton_couplings
 
 contains
   !----------------------------------------------------------------------
@@ -239,6 +240,109 @@ contains
 
     enddo
   end function eval_matrix_element_new
+
+  !----------------------------------------------------------------------
+  ! Electroweak couplings of each incoming parton at LO, in units of
+  ! the photon-exchange coupling e_q^2 (and with the same propagator
+  ! factors, lepton species and gamma/Z selection as
+  ! eval_matrix_element_new above, which must be kept in step):
+  !   F2/x  = sum_i c2(i) f_i(x),    F3 = sum_i c3(i) f_i(x),
+  ! i = -6..6 as in the PDF arrays (1 = d, 2 = u, negative = antiquarks,
+  ! c2(0) = c3(0) = 0). Equivalently, for helicity-conserving
+  ! lepton-parton scattering, c2 + c3 (c2 - c3) is the coupling of the
+  ! same-helicity (opposite-helicity) lepton-parton configuration.
+  ! Used by MATTHR in DISENT (src/libdisent.f) through disent_couplings
+  ! (src/mod_disent_interface.f90). eq(-6:6) are the quark charges; the
+  ! photon term is eq(i)**2 exactly, so that pure photon exchange
+  ! reproduces DISENT's original arithmetic bit for bit.
+  subroutine parton_couplings(Qsq, eq, c2, c3)
+    real(dp), intent(in)  :: Qsq, eq(-6:6)
+    real(dp), intent(out) :: c2(-6:6), c3(-6:6)
+    real(dp) :: propgZ, propZ, propW, cw, sw2, c2q, c3q
+    real(dp) :: two_vq, two_aq, vq2_aq2, two_vq_aq
+    integer  :: i, iu, id, ngen
+
+    c2 = zero
+    c3 = zero
+
+    if(NC) then
+       propgZ = Qsq / (Qsq + MZ**2) / sin_2thw_sq
+       propZ  = propgZ**2
+       if(neutrino) propZ = two * propZ ! Polarisation sum is 1, not 1/2.
+       sw2 = sin_thw_sq
+       do i = 1, nflav
+          ! Z couplings in HOPPET's normalisation (structure_functions.f90)
+          if (mod(i,2) == 0) then ! up type
+             two_vq    = one - (8.0_dp/three) * sw2
+             two_aq    = one
+             vq2_aq2   = one/four + (half - (four/three) * sw2)**2
+             two_vq_aq = half - (four/three) * sw2
+          else                    ! down type
+             two_vq    = -one + (four/three) * sw2
+             two_aq    = -one
+             vq2_aq2   = one/four + (half - (two/three)  * sw2)**2
+             two_vq_aq = half - (two/three)  * sw2
+          endif
+          if(noZ) then
+             c2q = eq(i)**2
+             c3q = zero
+          elseif(Zonly) then
+             c2q =   Ve2_Ae2 * propZ * vq2_aq2
+             c3q = two_Ve_Ae * propZ * two_vq_aq
+          elseif(intonly) then
+             c2q = - Ve * propgZ * eq(i) * two_vq
+             c3q = - Ae * propgZ * eq(i) * two_aq
+          else
+             c2q = eq(i)**2 - (Ve * propgZ * eq(i) * two_vq - Ve2_Ae2 * propZ * vq2_aq2)
+             c3q =          - (Ae * propgZ * eq(i) * two_aq - two_Ve_Ae * propZ * two_vq_aq)
+          endif
+          c2( i) = c2( i) + c2q
+          c2(-i) = c2(-i) + c2q
+          c3( i) = c3( i) + c3q
+          c3(-i) = c3(-i) - c3q
+       enddo
+    endif
+
+    if(CC) then
+       ! As in eval_matrix_element_new, including the factor two
+       ! multiplying HOPPET's W structure functions (whose couplings are
+       ! vi^2 + ai^2 = 2 vi ai = 1 per flavour).
+       propW = half * (1/(sqrt(two) * four * sin_thw_sq) * Qsq / (Qsq + MW**2))**2
+       if(neutrino) then
+          propW = four * propW
+       else
+          propW = two * propW
+       endif
+       cw = two * propW
+       ! HOPPET only uses complete generations (u,d), (c,s) for W exchange
+       ngen = nflav / 2
+       do i = 1, ngen
+          id = 2*i - 1
+          iu = 2*i
+          if(neutrino .neqv. positron) then ! e+ or nu: W+ absorbed, d -> u, ubar -> dbar
+             c2( id) = c2( id) + cw
+             c2(-iu) = c2(-iu) + cw
+             if(neutrino) then ! nu (left-handed): same helicity as d
+                c3( id) = c3( id) + cw
+                c3(-iu) = c3(-iu) - cw
+             else              ! e+ (right-handed)
+                c3( id) = c3( id) - cw
+                c3(-iu) = c3(-iu) + cw
+             endif
+          else                              ! e- or nubar: W-, u -> d, dbar -> ubar
+             c2( iu) = c2( iu) + cw
+             c2(-id) = c2(-id) + cw
+             if(.not.neutrino) then ! e- (left-handed): same helicity as u
+                c3( iu) = c3( iu) + cw
+                c3(-id) = c3(-id) - cw
+             else                   ! nubar (right-handed)
+                c3( iu) = c3( iu) - cw
+                c3(-id) = c3(-id) + cw
+             endif
+          endif
+       enddo
+    endif
+  end subroutine parton_couplings
     
   subroutine muR_muF(x,y,Q,muR,muF)
     implicit none

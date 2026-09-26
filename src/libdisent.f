@@ -628,23 +628,41 @@ C-----------------------------------------------------------------------
       IMPLICIT NONE
 C---EVALUATE THE THREE-PARTON MATRIX ELEMENT SQUARED FOR THE GIVEN
 C   CONFIGURATION.
+C
+C AK (2026): generalised from photon exchange to gamma/Z and W exchange.
+C   For helicity-conserving couplings the quark-initiated matrix element
+C   is the sum of a same-helicity (lepton and quark) term proportional to
+C   DOT(P,1,6)**2+DOT(P,2,7)**2 and an opposite-helicity term
+C   proportional to DOT(P,1,7)**2+DOT(P,2,6)**2, with a common
+C   denominator (derivations/matthr/). With C2 = (same+opposite)/2 and
+C   C3 = (same-opposite)/2 in units of the photon coupling (the parton
+C   couplings of F2 and F3, from DISENT_COUPLINGS), M = C2*QQ + C3*QQ3.
+C   For photon exchange C2 = EQ**2 and C3 = 0, which gives exactly the
+C   original result. In the gluon-initiated channel the parity-violating
+C   term is odd under the exchange of the quark and antiquark (2<->3) and
+C   is dropped, since the phase space is symmetric under it.
       INTEGER I
-      DOUBLE PRECISION P(4,7),M(-6:6),QQ,GQ,DOT
+      DOUBLE PRECISION P(4,7),M(-6:6),QQ,QQ3,GQ,DOT,C2(-6:6),C3(-6:6),
+     $     CG(6)
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
       QQ=8*(4*PI/137)**2*
      $     (DOT(P,1,6)**2+DOT(P,1,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2)
      $     *16*PISQ*CF/(-4*DOT(P,2,3)*DOT(P,1,3)*DOT(P,5,5))
+      QQ3=8*(4*PI/137)**2*
+     $     (DOT(P,1,6)**2-DOT(P,1,7)**2+DOT(P,2,7)**2-DOT(P,2,6)**2)
+     $     *16*PISQ*CF/(-4*DOT(P,2,3)*DOT(P,1,3)*DOT(P,5,5))
       GQ=8*(4*PI/137)**2*
      $     (DOT(P,3,6)**2+DOT(P,3,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2)
      $     *16*PISQ*TR/(-4*DOT(P,2,1)*DOT(P,3,1)*DOT(P,5,5))
+      CALL DISENT_COUPLINGS(-DOT(P,5,5),EQ,C2,C3,CG)
       DO I=-6,6
-        M(I)=EQ(I)**2*QQ
+        M(I)=C2(I)*QQ+C3(I)*QQ3
       ENDDO
       M(0)=0
       DO I=1,NF
-        M(0)=M(0)+EQ(I)**2*GQ
+        M(0)=M(0)+CG(I)*GQ
       ENDDO
       END
 C-----------------------------------------------------------------------

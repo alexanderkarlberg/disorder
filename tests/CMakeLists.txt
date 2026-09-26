@@ -64,13 +64,25 @@ foreach(case ${me_nlo_cases})
   set_tests_properties(unit_matrix_element_${name} PROPERTIES LABELS "unit")
 endforeach()
 
+# DISENT's three-parton matrix element for each process
+disorder_add_test_program(test_matthr)
+foreach(case ${me_cases})
+  string(REPLACE "|" ";" case ${case})
+  list(GET case 0 name)
+  list(GET case 1 args)
+  separate_arguments(args)
+  add_test(NAME unit_matthr_${name} COMMAND test_matthr ${me_common} ${args})
+  set_tests_properties(unit_matthr_${name} PROPERTIES LABELS "unit")
+endforeach()
+
 # Combinations that disorder must refuse to run. The guards in
 # set_parameters use `stop`, which exits with status 0, so the tests
 # look for the message instead.
 set(guard_cases
-  "p2b_cc|Cannot do CC in p2b yet|-p2b -CC -nnlo -toyQ0 2.0 -Q 10 -x 0.01"
+  "p2b_cc|Cannot do CC in p2b beyond NLO yet|-p2b -CC -nnlo -toyQ0 2.0 -Q 10 -x 0.01"
   "p2b_n3lo|Cannot run p2b at N3LO yet|-p2b -n3lo -toyQ0 2.0 -Q 10 -x 0.01"
-  "p2b_Z|Cannot do Z in p2b yet|-p2b -includeZ -nnlo -toyQ0 2.0 -Q 10 -x 0.01"
+  "p2b_Z|Cannot do Z in p2b beyond NLO yet|-p2b -includeZ -nnlo -toyQ0 2.0 -Q 10 -x 0.01"
+  "p2b_nu_nc|Cannot do Z in p2b beyond NLO yet|-p2b -NC -neutrino -nnlo -toyQ0 2.0 -Q 10 -x 0.01"
   "p2b_vnf|Cannot run p2b with variable flavour|-p2b -vnf -nnlo -toyQ0 2.0 -Q 10 -x 0.01"
   "p2b_pdfuncert|Cannot do pdf uncertainties with p2b|-p2b -nnlo -toyQ0 2.0 -Q 10 -x 0.01 -pdfuncert"
   "alphasuncert_alone|Need -pdfuncert to run with -alphasuncert|-nnlo -toyQ0 2.0 -Q 10 -x 0.01 -alphasuncert"

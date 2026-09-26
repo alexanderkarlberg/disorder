@@ -252,3 +252,31 @@ contains
  END FUNCTION DOT
 
 end module mod_disent_interface
+
+!----------------------------------------------------------------------
+! Electroweak couplings for MATTHR in DISENT (src/libdisent.f), which
+! calls this as an external routine. Given Q2 = -q^2 and DISENT's quark
+! charges eq(-6:6), it returns, for each incoming parton i,
+!   c2(i): the coupling of the parity-conserving part of the matrix
+!          element (e_q^2 for photon exchange),
+!   c3(i): the coupling of the parity-violating part (0 for photon
+!          exchange),
+!   cg(i), i = 1..6: the coupling of the gluon-initiated channel with
+!          a q qbar pair of flavour i in the final state; the parity-
+!          violating part of that channel is odd under the exchange of
+!          the quark and the antiquark and cancels after integration
+!          over DISENT's symmetric three-parton phase space.
+! See parton_couplings in src/mod_matrix_element.f90 and
+! derivations/matthr/.
+subroutine disent_couplings(Q2, eq, c2, c3, cg)
+  use types, only: dp
+  use mod_matrix_element, only: parton_couplings
+  implicit none
+  real(dp), intent(in)  :: Q2, eq(-6:6)
+  real(dp), intent(out) :: c2(-6:6), c3(-6:6), cg(6)
+  integer :: i
+  call parton_couplings(Q2, eq, c2, c3)
+  do i = 1, 6
+     cg(i) = (c2(i) + c2(-i)) / 2
+  enddo
+end subroutine disent_couplings

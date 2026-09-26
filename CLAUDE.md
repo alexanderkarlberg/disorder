@@ -58,8 +58,12 @@ Everything runs through `ctest` (`enable_testing()` in the top-level CMakeLists.
     (kinematics, frame properties, Jacobian integrated against the phase-space volume).
   - `test_matrix_element`: run with disorder's own flags (one ctest entry per process: γ/Z/γZ,
     e±, ν/ν̄, NC/CC). At LO it compares `eval_matrix_element_new` with parton-model formulas
-    written out independently in the test; beyond LO (photon only) it checks the F2/FL
-    combination. Also checks `muR_muF` and the scale-variation labels.
+    written out independently in the test, and also the per-parton couplings `parton_couplings`
+    used by DISENT; beyond LO (photon only) it checks the F2/FL combination. Also checks
+    `muR_muF` and the scale-variation labels.
+  - `test_matthr`: DISENT's three-parton matrix element for each process (same flag sets):
+    bitwise identical to the original DISENT expression for photon exchange, decomposition into
+    parity-conserving/violating parts, collinear limits.
   - `test_disent_interface`: drives the real `DISENTFULL` with a checking callback and verifies
     the momentum mapping/boosts used by `user` (`src/mod_disent_interface.f90`).
   - `guard_*`: invalid flag combinations must be refused. The guards use `stop`, which exits
@@ -117,7 +121,11 @@ Entry point `src/disorder.f90` drives two very different computational modes, se
 - **P2B ("projection to Born") mode** (`-p2b`): adds real-radiation corrections through
   `DISENTFULL` (`src/libdisent.f`, ~3100 lines, adapted from Mike Seymour's `disent`/`dispatch`),
   which generates 2→3 and 2→4 real-emission kinematics and dipole-subtracted matrix elements on
-  top of the Born. Currently NC-only, and capped below N3LO (see the guard clauses in
+  top of the Born. Up to NLO (only the three-parton tree `MATTHR` enters) all NC/CC processes
+  are supported; `MATTHR`'s electroweak couplings come from `parton_couplings`
+  (`src/mod_matrix_element.f90`, mirroring `eval_matrix_element_new`; derivation in
+  `derivations/matthr/`). At NNLO the other O(αs²) ingredients are photon-only, so p2b beyond
+  NLO is restricted to photon exchange, and N3LO is not available (see the guard clauses in
   `set_parameters`).
 
 The disent callbacks (`user`, `dis_cuts`, `disent_muf`) live in `src/mod_disent_interface.f90`,

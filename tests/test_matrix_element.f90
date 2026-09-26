@@ -15,6 +15,8 @@
 ! Beyond LO (for photon exchange only) it instead checks how the
 ! structure functions from HOPPET are combined, which tests the F_L
 ! term that vanishes at LO.
+! At LO it also checks the per-parton couplings (parton_couplings) that
+! DISENT's three-parton matrix element uses against the same formulas.
 ! It also checks the central-scale choices of muR_muF and the scale
 ! labels used in the output file names.
 program test_matrix_element
@@ -55,6 +57,9 @@ program test_matrix_element
         endif
         expected = lo_cross_section(x, y, Q, muF)
         call check_close(trim(tag)//': LO d2sigma/dx/dQ2', res(1), expected, 1e-5_dp)
+        ! the per-parton couplings used by DISENT's MATTHR
+        call check_close(trim(tag)//': LO from parton_couplings (DISENT)', &
+             & couplings_cross_section(x, y, Q, muF), expected, 1e-5_dp)
 
         ! reduced cross sections as defined by H1, 1206.7007 (charged leptons)
         if (.not. neutrino) then
@@ -88,6 +93,24 @@ contains
     FL = F2 - 2 * x * Fx(iF1EM)
     sig = 2 * pi * alpha_em**2 / (x * Q**4) * ((1 + (1-y)**2) * F2 - y**2 * FL)
   end function photon_cross_section
+
+  ! LO cross section from the per-parton couplings c2, c3 that DISENT's
+  ! MATTHR uses (parton_couplings), 2 pi alpha^2/(x Q^4)
+  ! sum_i x f_i (Y+ c2(i) + Y- c3(i)).
+  real(dp) function couplings_cross_section(x, y, Q, muF) result(sig)
+    real(dp), intent(in) :: x, y, Q, muF
+    real(dp) :: xf(-6:6), eq(-6:6), c2(-6:6), c3(-6:6)
+    integer :: i
+    eq(0) = 0
+    do i = 1, 6
+       eq(i) = merge(2.0_dp/3.0_dp, -1.0_dp/3.0_dp, mod(i,2) == 0)
+       eq(-i) = -eq(i)
+    enddo
+    call parton_couplings(Q**2, eq, c2, c3)
+    call hoppetEval(x, muF, xf)
+    sig = 2 * pi * alpha_em**2 / (x * Q**4) &
+         & * sum(xf * ((1 + (1-y)**2) * c2 + (1 - (1-y)**2) * c3))
+  end function couplings_cross_section
 
   ! LO cross section d^2sigma/dx/dQ^2 in GeV^-4, for the process
   ! selected on the command line (NC and/or CC, lepton species).

@@ -152,3 +152,118 @@ inactivity.
   `mod_matrix_element.f90`.
 - The manual still describes validation with GNU parallel; changes are
   documented in `docs/release-notes.md` instead.
+
+## 2026-09-25/26 — Cross-check against NNLOJET 1.0.2 and POWHEG-BOX-RES (DIS)
+
+Full log, scripts, results and plots: `~/cernbox/disorder-comparisons/`
+(`NOTES.md`, `results/`, `plots/`, `bug_reports/`). disorder used from the
+command line only; no change to `src/`.
+
+Setup: 27.5 × 920 GeV, 150 < Q² < 15000 GeV², 0.1 < y < 0.9,
+NNPDF40MC_nlo_as_01180 (NNLO set for O(αs²)), α = 1/137, M_Z = 91.1876,
+M_W = 80.398, zero widths, identity CKM, μR = μF = Q. The observables are in
+`analysis/cmp_obs_core.f`, shared by the disorder analysis
+`analysis/cmp_nnlojet_powheg.f` and a POWHEG analysis: σ, Q², x, y; the
+leading lab-frame anti-kt (R = 1) jet (pT, η); and the Breit-frame,
+E-normalised current-hemisphere shapes τ_zE, B_zE, ρ_E (NNLOJET definitions).
+These files are not committed yet.
+
+### Findings
+
+- LO: all processes (NC γ/Z/γZ e∓, ν, ν̄; CC e∓, ν, ν̄) agree for all
+  histograms. χ²/n ≲ 1. Totals agree to 1e-5–3e-4, within 1.4σ.
+- O(αs):
+  - Inclusive: disorder, NNLOJET and POWHEG agree for every process each code
+    supports, with totals within 1.1σ.
+  - Lab jets: NNLOJET and POWHEG agree, and the photon case also agrees with
+    disorder P2B.
+  - Event shapes: all three codes agree. The exceptions are NC e⁺, where
+    NNLOJET returns the e⁻ result (its limitation), and one 4σ bin.
+- O(αs²), photon only (disorder P2B `-nnlo` vs NNLOJET epLJJ NLO):
+  - ρ_E agrees.
+  - τ_zE and B_zE disagree in their tails, by up to 7%.
+  - Cause: without a current-hemisphere energy cut, τ_zE and B_zE are not
+    infrared safe at this order. A soft gluon alone in the current hemisphere
+    gives a finite value. Varying DISENT's `-cutoff` from 1e-6 to 1e-10 moves
+    the τ tail from −25% to +30%, while ρ_E stays unchanged.
+  - So this is not a code bug. Future comparisons need E_cur > εQ, or the
+    Q-normalised shapes.
+- No bug in disorder found.
+- One bug in the new comparison analysis, now fixed: at O(αs²), DISENT passes
+  exactly-zero momenta in its collinear counterterms, which made `cmp_antikt`
+  loop forever.
+- Issues in NNLOJET and POWHEG are drafted as bug reports in the directory
+  above.
+
+### Speed (CPU time for 1e-4 on the total)
+
+- disorder, inclusive: ~7 s.
+- disorder, P2B NLO: ~120 s.
+- POWHEG: LO 60–75 s, NLO 1800–4000 s.
+- NNLOJET: LO 300–400 s.
+- O(αs²) shapes:
+  - disorder: 24 CPU-h for all shapes at 0.3–1% per bin.
+  - NNLOJET: ~80 core-h per (process, shape) at 0.2–0.6%.
+  - A full NC/CC set at 0.3% needs O(10⁴) core-h with NNLOJET.
+
+## 2026-09-26 — MATTHR for γ/Z and W exchange (p2b at NLO for all processes)
+
+Goal (AK): re-derive DISENT's photon three-parton matrix element, find the
+form in which Z and W exchange fit into it while keeping photon exchange
+bit-identical, then implement it for all NC/CC processes and validate
+against NNLOJET and POWHEG. Only `MATTHR` (and the guards) are touched: at
+NLO p2b it is the only DISENT matrix element that reaches the user routine.
+
+### Derivation (FORM 4.3, `derivations/matthr/`)
+
+- |M|² of l q → l q g, l q̄ → l q̄ g and l g → l q q̄ for each lepton
+  helicity and quark chirality, with p3 and p1·p2 eliminated; sympy
+  confirms exact identities A(l,h) = 32 (−q²) PAIR/(s13 s23)
+  (s12 s13 for the gluon), where PAIR is (k·p1)² + (k'·p2)² for equal
+  helicities and (k'·p1)² + (k·p2)² otherwise (swapped for antiquarks).
+  For the gluon the pairs are (k·p3)² + (k'·p2)² and (k'·p3)² + (k·p2)².
+- The helicity sum reproduces DISENT's `QQ`/`GQ`; with spin/colour
+  averages, QQ = |M|²/(αs/2π) exactly.
+- Hence M(i) = C2(i) QQ + C3(i) QQ3, where QQ3 has the numerator
+  same − opposite and C2, C3 are the per-parton couplings of F2/x and F3
+  in photon units, the same combination as at LO (Y₊ C2 + Y₋ C3).
+  Antiquarks flip C3. In the gluon channel the parity-violating part is
+  odd under 2 ↔ 3 and integrates to zero over DISENT's symmetric phase
+  space (checked that GENTHR/GENDEC generate z and 1−z and the azimuth
+  symmetrically), so it is dropped and the coupling is (C2(i)+C2(−i))/2.
+
+### Implementation
+
+- `parton_couplings` (`src/mod_matrix_element.f90`) mirrors the coupling
+  and propagator logic of `eval_matrix_element_new` (γ, Z, γ/Z, Z-only,
+  interference-only, CC, e±, ν/ν̄, HOPPET's quark couplings and complete
+  generations for W exchange). `disent_couplings`
+  (`src/mod_disent_interface.f90`, external, called from F77) adds the
+  gluon couplings.
+- `MATTHR`: `M(I) = C2(I)*QQ + C3(I)*QQ3`. For photon exchange C2 = EQ²,
+  C3 = 0 and CG = EQ², so the arithmetic is the original one.
+- Guards: Z/CC with p2b allowed up to NLO; beyond that still refused
+  (VIRTHR, CONTHR, MATFOR, ... are photon-only, and they also call MATTHR).
+
+### Checks
+
+- `test_matrix_element` (13 processes): LO cross section from
+  `parton_couplings` = quark-parton-model formulas (1e-5).
+- `test_matthr` (13 processes): photon bitwise identical to the original
+  expression; decomposition; QQ3/QQ → Y₋/Y₊ in the initial- and
+  final-state collinear limits.
+- Full ctest (59 tests) passes; the p2b validation outputs (photon,
+  O(αs²), which also use MATTHR via VIRTHR/COLFOR/SUBFOR) are bitwise
+  identical to `ref_runs` apart from the header stamp.
+- The photon O(αs) p2b run of 2026-09-25 (1e8 events, seed 1), repeated
+  with the new binary: histograms, grids and cross section byte-identical.
+- Physics validation (`~/cernbox/disorder-comparisons`, stages
+  `p2b_jets`, `p2b_shapes`): disorder `-nlo -p2b`, 4 × 1e8 events per
+  process, against the O(αs) NNLOJET and POWHEG runs of 2026-09-25/26.
+  All 10 processes, all histograms (Q², x, y, lab jet pT and η, τ_zE,
+  B_zE, ρ_E) agree within statistics. Totals: χ² 397.8/360 (NNLOJET shapes),
+  799.3/720 (POWHEG shapes), with no process or observable standing out.
+  NNLOJET is not available for ν beams, nor for NC e⁺ (it computes e⁻).
+- Negative control: the same CC e⁻ run with QQ3 dropped deviates by up to
+  11% (τ_zE χ² ≈ 1.9e4/24, lab η_j 3.2e3/10 vs NNLOJET), so the
+  comparison is sensitive to the new term.
