@@ -184,6 +184,22 @@ program harness
 201        continue
            write(*,'(a,i2,es14.5)') '  perm', J4, S4(2)
         enddo
+     case ('conthr3avg')
+        ! azimuthal average of CONTHR (CONTHR3) around the gluon p3 vs half of
+        ! the photon (parity-violating) MATTHR structure QQ (QQ3)
+        SS4 = 0; S4 = 0
+        do J4 = 1, 64
+           call vazim(P, 3, 2*PI*(J4-0.5d0)/64, V)
+           VV = V(4)**2-V(3)**2-V(2)**2-V(1)**2
+           call CONTHR(P, V, VV, 2, -1, 3, SC); SS4(0) = SS4(0) + SC/64
+           call CONTHR3(P, V, VV, SC); SS4(1) = SS4(1) + SC/64
+        enddo
+        ! QQ and QQ3 as in MATTHR
+        S4(0) = 8*(4*PI/137)**2*(DOT(P,1,6)**2+DOT(P,1,7)**2+DOT(P,2,7)**2+DOT(P,2,6)**2) &
+             *16*PISQ*CF/(-4*DOT(P,2,3)*DOT(P,1,3)*DOT(P,5,5))
+        S4(1) = 8*(4*PI/137)**2*(DOT(P,1,6)**2-DOT(P,1,7)**2+DOT(P,2,7)**2-DOT(P,2,6)**2) &
+             *16*PISQ*CF/(-4*DOT(P,2,3)*DOT(P,1,3)*DOT(P,5,5))
+        write(*,'(2f18.12)') SS4(0)/(S4(0)/2), SS4(1)/(S4(1)/2)
      case ('fcc')
         call FEXX3(P(1,6),P(1,1),P(1,2),P(1,3),P(1,4),EPV,ESY)
         write(*,'(2es25.16)',advance='no') ESY, EPV
@@ -219,6 +235,18 @@ contains
     a = DOT(P,6,ig); b = DOT(P,2,ig)
     V = P(:,6) - a/b * P(:,2)
   end subroutine vperp
+  ! a space-like unit-ish vector perpendicular to P(,ig), rotated by phi
+  ! around P(,ig) (in the frame where P(,ig) has no time-like mixing)
+  subroutine vazim(P, ig, phi, V)
+    double precision, intent(in) :: P(4,7), phi
+    integer, intent(in) :: ig
+    double precision, intent(out) :: V(4)
+    double precision :: n(3), a(3), b(3), e1(3), e2(3), nn
+    n = P(1:3,ig)/sqrt(sum(P(1:3,ig)**2))
+    a = [1d0, 0d0, 0d0]; a = a - sum(a*n)*n; e1 = a/sqrt(sum(a**2))
+    e2 = [n(2)*e1(3)-n(3)*e1(2), n(3)*e1(1)-n(1)*e1(3), n(1)*e1(2)-n(2)*e1(1)]
+    V(1:3) = cos(phi)*e1 + sin(phi)*e2; V(4) = 0
+  end subroutine vazim
 end program harness
 
 ! symmetric (photon) version of VIRT3PV, for testing
