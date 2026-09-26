@@ -709,6 +709,22 @@ C      VV=V(4)**2-V(3)**2-V(2)**2-V(1)**2
       m=m*(4*pi/137)**2
       END
 C-----------------------------------------------------------------------
+      SUBROUTINE CONTHR3(P,V,VV,M)
+      IMPLICIT NONE
+C---AK (2026): parity-violating analogue of CONTHR for the quark-initiated
+C   Born (CONTHR arguments Q=2, QBAR=-1, G=3), for Z and W exchange: the
+C   difference between the same- and opposite-helicity lepton-quark
+C   configurations, normalised like CONTHR (to be multiplied by the
+C   coupling C3 instead of EQ**2). From FCONTH3 (disent_o2_trees.f,
+C   FORM, derivations/o2), whose helicity sum reproduces CONTHR.
+      DOUBLE PRECISION P(4,7),V(4),VV,M,DOT,C3PV,C3SY
+      INTEGER SCHEME,NF
+      DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
+      COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
+      CALL FCONTH3(P(1,6),P(1,1),P(1,2),P(1,3),V,C3PV,C3SY)
+      M=-CF*4*PISQ*(4*PI/137)**2*C3PV/(VV*DOT(P,5,5)**2)
+      END
+C-----------------------------------------------------------------------
       SUBROUTINE MATFOR(P,M)
       IMPLICIT NONE
 C---EVALUATE THE FOUR-PARTON MATRIX ELEMENT SQUARED FOR THE GIVEN
@@ -716,7 +732,11 @@ C   CONFIGURATION.
       INTEGER I,J
       DOUBLE PRECISION P(4,7),M(-6:6),ERTA,ERTB,ERTC,ERTD,ERTE,
      $     LEIA,LEIB,LEIC,LEID,LEIE,
-     $     A,B,C,DS,D1,D2,E,Q,G,QQ,EMSQ,DOT
+     $     A,B,C,DS,D1,D2,E,Q,G,QQ,EMSQ,DOT,
+     $     C2N(-6:6),C3N(-6:6),C2C(-6:6),C3C(-6:6),CG(6),QNC3,QCC,QCC3,
+     $     X1PV,X2PV,X1SY,X2SY,DPV,DSY,EPV,ESY,EXXPV,EXXSY,EXYPV,EXYSY,
+     $     QG3,D13
+      LOGICAL LPV,LCC
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
@@ -767,6 +787,59 @@ c$$$      Q=Q+HF*TR*(DS-D1-D2)
      $    +ERTE(P,-1,4,2,3)+ERTE(P,2,3,-1,4)
      $    +ERTE(P,-1,4,3,2)+ERTE(P,3,2,-1,4))
       Q=Q+HF*(CF-CA/2)*E
+C---AK (2026): Z and W exchange (derivations/o2). The structures above
+C   are for photon exchange; with the couplings of DISENT_COUPLINGS4 the
+C   matrix element for incoming parton I is
+C     C2N(I)*Q + C3N(I)*QNC3 + C2C(I)*QCC + C3C(I)*QCC3 + sum_J CG(J)*QQ
+C   where QNC3 is the parity-violating part of Q (same minus opposite
+C   lepton-quark helicity, from the FORM-generated functions in
+C   disent_o2_trees.f), and for W exchange the identical-quark
+C   interference E is replaced by its W-attachment classes: EXX (W on
+C   the incoming-quark line in both amplitudes; pair flavour = partner
+C   of the incoming quark) and EXY (W on the incoming line interfering
+C   with W on the q qbar pair, e.g. d u ubar from an incoming u; not
+C   identical particles, hence no factor HF). The parity-violating
+C   parts of the gluon-initiated and boson-on-the-pair (QQ) terms are
+C   odd under exchange of the final-state quark and antiquark and are
+C   dropped, as is the interference of the boson on different quark
+C   lines for different flavours (odd for vector couplings; for axial
+C   couplings proportional to the sum of the axial couplings of the
+C   pair flavours, which vanishes for complete generations and is
+C   neglected, as in the structure functions). For photon exchange
+C   C2N = EQ**2 and CG = EQ**2 exactly and the other terms vanish, so
+C   the original arithmetic is unchanged.
+      CALL DISENT_COUPLINGS4(EMSQ,EQ,C2N,C3N,C2C,C3C,CG)
+      LPV=.FALSE.
+      LCC=.FALSE.
+      DO I=-6,6
+        IF (C3N(I).NE.0) LPV=.TRUE.
+        IF (C2C(I).NE.0.OR.C3C(I).NE.0) LCC=.TRUE.
+      ENDDO
+      IF (LPV.OR.LCC) THEN
+        CALL FQGG3(P(1,6),P(1,1),P(1,2),P(1,3),P(1,4),
+     $       X1PV,X2PV,X1SY,X2SY)
+        CALL FD13(P(1,6),P(1,1),P(1,2),P(1,3),P(1,4),DPV,DSY)
+        QG3=(CF*X1PV+(CF-CA/2)*X2PV)/64
+        D13=DPV/32
+      ENDIF
+      IF (LPV) THEN
+        CALL FE3(P(1,6),P(1,1),P(1,2),P(1,3),P(1,4),EPV,ESY)
+        QNC3=QG3+NF*TR*D13+HF*(CF-CA/2)*(-EPV/16)
+        QNC3=QNC3*256*PI**4*CF/EMSQ
+        QNC3=QNC3*(4*PI/137)**2*4/EMSQ
+      ENDIF
+      IF (LCC) THEN
+        CALL FEXX3(P(1,6),P(1,1),P(1,2),P(1,3),P(1,4),EXXPV,EXXSY)
+        CALL FEXY3(P(1,6),P(1,1),P(1,2),P(1,3),P(1,4),EXYPV,EXYSY)
+        QCC=Q-HF*(CF-CA/2)*E+HF*(CF-CA/2)*(-EXXSY/16)
+     $       +(CF-CA/2)*(-EXYSY/16)
+        QCC3=QG3+NF*TR*D13+HF*(CF-CA/2)*(-EXXPV/16)
+     $       +(CF-CA/2)*(-EXYPV/16)
+        QCC=QCC*256*PI**4*CF/EMSQ
+        QCC=QCC*(4*PI/137)**2*4/EMSQ
+        QCC3=QCC3*256*PI**4*CF/EMSQ
+        QCC3=QCC3*(4*PI/137)**2*4/EMSQ
+      ENDIF
 C---INCLUDE EXTERNAL FACTORS
       Q=Q*256*PI**4*CF/EMSQ
       Q=Q*(4*PI/137)**2*4/EMSQ
@@ -775,14 +848,16 @@ C---INCLUDE EXTERNAL FACTORS
       QQ=QQ*256*PI**4*CF/EMSQ
       QQ=QQ*(4*PI/137)**2*4/EMSQ
       DO I=-6,6
-        M(I)=EQ(I)**2*Q
+        M(I)=C2N(I)*Q
+        IF (LPV) M(I)=M(I)+C3N(I)*QNC3
+        IF (LCC) M(I)=M(I)+C2C(I)*QCC+C3C(I)*QCC3
         DO J=1,NF
-          M(I)=M(I)+EQ(J)**2*QQ
+          M(I)=M(I)+CG(J)*QQ
         ENDDO
       ENDDO
       M(0)=0
       DO I=1,NF
-        M(0)=M(0)+EQ(I)**2*G
+        M(0)=M(0)+CG(I)*G
       ENDDO
       END
 C-----------------------------------------------------------------------
@@ -870,7 +945,9 @@ C-----------------------------------------------------------------------
 C---CALCULATE THE THREE-PARTON MATRIX-ELEMENT AT NEXT-TO-LEADING ORDER
       INTEGER I
       DOUBLE PRECISION S,P(4,7),V(-6:6),M(-6:6),X,XJAC,XMIN, QQ,GQ,QG,GG
-     $     ,KQF,KGF,PQF,PGF,L12,L13,L23,DOT,ERTV,LEIV,EMSQ
+     $     ,KQF,KGF,PQF,PGF,L12,L13,L23,DOT,ERTV,LEIV,EMSQ,
+     $     C2(-6:6),C3(-6:6),CG(6),QQ3,NX3,NY3
+      LOGICAL LPV
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
@@ -889,12 +966,32 @@ C---THE NON-FACTORIZING VIRTUAL CROSS-SECTION
      $     (2*LEIV(P,P(1,6),2,-1,3)-EMSQ/2*ERTV(P,2,-1,3))
       GG=TR/CF*((4*PI/137)**2*4/EMSQ)*
      $     (2*LEIV(P,P(1,6),2,3,-1)-EMSQ/2*ERTV(P,2,3,-1))
+C---AK (2026): Z and W exchange: C2(I)*QQ plus C3(I) times the
+C   parity-violating non-factorising part (VIRT3PV, disent_virt3.f);
+C   the gluon-initiated part has none (odd under q <-> qbar). For photon
+C   exchange C2 = CG = EQ**2 and C3 = 0, the original arithmetic.
+      CALL DISENT_COUPLINGS(EMSQ,EQ,C2,C3,CG)
+      LPV=.FALSE.
       DO I=-6,6
-        V(I)=EQ(I)**2*QQ
+        IF (C3(I).NE.0) LPV=.TRUE.
+      ENDDO
+      IF (LPV) THEN
+        CALL VIRT3PV(P,NX3,NY3)
+        QQ3=-(4*PI/137)**2*4*CF*(CF*NX3+CA*NY3)
+      ENDIF
+      DO I=-6,6
+        IF (ABS(I).GT.NF) THEN
+C---  (no coupling, zero PDF; keep the original non-zero value, which the
+C     scale-variation weights are normalised to)
+          V(I)=EQ(I)**2*QQ
+        ELSE
+          V(I)=C2(I)*QQ
+          IF (LPV) V(I)=V(I)+C3(I)*QQ3
+        ENDIF
       ENDDO
       V(0)=0
       DO I=1,NF
-        V(0)=V(0)+EQ(I)**2*GG
+        V(0)=V(0)+CG(I)*GG
       ENDDO
 C---SUM OF FACTORIZING VIRTUAL CROSS-SECTION AND SUBTRACTION COUNTERTERM
       QQ=CF*2+CA*50D0/9-TR*NF*16D0/9-CF*PISQ
@@ -1417,6 +1514,8 @@ C   AND (IF PERM.GT.0) THE APPROXIMATE MATRIX-ELEMENT.
      $     Y,ZI,ZJ,OY,ZTI,ZTJ,V(4),VV,S1(-6:6),S2(-6:6),SC,S3(-6:6),CUT
      $     ,s4(-6:6),s5(-6:6),s6(-6:6),s7(-6:6),s8(-6:6),gg,qg
      $     ,s9(-6:6),s10(-6:6),s11(-6:6),temp
+     $     ,C2(-6:6),C3(-6:6),CG(6),SC3
+      LOGICAL LPV
       PARAMETER (NPERM=6,NPERM3=1)
       DIMENSION IPERM(4,NPERM),IJF(NPERM),KF(NPERM),LF(NPERM)
       INTEGER SCHEME,NF
@@ -1528,6 +1627,18 @@ C---INCLUDE A PRIORI CHANNEL WEIGHTS
       JAC=JAC/8
       IF (ABS(PERM).GT.4) JAC=JAC*2
       IF (PERM.LT.0) RETURN
+C---AK (2026): couplings for Z and W exchange. The spin-correlated
+C   quark-initiated Born terms (s3, s9) get C2*CONTHR + C3*CONTHR3,
+C   the gluon-initiated ones (s7, s11) the gluon couplings CG, and the
+C   g -> q qbar initial-state term (s5) averages the quark- and
+C   antiquark-initiated Born, whose parity-violating parts cancel as in
+C   the gluon-initiated four-parton matrix element and COLFOR. For photon
+C   exchange C2 = CG = EQ**2, C3 = 0: the original arithmetic.
+      CALL DISENT_COUPLINGS(-DOT(Q,5,5),EQ,C2,C3,CG)
+      LPV=.FALSE.
+      DO M=-6,6
+        IF (C3(M).NE.0) LPV=.TRUE.
+      ENDDO
 C---CALCULATE WEIGHT FOR QUARK-GLUON SPLITTING FUNCTION
       IF (PERM.LE.4) THEN
         CALL MATTHR(Q,S1)
@@ -1563,8 +1674,11 @@ C---CALCULATE WEIGHT FOR GLUON-GLUON SPLITTING FUNCTION
           ENDDO
           VV = -2*Z*(1-Z)*DOT(P,I,J)
           CALL CONTHR(Q,V,VV,2,-1,3,SC)
+          IF (LPV) CALL CONTHR3(Q,V,VV,SC3)
           do m=-6,6
-            s3(m)=16*pisq/emsq*eq(m)**2*SC*4*z*(1-z)*hf*ca/2/(1-x)
+            s3(m)=16*pisq/emsq*c2(m)*SC*4*z*(1-z)*hf*ca/2/(1-x)
+            if (lpv) s3(m)=s3(m)
+     $           +16*pisq/emsq*c3(m)*SC3*4*z*(1-z)*hf*ca/2/(1-x)
           enddo
           QQ=16*PISQ/EMSQ*
      $         ((2/(2-Z-X)+2/(Z+1-X)-4)/(1-X)
@@ -1577,8 +1691,11 @@ C---CALCULATE WEIGHT FOR GLUON-GLUON SPLITTING FUNCTION
           ENDDO
           VV = -2*ZTI*ZTJ*DOT(P,I,J)
           CALL CONTHR(Q,V,VV,2,-1,3,SC)
+          IF (LPV) CALL CONTHR3(Q,V,VV,SC3)
           do m=-6,6
-            s3(m)=16*pisq/emsq*eq(m)**2*SC*4*zti*ztj*hf*ca/2/y
+            s3(m)=16*pisq/emsq*c2(m)*SC*4*zti*ztj*hf*ca/2/y
+            if (lpv) s3(m)=s3(m)
+     $           +16*pisq/emsq*c3(m)*SC3*4*zti*ztj*hf*ca/2/y
           enddo
           QQ=16*PISQ/EMSQ*(2/(1-ZTI*(1-Y))+2/(1-ZTJ*(1-Y))-4)/Y
           QQ=QQ*HF*CA
@@ -1638,7 +1755,7 @@ c---calculate weight for gluon-quark splitting function (isr)
          endif
          s5(0)=0
          do m=1,nf
-            s5(0)=s5(0)+gq*s5(m)
+            s5(0)=s5(0)+gq*(s5(m)+s5(-m))/2
          enddo
          do m=-6,6
             if (m.ne.0) s5(m)=0
@@ -1658,7 +1775,7 @@ c---  calculate weight for gluon-gluon splitting function (isr)
         call conthr(q,v,VV,2,3,-1,sc)
         s7(0)=0
         do m=1,nf
-          s7(0)=s7(0)-16*pisq/emsq*eq(m)**2*sc*4*(1-x)/x*hf*ca/(1-z)
+          s7(0)=s7(0)-16*pisq/emsq*cg(m)*sc*4*(1-x)/x*hf*ca/(1-z)
      $         *tr/cf
         enddo
         do m=-6,6
@@ -1686,8 +1803,11 @@ c---calculate weight for quark-antiquark splitting function (fsr)
           enddo
           VV = -2*Z*(1-Z)*DOT(P,I,J)
           call conthr(q,v,VV,2,-1,3,sc)
+          if (lpv) call conthr3(q,v,VV,sc3)
           do m=-6,6
-            s9(m)=-16*pisq/emsq*eq(m)**2*sc*4*z*(1-z)
+            s9(m)=-16*pisq/emsq*c2(m)*sc*4*z*(1-z)
+     $           *hf*tr*nf/(1-x)
+            if (lpv) s9(m)=s9(m)-16*pisq/emsq*c3(m)*sc3*4*z*(1-z)
      $           *hf*tr*nf/(1-x)
           enddo
           qq=16*pisq/emsq/(1-x)
@@ -1698,8 +1818,11 @@ c---calculate weight for quark-antiquark splitting function (fsr)
           enddo
           VV = -2*ZTI*ZTJ*DOT(P,I,J)
           call conthr(q,v,VV,2,-1,3,sc)
+          if (lpv) call conthr3(q,v,VV,sc3)
           do m=-6,6
-            s9(m)=-16*pisq/emsq*eq(m)**2*sc*4*zti*ztj*hf*tr*nf/y
+            s9(m)=-16*pisq/emsq*c2(m)*sc*4*zti*ztj*hf*tr*nf/y
+            if (lpv) s9(m)=s9(m)
+     $           -16*pisq/emsq*c3(m)*sc3*4*zti*ztj*hf*tr*nf/y
           enddo
           qq=16*pisq/emsq/y
           qq=qq*hf*tr*nf
@@ -1721,7 +1844,7 @@ c---calculate weight for quark-antiquark splitting function (isr)
           s11(m)=0
           do n=1,nf
             s11(m)=s11(m)-
-     $           16*pisq/emsq*eq(n)**2*sc*4*(1-x)/x*hf*cf/z
+     $           16*pisq/emsq*cg(n)*sc*4*(1-x)/x*hf*cf/z
      $           *tr/cf
           enddo
         enddo

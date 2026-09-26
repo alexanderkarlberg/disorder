@@ -1,0 +1,8 @@
+# generated (see README.md)
+*.frm
+*.out
+*.log
+prod/
+__pycache__/
+harness/harness
+harness/*.txt

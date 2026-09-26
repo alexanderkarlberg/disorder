@@ -8,19 +8,28 @@ where it no longer applies, this file says so.
 
 ### Physics
 
-- **p2b at NLO for all NC and CC processes.** DISENT's three-parton
-  tree-level matrix element (`MATTHR` in `src/libdisent.f`) now includes Z
-  and W exchange: NC with γ, Z or γ/Z (`-includeZ`, `-Zonly`, `-intonly`),
-  CC, charged-lepton and neutrino beams of either charge (`-positron`,
-  `-neutrino`). `-p2b` can therefore be combined with `-includeZ` and `-CC`
-  (and NC neutrino beams) up to NLO, giving differential O(αs) predictions
-  (jets, event shapes) for all these processes. Beyond NLO p2b is still
-  restricted to photon exchange; the guards say so ("Cannot do Z/CC in p2b
-  beyond NLO yet"). The electroweak couplings are the same as in the
+- **p2b for all NC and CC processes, up to NNLO.** DISENT's matrix elements
+  (`src/libdisent.f`) now include Z and W exchange: NC with γ, Z or γ/Z
+  (`-includeZ`, `-Zonly`, `-intonly`), CC, charged-lepton and neutrino beams
+  of either charge (`-positron`, `-neutrino`). `-p2b` can therefore be
+  combined with `-includeZ`, `-CC` and NC neutrino beams, giving
+  differential predictions (jets, event shapes) at O(αs) and O(αs²) for all
+  these processes. The electroweak couplings are the same as in the
   inclusive (structure-function) mode. For photon exchange the results are
-  bitwise identical to before. The derivation (FORM) is in
-  `derivations/matthr/`; the NLO distributions were validated against
-  NNLOJET 1.0.2 and POWHEG-BOX-RES for all processes each code supports.
+  bitwise identical to before.
+  - O(αs): the three-parton tree `MATTHR` (derivation in
+    `derivations/matthr/`); validated against NNLOJET 1.0.2 and
+    POWHEG-BOX-RES for all processes each code supports.
+  - O(αs²): the four-parton trees (`MATFOR`, including for W exchange the
+    identical-final-state interferences), the spin-correlated dipoles
+    (`CONTHR3`, `SUBFOR`) and the finite one-loop part (`VIRTHR`, with the
+    Bern–Dixon–Kosower amplitudes ported from MCFM); derivation and
+    validation in `derivations/o2/`. Neglected, as in the structure
+    functions: contributions proportional to the sum of the quark axial
+    couplings (Z coupling to a second quark line or to a quark loop), which
+    vanish for complete generations. T-odd one-loop terms (sin φ
+    correlations from absorptive parts) are dropped; they integrate to zero
+    for reflection-symmetric observables.
 
 ### Testing and validation
 
@@ -29,7 +38,9 @@ where it no longer applies, this file says so.
   against the quark-parton-model expressions for NC γ/Z/γZ exchange, CC, and
   neutrino beams; beyond LO the combination of structure functions), the
   interface to DISENT, DISENT's three-parton matrix element for every
-  process (`test_matthr`), and the refusal of unsupported option
+  process (`test_matthr`), the consistency of the four-parton matrix element
+  with the dipole subtraction terms in all single-unresolved limits for every
+  process (`test_subtraction`), and the refusal of unsupported option
   combinations.
   They take about a second: `ctest -L unit`.
 - **Validation through ctest.** Each configuration of the validation matrix

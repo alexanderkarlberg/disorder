@@ -280,3 +280,22 @@ subroutine disent_couplings(Q2, eq, c2, c3, cg)
      cg(i) = (c2(i) + c2(-i)) / 2
   enddo
 end subroutine disent_couplings
+
+!----------------------------------------------------------------------
+! As disent_couplings, with the NC (c2n, c3n) and CC (c2c, c3c) parts
+! separately, for MATFOR, whose identical-quark interference terms differ
+! between NC and CC exchange. cg is for the total, as in disent_couplings.
+subroutine disent_couplings4(Q2, eq, c2n, c3n, c2c, c3c, cg)
+  use types, only: dp
+  use mod_matrix_element, only: parton_couplings_split
+  implicit none
+  real(dp), intent(in)  :: Q2, eq(-6:6)
+  real(dp), intent(out) :: c2n(-6:6), c3n(-6:6), c2c(-6:6), c3c(-6:6), cg(6)
+  real(dp) :: c2(-6:6)
+  integer :: i
+  call parton_couplings_split(Q2, eq, c2n, c3n, c2c, c3c)
+  c2 = c2n + c2c
+  do i = 1, 6
+     cg(i) = (c2(i) + c2(-i)) / 2
+  enddo
+end subroutine disent_couplings4

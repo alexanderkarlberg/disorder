@@ -9,7 +9,7 @@ module mod_matrix_element
 
   private
   public :: eval_matrix_element, eval_matrix_element_new, muR_muF
-  public :: parton_couplings
+  public :: parton_couplings, parton_couplings_split
 
 contains
   !----------------------------------------------------------------------
@@ -258,12 +258,26 @@ contains
   subroutine parton_couplings(Qsq, eq, c2, c3)
     real(dp), intent(in)  :: Qsq, eq(-6:6)
     real(dp), intent(out) :: c2(-6:6), c3(-6:6)
+    real(dp) :: c2n(-6:6), c3n(-6:6), c2c(-6:6), c3c(-6:6)
+    call parton_couplings_split(Qsq, eq, c2n, c3n, c2c, c3c)
+    c2 = c2n + c2c
+    c3 = c3n + c3c
+  end subroutine parton_couplings
+
+  ! The same, separately for NC (c2n, c3n) and CC (c2c, c3c) exchange
+  ! (needed where the two differ in structure, e.g. identical-quark
+  ! interferences in the four-parton matrix element).
+  subroutine parton_couplings_split(Qsq, eq, c2, c3, c2c, c3c)
+    real(dp), intent(in)  :: Qsq, eq(-6:6)
+    real(dp), intent(out) :: c2(-6:6), c3(-6:6), c2c(-6:6), c3c(-6:6)
     real(dp) :: propgZ, propZ, propW, cw, sw2, c2q, c3q
     real(dp) :: two_vq, two_aq, vq2_aq2, two_vq_aq
     integer  :: i, iu, id, ngen
 
     c2 = zero
     c3 = zero
+    c2c = zero
+    c3c = zero
 
     if(NC) then
        propgZ = Qsq / (Qsq + MZ**2) / sin_2thw_sq
@@ -320,29 +334,29 @@ contains
           id = 2*i - 1
           iu = 2*i
           if(neutrino .neqv. positron) then ! e+ or nu: W+ absorbed, d -> u, ubar -> dbar
-             c2( id) = c2( id) + cw
-             c2(-iu) = c2(-iu) + cw
+             c2c( id) = c2c( id) + cw
+             c2c(-iu) = c2c(-iu) + cw
              if(neutrino) then ! nu (left-handed): same helicity as d
-                c3( id) = c3( id) + cw
-                c3(-iu) = c3(-iu) - cw
+                c3c( id) = c3c( id) + cw
+                c3c(-iu) = c3c(-iu) - cw
              else              ! e+ (right-handed)
-                c3( id) = c3( id) - cw
-                c3(-iu) = c3(-iu) + cw
+                c3c( id) = c3c( id) - cw
+                c3c(-iu) = c3c(-iu) + cw
              endif
           else                              ! e- or nubar: W-, u -> d, dbar -> ubar
-             c2( iu) = c2( iu) + cw
-             c2(-id) = c2(-id) + cw
+             c2c( iu) = c2c( iu) + cw
+             c2c(-id) = c2c(-id) + cw
              if(.not.neutrino) then ! e- (left-handed): same helicity as u
-                c3( iu) = c3( iu) + cw
-                c3(-id) = c3(-id) - cw
+                c3c( iu) = c3c( iu) + cw
+                c3c(-id) = c3c(-id) - cw
              else                   ! nubar (right-handed)
-                c3( iu) = c3( iu) - cw
-                c3(-id) = c3(-id) + cw
+                c3c( iu) = c3c( iu) - cw
+                c3c(-id) = c3c(-id) + cw
              endif
           endif
        enddo
     endif
-  end subroutine parton_couplings
+  end subroutine parton_couplings_split
     
   subroutine muR_muF(x,y,Q,muR,muF)
     implicit none

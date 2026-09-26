@@ -170,12 +170,9 @@ contains
     if(.not.NC.and..not.CC) stop 'Need to run with either or/both of NC and CC'
     p2b = log_val_opt("-p2b",.false.)
     inclusive = .not.p2b 
-    ! DISENT's three-parton tree-level matrix element (MATTHR) includes
-    ! Z and W exchange, which is all that p2b needs up to NLO. The
-    ! O(αS**2) ingredients (VIRTHR, CONTHR, MATFOR, ...) are still for
-    ! photon exchange only.
-    if(.not.noZ.and.p2b.and.order_max.ge.3) stop 'Cannot do Z in p2b beyond NLO yet'
-    if(CC.and.p2b.and.order_max.ge.3) stop 'Cannot do CC in p2b beyond NLO yet'
+    ! DISENT's matrix elements (MATTHR, MATFOR, VIRTHR, CONTHR/SUBFOR)
+    ! include Z and W exchange, so p2b works for all NC and CC processes
+    ! up to NNLO.
     if(order_max.ge.4.and.p2b) stop 'Cannot run p2b at N3LO yet'
     if(vnf.and.p2b) stop 'Cannot run p2b with variable flavour'
     outname      = string_val_opt("-out", "") ! Overwite the prefix of the file name
