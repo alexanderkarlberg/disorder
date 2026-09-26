@@ -18,7 +18,7 @@
       include 'cmp_obs_cuts.h'
       double precision kin(0:3), kout(0:3), pin(0:3), pout(0:3,4)
       double precision x, y, Q2, pj(0:3,4), protsign
-      double precision tauzE, BzE, rhoE, cmp_eta
+      double precision ecur, tauzE, BzE, rhoE, cmp_eta
       integer npart, njets
       logical pass, valid
 
@@ -50,6 +50,13 @@
          call filld('tauzE', tauzE, dsig)
          call filld('BzE', BzE, dsig)
          call filld('rhoE', rhoE, dsig)
+         call cmp_current_energy(kin, kout, pin, x, npart,
+     $        pout(:,1:npart), ecur)
+         if (ecur .gt. cmp_Ecfrac * sqrt(Q2)) then
+            call filld('tauzE_Ec', tauzE, dsig)
+            call filld('BzE_Ec', BzE, dsig)
+            call filld('rhoE_Ec', rhoE, dsig)
+         endif
       endif
       end
 

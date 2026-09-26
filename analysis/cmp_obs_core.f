@@ -12,6 +12,12 @@
 !       B_zE   = sum pt / (2 sum|p|)            (dis_JB)
 !       rho_E  = ((sum|p|)^2 - |sum p|^2)/(2 sum|p|)^2  (dis_JM2)
 !     undefined (not filled) if the current hemisphere is empty;
+!     these are not infrared safe beyond their leading order (a soft
+!     gluon alone in an otherwise empty current hemisphere gives a
+!     finite tau_zE, B_zE), so they are also booked with the cut
+!     E_current > cmp_Ecfrac * Q on the energy in the current hemisphere
+!     (names *_Ec; H1's definition; NNLOJET: dis_eventshapes = 0.1 in
+!     the PROCESS block);
 !   - lab-frame jets: anti-kt, R = 1, E-scheme recombination, in
 !     (rapidity, azimuth), from the outgoing partons only; pseudo-
 !     rapidities are given with the proton direction as positive.
@@ -68,6 +74,26 @@
       tauzE = 1d0 - sabspz / sabsp
       BzE   = spt / (2d0 * sabsp)
       rhoE  = (sabsp**2 - sum(ptot**2)) / (2d0 * sabsp)**2
+      end
+
+!     Energy in the current hemisphere of the Breit frame (as in
+!     NNLOJET's dis_eventshapes cut, driver/core/ecuts.f).
+      subroutine cmp_current_energy(kin, kout, pin, x, npart, pout,
+     $     ecur)
+      implicit none
+      integer npart
+      double precision kin(0:3), kout(0:3), pin(0:3), x
+      double precision pout(0:3,npart), ecur
+      double precision q(0:3), pb(0:3), qb(0:3), bmat(0:3,0:3)
+      integer i
+      q = kin - kout
+      call cmp_breit_matrix(q, pin, x, bmat)
+      qb = matmul(bmat, q)
+      ecur = 0d0
+      do i = 1, npart
+         pb = matmul(bmat, pout(:,i))
+         if (pb(3)*qb(3) .gt. 0d0) ecur = ecur + pb(0)
+      enddo
       end
 
 !     Lorentz transformation to the Breit frame: the rest frame of
@@ -250,4 +276,7 @@
       call bookupeqbins('tauzE', 0.04d0, 0.02d0, 0.98d0)
       call bookupeqbins('BzE', 0.02d0, 0.02d0, 0.5d0)
       call bookupeqbins('rhoE', 0.01d0, 0.01d0, 0.25d0)
+      call bookupeqbins('tauzE_Ec', 0.04d0, 0.02d0, 0.98d0)
+      call bookupeqbins('BzE_Ec', 0.02d0, 0.02d0, 0.5d0)
+      call bookupeqbins('rhoE_Ec', 0.01d0, 0.01d0, 0.25d0)
       end
