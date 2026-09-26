@@ -381,3 +381,67 @@ One loop:
     dipoles, the photon and all Z/W cases converge like √λ.
   - Negative control: dropping QNC3 gives ratios of 0.83.
 - Speed: O(αs²) CC and Z-only runs are about 25% slower than photon.
+- What the limit test can and cannot see (question from AK): removing the
+  old SUBFOR fix (perm 4, s5: quark/gluon orientation of the Born)
+  leaves all limit ratios unchanged. In the collinear limit that
+  orientation error is equivalent to swapping partons 2 and 3, which the
+  symmetrisation averages over. The bug only changes the finite part of
+  the local dipole away from the limit, where it no longer matches its
+  integrated counterpart. Such finite-part errors are only visible
+  against an independent code (NNLOJET distributions).
+- Local vs integrated consistency of the new spin-correlated dipole: the
+  azimuthal average of CONTHR3 around the gluon equals half of MATTHR's
+  QQ3 exactly, as CONTHR does for QQ. COLFOR/VIRTHR, which see only the
+  average, therefore match the local dipoles.
+
+### Validation against NNLOJET at O(αs²) (2026-09-26 evening)
+
+Setup: disorder `-nnlo -p2b`, 30 × 5e7 events per process, compared with
+NNLOJET 1.0.2 epLJJ/epNJJ/epNbJJ at NLO (O(αs²)).
+- NNLOJET runs: 30 jobs per part; LO/V/R job lengths 30/30/100 min
+  (the R jobs took about 3.3 h).
+- Both use NNPDF40MC_nnlo_as_01180 and μ = Q.
+- τ_zE and B_zE are taken with the current-hemisphere energy cut
+  E_cur > Q/10: NNLOJET `dis_eventshapes = 0.1` in the PROCESS block,
+  our `*_Ec` histograms. Without the cut these observables are not
+  infrared safe at this order (see 2026-09-25). ρ_E needs no cut.
+
+| process | observable | χ²/24 |
+|---|---|---|
+| NC γ e⁻ | τ_zE (cut) | 21.8 |
+| NC γ e⁻ | B_zE (cut) | 32.6 |
+| NC Z e⁻ | τ_zE (cut) | 27.3 |
+| NC Z e⁻ | ρ_E | 36.8 |
+| CC e⁻ | τ_zE (cut) | 35.2 |
+| CC e⁻ | B_zE (cut) | 17.0 |
+| CC e⁻ | ρ_E | 24.1 |
+| CC e⁺ | τ_zE (cut) | 20.5 |
+| CC e⁺ | ρ_E | 18.9 |
+
+Total χ² = 234.2/216 (+0.9σ); no |pull| above 2.9. The photon τ/B
+disagreement of 2026-09-25 is gone with the IR-safe definitions.
+
+Further checks:
+- Negative control, CC e⁻, same 30 seeds, with the one-loop
+  parity-violating finite part (VIRT3PV) switched off:
+  - The distributions shift by up to +5% (ρ, τ) and +16% (B) in the
+    lowest bins; the correlated error of the difference is below 0.001%.
+  - χ² against NNLOJET becomes 1568 (ρ), 2623 (τ) and 10854 (B) for 24
+    bins.
+  - So the comparison is highly sensitive to the new one-loop term. This
+    also supports dropping the T-odd parts.
+- Cutoff independence, CC e⁻: DISENT cutoff 1e-6 vs 1e-10 (5 × 2e7 each).
+  - ρ, τ_Ec and B_Ec agree (χ² 28.6, 27.6, 15.3 for 24 bins).
+  - The uncut τ and B change by 15–60% (χ² ≈ 390), as expected for
+    observables that are not IR safe.
+
+Not directly tested against an external code, because NNLOJET has no
+e⁺ NC or ν beams: NC e⁺, NC ν/ν̄, CC ν/ν̄. Their O(αs²) matrix elements
+use the same structures with different coupling values:
+- e⁺ flips the sign of C3;
+- ν/ν̄ change C2/C3.
+
+These couplings are validated against the quark-parton model and, at
+O(αs), against POWHEG. The CC runs cover both signs of C3 and the
+CC-specific interference classes. `test_subtraction`/`test_matthr` run for
+all of these flag sets.
