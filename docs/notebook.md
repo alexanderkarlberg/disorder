@@ -267,3 +267,12 @@ NLO p2b it is the only DISENT matrix element that reaches the user routine.
 - Negative control: the same CC e⁻ run with QQ3 dropped deviates by up to
   11% (τ_zE χ² ≈ 1.9e4/24, lab η_j 3.2e3/10 vs NNLOJET), so the
   comparison is sensitive to the new term.
+- Photon ρ_E lowest bin: with seeds 1–4, disorder was 0.3% above both
+  references (also in nc_gZ_e±, which share the seeds and the low-Q² photon
+  events). Independent seeds 5–12 agree with NNLOJET/POWHEG, so this was a
+  correlated ~2.5σ fluctuation in the lowest τ/B/ρ bins. Near the singular
+  region the P2B weights have heavy tails, so the errors of the first bins
+  may be slightly optimistic.
+- Speed: old and new binary, pinned to separate cores, photon, 2e7 events:
+  75.5 s and 75.0 s, with identical histograms.
+- Full ctest (59 tests) passes from a clean clone of the branch.
