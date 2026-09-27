@@ -434,6 +434,26 @@ Further checks:
   - ρ, τ_Ec and B_Ec agree (χ² 28.6, 27.6, 15.3 for 24 bins).
   - The uncut τ and B change by 15–60% (χ² ≈ 390), as expected for
     observables that are not IR safe.
+- Fluctuation check of the largest χ², NC Z e⁻ ρ_E (36.8/24, p ≈ 0.05;
+  2026-09-27 night). Both codes were rerun with 30 new seeds (101–130),
+  NNLOJET on the VEGAS grids of the original run.
+
+  | comparison | χ²/24 |
+  |---|---|
+  | new NNLOJET vs new disorder | 20.3 |
+  | new vs old disorder | 20.0 |
+  | new vs old NNLOJET | 36.7 |
+  | combined NNLOJET vs combined disorder | 27.0 |
+
+  - The excess came from the NNLOJET sample, not from disorder: the two
+    NNLOJET samples differ from each other at the same level (pulls of
+    +2.7, +2.4 and −2.3 at ρ ≈ 0.13–0.22), while the two disorder samples
+    agree.
+  - NNLOJET's per-bin errors from the real-emission part may be somewhat
+    small there, or this is a fluctuation; this check cannot tell which.
+  - With the combined samples the comparison is 27.0/24.
+  - Runs: `~/cernbox/disorder-comparisons/runs/topup_ncZ_rho`, comparison
+    `tools/topup_compare.py`.
 
 Not directly tested against an external code, because NNLOJET has no
 e⁺ NC or ν beams: NC e⁺, NC ν/ν̄, CC ν/ν̄. Their O(αs²) matrix elements
