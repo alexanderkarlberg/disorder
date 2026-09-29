@@ -915,9 +915,7 @@ C---  THE TOTAL
             ENDIF
          ENDDO
          V(:) = SCL_WEIGHT(1,:) 
-         do i = 1,3
-            SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / V(:) 
-         enddo
+         CALL SCLNRM(V)
       else
          CALL KPFUNS(-X,XJAC,XMIN,KQF,O,O,O,QQ,GQ,QG,GG)
 C---  THE TOTAL
@@ -1031,9 +1029,7 @@ C---  THE TOTAL
             ENDIF
          ENDDO
          V(:) = SCL_WEIGHT(1,:) 
-         do i = 1,3
-            SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / V(:) 
-         enddo
+         CALL SCLNRM(V)
       else
          CALL KPFUNS(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
 C---  THE TOTAL
@@ -1221,6 +1217,39 @@ C---THE SMOOTH FUNCTIONS
       END
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
+      SUBROUTINE SCLNRM(V)
+      IMPLICIT NONE
+C---AK (2026): normalise the three muF-variation weights of each incoming
+C   parton to the central one, as USER expects. With Z/W couplings a
+C   parton can have no contribution at all (e.g. d for CC e-), in which
+C   case the weights vanish at all three scales and the ratio is left at
+C   1 (it multiplies a zero weight); dividing gave 0/0 = NaN before.
+      DOUBLE PRECISION V(-6:6)
+      LOGICAL SCALE_VAR,WARNED
+      DOUBLE PRECISION SCL_WEIGHT(3,-6:6)
+      COMMON/cSCALE_VAR/SCL_WEIGHT, SCALE_VAR
+      INTEGER J,K
+      DATA WARNED/.FALSE./
+      SAVE WARNED
+      DO J=-6,6
+        IF (V(J).NE.0) THEN
+          DO K=1,3
+            SCL_WEIGHT(K,J)=SCL_WEIGHT(K,J)/V(J)
+          ENDDO
+        ELSE
+          IF (.NOT.WARNED.AND.(SCL_WEIGHT(2,J).NE.0
+     $         .OR.SCL_WEIGHT(3,J).NE.0)) THEN
+            WRITE(*,*) 'SCLNRM: scale-varied weight without central',
+     $           ' weight, dropped (parton',J,')'
+            WARNED=.TRUE.
+          ENDIF
+          DO K=1,3
+            SCL_WEIGHT(K,J)=1
+          ENDDO
+        ENDIF
+      ENDDO
+      END
+C-----------------------------------------------------------------------
       SUBROUTINE KPFUNS_SCL_VAR(X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
       IMPLICIT NONE
 C---EVALUATE THE SUM OF THE K AND P FUNCTIONS.
@@ -1327,9 +1356,7 @@ C---  THE TOTAL
             ENDIF
          ENDDO
          W(:) = SCL_WEIGHT(1,:) 
-         do i = 1,3
-            SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / W(:) 
-         enddo
+         CALL SCLNRM(W)
       else
          CALL KPFUNS(X,XJAC,XMIN,KQF,O,O,O,QQ,GQ,QG,GG)
 C---  THE TOTAL
@@ -1400,9 +1427,7 @@ C---  THE TOTAL
             ENDIF
          ENDDO
          W(:) = SCL_WEIGHT(1,:) 
-         do i = 1,3
-            SCL_WEIGHT(i,:) = SCL_WEIGHT(i,:) / W(:)
-         enddo
+         CALL SCLNRM(W)
       else
          CALL KPFUNS(X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
 C---THE TOTAL
