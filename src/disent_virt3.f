@@ -6,7 +6,9 @@ C     The one-loop amplitudes for 0 -> qbar q l lbar g are those of
 C     Z. Bern, L. Dixon, D. Kosower, Nucl. Phys. B513 (1998) 3, as
 C     implemented in MCFM by R.K. Ellis and J. Campbell (src/W1jet/A51.f,
 C     A52.f, A5NLO.f, virt5.f, src/Need/spinoru.f, lnrat.f and
-C     src/Wbb/lfunctions.f), from which this is a port (MCFM is GPL).
+C     src/Wbb/lfunctions.f), from which this is a port. MCFM 10.3:
+C     Copyright (C) 2019-2022, respective authors of MCFM;
+C     SPDX-License-Identifier: GPL-3.0-or-later.
 C     Momenta are all outgoing (negative energy for incoming particles)
 C     in the layout (px,py,pz,E), as in DISENT.
 C

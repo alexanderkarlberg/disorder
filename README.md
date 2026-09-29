@@ -63,6 +63,23 @@ and then pass it to `cmake` through
 
 	cmake -DANALYSIS=my_analysis.f ..
 
+Tests
+=====
+
+Unit tests and a validation suite (which compares full runs with stored
+reference output in `validation/ref_runs`) are run with `ctest` from the
+build directory:
+
+	ctest -L unit
+
+The validation runs are only set up when the exclusive analysis is
+compiled in,
+
+	cmake -DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis.f ..
+
+after which `ctest -j 8` runs everything (a few
+minutes). Tests are skipped with `-DDISORDER_TESTS=OFF`.
+
 Usage
 =====
 
@@ -87,6 +104,12 @@ in `disorder_[...].dat` files.
 The full list of possible options can be obtained from
 `src/mod_parameters.f90`.
 
+By default the cross section is computed inclusively from the structure
+functions (up to N3LO). With `-p2b` the real radiation is generated
+explicitly with disent and projection-to-Born, which gives fully
+differential predictions up to NNLO for all neutral- and charged-current
+processes (photon, Z and W exchange, all lepton beams).
+
 For a more detailed usage description please look in the manual which
 can be found in the `docs` directory.
 
@@ -98,7 +121,8 @@ Besides the dependencies listed above `disorder` incorporates code from the foll
 * The [POWHEG-BOX](https://powhegbox.mib.infn.it/) under GPLv2. Specifically the analysis framework and the `mergedata` programs are adapted from there.
 * The command line tools (io_utils.f90 and lcl_dec.f90) are written by Gavin Salam and are under GPLv3. 
 * Some of the code is adapted from [proVBFH](https://github.com/fdreyer/proVBFH/) under GPLv3.
-* The code relies heavily on disent, written by Mike Seymour. The version included here is based on the one included with v1.0.5 of [dispatch](https://github.com/gavinsalam/dispatch), but has received significant additional modifications.
+* The code relies heavily on disent, written by Mike Seymour. The version included here is based on the one included with v1.0.5 of [dispatch](https://github.com/gavinsalam/dispatch), but has received significant additional modifications, including the extension of its matrix elements from photon exchange to γ/Z and W exchange. The parity-violating and charged-current tree-level pieces (`src/disent_o2_trees.f`) are generated with [FORM](https://github.com/form-dev/form) by the scripts in `derivations/o2`.
+* The parity-violating part of the one-loop three-parton matrix element (`src/disent_virt3.f`) is ported from [MCFM](https://mcfm.fnal.gov/) (v10.3, GPLv3 or later), which implements the one-loop amplitudes of Bern, Dixon and Kosower.
 
 Citation policy
 ===============
@@ -119,6 +143,10 @@ along with references for the DIS coefficient functions at the appropriate order
 Whenever the code is run in the P2B mode the following paper must also be cited
 
 * S. Catani, M.H. Seymour, A General algorithm for calculating jet cross-sections in NLO QCD, [Nucl.Phys.B 485 (1997) 291-419](https://doi.org/10.1016/S0550-3213(96)00589-5) [arXiv:hep-ph/9605323](https://arxiv.org/abs/hep-ph/9605323).
+
+If, in addition, Z or W exchange is included at NNLO (`-nnlo -p2b` with `-includeZ`, `-CC` or `-neutrino`), the one-loop amplitudes used for the parity-violating part should be cited
+
+* Z. Bern, L.J. Dixon, D.A. Kosower, One loop amplitudes for e+ e- to four partons, [Nucl.Phys.B 513 (1998) 3-86](https://doi.org/10.1016/S0550-3213(97)00703-7), [arXiv:hep-ph/9708239](https://arxiv.org/abs/hep-ph/9708239).
 
 Bugs
 ====

@@ -179,3 +179,5 @@ Do not casually "clean up" or restyle these — they are vendored/adapted, not h
 - `src/io_utils.f90`, `src/lcl_dec.f90` — command-line/IO utilities by Gavin Salam (GPLv3).
 - `analysis/pwhg_bookhist-multi.*`, `aux/mergedata.f` — adapted from the POWHEG-BOX (GPLv2).
 - Some `src/`/`analysis/` code is adapted from [proVBFH](https://github.com/fdreyer/proVBFH/).
+- `src/disent_virt3.f` — ported from MCFM 10.3 (BDK one-loop amplitudes; GPLv3 or later).
+- `src/disent_o2_trees.f` — generated (`derivations/o2/make_trees.py`); regenerate rather than edit.
