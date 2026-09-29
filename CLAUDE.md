@@ -109,6 +109,8 @@ loosening a tolerance).
 
 - `docs/notebook.md`: dated log of development work (what was checked, how, findings, and
   explicit corrections of earlier conclusions). Append an entry for each piece of work.
+- `NEWS.md`: the release notes of every version (the GitHub release texts), newest
+  first; add the entry for a new version there when releasing.
 - `docs/release-notes.md`: user-facing changes since 1.0.0. The 1.0.0 manual
   (`docs/disorder-1.0.0-manual.tex`) matches the published paper and is not edited; document
   changes in the release notes instead.
