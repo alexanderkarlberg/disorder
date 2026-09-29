@@ -4,7 +4,7 @@ Changes since version 1.0.0 (SciPost Phys. Codebases 32, arXiv:2401.16964).
 The 1.0.0 manual (`docs/disorder-1.0.0-manual.tex`) is left unchanged;
 where it no longer applies, this file says so.
 
-## Unreleased
+## 2.2.0
 
 ### Physics
 
@@ -70,6 +70,11 @@ where it no longer applies, this file says so.
   ctest --test-dir build -j 8               # everything, a few minutes
   ctest --test-dir build -j 8 -LE slow      # without the PDF-uncertainty run
   ```
+- A NaN or infinity anywhere in the output of a validation run is a
+  failure, also when generating references.
+- The validation matrix covers p2b for every NC/CC mode and beam: NC γ,
+  γ/Z, Z only and interference only; CC; e±, ν and ν̄; NC+CC; at NLO and
+  NNLO; with and without scale variations.
 - `validation/validate_or_generate.sh validate|quick|generate` still works and
   now uses ctest. It no longer needs GNU parallel (this replaces the
   corresponding paragraph of section "Validating the code" of the 1.0.0
@@ -82,6 +87,8 @@ where it no longer applies, this file says so.
 
 ### Fixes
 
+- HOPPET's grid now always extends to x = 0.1, also when a very large
+  `-xmin` is requested.
 - `-scale-choice 4`: the printed header and `-help` text said the central
   scale was Q(1−x)/x. The scale used is, as intended, μ² = Q²(1−x)/x, i.e.
   μ = Q·sqrt((1−x)/x); the texts now say so. Results are unchanged. (The

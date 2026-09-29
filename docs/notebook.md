@@ -465,3 +465,165 @@ These couplings are validated against the quark-parton model and, at
 O(αs), against POWHEG. The CC runs cover both signs of C3 and the
 CC-specific interference classes. `test_subtraction`/`test_matthr` run for
 all of these flag sets.
+
+## 2026-09-29 — p2b NC γ/Z and CC entries in the validation matrix
+
+The validation matrix had p2b runs for photon exchange only, so a change
+to DISENT's Z/W couplings would not have been caught by CI. Two entries
+were added to `validation/configurations.txt` (NNLO, toy PDF, Q = 30,
+x = 0.1, 7-point scale variation):
+- `p2b_nc_includeZ_Q_30_x_0.1_positron_`: NC γ/Z, e⁺, so both the
+  parity-conserving and parity-violating parts (with the e⁺ sign of C3);
+- `p2b_cc_Q_30_x_0.1_`: CC e⁻.
+
+Checks:
+- The first attempt used Q = 50, whose Q² lies outside the
+  `exclusive_lab_frame_analysis.f` window (25 < Q² < 1000). All 51 bins
+  of those references were zero, so they tested nothing of DISENT.
+  They were discarded before committing; the new entries fill 42 of 51
+  bins, like the photon entry.
+- Totals equal the inclusive NNLO results exactly (NC γ/Z e⁺ 1.225914,
+  CC e⁻ 0.047969 pb/GeV² at Q = 30; also at Q = 50).
+- The Z enters the jet histograms: the cut cross section is 0.44% above
+  that of a photon-only e⁺ run with the same seed, which is about 400
+  times the 1e-5 tolerance. The inclusive total is 0.46% above.
+- Regenerating the references and re-validating them gives identical
+  output (deviation 0). Full ctest: 71/71 pass (228 s). Each new run
+  takes about 6 s.
+
+The references are regression values. The physics validation of these
+processes is the comparison with NNLOJET/POWHEG in the entries above.
+
+README updated (same day):
+- third-party code: the Z/W extension of disent (FORM-generated trees)
+  and the MCFM 10.3 port in `src/disent_virt3.f` (GPLv3 or later; MCFM's
+  copyright and SPDX notice added to that file's header);
+- citation policy: Bern–Dixon–Kosower (hep-ph/9708239) for p2b at NNLO
+  with Z or W exchange;
+- a short description of the two modes;
+- a Tests section (ctest), which the ctest commit had not added.
+
+## 2026-09-29 — Pointwise cross-check against an independent DIS+jet implementation
+
+AK has a separate, private implementation of the NLO 2+1-jet matrix
+elements for all beams and NC/CC: a POWHEG-BOX process with VBFNLO-style
+helicity amplitudes (Born e q → e q g, one loop, real e q → e q g g,
+e q → e q Q Q̄, and crossings). Its code is not part of this repository, and
+neither is the harness that calls it. The harness is linked against a
+clean snapshot of this branch (4113237) and runs with disorder's own
+flags. The other code is used unmodified, with the Z/W
+widths set to zero as in disorder.
+
+Checks, at 20 random points in DISENT's layout (`derivations/o2/harness/kin.py`,
+Q = 12–100 GeV). Each check covers 11 processes: NC γ e±, γZ e±, Z e⁻, ν,
+ν̄, and CC e±, ν, ν̄. Each covers every incoming parton (q, q̄, g).
+
+- **Born, MATTHR.**
+  - Independent reference: BDK/MCFM tree helicity amplitudes (V3SPIN/V3HEL
+    of `src/disent_virt3.f`), crossed to each channel. Each lepton/quark-line
+    chirality gets an SM coupling computed from sin²θ_W. This uses neither
+    code's couplings.
+  - The other code agrees with the reference to 1e-12 in every process and
+    channel, once its lepton line is crossed explicitly (see the list at the
+    end).
+  - MATTHR agrees with both to 1e-13. For g-initiated channels this holds for
+    the flavour sum symmetrised in q ↔ q̄: the dropped PV part is odd, and the
+    unsymmetrised amplitudes agree with the reference.
+  - For ν beams disorder is twice the other code, as it should be: one
+    helicity is averaged over, not two.
+- **One loop, VIRTHR's non-factorising part including VIRT3PV.**
+  - The reference V/B is MCFM's assembly: N(A51 + A52/N²) + N/6 (the UV
+    counterterm), converted from DRED to CDR by −C_F − C_A/6, exactly as
+    POWHEG-BOX's Zj process does.
+  - The other code's box-line virtual has the same loop functions to 1e-11
+    (after one bug of its own; see the list at the end).
+  - DISENT: (C2·QQ_nf + C3·QQ3)/MATTHR, minus its photon value at the same
+    point, equals (1/3) × the same difference of the reference V/B, to 1e-10
+    in all 11 processes. This requires averaging the reference over the
+    reflected point (p_y → −p_y). Without it the relation fails by O(10).
+    This confirms that what disorder drops is exactly the reflection-odd
+    (T-odd, absorptive) part.
+- **Real, MATFOR.** Compared after averaging over the 6 permutations of the
+  outgoing partons 2, 3, 4, since MATFOR is not the pointwise |M|² for
+  identical partons, only equal to it for label-symmetric observables.
+  Processes: NC γ, γZ, Z, ν; CC e⁻, ν. For e⁺ and ν̄ the other code's real
+  cannot be crossed.
+  - Exact (≤ 7e-14):
+    - q → q g g, including its PV part (QG3);
+    - g → q q̄ g;
+    - q → q Q Q̄ per pair flavour, as e_q²·TR·D1 + e_Q²·TR·D2 for photon
+      exchange, and for Z/W summed over complete generations, including the
+      PV part of D1 (FD13) and CG(Q)·D2;
+    - the CC classes with the W on the incoming line and on the pair.
+  - With DISENT's identical-quark interferences added to the other code (E
+    for NC; EXX, EXY for CC), MATFOR agrees to 2e-14 (photon, CC, and NC Z
+    with the b pair removed). The other code lacks these terms. They are up
+    to ~1% (NC) and 2.4% (CC) of the matrix element at these points, and
+    were checked earlier against explicit Dirac spinors (`num4q.py`).
+  - The one remaining difference is the neglected axial interference of the
+    boson on the two quark lines. It is ∝ a_q·a_Q and cancels over u+d and
+    c+s, but not for the b pair at nf = 5. It is up to 0.4% (γZ e⁻) and 2%
+    (pure Z, ν) of the four-parton matrix element at these points, and
+    changes sign from point to point. As documented in MATFOR, disorder
+    neglects it deliberately, as in the structure functions.
+
+So every Z/W ingredient of disorder's p2b matrix elements up to O(αs²)
+(MATTHR, VIRTHR incl. VIRT3PV, MATFOR incl. QNC3/QCC/QCC3) now also agrees
+point by point with an independent implementation. The only exceptions are
+the approximations documented in the code.
+
+Issues found in the other code were reported to AK separately.
+
+## 2026-09-29 — NaN in p2b CC at NNLO with scale variations; validation matrix for all p2b modes
+
+Correction to the entry "p2b NC γ/Z and CC entries in the validation
+matrix" above. The CC entry (`p2b_cc_Q_30_x_0.1_`) passed, but its
+reference log had 1.5 million lines: 198,782 events were reported as NaN
+and dropped by `analysis`. The reference had been generated with the
+same NaN, so the comparison could not see it. I only noticed from the
+size of the log before pushing.
+
+Cause:
+- With `-scaleuncert`, VIRTHR (and VIRTWO, COLTHR, COLFOR) normalise the
+  three μ_F weights of each incoming parton to the central one.
+- With W exchange some partons have no contribution at all (d, ū, s, c̄,
+  b, b̄ for e⁻ CC): V(I) = 0 at all three scales, giving 0/0.
+- In VIRTHR the q → g collinear term QG is zero by construction in MS-bar
+  (KPFUNS is called with −X); that convolution is done in COLFOR. This
+  was checked: all three weights vanish for these partons.
+- So no contribution was lost apart from the NaN events themselves. The
+  analysis drops those, so the central values of such runs were biased.
+- Only NNLO runs with `-scaleuncert` are affected. The NNLOJET comparisons
+  above ran without scale variations and are unaffected: their logs have
+  no NaN.
+
+Fix: `SCLNRM` (`src/libdisent.f`) leaves the ratio at 1 where the central
+weight vanishes, since it multiplies a zero weight. If a varied weight is
+non-zero there it warns once; that has not happened. For non-zero weights
+the arithmetic is unchanged: all 19 existing fast validation entries
+still pass against their old references, except the CC one.
+
+Validation matrix:
+- `run_validation.py` fails on any NaN or infinity in the output, also
+  when generating references.
+- New p2b entries (toy PDF, Q = 30, x = 0.1, fixed kinematics):
+  - NC γ/Z at NLO;
+  - Z only;
+  - interference only (e⁺);
+  - NC ν and ν̄;
+  - CC at NLO;
+  - CC without scale variations;
+  - CC e⁺, ν and ν̄;
+  - NC+CC.
+  With the two earlier entries, p2b is covered for every NC/CC mode and
+  beam, at NLO and NNLO, and on both scale-variation code paths.
+- Checks of the new references:
+  - every histogram is populated (42 of 51 bins);
+  - every total and scale uncertainty equals the inclusive result;
+  - the CC central histograms are bit-identical with and without
+    `-scaleuncert`.
+- Full ctest: 82/82.
+
+The welcome line ("Welcome to disorder v. …") is now ignored by the
+comparison, so that version changes do not require new reference logs.
+Version set to 2.2.0 (welcome message and CMake project).
