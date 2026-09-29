@@ -1,0 +1,202 @@
+<title>MATTHR for NC and CC</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap">
+<style>
+:root{
+  --bg:#f6f7f9; --paper:#ffffff; --ink:#1a2130; --muted:#586174; --rule:#dde1e8;
+  --accent:#1f5a85; --code:#eef1f5; --codeink:#233042;
+  --wrong:#a8322a; --wrongbg:#fbeceb; --flow:#8a5a00; --flowbg:#fbf1dc; --doc:#3f6636; --docbg:#e9f2e5;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11141a; --paper:#171b23; --ink:#e3e7ee; --muted:#9aa3b5; --rule:#2a303c;
+    --accent:#86bde3; --code:#1e2430; --codeink:#d5dce8;
+    --wrong:#f09a92; --wrongbg:#3a1e1c; --flow:#e7c07a; --flowbg:#352a14; --doc:#a8d09a; --docbg:#1e2d1a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11141a; --paper:#171b23; --ink:#e3e7ee; --muted:#9aa3b5; --rule:#2a303c;
+  --accent:#86bde3; --code:#1e2430; --codeink:#d5dce8;
+  --wrong:#f09a92; --wrongbg:#3a1e1c; --flow:#e7c07a; --flowbg:#352a14; --doc:#a8d09a; --docbg:#1e2d1a;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;}
+.wrap{max-width:62rem;margin:0 auto;padding-inline:20px;padding-block:40px 64px;}
+h1,h2{font-family:"Newsreader",Georgia,"Times New Roman",serif;font-weight:600;text-wrap:balance;line-height:1.2;}
+h1{font-size:2.1rem;margin:0 0 .4rem;}
+h2{font-size:1.4rem;margin:0;}
+h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:1.3rem 0 .35rem;font-weight:600;}
+p{margin:.5rem 0;}
+.lede{color:var(--muted);font-size:1.02rem;max-width:62ch;}
+a{color:var(--accent);}
+code,pre{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.86em;}
+code{background:var(--code);color:var(--codeink);padding:.08em .32em;border-radius:3px;}
+pre{background:var(--code);color:var(--codeink);padding:12px 14px;border-radius:4px;overflow-x:auto;line-height:1.45;margin:.5rem 0;}
+pre code{background:none;padding:0;font-size:1em;}
+.env{margin:1.6rem 0 2rem;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding-block:.8rem;display:grid;grid-template-columns:max-content 1fr;gap:.25rem 1.2rem;font-size:.92rem;}
+.env dt{color:var(--muted);}
+.env dd{margin:0;}
+.index{list-style:none;padding:0;margin:0 0 2.4rem;display:grid;gap:.45rem;}
+.index li{display:grid;grid-template-columns:2.2rem 7.5rem 1fr;align-items:baseline;gap:.6rem;}
+.index .n{font-family:"IBM Plex Mono",monospace;color:var(--muted);font-variant-numeric:tabular-nums;}
+.chip{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:.12rem .5rem;border-radius:999px;white-space:nowrap;justify-self:start;}
+.chip.wrong{color:var(--wrong);background:var(--wrongbg);}
+.chip.flow{color:var(--flow);background:var(--flowbg);}
+.chip.doc{color:var(--doc);background:var(--docbg);}
+.issue{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:20px 22px;margin:0 0 1.4rem;}
+.issue header{display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem .8rem;}
+.issue header .n{font-family:"IBM Plex Mono",monospace;color:var(--muted);}
+.minor{padding-left:1.1rem;}
+.minor li{margin:.4rem 0;}
+footer{color:var(--muted);font-size:.88rem;border-top:1px solid var(--rule);padding-top:1rem;margin-top:2rem;}
+@media (max-width:520px){.index li{grid-template-columns:1.8rem 1fr;}.index li .chip{grid-column:2;}.index li a{grid-column:2;}.env{grid-template-columns:1fr;}.env dd{margin-bottom:.4rem;}}
+</style>
+<style>
+.prose{max-width:46rem;}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:6px;overflow:hidden;margin:1.6rem 0 2.2rem;}
+.facts div{background:var(--paper);padding:14px 16px;}
+.facts b{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:.25rem;}
+.facts span{font-size:.95rem;}
+h2.sec{margin:2.6rem 0 .6rem;padding-top:.4rem;border-top:1px solid var(--rule);}
+.formula{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:14px 18px;margin:.8rem 0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.9rem;line-height:1.7;overflow-x:auto;}
+.tablewrap{overflow-x:auto;margin:.8rem 0;border:1px solid var(--rule);border-radius:6px;background:var(--paper);}
+table.chi{border-collapse:collapse;width:100%;font-size:.86rem;font-variant-numeric:tabular-nums;}
+table.chi th,table.chi td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--rule);white-space:nowrap;}
+table.chi thead th{font-weight:600;color:var(--muted);text-align:right;background:var(--paper);}
+table.chi th.proc{text-align:left;font-weight:500;}
+table.chi th.ref{writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;color:var(--accent);font-weight:600;letter-spacing:.06em;border-right:1px solid var(--rule);}
+table.chi td .n{color:var(--muted);}
+table.chi td.ok{color:var(--doc);}
+table.chi td.watch{color:var(--flow);background:var(--flowbg);}
+table.chi td.bad{color:var(--wrong);background:var(--wrongbg);}
+table.chi td.na{color:var(--muted);text-align:center;}
+table.chi tbody tr:nth-child(10) td,table.chi tbody tr:nth-child(10) th{border-bottom:2px solid var(--muted);}
+table.plain{border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums;width:100%;}
+table.plain th,table.plain td{padding:5px 10px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap;}
+table.plain th:first-child,table.plain td:first-child{text-align:left;}
+table.plain thead th{color:var(--muted);font-weight:600;}
+.legend{font-size:.85rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:.3rem 1.2rem;}
+.legend i{font-style:normal;padding:0 .35rem;border-radius:3px;}
+.pbtns{display:flex;flex-wrap:wrap;gap:6px;margin:.8rem 0 1rem;}
+.pbtn{font:inherit;font-size:.85rem;padding:5px 11px;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer;}
+.pbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper);}
+.pbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:12px;}
+.gal figure{margin:0;background:#fff;border:1px solid var(--rule);border-radius:4px;padding:4px;}
+.gal img{display:block;width:100%;height:auto;}
+ul.tight li{margin:.35rem 0;}
+.ob{text-decoration:overline;text-decoration-thickness:1px;}
+</style>
+<main class="wrap">
+<h1>MATTHR for NC and CC</h1>
+<p class="lede prose">DISENT's three-parton matrix element now covers γ, Z and W exchange for charged-lepton and neutrino beams of both charges. That makes disorder's projection-to-Born mode available at O(α<sub>s</sub>) for every NC and CC process. For photon exchange the result is bit-identical to the original, and all ten processes agree with NNLOJET and POWHEG-BOX-RES within statistics.</p>
+
+<div class="facts">
+  <div><b>Branch</b><span><code>2026-09-matthr-nc-cc</code>, commits <code>1d7e2df</code>, <code>efbd286</code>, not pushed</span></div>
+  <div><b>Photon exchange</b><span>Bitwise identical: validation references and a 10⁸-event run</span></div>
+  <div><b>Validation</b><span>10 processes × 8 distributions, 4 × 10⁸ events each</span></div>
+  <div><b>Speed</b><span>75.0 s vs 75.5 s before (2·10⁷ events, pinned)</span></div>
+</div>
+
+<h2 class="sec">The matrix element</h2>
+<div class="prose">
+<p>A FORM calculation of |M|² for lepton + quark → lepton + quark + gluon, resolved into lepton helicity and quark chirality, gives an exact identity (sympy check). Each helicity combination is DISENT's photon denominator times one of two pairs of squared invariants. With k and k′ the incoming and outgoing lepton, p<sub>1</sub> the incoming and p<sub>2</sub> the outgoing quark:</p>
+</div>
+<div class="formula">same helicity (LL, RR):      (k·p₁)² + (k′·p₂)²<br>opposite helicity (LR, RL):  (k′·p₁)² + (k·p₂)²<br><br>M(i) = C2(i)·QQ + C3(i)·QQ3<br>QQ  = DISENT's original photon structure (numerator: sum of the four squares)<br>QQ3 = same denominator, numerator (k·p₁)² + (k′·p₂)² − (k′·p₁)² − (k·p₂)²</div>
+<div class="prose">
+<p>C2 and C3 are the per-parton couplings of F<sub>2</sub>/x and F<sub>3</sub> in units of e<sub>q</sub>², the same combination that gives Y₊C2 + Y₋C3 at LO. Antiquarks flip the sign of C3. There is no separate longitudinal coupling: for massless quarks F<sub>L</sub> = F<sub>2</sub> − 2xF<sub>1</sub> carries the same electroweak factor as F<sub>2</sub>, so it comes with C2. At O(α<sub>s</sub>) the −y²F<sub>L</sub> contribution sits inside QQ, which holds the full y-dependence of the parity-even part, just as for photon exchange in the original DISENT. QQ3 is the parity-odd, F<sub>3</sub>-like part. The couplings come from a new routine, <code>parton_couplings</code>, that mirrors the structure-function code, so the real-emission events use exactly the electroweak setup of the inclusive part.</p>
+<p>In the gluon channel the parity-violating piece is odd under exchange of the quark and antiquark. DISENT's phase space is symmetric under that exchange, so the piece integrates to zero and the channel keeps its original form. For photon exchange C2 = e<sub>q</sub>² and C3 = 0 exactly, so the arithmetic is the original one.</p>
+<p>The derivation is in <code>derivations/matthr/</code> in the repository.</p>
+</div>
+
+<h2 class="sec">Validation against NNLOJET and POWHEG</h2>
+<div class="prose">
+<p>disorder <code>-nlo -p2b</code> was compared with the O(α<sub>s</sub>) NNLOJET 1.0.2 and POWHEG-BOX-RES runs from the earlier cross-check. Setup: HERA beams, 150 &lt; Q² &lt; 15000 GeV², 0.1 &lt; y &lt; 0.9, NNPDF40MC_nlo_as_01180, μ = Q. The table gives χ² against disorder for each distribution; hover over a cell for the p-value and the largest pull.</p>
+</div>
+<div class="legend"><span><i style="color:var(--doc)">green</i> p &gt; 0.01</span><span><i style="color:var(--flow);background:var(--flowbg)">amber</i> 10⁻³ &lt; p &lt; 0.01</span><span><i style="color:var(--wrong);background:var(--wrongbg)">red</i> p &lt; 10⁻³</span><span>– not available (NNLOJET has no ν beams; its NC e⁺ is e⁻)</span></div>
+<div class="tablewrap"><table class="chi"><thead><tr><th></th><th></th><th>Q²</th><th>x</th><th>y</th><th>p<sub>T,j</sub></th><th>η<sub>j</sub></th><th>τ<sub>zE</sub></th><th>B<sub>zE</sub></th><th>ρ<sub>E</sub></th></tr></thead><tbody>
+<tr><th rowspan="10" class="ref">NNLOJET</th><th class="proc">NC γ, e⁻p</th><td class="ok" title="p = 0.83, max |pull| = 1.54">5.0<span class="n">/9</span></td><td class="ok" title="p = 0.99, max |pull| = 1.25">2.2<span class="n">/9</span></td><td class="ok" title="p = 1, max |pull| = 0.59">1.3<span class="n">/8</span></td><td class="ok" title="p = 0.56, max |pull| = 1.74">7.7<span class="n">/9</span></td><td class="ok" title="p = 0.49, max |pull| = 1.81">9.5<span class="n">/10</span></td><td class="ok" title="p = 0.35, max |pull| = 2.49">26.0<span class="n">/24</span></td><td class="ok" title="p = 0.32, max |pull| = 2.38">26.6<span class="n">/24</span></td><td class="watch" title="p = 0.0047, max |pull| = 3.29">45.8<span class="n">/24</span></td></tr>
+<tr><th class="proc">NC γ/Z, e⁻p</th><td class="ok" title="p = 0.72, max |pull| = 1.40">6.2<span class="n">/9</span></td><td class="ok" title="p = 0.96, max |pull| = 1.37">3.2<span class="n">/9</span></td><td class="ok" title="p = 1, max |pull| = 0.55">1.0<span class="n">/8</span></td><td class="ok" title="p = 0.55, max |pull| = 1.97">7.8<span class="n">/9</span></td><td class="ok" title="p = 0.22, max |pull| = 1.77">13.0<span class="n">/10</span></td><td class="ok" title="p = 0.33, max |pull| = 2.61">26.4<span class="n">/24</span></td><td class="ok" title="p = 0.46, max |pull| = 2.08">24.0<span class="n">/24</span></td><td class="ok" title="p = 0.075, max |pull| = 2.33">34.6<span class="n">/24</span></td></tr>
+<tr><th class="proc">NC γ/Z, e⁺p</th><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td></tr>
+<tr><th class="proc">NC Z only, e⁻p</th><td class="ok" title="p = 1, max |pull| = 0.75">1.3<span class="n">/9</span></td><td class="ok" title="p = 0.79, max |pull| = 1.55">5.5<span class="n">/9</span></td><td class="ok" title="p = 0.82, max |pull| = 1.19">4.4<span class="n">/8</span></td><td class="ok" title="p = 0.88, max |pull| = 1.14">4.5<span class="n">/9</span></td><td class="ok" title="p = 0.99, max |pull| = 0.73">2.4<span class="n">/10</span></td><td class="ok" title="p = 0.38, max |pull| = 2.35">25.5<span class="n">/24</span></td><td class="ok" title="p = 0.23, max |pull| = 3.84">28.7<span class="n">/24</span></td><td class="ok" title="p = 0.036, max |pull| = 2.26">37.8<span class="n">/24</span></td></tr>
+<tr><th class="proc">NC, νp</th><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td></tr>
+<tr><th class="proc">NC, <span class='ob'>ν</span>p</th><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td></tr>
+<tr><th class="proc">CC, e⁻p → νX</th><td class="ok" title="p = 0.87, max |pull| = 1.49">4.6<span class="n">/9</span></td><td class="ok" title="p = 0.99, max |pull| = 0.71">1.8<span class="n">/9</span></td><td class="ok" title="p = 0.87, max |pull| = 1.17">3.9<span class="n">/8</span></td><td class="ok" title="p = 0.96, max |pull| = 0.99">3.2<span class="n">/9</span></td><td class="ok" title="p = 0.85, max |pull| = 1.43">5.6<span class="n">/10</span></td><td class="ok" title="p = 0.45, max |pull| = 2.53">24.2<span class="n">/24</span></td><td class="ok" title="p = 0.82, max |pull| = 2.02">17.7<span class="n">/24</span></td><td class="ok" title="p = 0.79, max |pull| = 2.67">18.3<span class="n">/24</span></td></tr>
+<tr><th class="proc">CC, e⁺p → <span class='ob'>ν</span>X</th><td class="ok" title="p = 0.96, max |pull| = 1.25">3.2<span class="n">/9</span></td><td class="ok" title="p = 1, max |pull| = 0.83">1.1<span class="n">/9</span></td><td class="ok" title="p = 0.98, max |pull| = 0.95">2.1<span class="n">/8</span></td><td class="ok" title="p = 1, max |pull| = 0.78">1.1<span class="n">/9</span></td><td class="ok" title="p = 0.94, max |pull| = 1.05">4.2<span class="n">/10</span></td><td class="ok" title="p = 0.55, max |pull| = 2.13">22.5<span class="n">/24</span></td><td class="ok" title="p = 0.49, max |pull| = 2.47">23.5<span class="n">/24</span></td><td class="ok" title="p = 0.88, max |pull| = 1.93">16.2<span class="n">/24</span></td></tr>
+<tr><th class="proc">CC, νp → e⁻X</th><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td></tr>
+<tr><th class="proc">CC, <span class='ob'>ν</span>p → e⁺X</th><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td><td class="na">–</td></tr>
+<tr><th rowspan="10" class="ref">POWHEG</th><th class="proc">NC γ, e⁻p</th><td class="ok" title="p = 0.91, max |pull| = 1.47">4.0<span class="n">/9</span></td><td class="ok" title="p = 0.63, max |pull| = 1.83">7.1<span class="n">/9</span></td><td class="ok" title="p = 0.97, max |pull| = 0.80">2.2<span class="n">/8</span></td><td class="ok" title="p = 0.44, max |pull| = 1.74">9.0<span class="n">/9</span></td><td class="ok" title="p = 0.17, max |pull| = 1.86">14.0<span class="n">/10</span></td><td class="ok" title="p = 0.28, max |pull| = 2.70">27.5<span class="n">/24</span></td><td class="ok" title="p = 0.62, max |pull| = 1.97">21.4<span class="n">/24</span></td><td class="ok" title="p = 0.57, max |pull| = 1.85">22.2<span class="n">/24</span></td></tr>
+<tr><th class="proc">NC γ/Z, e⁻p</th><td class="ok" title="p = 0.88, max |pull| = 1.73">4.4<span class="n">/9</span></td><td class="ok" title="p = 0.24, max |pull| = 2.09">11.6<span class="n">/9</span></td><td class="ok" title="p = 0.97, max |pull| = 0.98">2.3<span class="n">/8</span></td><td class="ok" title="p = 0.9, max |pull| = 1.28">4.1<span class="n">/9</span></td><td class="ok" title="p = 0.079, max |pull| = 2.44">16.8<span class="n">/10</span></td><td class="ok" title="p = 0.25, max |pull| = 2.91">28.3<span class="n">/24</span></td><td class="ok" title="p = 0.56, max |pull| = 1.96">22.4<span class="n">/24</span></td><td class="ok" title="p = 0.47, max |pull| = 1.92">23.9<span class="n">/24</span></td></tr>
+<tr><th class="proc">NC γ/Z, e⁺p</th><td class="ok" title="p = 0.94, max |pull| = 1.39">3.5<span class="n">/9</span></td><td class="ok" title="p = 0.69, max |pull| = 1.84">6.5<span class="n">/9</span></td><td class="ok" title="p = 0.99, max |pull| = 0.57">1.4<span class="n">/8</span></td><td class="ok" title="p = 0.23, max |pull| = 2.38">11.7<span class="n">/9</span></td><td class="ok" title="p = 0.47, max |pull| = 1.70">9.7<span class="n">/10</span></td><td class="ok" title="p = 0.36, max |pull| = 2.82">25.9<span class="n">/24</span></td><td class="ok" title="p = 0.71, max |pull| = 1.87">19.7<span class="n">/24</span></td><td class="ok" title="p = 0.53, max |pull| = 1.88">22.8<span class="n">/24</span></td></tr>
+<tr><th class="proc">NC Z only, e⁻p</th><td class="ok" title="p = 0.94, max |pull| = 1.24">3.5<span class="n">/9</span></td><td class="ok" title="p = 0.84, max |pull| = 1.41">4.9<span class="n">/9</span></td><td class="ok" title="p = 0.83, max |pull| = 1.49">4.3<span class="n">/8</span></td><td class="ok" title="p = 0.96, max |pull| = 0.99">3.1<span class="n">/9</span></td><td class="ok" title="p = 0.18, max |pull| = 2.86">13.9<span class="n">/10</span></td><td class="ok" title="p = 0.21, max |pull| = 2.43">29.4<span class="n">/24</span></td><td class="ok" title="p = 0.18, max |pull| = 2.28">30.3<span class="n">/24</span></td><td class="ok" title="p = 0.22, max |pull| = 2.02">29.0<span class="n">/24</span></td></tr>
+<tr><th class="proc">NC, νp</th><td class="ok" title="p = 0.94, max |pull| = 0.94">3.6<span class="n">/9</span></td><td class="ok" title="p = 0.84, max |pull| = 1.61">4.9<span class="n">/9</span></td><td class="ok" title="p = 0.84, max |pull| = 1.48">4.2<span class="n">/8</span></td><td class="ok" title="p = 0.83, max |pull| = 1.50">5.0<span class="n">/9</span></td><td class="ok" title="p = 0.42, max |pull| = 2.42">10.2<span class="n">/10</span></td><td class="ok" title="p = 0.47, max |pull| = 2.35">23.8<span class="n">/24</span></td><td class="ok" title="p = 0.38, max |pull| = 2.36">25.5<span class="n">/24</span></td><td class="ok" title="p = 0.5, max |pull| = 2.13">23.4<span class="n">/24</span></td></tr>
+<tr><th class="proc">NC, <span class='ob'>ν</span>p</th><td class="ok" title="p = 0.78, max |pull| = 1.40">5.6<span class="n">/9</span></td><td class="ok" title="p = 0.78, max |pull| = 1.76">5.6<span class="n">/9</span></td><td class="ok" title="p = 0.91, max |pull| = 1.03">3.4<span class="n">/8</span></td><td class="ok" title="p = 0.79, max |pull| = 1.40">5.5<span class="n">/9</span></td><td class="ok" title="p = 0.64, max |pull| = 2.06">7.9<span class="n">/10</span></td><td class="ok" title="p = 0.34, max |pull| = 2.09">26.2<span class="n">/24</span></td><td class="ok" title="p = 0.064, max |pull| = 3.05">35.3<span class="n">/24</span></td><td class="ok" title="p = 0.1, max |pull| = 2.46">33.2<span class="n">/24</span></td></tr>
+<tr><th class="proc">CC, e⁻p → νX</th><td class="ok" title="p = 0.97, max |pull| = 1.16">2.8<span class="n">/9</span></td><td class="ok" title="p = 0.96, max |pull| = 1.42">3.1<span class="n">/9</span></td><td class="ok" title="p = 0.84, max |pull| = 1.45">4.2<span class="n">/8</span></td><td class="ok" title="p = 0.95, max |pull| = 1.04">3.4<span class="n">/9</span></td><td class="ok" title="p = 0.34, max |pull| = 1.97">11.2<span class="n">/10</span></td><td class="ok" title="p = 0.14, max |pull| = 2.52">31.5<span class="n">/24</span></td><td class="ok" title="p = 0.29, max |pull| = 2.56">27.4<span class="n">/24</span></td><td class="ok" title="p = 0.93, max |pull| = 2.26">14.7<span class="n">/24</span></td></tr>
+<tr><th class="proc">CC, e⁺p → <span class='ob'>ν</span>X</th><td class="ok" title="p = 0.91, max |pull| = 1.33">4.0<span class="n">/9</span></td><td class="ok" title="p = 0.72, max |pull| = 1.55">6.2<span class="n">/9</span></td><td class="ok" title="p = 0.31, max |pull| = 1.90">9.4<span class="n">/8</span></td><td class="ok" title="p = 0.9, max |pull| = 1.89">4.2<span class="n">/9</span></td><td class="ok" title="p = 0.88, max |pull| = 1.05">5.2<span class="n">/10</span></td><td class="ok" title="p = 0.49, max |pull| = 2.72">23.5<span class="n">/24</span></td><td class="ok" title="p = 0.22, max |pull| = 2.65">28.9<span class="n">/24</span></td><td class="ok" title="p = 0.29, max |pull| = 2.45">27.3<span class="n">/24</span></td></tr>
+<tr><th class="proc">CC, νp → e⁻X</th><td class="ok" title="p = 0.99, max |pull| = 1.00">1.9<span class="n">/9</span></td><td class="ok" title="p = 0.7, max |pull| = 1.28">6.4<span class="n">/9</span></td><td class="ok" title="p = 0.61, max |pull| = 1.70">6.3<span class="n">/8</span></td><td class="ok" title="p = 0.56, max |pull| = 1.45">7.7<span class="n">/9</span></td><td class="ok" title="p = 0.49, max |pull| = 1.80">9.4<span class="n">/10</span></td><td class="ok" title="p = 0.14, max |pull| = 2.93">31.6<span class="n">/24</span></td><td class="ok" title="p = 0.66, max |pull| = 2.29">20.6<span class="n">/24</span></td><td class="ok" title="p = 0.18, max |pull| = 2.14">30.1<span class="n">/24</span></td></tr>
+<tr><th class="proc">CC, <span class='ob'>ν</span>p → e⁺X</th><td class="ok" title="p = 0.96, max |pull| = 1.05">3.1<span class="n">/9</span></td><td class="ok" title="p = 0.95, max |pull| = 1.24">3.4<span class="n">/9</span></td><td class="ok" title="p = 0.74, max |pull| = 1.44">5.2<span class="n">/8</span></td><td class="ok" title="p = 0.38, max |pull| = 1.79">9.6<span class="n">/9</span></td><td class="ok" title="p = 0.72, max |pull| = 1.41">7.1<span class="n">/10</span></td><td class="ok" title="p = 0.11, max |pull| = 2.32">32.6<span class="n">/24</span></td><td class="ok" title="p = 0.3, max |pull| = 2.43">27.1<span class="n">/24</span></td><td class="ok" title="p = 0.088, max |pull| = 2.94">33.8<span class="n">/24</span></td></tr>
+</tbody></table></div>
+<div class="prose">
+<ul class="tight">
+<li>Summed over the shapes: χ² = 397.8 / 360 against NNLOJET and 799.3 / 720 against POWHEG. No process or observable stands out.</li>
+<li>For Q², x and y the χ² is below n. In P2B the real event and its Born counter-event fall in the same bin, so disorder is almost exact there and the reference errors dominate.</li>
+<li>NNLOJET's photon ρ<sub>E</sub> is the only amber cell: its pulls have both signs and show no trend, while POWHEG agrees. Against independent disorder seeds 5–12 it gives χ² 26.4 / 24.</li>
+</ul>
+</div>
+
+<h2 class="sec">Negative control</h2>
+<div class="prose"><p>To check that these comparisons can see the new term at all, CC e⁻ was rerun (2 × 10⁸ events) with a binary built from a patched copy that drops QQ3.</p></div>
+<div class="tablewrap"><table class="plain">
+<thead><tr><th>Distribution</th><th>vs NNLOJET, MATTHR</th><th>vs NNLOJET, no QQ3</th><th>vs POWHEG, MATTHR</th><th>vs POWHEG, no QQ3</th><th>largest shift without QQ3</th></tr></thead>
+<tbody>
+<tr><td>p<sub>T,j</sub> (lab)</td><td>3.2 / 9</td><td>142.9 / 9</td><td>3.4 / 9</td><td>85.0 / 9</td><td>3%</td></tr>
+<tr><td>η<sub>j</sub> (lab)</td><td>5.6 / 10</td><td>3205 / 10</td><td>11.2 / 10</td><td>1024 / 10</td><td>10%</td></tr>
+<tr><td>τ<sub>zE</sub></td><td>24.2 / 24</td><td>18 573 / 24</td><td>31.5 / 24</td><td>111 663 / 24</td><td>11%</td></tr>
+<tr><td>B<sub>zE</sub></td><td>17.7 / 24</td><td>780 519 / 24</td><td>27.4 / 24</td><td>150 606 / 24</td><td>11%</td></tr>
+<tr><td>ρ<sub>E</sub></td><td>18.3 / 24</td><td>36 705 / 24</td><td>14.7 / 24</td><td>66 505 / 24</td><td>11%</td></tr>
+</tbody></table></div>
+
+<h2 class="sec">Plots</h2>
+<div class="prose"><p>Upper panel: absolute distributions. Lower panel: ratio to disorder, with statistical errors as boxes. Choose a process:</p></div>
+<div class="pbtns" role="group" aria-label="Process"><button type="button" class="pbtn" data-proc="nc_g_em" aria-pressed="false">NC γ, e⁻p</button><button type="button" class="pbtn" data-proc="nc_gZ_em" aria-pressed="false">NC γ/Z, e⁻p</button><button type="button" class="pbtn" data-proc="nc_gZ_ep" aria-pressed="false">NC γ/Z, e⁺p</button><button type="button" class="pbtn" data-proc="nc_Z_em" aria-pressed="false">NC Z only, e⁻p</button><button type="button" class="pbtn" data-proc="nc_nu" aria-pressed="false">NC, νp</button><button type="button" class="pbtn" data-proc="nc_nubar" aria-pressed="false">NC, <span class='ob'>ν</span>p</button><button type="button" class="pbtn" data-proc="cc_em" aria-pressed="true">CC, e⁻p → νX</button><button type="button" class="pbtn" data-proc="cc_ep" aria-pressed="false">CC, e⁺p → <span class='ob'>ν</span>X</button><button type="button" class="pbtn" data-proc="cc_nu" aria-pressed="false">CC, νp → e⁻X</button><button type="button" class="pbtn" data-proc="cc_nubar" aria-pressed="false">CC, <span class='ob'>ν</span>p → e⁺X</button></div>
+<div class="gal" data-proc="nc_g_em" hidden><figure><img loading="lazy" src="plots/p2b_jets/nc_g_em_Q2.png" alt="nc_g_em: Q2 distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_g_em_x.png" alt="nc_g_em: x distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_g_em_y.png" alt="nc_g_em: y distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_g_em_ptj1_lab.png" alt="nc_g_em: ptj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_g_em_etaj1_lab.png" alt="nc_g_em: etaj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_g_em_tauzE.png" alt="nc_g_em: tauzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_g_em_BzE.png" alt="nc_g_em: BzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_g_em_rhoE.png" alt="nc_g_em: rhoE distribution, disorder P2B vs references"></figure></div>
+<div class="gal" data-proc="nc_gZ_em" hidden><figure><img loading="lazy" src="plots/p2b_jets/nc_gZ_em_Q2.png" alt="nc_gZ_em: Q2 distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_gZ_em_x.png" alt="nc_gZ_em: x distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_gZ_em_y.png" alt="nc_gZ_em: y distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_gZ_em_ptj1_lab.png" alt="nc_gZ_em: ptj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_gZ_em_etaj1_lab.png" alt="nc_gZ_em: etaj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_gZ_em_tauzE.png" alt="nc_gZ_em: tauzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_gZ_em_BzE.png" alt="nc_gZ_em: BzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_gZ_em_rhoE.png" alt="nc_gZ_em: rhoE distribution, disorder P2B vs references"></figure></div>
+<div class="gal" data-proc="nc_gZ_ep" hidden><figure><img loading="lazy" src="plots/p2b_jets/nc_gZ_ep_Q2.png" alt="nc_gZ_ep: Q2 distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_gZ_ep_x.png" alt="nc_gZ_ep: x distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_gZ_ep_y.png" alt="nc_gZ_ep: y distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_gZ_ep_ptj1_lab.png" alt="nc_gZ_ep: ptj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_gZ_ep_etaj1_lab.png" alt="nc_gZ_ep: etaj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_gZ_ep_tauzE.png" alt="nc_gZ_ep: tauzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_gZ_ep_BzE.png" alt="nc_gZ_ep: BzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_gZ_ep_rhoE.png" alt="nc_gZ_ep: rhoE distribution, disorder P2B vs references"></figure></div>
+<div class="gal" data-proc="nc_Z_em" hidden><figure><img loading="lazy" src="plots/p2b_jets/nc_Z_em_Q2.png" alt="nc_Z_em: Q2 distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_Z_em_x.png" alt="nc_Z_em: x distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_Z_em_y.png" alt="nc_Z_em: y distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_Z_em_ptj1_lab.png" alt="nc_Z_em: ptj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_Z_em_etaj1_lab.png" alt="nc_Z_em: etaj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_Z_em_tauzE.png" alt="nc_Z_em: tauzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_Z_em_BzE.png" alt="nc_Z_em: BzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_Z_em_rhoE.png" alt="nc_Z_em: rhoE distribution, disorder P2B vs references"></figure></div>
+<div class="gal" data-proc="nc_nu" hidden><figure><img loading="lazy" src="plots/p2b_jets/nc_nu_Q2.png" alt="nc_nu: Q2 distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_nu_x.png" alt="nc_nu: x distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_nu_y.png" alt="nc_nu: y distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_nu_ptj1_lab.png" alt="nc_nu: ptj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_nu_etaj1_lab.png" alt="nc_nu: etaj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_nu_tauzE.png" alt="nc_nu: tauzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_nu_BzE.png" alt="nc_nu: BzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_nu_rhoE.png" alt="nc_nu: rhoE distribution, disorder P2B vs references"></figure></div>
+<div class="gal" data-proc="nc_nubar" hidden><figure><img loading="lazy" src="plots/p2b_jets/nc_nubar_Q2.png" alt="nc_nubar: Q2 distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_nubar_x.png" alt="nc_nubar: x distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_nubar_y.png" alt="nc_nubar: y distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_nubar_ptj1_lab.png" alt="nc_nubar: ptj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/nc_nubar_etaj1_lab.png" alt="nc_nubar: etaj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_nubar_tauzE.png" alt="nc_nubar: tauzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_nubar_BzE.png" alt="nc_nubar: BzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/nc_nubar_rhoE.png" alt="nc_nubar: rhoE distribution, disorder P2B vs references"></figure></div>
+<div class="gal" data-proc="cc_em"><figure><img loading="lazy" src="plots/p2b_jets/cc_em_Q2.png" alt="cc_em: Q2 distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_em_x.png" alt="cc_em: x distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_em_y.png" alt="cc_em: y distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_em_ptj1_lab.png" alt="cc_em: ptj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_em_etaj1_lab.png" alt="cc_em: etaj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_em_tauzE.png" alt="cc_em: tauzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_em_BzE.png" alt="cc_em: BzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_em_rhoE.png" alt="cc_em: rhoE distribution, disorder P2B vs references"></figure></div>
+<div class="gal" data-proc="cc_ep" hidden><figure><img loading="lazy" src="plots/p2b_jets/cc_ep_Q2.png" alt="cc_ep: Q2 distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_ep_x.png" alt="cc_ep: x distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_ep_y.png" alt="cc_ep: y distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_ep_ptj1_lab.png" alt="cc_ep: ptj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_ep_etaj1_lab.png" alt="cc_ep: etaj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_ep_tauzE.png" alt="cc_ep: tauzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_ep_BzE.png" alt="cc_ep: BzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_ep_rhoE.png" alt="cc_ep: rhoE distribution, disorder P2B vs references"></figure></div>
+<div class="gal" data-proc="cc_nu" hidden><figure><img loading="lazy" src="plots/p2b_jets/cc_nu_Q2.png" alt="cc_nu: Q2 distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_nu_x.png" alt="cc_nu: x distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_nu_y.png" alt="cc_nu: y distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_nu_ptj1_lab.png" alt="cc_nu: ptj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_nu_etaj1_lab.png" alt="cc_nu: etaj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_nu_tauzE.png" alt="cc_nu: tauzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_nu_BzE.png" alt="cc_nu: BzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_nu_rhoE.png" alt="cc_nu: rhoE distribution, disorder P2B vs references"></figure></div>
+<div class="gal" data-proc="cc_nubar" hidden><figure><img loading="lazy" src="plots/p2b_jets/cc_nubar_Q2.png" alt="cc_nubar: Q2 distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_nubar_x.png" alt="cc_nubar: x distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_nubar_y.png" alt="cc_nubar: y distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_nubar_ptj1_lab.png" alt="cc_nubar: ptj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_jets/cc_nubar_etaj1_lab.png" alt="cc_nubar: etaj1_lab distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_nubar_tauzE.png" alt="cc_nubar: tauzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_nubar_BzE.png" alt="cc_nubar: BzE distribution, disorder P2B vs references"></figure><figure><img loading="lazy" src="plots/p2b_shapes/cc_nubar_rhoE.png" alt="cc_nubar: rhoE distribution, disorder P2B vs references"></figure></div>
+
+<h2 class="sec">Other checks and observations</h2>
+<div class="prose">
+<ul class="tight">
+<li><b>Unit tests.</b> The new <code>test_matthr</code> runs for 13 flag sets. It checks photon bit-identity, the C2/C3 decomposition, and that QQ3/QQ → Y₋/Y₊ in the initial- and final-state collinear limits. <code>test_matrix_element</code> now also checks <code>parton_couplings</code> against the quark-parton model. The full ctest suite (59 tests) passes, also from a clean clone.</li>
+<li><b>Photon bit-identity.</b> The P2B validation references at O(α<sub>s</sub>²) are byte-identical apart from the header stamp; they also call MATTHR through VIRTHR, COLFOR and SUBFOR. Yesterday's 10⁸-event O(α<sub>s</sub>) photon run was repeated with the new binary, and its histograms, VEGAS grids and cross section are identical.</li>
+<li><b>Lowest ρ<sub>E</sub> bin.</b> With seeds 1–4 the photon-dominated processes were 0.3% above both references in the lowest bin. Independent seeds 5–12 agree with the references, so this was a correlated fluctuation of about 2.5σ in the lowest τ, B and ρ bins. The P2B weights near the singular region have heavy tails, so the quoted errors of the first bins may be slightly small.</li>
+<li><b>Guards.</b> <code>-p2b</code> now accepts <code>-includeZ</code>, <code>-CC</code> and NC neutrino beams up to NLO. At NNLO the other O(α<sub>s</sub>²) pieces (VIRTHR, CONTHR, MATFOR, …) are still photon-only and are refused with "Cannot do Z/CC in p2b beyond NLO yet".</li>
+</ul>
+</div>
+
+<h2 class="sec">Bug reports</h2>
+<div class="prose">
+<p>Written up for submission, as private pages to share from their Share menu: <a href="https://claude.ai/artifact/2gVcQsGmVFFFTWR3Xec5aW">NNLOJET 1.0.2 DIS issues</a> and <a href="https://claude.ai/artifact/TEFpA9vDe6d7C41bDVETMV">POWHEG-BOX-RES DIS issues</a>.</p>
+</div>
+
+<footer>Logbook, run scripts and raw results are in <code>~/cernbox/disorder-comparisons/</code> (<code>NOTES.md</code>, <code>results/p2b_*.txt</code>, <code>plots/p2b_*/</code>). The development log is in <code>docs/notebook.md</code> on the branch. September 2026.</footer>
+</main>
+<script>
+(function(){
+  var btns = document.querySelectorAll('.pbtn');
+  function show(p){
+    document.querySelectorAll('.gal').forEach(function(g){ g.hidden = g.getAttribute('data-proc') !== p; });
+    btns.forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-proc') === p)); });
+    try { localStorage.setItem('matthr-proc', p); } catch (e) {}
+  }
+  btns.forEach(function(b){ b.addEventListener('click', function(){ show(b.getAttribute('data-proc')); }); });
+  try { var s = localStorage.getItem('matthr-proc'); if (s && document.querySelector('.gal[data-proc="'+s+'"]')) show(s); } catch (e) {}
+})();
+</script>
