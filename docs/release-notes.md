@@ -31,6 +31,19 @@ where it no longer applies, this file says so.
     correlations from absorptive parts) are dropped; they integrate to zero
     for reflection-symmetric observables.
 
+### Analyses
+
+- **`analysis/cmp_nnlojet_powheg.f`** (build with
+  `-DANALYSIS=cmp_nnlojet_powheg.f`; it has its own anti-kT and needs no
+  FastJet): the analysis used for the comparisons with NNLOJET and
+  POWHEG-BOX-RES. It fills Q², x, y, the leading lab-frame jet (anti-kT,
+  R = 1, p_T > 5 GeV) and the Breit-frame event shapes τ_zE, B_zE and ρ_E,
+  with `*_Ec` versions that require an energy E_cur > Q/10 in the current
+  hemisphere (for τ_zE and B_zE this makes them infrared safe at O(αs²),
+  as NNLOJET's `dis_eventshapes`). The observables are defined in
+  `analysis/cmp_obs_core.f` and the cuts in `analysis/cmp_obs_cuts.h`,
+  shared with the POWHEG-BOX analysis.
+
 ### Testing and validation
 
 - **Unit tests.** `ctest` now runs unit tests of the Born phase-space

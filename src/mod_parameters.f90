@@ -542,6 +542,8 @@ contains
     write(0,'(a)') ' -scaleuncert [false]: Do 7-point scale variation around Q   '
     write(0,'(a)') ' -pdfuncert [false] : Compute pdf uncertainties              '
     write(0,'(a)') ' -p2b [false] : Turn on disent and projection-to-Born        '
+    write(0,'(a)') '                (all NC/CC processes, up to NNLO; not with   '
+    write(0,'(a)') '                -n3lo, variable flavour or -pdfuncert)       '
     write(0,'(a)') '                                                             '
     write(0,'(a)') ' # EW parameters:                                            '
     write(0,'(a)') ' -one-over-alpha (dble) [137.] : 1/αEM                       '
