@@ -627,3 +627,39 @@ Validation matrix:
 The welcome line ("Welcome to disorder v. …") is now ignored by the
 comparison, so that version changes do not require new reference logs.
 Version set to 2.2.0 (welcome message and CMake project).
+
+## 2026-09-29 — NNLOJET at O(αs²): NC γ/Z e⁻ with the interference
+
+The table of 2026-09-26 has NC γ and NC Z separately. The full NC process
+(γ + Z + γZ interference) was not in it. It is compared here for all three
+shapes.
+
+Setup (`~/cernbox/disorder-comparisons/runs/shapes_nlo_gz`, set up by
+`tools/setup_shapes_nlo_gz.py`):
+- disorder `-nnlo -p2b -NC -includeZ` at commit c1eff06 of this branch,
+  with the comparison analysis: 30 seeds × 5e7 events.
+- NNLOJET 1.0.2 epLJJ at NLO: 30 jobs per part, LO/V/R 30/30/100 min.
+- HERA e⁻p (27.5 × 920 GeV), 1000 < Q² < 15000 GeV², 0.1 < y < 0.9,
+  NNPDF40MC_nnlo_as_01180, μ_R = μ_F = Q, M_Z = 91.1876 GeV, M_W = 80.398
+  GeV, zero widths.
+- τ_zE and B_zE are taken with the current-hemisphere energy cut
+  E_cur > Q/10, as before.
+- The later commits change only the scale-variation ratio for zero weights
+  (not used here), the help text and the version.
+
+| observable | χ²/24, disorder γ/Z vs NNLOJET | max \|r−1\| | photon-only disorder vs NNLOJET γ/Z |
+|---|---|---|---|
+| τ_zE (cut) | 20.8 | 5.1e-3 | 8724 |
+| B_zE (cut) | 24.2 | 4.7e-3 | 18726 |
+| ρ_E | 16.8 | 1.9e-2 | 3402 |
+
+- Total χ² = 61.8/72; no |pull| above 2.4.
+- The control (photon-only disorder, 10 seeds) is 7–9% below NNLOJET, with
+  pulls up to 50. So the comparison resolves the Z and γZ contributions
+  with a large margin.
+- Comparison: `tools/gz_compare.py`; bin-by-bin tables in
+  `results/shapes_nlo_gz.txt`.
+
+With this, disorder's p2b O(αs²) event shapes agree with NNLOJET for:
+- NC γ, NC Z and NC γ/Z e⁻;
+- CC e⁻ and e⁺.
