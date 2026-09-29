@@ -23,3 +23,16 @@ fast | inclusive_cc_Q_10_x_0.01_neutrino_ | -n3lo -yorder 5 -lnlnQorder 4 -noNC 
 fast | inclusive_cc_Q_10_x_0.01_neutrino_positron_ | -n3lo -yorder 5 -lnlnQorder 4 -noNC -CC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -neutrino -positron
 fast | p2b_nc_Q_10_x_0.01_ | -nnlo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -p2b
 fast | p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_ | -nnlo -yorder 5 -lnlnQorder 4 -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -p2b
+fast | p2b_nc_includeZ_Q_30_x_0.1_positron_ | -nnlo -yorder 5 -lnlnQorder 4 -NC -includeZ -positron -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_cc_Q_30_x_0.1_ | -nnlo -yorder 5 -lnlnQorder 4 -noNC -CC -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_nc_includeZ_Q_30_x_0.1_nlo_ | -nlo -yorder 5 -lnlnQorder 4 -NC -includeZ -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_nc_Zonly_Q_30_x_0.1_ | -nnlo -yorder 5 -lnlnQorder 4 -NC -includeZ -Zonly -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_nc_intonly_Q_30_x_0.1_positron_ | -nnlo -yorder 5 -lnlnQorder 4 -NC -includeZ -intonly -positron -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_nc_Q_30_x_0.1_neutrino_ | -nnlo -yorder 5 -lnlnQorder 4 -NC -neutrino -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_nc_Q_30_x_0.1_neutrino_positron_ | -nnlo -yorder 5 -lnlnQorder 4 -NC -neutrino -positron -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_cc_Q_30_x_0.1_nlo_ | -nlo -yorder 5 -lnlnQorder 4 -noNC -CC -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_cc_Q_30_x_0.1_noscaleuncert_ | -nnlo -yorder 5 -lnlnQorder 4 -noNC -CC -toyQ0 2.0 -Q 30.0 -x 0.1 -p2b
+fast | p2b_cc_Q_30_x_0.1_positron_ | -nnlo -yorder 5 -lnlnQorder 4 -noNC -CC -positron -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_cc_Q_30_x_0.1_neutrino_ | -nnlo -yorder 5 -lnlnQorder 4 -noNC -CC -neutrino -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_cc_Q_30_x_0.1_neutrino_positron_ | -nnlo -yorder 5 -lnlnQorder 4 -noNC -CC -neutrino -positron -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b
+fast | p2b_nc_cc_includeZ_Q_30_x_0.1_ | -nnlo -yorder 5 -lnlnQorder 4 -NC -includeZ -CC -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b

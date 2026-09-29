@@ -8,9 +8,11 @@ A run of `disorder <args> -prefix <prefix>` produces
 and we store its screen output as <prefix without trailing _>.log.
 All of these are compared with the files of the same name in the
 reference directory:
-  - lines with volatile content (timings, dates, library banners) are
+  - lines with volatile content (timings, dates, library banners, the
+    version in the welcome line) are
     dropped, and the path of the executable in the echoed command line
     is ignored;
+  - any NaN or infinity in the output is a failure (also with --generate);
   - the remaining lines must have the same text, and numbers must agree
     within a relative tolerance rtol (default 1e-5; plus an absolute
     tolerance atol for numbers that are zero up to rounding), so that the
@@ -36,12 +38,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG = os.path.join(HERE, "configurations.txt")
 
 # Lines containing any of these (case-insensitive) are not compared
-VOLATILE = ("total time", "stamped by", "fastjet", "hoppet", "arxiv", "lhapdf")
+VOLATILE = ("total time", "stamped by", "fastjet", "hoppet", "arxiv", "lhapdf",
+            "welcome to disorder")  # the version number
 # The echoed command line starts with the path to the executable
 COMMAND_LINE = re.compile(r"#\S*disorder(?=\s)")
 # VEGAS's chi^2 per iteration is a diagnostic that is zero up to rounding
 # after the first iteration
 VEGAS_CHI2 = re.compile(r"(chi\*\*2/it'n =)\s*\S+")
+# A NaN or infinity anywhere in the output fails the run (also when
+# generating references), since a reference with NaN would compare equal
+# to a broken run
+NONFINITE = re.compile(rb"(?i)\b(nan|infinity)\b")
 # Numbers anywhere in a line (Fortran may glue them to other characters)
 NUMBER = re.compile(r"([-+]?(?:\d+\.?\d*|\.\d+)(?:[eEdD][-+]?\d+)?)")
 
@@ -178,6 +185,17 @@ def main():
         return 1
 
     produced = output_files(opts.workdir, prefix)
+    nonfinite = False
+    for name in produced:
+        with open(os.path.join(opts.workdir, name), "rb") as f:
+            for number, line in enumerate(f, 1):
+                if NONFINITE.search(line):
+                    print(f"FAILED: {name}:{number} contains a NaN or infinity:")
+                    print("  " + line.decode(errors="replace").rstrip()[:200])
+                    nonfinite = True
+                    break
+    if nonfinite:
+        return 1
     if opts.generate:
         os.makedirs(opts.refdir, exist_ok=True)
         for name in output_files(opts.refdir, prefix):

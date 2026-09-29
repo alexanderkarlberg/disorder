@@ -1,0 +1,119 @@
+ WARNING: Using toy PDF
+Starting the structure functions with fixed number of flavours
+nf =  5
+ WARNING: Using toy PDF
+#--------------------------------------------------------------------------
+#                         FastJet release 3.5.1
+#                 M. Cacciari, G.P. Salam and G. Soyez                  
+#     A software package for jet finding and analysis at colliders      
+#                           https://fastjet.fr                           
+#	                                                                      
+# Please cite EPJC72(2012)1896 [arXiv:1111.6097] if you use this package
+# for scientific work and optionally PLB641(2006)57 [hep-ph/0512210].   
+#                                                                       
+# FastJet is provided without warranty under the GNU GPL v2 or higher.  
+# It uses T. Chan's closest pair algorithm, S. Fortune's Voronoi code
+# and 3rd party plugin jet algorithms. See COPYING file for details.
+#--------------------------------------------------------------------------
+
+ This is DISENT, a program for calculating jet quantities in
+ deep inelastic scattering to next-to-leading order in alpha_s
+ If you use this program, please reference:
+ S.Catani & M.H.Seymour, Nucl. Phys. B485 (1997) 291
+
+ Written by Mike Seymour, August 1996
+ Version 0.1, October 1997
+
+ Minor modifications by Gavin Salam, August 1999
+ Minor modifications by Alexander Karlberg, March 2023
+ Including bug fix in SUBFOR as reported in
+ 2005.10705 and 2010.07354
+    NEV=    100000
+ CA =  3.000000  CF =  1.333333  TR =  0.500000  nf =  5
+ CUTOFF =   1.0000000000000000E-008
+ SCHEME =           0
+ NPOW =           2           4
+ ORDER =           1
+         0, ISEED=     12345      67890
+ Outputting results to: p2b_nc_includeZ_Q_30_x_0.1_nlo_disorder_nlo_seed0001_pdfmem000
+
+==================== TOTAL TIME :  8.14E-01 s.
+
+-----------------------------------------------------------[1m
+              Welcome to HOPPET v. 2.3.1-dev0
+    Higher Order Perturbative Parton Evolution Toolkit     [0m
+-----------------------------------------------------------
+                  Written (2001-2025) by                   
+     Frederic Dreyer, Alexander Karlberg, Paolo Nason,     
+      Juan Rojo, Gavin P. Salam and Giulia Zanderighi      
+
+ It is made available under the GNU public license.        
+ If using it for scientific work, please cite              
+ G.P. Salam & J. Rojo, CPC 180(2009)120 (arXiv:0804.3755). 
+ and A. Karlberg, P. Nason, G.P. Salam, G. Zanderighi      
+ & F. Dreyer (arXiv:2510.09310).                           
+ 
+ You are also encouraged to cite the original references,  
+ for LO, NLO, NNLO, and N3LO splitting functions, the QCD  
+ 1, 2, 3, and 4 loop beta functions and the PDF and        
+ coupling mass threshold matching functions. Additionally  
+ the DIS coefficient functions should be cited when used.  
+-----------------------------------------------------------
+-----------------------------------------------------------
+               Welcome to disorder v. 1.0.0                
+        Written by Alexander Karlberg (2023-2024)          
+                                                           
+ It is made available under the GNU public license,        
+ with the additional request that if you use it or any     
+ derivative of it in scientific work then you should cite: 
+ A. Karlberg (arXiv:2401.16964).                           
+                                                           
+ You are also encouraged to cite HOPPET, the original      
+ references,for LO, NLO and NNLO splitting functions, the  
+ QCD 1, 2, 3 and 4 loop beta functions and the coupling and
+ PDF mass threshold matching functions. You are furthermore
+ encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
+ functions and the disent references.                      
+-----------------------------------------------------------
+ # Stamped by ./disorder on 29/09/2026 at 12:42:26
+ #./disorder -nlo -yorder 5 -lnlnQorder 4 -NC -includeZ -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b -prefix p2b_nc_includeZ_Q_30_x_0.1_nlo_
+ # ----------------------------------------------------------
+ # Doing DIS @ nlo  (e^- + p)
+ # Using DISENT with projection-to-Born
+ # Including neutral current
+ # With γ/Z
+ # xmin, xmax:           0.100000000     0.100000000
+ # ymin, ymax:           0.099778271     0.099778271
+ # Qmin, Qmax:          30.000000000    30.000000000 GeV
+ # Electron energy:     27.500000000 GeV
+ # Proton energy:      820.000000000 GeV
+ # COM energy:       90200.000000000 GeV^2
+  # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
+ # MZ:                  91.187600000 GeV
+ # MW:                  80.398000000 GeV
+ # nf:                           5
+ # CA:                   3.000000000
+ # CF:                   1.333333333
+ # TR:                   0.500000000
+ # αS(MZ):               0.126695130
+ # αS(Qmin):             0.154790310
+ #        with 2-loop running
+ # With Q as central scale
+ # 1/αEM:              137.000000000
+ # GF:                   0.112670237E-04 GeV^-2
+ # sin(θ_W)^2:           0.222645853
+ # ----------------------------------------------------------
+ 
+ ============================================================
+ # Total NLO cross-section
+ # Summary:
+ # σ(NC)                          =        1.258068 pb/GeV^2
+ # MC integration uncertainty     =        0.0000 %
+ # QCD scale uncertainty (+)      =        0.6367 %
+ # QCD scale uncertainty (-)      =       -0.7775 %
+ 
+ # Reduced NLO cross-sections
+ # σ reduced (NC)                 =        0.431820
+ # QCD scale uncertainty (+)      =        0.6367 %
+ # QCD scale uncertainty (-)      =       -0.7775 %
+ ============================================================

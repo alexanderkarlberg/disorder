@@ -1,0 +1,42 @@
+ # Stamped by ./disorder on 29/09/2026 at 12:43:08
+ #./disorder -nlo -yorder 5 -lnlnQorder 4 -noNC -CC -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b -prefix p2b_cc_Q_30_x_0.1_nlo_
+ # ----------------------------------------------------------
+ # Doing DIS @ nlo  (e^- + p)
+ # Using DISENT with projection-to-Born
+ # Including charged current
+ # And no neutral current
+ # xmin, xmax:           0.100000000     0.100000000
+ # ymin, ymax:           0.099778271     0.099778271
+ # Qmin, Qmax:          30.000000000    30.000000000 GeV
+ # Electron energy:     27.500000000 GeV
+ # Proton energy:      820.000000000 GeV
+ # COM energy:       90200.000000000 GeV^2
+  # PDF:             LHA toy PDF initialised at   2.0000000000000000      GeV
+ # MZ:                  91.187600000 GeV
+ # MW:                  80.398000000 GeV
+ # nf:                           5
+ # CA:                   3.000000000
+ # CF:                   1.333333333
+ # TR:                   0.500000000
+ # αS(MZ):               0.126695130
+ # αS(Qmin):             0.154790310
+ #        with 2-loop running
+ # With Q as central scale
+ # 1/αEM:              137.000000000
+ # GF:                   0.112670237E-04 GeV^-2
+ # sin(θ_W)^2:           0.222645853
+ # ----------------------------------------------------------
+ 
+ ============================================================
+ # Total NLO cross-section
+ # Summary:
+ # σ(CC)                          =        0.048453 pb/GeV^2
+ # MC integration uncertainty     =        0.0000 %
+ # QCD scale uncertainty (+)      =        0.5794 %
+ # QCD scale uncertainty (-)      =       -0.7731 %
+ 
+ # Reduced NLO cross-sections
+ # σ reduced (CC)                 =        1.598692
+ # QCD scale uncertainty (+)      =        0.5794 %
+ # QCD scale uncertainty (-)      =       -0.7731 %
+ ============================================================
