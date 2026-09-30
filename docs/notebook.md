@@ -663,3 +663,24 @@ Setup (`~/cernbox/disorder-comparisons/runs/shapes_nlo_gz`, set up by
 With this, disorder's p2b O(αs²) event shapes agree with NNLOJET for:
 - NC γ, NC Z and NC γ/Z e⁻;
 - CC e⁻ and e⁺.
+
+## 2026-09-30 — CI failure on main after the 2.2.0 merge
+
+- CI failed on main at 9ee483c and 51aa33c (Test step; ctest exit code 8).
+  The last green run was the scheduled one on 67fa107.
+- Reproduced from a clean clone of main (51aa33c), configured as in CI
+  (Release, FastJet, exclusive lab-frame analysis):
+  - all unit and guard tests pass;
+  - 31 of the 32 validation tests fail, each only on its `.log`, and each on
+    the same line of the welcome banner: `Written by Alexander Karlberg
+    (2023-2024)` in the references vs `(2023-2026)` since cc5b9f2 ("Updated
+    banner"). Numbers are compared anywhere in a line, so 2024 vs 2026 is a
+    relative deviation of 9.9e-4.
+  - All result and histogram files agree to 0.0e+00.
+- Cause: the years in the banner are volatile in the same way as the
+  version on the line above it, which was already dropped.
+- Fix: `run_validation.py` also drops the "Written by" line of the banner.
+  The references are left as generated.
+- Why it was not caught: CI runs only on pushes and PRs to main (and on the
+  schedule), not on branches. The full ctest was not rerun after the banner
+  commit went onto the branch before the merge.

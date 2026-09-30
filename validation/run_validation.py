@@ -9,7 +9,7 @@ and we store its screen output as <prefix without trailing _>.log.
 All of these are compared with the files of the same name in the
 reference directory:
   - lines with volatile content (timings, dates, library banners, the
-    version in the welcome line) are
+    version and the years in the welcome banner) are
     dropped, and the path of the executable in the echoed command line
     is ignored;
   - any NaN or infinity in the output is a failure (also with --generate);
@@ -39,7 +39,8 @@ CONFIG = os.path.join(HERE, "configurations.txt")
 
 # Lines containing any of these (case-insensitive) are not compared
 VOLATILE = ("total time", "stamped by", "fastjet", "hoppet", "arxiv", "lhapdf",
-            "welcome to disorder")  # the version number
+            "welcome to disorder",          # the version number
+            "written by alexander karlberg")  # the years
 # The echoed command line starts with the path to the executable
 COMMAND_LINE = re.compile(r"#\S*disorder(?=\s)")
 # VEGAS's chi^2 per iteration is a diagnostic that is zero up to rounding
