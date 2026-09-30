@@ -2,7 +2,7 @@
 
 Release notes for each version, newest first. The detailed list of changes since 1.0.0, with pointers into the code, is in [docs/release-notes.md](docs/release-notes.md).
 
-## v2.2.0 (unreleased)
+## v2.2.0 (2026-09-30)
 
 This release extends the projection-to-Born (P2B) mode, `-p2b`, from photon exchange to all neutral- and charged-current processes. DISENT's matrix elements now include Z and W exchange up to O(αs²). Fully differential predictions (jets, event shapes) at NLO and NNLO are therefore available for NC γ/Z exchange (also Z only or interference only) and CC, for charged-lepton and neutrino beams of either charge. For photon exchange the results are bitwise identical to v2.1.1.
 
