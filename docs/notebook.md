@@ -996,3 +996,19 @@ slicing against DISENT (x = 0.01, Q^2 = 400 GeV^2, tau_zQ in [0.05, 0.5)).
   contributions vanishes because of colour conservation"; the dipole part has
   a universal cos(πε). So the pp → V+jet soft function applies to DIS 2+1
   (qq̄g: one-dimensional colour space, tripoles vanish identically).
+- Invariant-measure decomposition (fixed DISENT, 90 × 2M each; settings
+  checked in every run.log), offset per Born at τ_cut = 1e-4 / 3e-5 / 1e-5,
+  slope over 2e-4 … 1e-5:
+  - QCD, all channels: −0.13 ± 0.09 / −0.06 ± 0.14 / +0.11 ± 0.24, 0.07 ± 0.07
+  - QCD, quark channel: +0.16 ± 0.10 / +0.20 ± 0.18 / +0.02 ± 0.25, 0.00 ± 0.07
+  - QCD, gluon channel: −0.22 ± 0.16 / +0.13 ± 0.24 / +0.31 ± 0.38, 0.22 ± 0.10
+  - quark, T_R = 0: +0.03 ± 0.11 / −0.06 ± 0.17 / −0.23 ± 0.22, −0.02 ± 0.06
+  - quark, C_A = 0: −0.18 ± 0.08 / 0.00 ± 0.12 / −0.10 ± 0.17, 0.15 ± 0.05
+  - quark, abelian: −0.24 ± 0.09 / −0.30 ± 0.14 / −0.30 ± 0.18, 0.08 ± 0.05
+  At 3e-5 and 1e-5 all six are consistent with zero (χ² 6.4/6 and 5.1/6);
+  largest deviation the abelian part (−2.1σ, −1.7σ). So NLO 2+1 with the
+  invariant measure reproduces DISENT within the statistical precision, about
+  1.4–3.8% of the NLO coefficient per configuration. Still open: the
+  geometric measure's rising residual (unexplained; it must not hide
+  something the invariant measure shares) and more statistics for the
+  abelian part.
