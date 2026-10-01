@@ -88,7 +88,7 @@ C
      $     WTWO,WTHR,WFOR,JTHR,JFOR,JTMP,MTWO(-6:6),MTHR(-6:6),
      $     MFOR(-6:6),VTWO(-6:6),VTHR(-6:6),CTHR(-6:6),CFOR(-6:6),
      $     STHR(-6:6,NPERM3),SFOR(-6:6,NPERM4),WEIGHT(-6:6),ZERO(-6:6),
-     $     P(4,7),Q(4,7,NPERM4),NRM,NPOW1,NPOW2,CUTOFF_IN
+     $     P(4,7),Q(4,7,NPERM4),NRM,NPOW1,NPOW2,CUTOFF_IN,XC,XCJAC
       INTEGER SCHEME,NF,ORDER
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
@@ -229,8 +229,13 @@ C---  GIVE IT TO THE USER
 C---  EVALUATE THE FOUR-PARTON COLLINEAR SUBTRACTION
             CALL COLFOR(S,P,CFOR,*1000)
 C---  GIVE IT TO THE USER
-            CALL VECMUL(13,NRM*WTWO*WTHR/JTHR/NEV,CFOR,WEIGHT)
-            CALL USER(4,2,3,P,S,WEIGHT,SCALE)
+C---  AK (2026): not when X is in the cutoff region (zero Jacobian, see
+C     VIRTHR): the weight is zero and parton 4 can have zero momentum
+            CALL GETCOL(XC,XCJAC)
+            IF (XCJAC.NE.0) THEN
+              CALL VECMUL(13,NRM*WTWO*WTHR/JTHR/NEV,CFOR,WEIGHT)
+              CALL USER(4,2,3,P,S,WEIGHT,SCALE)
+            ENDIF
 C---  GENERATE A FOUR-PARTON STATE
             SCL_WEIGHT = 1D0 
             CALL GENFOR(P,WFOR,*1000)
@@ -403,6 +408,9 @@ C---IF INCOMING PARTON IS THE SPECTATOR GENERATE AN INITIAL-STATE DIPOLE
       IF (OMIT.EQ.1) THEN
 C---FIND OUT WHAT X VALUE WAS GENERATED AND THE JACOBIAN FACTOR
         CALL GETCOL(X,XJAC)
+C---AK (2026): X IN THE CUTOFF REGION (ZERO JACOBIAN, SEE VIRTHR): THIS
+C   DIPOLE WOULD BE SINGULAR, SO DROP THE POINT AS FOR THE CUTS BELOW
+        IF (XJAC.EQ.0) RETURN 1
 C---GENERATE A Z VALUE
         Z=1-R(3)**NPOW(2)
         IF (R(4).GT.0.5) Z=1-Z
@@ -544,6 +552,11 @@ C---GENERATE AN X VALUE AND STORE IT FOR LATER RETRIEVAL
         XJAC=1/(0.5/(-X*LOG(XMIN))
      $       +0.5*((1-XMIN)/(1-X))**XPOW(I)/(NPOW(I)*(1-XMIN)))
       ENDIF
+      XL=X
+      XLJAC=XJAC
+      RETURN
+C---AK (2026): OVERWRITE THE STORED VALUES (VIRTHR, FOR X IN THE CUTOFF REGION)
+      ENTRY SETCOL(X,XJAC)
       XL=X
       XLJAC=XJAC
       RETURN
@@ -943,6 +956,7 @@ C-----------------------------------------------------------------------
 C---CALCULATE THE THREE-PARTON MATRIX-ELEMENT AT NEXT-TO-LEADING ORDER
       INTEGER I
       DOUBLE PRECISION S,P(4,7),V(-6:6),M(-6:6),X,XJAC,XMIN, QQ,GQ,QG,GG
+     $     ,XK
      $     ,KQF,KGF,PQF,PGF,L12,L13,L23,DOT,ERTV,LEIV,EMSQ,
      $     C2(-6:6),C3(-6:6),CG(6),QQ3,NX3,NY3
       LOGICAL LPV
@@ -1000,7 +1014,21 @@ C---GENERATE A COLLINEAR EMISSION
       XMIN=2*DOT(P,1,6)/S
       CALL GENCOL(2,X,XJAC,XMIN)
 C---ENFORCE INVARIANT MASS CUTOFF
-      IF (1-X.LT.CUTOFF) RETURN 1
+C---AK (2026): this used to be IF (1-X.LT.CUTOFF) RETURN 1, which aborted
+C   the event after the three-parton Born had been given to the user, so
+C   the whole O(as^2) part (virtual, collinear, real, counter-events) was
+C   lost for a fraction CUTOFF**(1/NPOW(2))/2 of the events (0.5% for
+C   NPOW(2) = 4, CUTOFF = 1e-8). Instead the X region above 1-CUTOFF is
+C   dropped from the x integral alone: zero Jacobian (also stored for
+C   COLFOR and GENFOR), so the X-sampled K and P terms vanish while the
+C   virtual and the delta(1-x) terms are kept. XK is any X at which those
+C   terms are finite (X can be exactly 1).
+      XK=X
+      IF (1-X.LT.CUTOFF) THEN
+        XJAC=0
+        XK=0.5D0
+        CALL SETCOL(X,XJAC)
+      ENDIF
 C---CALCULATE THE COLLINEAR COUNTERTERM
       GQ=0
       QG=0
@@ -1016,7 +1044,7 @@ C---CALCULATE THE COLLINEAR COUNTERTERM
          do i = 1,3
             SCL_WEIGHT(i,:) = V(:)
          enddo
-         CALL KPFUNS_SCL_VAR(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQscl,GQscl
+         CALL KPFUNS_SCL_VAR(-XK,XJAC,XMIN,KQF,KGF,PQF,PGF,QQscl,GQscl
      $        ,QGscl,GGscl)
 C---  THE TOTAL
          SCL_WEIGHT(:,0)=SCL_WEIGHT(:,0)+GGscl(:)*M(0)
@@ -1031,7 +1059,7 @@ C---  THE TOTAL
          V(:) = SCL_WEIGHT(1,:) 
          CALL SCLNRM(V)
       else
-         CALL KPFUNS(-X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
+         CALL KPFUNS(-XK,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
 C---  THE TOTAL
          V(0)=V(0)+GG*M(0)
          DO I=-6,6
@@ -1385,7 +1413,7 @@ C---GENERATE A COLLINEAR SPLITTING TO GIVE FOUR PARTONS
 C   AND EVALUATE THE WEIGHT FOR IT
       INTEGER I, INF
       DOUBLE PRECISION S,P(4,7),W(-6:6),M(-6:6),X,XJAC,XMIN,
-     $     QQ,GQ,QG,GG,KQF,KGF,PQF,PGF,L12,L13,DOT,EMSQ
+     $     QQ,GQ,QG,GG,KQF,KGF,PQF,PGF,L12,L13,DOT,EMSQ,XK
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
       COMMON  /COLFAC/ CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ,SCALE,SCHEME,NF
@@ -1397,6 +1425,10 @@ C---CALCULATE THE LOWEST-ORDER MATRIX-ELEMENT
       CALL MATTHR(P,M)
 C---IN FACT THE GENERATION WAS ALREADY DONE EARLIER
       CALL GETCOL(X,XJAC)
+C---AK (2026): ZERO JACOBIAN FOR X IN THE CUTOFF REGION (SEE VIRTHR): THE
+C   WEIGHT VANISHES; EVALUATE IT AT A SAFE X (X CAN BE EXACTLY 1)
+      XK=X
+      IF (XJAC.EQ.0) XK=0.5D0
 C---SO WE JUST HAVE TO CALCULATE THE WEIGHT
       XMIN=2*DOT(P,1,6)/S
       QQ=0
@@ -1415,7 +1447,7 @@ C---SO WE JUST HAVE TO CALCULATE THE WEIGHT
          GQscl = GQ
          QGscl = QG
          GGscl = GG
-         CALL KPFUNS_SCL_VAR(X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQscl,GQscl
+         CALL KPFUNS_SCL_VAR(XK,XJAC,XMIN,KQF,KGF,PQF,PGF,QQscl,GQscl
      $        ,QGscl,GGscl)
 C---  THE TOTAL
          SCL_WEIGHT(:,0)=GGscl(:)*M(0)
@@ -1429,7 +1461,7 @@ C---  THE TOTAL
          W(:) = SCL_WEIGHT(1,:) 
          CALL SCLNRM(W)
       else
-         CALL KPFUNS(X,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
+         CALL KPFUNS(XK,XJAC,XMIN,KQF,KGF,PQF,PGF,QQ,GQ,QG,GG)
 C---THE TOTAL
          W(0)=GG*M(0)
          DO I=-6,6
