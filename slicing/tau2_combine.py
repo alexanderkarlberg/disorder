@@ -17,7 +17,8 @@ def load(f):
     ab = take(nt * nb).reshape(nb, nt).T, take(nt * nb).reshape(nb, nt).T
     be = take(nt * nb).reshape(nb, nt).T, take(nt * nb).reshape(nb, nt).T
     d = take(nt * nb).reshape(nb, nt).T, take(nt * nb).reshape(nb, nt).T
-    return nevt, taus, blo, bhi, ref, ab, be, d
+    born = (take(nb), take(nb)) if i < len(w) else (np.full(nb, np.nan), np.full(nb, np.nan))
+    return nevt, taus, blo, bhi, ref, ab, be, d, born
 
 files = sorted(sum((glob.glob(a) for a in sys.argv[1:]), []))
 runs = [load(f) for f in files]
@@ -27,10 +28,11 @@ def comb(k):
     I = np.array([r[k][0] for r in runs]); n = np.array([r[0] for r in runs], float)
     V = np.array([r[k][1] - r[k][0] ** 2 / r[0] for r in runs])
     return I.mean(0), np.sqrt(np.clip(V, 0, None).sum(0)) / len(runs)
-ref, eref = comb(4); ab, eab = comb(5); be, ebe = comb(6); d, ed = comb(7)
+ref, eref = comb(4); ab, eab = comb(5); be, ebe = comb(6); d, ed = comb(7); born, eborn = comb(8)
 print(f'{len(runs)} runs, {sum(r[0] for r in runs):,} events')
 for ib in range(len(blo)):
-    print(f'\ntau_zQ in [{blo[ib]:.2f},{bhi[ib]:.2f}): NLO coefficient (DISENT) {ref[ib]:.6e} +- {eref[ib]:.2e}')
+    print(f'\ntau_zQ in [{blo[ib]:.2f},{bhi[ib]:.2f}): NLO coefficient (DISENT) {ref[ib]:.6e} +- {eref[ib]:.2e};'
+          f'  O(as) Born {born[ib]:.6e}')
     print(f'  {"tau_cut":>8s} {"below":>13s} {"above":>13s} {"sum-ref":>13s} {"(sum-ref)/ref":>14s} {"+-":>9s}')
     for it, t in enumerate(taus):
         print(f'  {t:8.1e} {be[it, ib]:13.5e} {ab[it, ib]:13.5e} {d[it, ib]:13.5e} {d[it, ib] / ref[ib]:14.4e} {ed[it, ib] / abs(ref[ib]):9.2e}')

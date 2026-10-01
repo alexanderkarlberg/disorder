@@ -28,6 +28,9 @@ module mod_slicing_scet
   real(dp), parameter :: CF = 4.0_dp/3.0_dp, CA = 3.0_dp, TF = 0.5_dp
   integer, save :: nf = 5
   real(dp), public, save :: soft_tol = 1e-11_dp   ! GK tolerance of soft_I0I1
+  ! diagnostics: 0 = all PDFs, 1 = quarks only (gluon PDF set to zero), 2 = gluon only
+  integer, public, save :: pdf_mask = 0
+  public :: mask_pdf
 
   ! Gauss-Legendre nodes/weights on [0,1] for the beam convolutions
   integer, parameter :: ngl = 64
@@ -43,6 +46,15 @@ module mod_slicing_scet
   end interface
 
 contains
+
+  subroutine mask_pdf(f)
+    real(dp), intent(inout) :: f(-6:6)
+    if (pdf_mask == 1) then
+       f(0) = 0
+    elseif (pdf_mask == 2) then
+       f(1:6) = 0; f(-6:-1) = 0
+    endif
+  end subroutine mask_pdf
 
   subroutine scet_set_nf(n)
     integer, intent(in) :: n
@@ -271,6 +283,7 @@ contains
     integer :: k, i
     call init_gl()
     call EvolvePDF(eta, Q, f1)
+    call mask_pdf(f1)
     c0 = 0; c1 = 0; c2 = 0
     aq0 = 0; aq1 = 0; ag0 = 0; ag1 = 0
     ! plus-distribution endpoint pieces: h(z) = r(z) xf(eta/z), r(1) = 2 for
@@ -283,6 +296,7 @@ contains
        dz = 2 * (1 - eta) * w * glw(k)
        if (z <= eta) cycle
        call EvolvePDF(eta / z, Q, fz)
+       call mask_pdf(fz)
        sumqz = 0
        do i = 1, nf
           sumqz = sumqz + fz(i) + fz(-i)

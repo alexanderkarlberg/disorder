@@ -738,3 +738,54 @@ Next: NLO 2+1 with tau_2 slicing against DISENT (one-loop hard function of
 gamma* q -> q g, three-direction one-loop soft function, beam and jet
 functions for both channels), and the pointwise MATTHR check of the real
 kernels.
+
+## 2026-10-01 — tau_2 slicing for DIS 2+1 at NLO: set-up (branch 2026-10-tau-slicing)
+
+AK: go ahead with the 2+1 at NLO. Code: `slicing/mod_slicing_scet.f90`,
+`slicing/tau2_nlo.f90`, design and formulas in `slicing/README.md`
+(GSTW conventions, arXiv:1505.04794; geometric measure, Q_i = 2 E_i, Breit
+frame). Ingredients and how they were checked:
+- jet and beam functions (quark and gluon; gluon beam coefficients from
+  arXiv:1405.1044) and the three-direction soft function (JSTW
+  arXiv:1102.4344 non-hemisphere integrals I0, I1, as 1D integrals with a
+  complex dilogarithm);
+- hard function from DISENT: VIRTHR's constant (factorising virtual + CS
+  I operator) + the finite part of the CS I operator + (pi^2/12) sum C_i,
+  plus DISENT's non-factorising virtual. The conversion was checked on the
+  two-parton case: VIRTWO's CF(2 - pi^2) gives the DIS form factor
+  CF(-8 + pi^2/6). For three partons the single logs cancel analytically.
+- `test_scet`: complex dilog vs mpmath; I0, I1 vs mpmath at 30 digits
+  (1e-11; a plain scipy 2D quadrature, first used as the reference, was off
+  by 3e-5 and failed where the log point is inside the region); the full
+  1+1 cumulant (beam, jet, two-direction soft, hard) vs the validated
+  Python tau_1^a cumulant (5e-7).
+- `tau2_nlo`: in one DISENT run, the reference (all O(alpha_s^2) pieces),
+  the real events above tau_cut (counter-events and collinear terms have
+  tau_2 = 0 exactly, checked in the run), and the Born events reweighted
+  with the cumulant. Observable: tau_zQ (= tau_1^b) bins above 0.05.
+  Speed about 0.4 ms per DISENT event including the reweighting.
+- First production (x = 0.01, Q^2 = 400 GeV^2, s = 101200 GeV^2,
+  NNPDF30_nlo_as_0118; 26 x 2M events, `slicing-runs/nlo21-x0.01-Q400`):
+  (sum - DISENT)/DISENT for tau_zQ in [0.05, 1) went -0.47, -0.36, -0.28,
+  -0.25, -0.24 for tau_cut = 1e-2 ... 5e-4 (errors 1%): flattening, but not
+  to zero. Quark-only and gluon-only runs (`-pdfmask`) were both off. With
+  the O(alpha_s) Born rates per bin, the offset per Born (alpha_s/2pi units)
+  was about -1 for tau_zQ < 0.5, but -27 to -44 in tau_zQ in [0.5, 1), with a
+  slope in ln tau_cut (single-log mismatch there, while the ln^2 coefficients
+  agree: below -11.3, above +11.0 per Born).
+- Cause: my observable, not the slicing. A Born with an empty current
+  hemisphere has tau_zQ = 1 exactly (a finite region of the 2+1 phase
+  space), and a soft gluon into the current hemisphere moves it to 1 - eps.
+  A bin with upper edge tau_zQ = 1 is therefore not IR safe; this is why the
+  earlier shape validations cut on E_cur > Q/10. The first runs' [0.5, 1)
+  and [0.05, 1) bins are invalid. In the IR-safe bins (tau_zQ < 0.5) the
+  offset per Born was -4.4, -2.6, -1.4, -1.1, -1.2 (+- 0.25) for tau_cut =
+  1e-2 ... 5e-4.
+- On the way, the hard function was cross-checked against the CS paper's
+  explicit e+e- -> 3 jets one-loop matrix element and I operator
+  (CS (D.16)-(D.18)): DISENT's QQ is their V + I constant with the DIS
+  analytic continuation (-CF pi^2: only the outgoing pair is timelike), my
+  I0 reproduces their I-operator finite part term by term, and the same
+  conversion gives the timelike form factor CF(-8 + 7 pi^2/6).
+- Rerun with IR-safe bins (tau_zQ in [0.05, 0.5), five bins), tau_cut 2e-2
+  ... 1e-4, 106 x 2M events (`slicing-runs/nlo21v2-x0.01-Q400`).

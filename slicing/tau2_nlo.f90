@@ -15,7 +15,8 @@
 ! T_2 (geometric measure, Breit frame, proton along +z):
 !   T_2 = min( min_j (E_j - p_zj), min_{j<k} (E_j + E_k - |p_j + p_k|) ).
 ! Observable: tau_zQ = 1 - (2/Q) sum_{p_z<0} |p_z| (= tau_1^b) in bins
-! above 0.05, which vanish at 1+1 Born kinematics.
+! between 0.05 and 0.5, which vanish at 1+1 Born kinematics and avoid the
+! IR-unsafe edge tau_zQ = 1 (empty current hemisphere).
 !
 ! Usage: tau2_nlo -pdf NAME -x X -Q2 Q2 -s S -nev N -seed1 I -seed2 J [-npow1 2 -npow2 4]
 !----------------------------------------------------------------------
@@ -23,17 +24,22 @@ module tau2_run
   use types, only: dp
   use mod_slicing_scet
   implicit none
-  integer, parameter :: nt = 8, nb = 5
-  real(dp), parameter :: taus(nt) = [1e-1_dp, 5e-2_dp, 2e-2_dp, 1e-2_dp, 5e-3_dp, 2e-3_dp, 1e-3_dp, 5e-4_dp]
-  real(dp), parameter :: blo(nb) = [0.05_dp, 0.1_dp, 0.2_dp, 0.3_dp, 0.05_dp]
-  real(dp), parameter :: bhi(nb) = [0.1_dp, 0.2_dp, 0.3_dp, 0.5_dp, 1.0_dp]
+  integer, parameter :: nt = 8, nb = 6
+  real(dp), parameter :: taus(nt) = [2e-2_dp, 1e-2_dp, 5e-3_dp, 2e-3_dp, 1e-3_dp, 5e-4_dp, 2e-4_dp, 1e-4_dp]
+  ! tau_zQ bins below 0.5 only: a Born with an empty current hemisphere has
+  ! tau_zQ = 1 exactly, and a soft gluon into the current hemisphere moves it
+  ! below 1, so any bin edge at tau_zQ = 1 is not IR safe (first runs).
+  real(dp), parameter :: blo(nb) = [0.05_dp, 0.1_dp, 0.2_dp, 0.3_dp, 0.4_dp, 0.05_dp]
+  real(dp), parameter :: bhi(nb) = [0.1_dp, 0.2_dp, 0.3_dp, 0.4_dp, 0.5_dp, 0.5_dp]
   real(dp), save :: xfix, Q2fix
   ! per-event values and global sums (s1 = sum, s2 = sum of squares)
   real(dp), save :: ev_ref(nb) = 0, ev_ab(nt,nb) = 0, ev_be(nt,nb) = 0
   real(dp), save :: s1_ref(nb) = 0, s2_ref(nb) = 0, s1_ab(nt,nb) = 0, s2_ab(nt,nb) = 0
   real(dp), save :: s1_be(nt,nb) = 0, s2_be(nt,nb) = 0, s1_d(nt,nb) = 0, s2_d(nt,nb) = 0
   real(dp), save :: tau2max_ct = 0
+  real(dp), save :: ev_born(nb) = 0, s1_born(nb) = 0, s2_born(nb) = 0   ! O(alpha_s) Born rate
   integer(8), save :: nevt = 0, nborn = 0
+  integer, save :: ndebug = 0
   real(dp), external :: DOT, LEIV, ERTV, alphasPDF
 
 contains
@@ -96,7 +102,8 @@ contains
              s1_d(it,ib) = s1_d(it,ib) + d; s2_d(it,ib) = s2_d(it,ib) + d * d
           enddo
        enddo
-       ev_ref = 0; ev_ab = 0; ev_be = 0
+       s1_born = s1_born + ev_born; s2_born = s2_born + ev_born**2
+       ev_ref = 0; ev_ab = 0; ev_be = 0; ev_born = 0
        return
     endif
     eta = 2 * DOT(p,1,6) / s
@@ -107,6 +114,7 @@ contains
        return
     endif
     call EvolvePDF(eta, Q, xf)
+    call mask_pdf(xf)
     as2pi = alphasPDF(Q) / (2 * pi)
     w = dot_product(weight, xf) * as2pi**na
     if (na == 2) then
@@ -122,6 +130,7 @@ contains
           endif
        endif
     elseif (na == 1 .and. n == 3) then
+       ev_born = ev_born + w * fb
        call below_cut(p, s, weight, xf, eta, Q, as2pi, fb)
     endif
   end subroutine slice_user
@@ -184,6 +193,19 @@ contains
           endif
        enddo
        ev_be(it,:) = ev_be(it,:) + r * tot * as2pi**2 * fb
+       if (ndebug > 0 .and. it == 5) then
+          ndebug = ndebug - 1
+          write(*,'(a,3f8.4,a,2f9.4,a,3es11.3)') ' DEBUG x_p,E2/Q,E3/Q ', Q*Q/(2*DOT(p,1,5))/1, E2/Q, E3/Q, &
+               & '  tau_zQ-bin/eta ', sum(fb), eta, '  l12 l13 l23 ', l12, l13, l23
+          write(*,'(a,es12.4,a,4f10.4)') '   tau_cut ', tc, '  quark: H(fact+nf) Jq Jg S ', hq, &
+               & jet_cum(.false., 2 * E2 * tc / Q), jet_cum(.true., 2 * E3 * tc / Q), soft_from_geom(3, g, ls, casq, ttq, tc)
+          write(*,'(a,4f10.4)') '                        gluon: H Jq Jq S ', hg, &
+               & jet_cum(.false., 2 * E2 * tc / Q), jet_cum(.false., 2 * E3 * tc / Q), soft_from_geom(3, g, ls, casg, ttg, tc)
+          write(*,'(a,2f10.4,a,2f10.4,a,f10.4)') '   nonfact q,g ', qqnf / qqb, ggnf / gqb, &
+               & '  beam/xf (u, g) ', (c0(2) + c1(2) * lb + c2(2) * lb * lb) / xf(2), &
+               & (c0(0) + c1(0) * lb + c2(0) * lb * lb) / xf(0), '  soft geom I-part q ', &
+               & 0.5_dp * sum(ttq * (g - (ls**2 - zeta2) * merge(1.0_dp, 0.0_dp, ls /= 0)))
+       endif
     enddo
   end subroutine below_cut
 
@@ -209,12 +231,14 @@ contains
     write(u,*) s1_ab, s2_ab
     write(u,*) s1_be, s2_be
     write(u,*) s1_d, s2_d
+    write(u,*) s1_born, s2_born
     close(u)
     write(*,'(a,i12,a,i12,a,es10.2)') ' events ', nevt, '  Born events reweighted ', nborn, &
          & '  max tau_2 of counter-events/collinear terms ', tau2max_ct
     do ib = 1, nb
-       write(*,'(/a,f5.2,a,f5.2,a,es14.6,a,es10.3)') ' tau_zQ in [', blo(ib), ',', bhi(ib), &
-            & ')   NLO coefficient (DISENT) ', s1_ref(ib), ' +- ', err(s1_ref(ib), s2_ref(ib))
+       write(*,'(/a,f5.2,a,f5.2,a,es14.6,a,es10.3,a,es14.6)') ' tau_zQ in [', blo(ib), ',', bhi(ib), &
+            & ')   NLO coefficient (DISENT) ', s1_ref(ib), ' +- ', err(s1_ref(ib), s2_ref(ib)), &
+            & '   O(alpha_s) Born ', s1_born(ib)
        write(*,'(a)') '   tau_cut       below            above            sum           (sum-ref)/ref     +-'
        do it = 1, nt
           m = s1_d(it,ib); e = err(s1_d(it,ib), s2_d(it,ib))
@@ -235,7 +259,7 @@ program tau2_nlo
   use types, only: dp
   use mod_parameters, only: nflav, NC, CC, noZ, Zonly, intonly, neutrino, positron
   use tau2_run
-  use mod_slicing_scet, only: soft_tol
+  use mod_slicing_scet, only: soft_tol, pdf_mask
   use sub_defs_io
   implicit none
   character(len=100) :: pdf
@@ -253,12 +277,15 @@ program tau2_nlo
   npow1 = dble_val_opt('-npow1', 2.0_dp)
   npow2 = dble_val_opt('-npow2', 4.0_dp)
   soft_tol = dble_val_opt('-softtol', 1e-9_dp)
+  pdf_mask = int_val_opt('-pdfmask', 0)   ! 1: quarks only, 2: gluon only (diagnostics)
+  ndebug = int_val_opt('-debug', 0)       ! print the cumulant pieces for this many Born events
 
   nflav = 5; NC = .true.; CC = .false.; noZ = .true.; Zonly = .false.
   intonly = .false.; neutrino = .false.; positron = .false.
   call InitPDFsetByName(trim(pdf))
   call InitPDF(0)
-  write(*,'(a,a,a,f8.5,a,f9.2,a,f10.1,a,i10)') ' pdf ', trim(pdf), '  x ', xfix, '  Q2 ', Q2fix, '  s ', s, '  nev ', nev
+  write(*,'(a,a,a,f8.5,a,f9.2,a,f10.1,a,i10,a,i2)') ' pdf ', trim(pdf), '  x ', xfix, '  Q2 ', Q2fix, '  s ', s, &
+       & '  nev ', nev, '  pdfmask ', pdf_mask
 
   call DISENTFULL(nev, s, 5, slice_user, slice_cuts, seed1, seed2, npow1, npow2, &
        & 1e-8_dp, 2, slice_muf, 4.0_dp/3.0_dp, 3.0_dp, 0.5_dp, .false.)
