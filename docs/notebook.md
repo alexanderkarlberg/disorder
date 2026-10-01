@@ -759,3 +759,22 @@ notebook entries of the same day). AK: fix it on a new branch.
   `xsct` files only the stamp lines change (totals identical), the
   histograms change statistically as shown above. Full ctest afterwards:
   82 of 82 pass.
+
+### 2 Oct (night): which part of an aborted event is lost — refinement
+
+Found while explaining a slicing artefact (see the slicing notebook on branch
+`2026-10-tau-slicing`, 2 Oct). GENCOL stores the X drawn in VIRTHR, and COLFOR
+and the initial-state-spectator branch of GENFOR (`OMIT.EQ.1`) take it back
+with GETCOL and weight with its full-range Jacobian. In the unfixed code an
+aborted event loses everything, but in expectation only the X-independent
+pieces are lost (virtual and δ(1−x) terms, final-state-spectator reals and
+their dipoles): the X-dependent ones (K+P, COLFOR, IS-spectator reals) are
+importance-weighted estimators of integrals over X, so dropping the events with
+1 − X < CUTOFF only removes their (negligible) contribution from that region.
+So the bias is p × (X-independent part of the O(αs²) weight), not p × the whole
+O(αs²) part as stated above. The measured cutoff dependence of the unfixed code
+(+1.18 ± 0.26% between 1e-10 and 1e-6, against +1.44% for the whole part) and
+fixed − unfixed at 1e-8 (+0.67 ± 0.22% against +0.51%) do not resolve the
+difference. The fix is unaffected: with XJAC = 0 the X-dependent pieces get
+zero weight in that region and the X-independent ones are kept, which is the
+unbiased estimator.
