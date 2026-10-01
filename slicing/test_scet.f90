@@ -20,7 +20,6 @@ program test_scet
   real(dp) :: nhat(3,2), cas(2), tt(2,2), h2, s2, jq, res, eq2(-6:6), pyref(2), taus(2)
   integer :: i, it
   logical :: ok
-  real(dp), parameter :: CF = 4.0_dp/3
 
   ok = .true.
   z = [ (0.5_dp,0.0_dp), (-1.0_dp,0.0_dp), (2.0_dp,0.0_dp), (0.3_dp,0.8_dp), &

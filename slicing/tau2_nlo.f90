@@ -24,8 +24,9 @@ module tau2_run
   use types, only: dp
   use mod_slicing_scet
   implicit none
-  integer, parameter :: nt = 8, nb = 6
-  real(dp), parameter :: taus(nt) = [2e-2_dp, 1e-2_dp, 5e-3_dp, 2e-3_dp, 1e-3_dp, 5e-4_dp, 2e-4_dp, 1e-4_dp]
+  integer, parameter :: nt = 10, nb = 6
+  real(dp), parameter :: taus(nt) = [2e-2_dp, 1e-2_dp, 5e-3_dp, 2e-3_dp, 1e-3_dp, 5e-4_dp, 2e-4_dp, 1e-4_dp, &
+       & 3e-5_dp, 1e-5_dp]
   ! tau_zQ bins below 0.5 only: a Born with an empty current hemisphere has
   ! tau_zQ = 1 exactly, and a soft gluon into the current hemisphere moves it
   ! below 1, so any bin edge at tau_zQ = 1 is not IR safe (first runs).
@@ -38,12 +39,19 @@ module tau2_run
   real(dp), save :: s1_be(nt,nb) = 0, s2_be(nt,nb) = 0, s1_d(nt,nb) = 0, s2_d(nt,nb) = 0
   real(dp), save :: tau2max_ct = 0
   real(dp), save :: ev_born(nb) = 0, s1_born(nb) = 0, s2_born(nb) = 0   ! O(alpha_s) Born rate
-  integer(8), save :: nevt = 0, nborn = 0
+  integer(8), save :: nevt = 0, nborn = 0, nabort = 0
+  ! DISENT aborts the rest of an event when VIRTHR's collinear X has
+  ! 1 - X < CUTOFF (alternate return), after the three-parton Born has
+  ! been given; such events have no O(alpha_s^2) part, so their Born and
+  ! below-cut weights are dropped too (keepall = .true.: old behaviour)
+  logical, save :: ev_na2 = .false., keepall = .false.
   integer, save :: ndebug = 0
   ! diagnostics: rapidity of a boost along z applied before computing T_2
   ! and the SCET ingredients (geometric measure in another frame); the
   ! observable stays in the Breit frame
   real(dp), save :: boostY = 0
+  ! diagnostics: both jets at s_1J > smin (no cut for 0)
+  real(dp), save :: smin = 0
   real(dp), external :: DOT, LEIV, ERTV, alphasPDF
 
 contains
@@ -72,7 +80,55 @@ contains
        if (p(3,i) < 0) t = t + 2 * p(3,i) / Q
     enddo
     fb = merge(1.0_dp, 0.0_dp, t >= blo .and. t < bhi)
+    if (smin > 0) then
+       if (jet_min_shat(n, p) < smin) fb = 0
+    endif
   end subroutine observable
+
+  ! diagnostics (-smin): smallest s_1J = (1 - cos theta_J)/2 of the two
+  ! jets of the minimising 2-jettiness partition (Breit frame): for three
+  ! partons the partons 2, 3; for four, the two left when one parton goes
+  ! to the beam, or the merged pair and the third parton
+  real(dp) function jet_min_shat(n, p) result(sm)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: p(4,7)
+    real(dp) :: best, v, ja(4), jb(4), jj(4,2)
+    integer :: j, k, m
+    if (n == 3) then
+       ja = p(:,2); jb = p(:,3)
+    else
+       best = huge(1.0_dp)
+       do j = 2, 4
+          v = p(4,j) - p(3,j)
+          if (v < best) then
+             best = v; m = 0
+             do k = 2, 4
+                if (k /= j) then
+                   m = m + 1; jj(:,m) = p(:,k)
+                endif
+             enddo
+          endif
+       enddo
+       do j = 2, 4
+          do k = j + 1, 4
+             v = p(4,j) + p(4,k) - sqrt(sum((p(1:3,j) + p(1:3,k))**2))
+             if (v < best) then
+                best = v
+                jj(:,1) = p(:,j) + p(:,k); jj(:,2) = p(:,9 - j - k)
+             endif
+          enddo
+       enddo
+       ja = jj(:,1); jb = jj(:,2)
+    endif
+    sm = min(shat1(ja), shat1(jb))
+  contains
+    real(dp) function shat1(q)
+      real(dp), intent(in) :: q(4)
+      real(dp) :: a
+      a = sqrt(sum(q(1:3)**2))
+      shat1 = merge(0.5_dp * (1 - q(3) / a), 1.0_dp, a > 0)
+    end function shat1
+  end function jet_min_shat
 
   subroutine zboost(pin, pout)
     real(dp), intent(in) :: pin(4,7)
@@ -111,6 +167,13 @@ contains
     integer :: it, ib
     if (n == 0) then
        nevt = nevt + 1
+       if (.not. ev_na2) then
+          if (any(ev_born /= 0)) nabort = nabort + 1
+          if (.not. keepall) then
+             ev_be = 0; ev_born = 0
+          endif
+       endif
+       ev_na2 = .false.
        s1_ref = s1_ref + ev_ref; s2_ref = s2_ref + ev_ref**2
        s1_ab = s1_ab + ev_ab; s2_ab = s2_ab + ev_ab**2
        s1_be = s1_be + ev_be; s2_be = s2_be + ev_be**2
@@ -124,6 +187,7 @@ contains
        ev_ref = 0; ev_ab = 0; ev_be = 0; ev_born = 0
        return
     endif
+    if (na == 2) ev_na2 = .true.
     eta = 2 * DOT(p,1,6) / s
     Q2 = -DOT(p,5,5); Q = sqrt(Q2)
     call observable(n, p, Q, fb)
@@ -159,7 +223,6 @@ contains
     real(dp) :: M(-6:6), r, Q2, l12, l13, l23, hq, hg, qqnf, ggnf, qqb, gqb, eq2sum
     real(dp) :: nhat(3,3), g(3,3), ls(3,3), casq(3), casg(3), ttq(3,3), ttg(3,3)
     real(dp) :: c0(-6:6), c1(-6:6), c2(-6:6), lb, wq, wg, tot, Ea, E2, E3, tc
-    real(dp), parameter :: CF = 4.0_dp/3, CA = 3.0_dp, TR = 0.5_dp
     real(dp) :: EQ(-6:6), pb(4,7)
     integer :: i, it, imax
     nborn = nborn + 1
@@ -174,7 +237,7 @@ contains
     hg = hard_fact(.true., l12, l13, l23)
     ! non-factorising one-loop part, as in DISENT's VIRTHR (photon exchange)
     qqnf = -((4 * pi / 137)**2 * 4 / Q2) * (2 * LEIV(p, p(1,6), 2, -1, 3) - Q2 / 2 * ERTV(p, 2, -1, 3))
-    ggnf = TR / CF * ((4 * pi / 137)**2 * 4 / Q2) * (2 * LEIV(p, p(1,6), 2, 3, -1) - Q2 / 2 * ERTV(p, 2, 3, -1))
+    ggnf = TF / CF * ((4 * pi / 137)**2 * 4 / Q2) * (2 * LEIV(p, p(1,6), 2, 3, -1) - Q2 / 2 * ERTV(p, 2, 3, -1))
     EQ = 0
     do i = 1, 5
        EQ(i) = merge(2.0_dp/3, -1.0_dp/3, mod(i,2) == 0); EQ(-i) = -EQ(i)
@@ -183,7 +246,7 @@ contains
     eq2sum = sum(EQ(1:5)**2)
     gqb = M(0) / eq2sum
     hq = hq + qqnf / qqb
-    hg = hg + ggnf / gqb
+    if (gqb /= 0) hg = hg + ggnf / gqb   ! (no gluon Born for TR = 0, diagnostics)
     ! soft function: directions (incoming parton along +z, partons 2 and 3),
     ! in the frame of the measure (Breit frame unless -boostY)
     call zboost(p, pb)
@@ -255,6 +318,8 @@ contains
     close(u)
     write(*,'(a,i12,a,i12,a,es10.2)') ' events ', nevt, '  Born events reweighted ', nborn, &
          & '  max tau_2 of counter-events/collinear terms ', tau2max_ct
+    write(*,'(a,i12,a,l2)') ' events in the bins without O(alpha_s^2) part (DISENT abort) ', nabort, &
+         & '  kept ', keepall
     do ib = 1, nb
        write(*,'(/a,f5.2,a,f5.2,a,es14.6,a,es10.3,a,es14.6)') ' tau_zQ in [', blo(ib), ',', bhi(ib), &
             & ')   NLO coefficient (DISENT) ', s1_ref(ib), ' +- ', err(s1_ref(ib), s2_ref(ib)), &
@@ -279,11 +344,11 @@ program tau2_nlo
   use types, only: dp
   use mod_parameters, only: nflav, NC, CC, noZ, Zonly, intonly, neutrino, positron
   use tau2_run
-  use mod_slicing_scet, only: soft_tol, pdf_mask
+  use mod_slicing_scet, only: soft_tol, pdf_mask, scet_set_colour, CF, CA, TF
   use sub_defs_io
   implicit none
   character(len=100) :: pdf
-  real(dp) :: s, npow1, npow2
+  real(dp) :: s, npow1, npow2, cf_in, ca_in, tf_in
   integer :: nev, seed1, seed2
   external :: DISENTFULL
 
@@ -300,15 +365,22 @@ program tau2_nlo
   pdf_mask = int_val_opt('-pdfmask', 0)   ! 1: quarks only, 2: gluon only (diagnostics)
   ndebug = int_val_opt('-debug', 0)       ! print the cumulant pieces for this many Born events
   boostY = dble_val_opt('-boostY', 0.0_dp) ! measure in a frame boosted along z (diagnostics)
+  smin = dble_val_opt('-smin', 0.0_dp)     ! jets away from the beam: s_1J > smin (diagnostics)
+  keepall = log_val_opt('-keepall')        ! keep Born/below-cut of aborted events (old behaviour)
+  ! colour factors (diagnostics: e.g. -CA 0 or -TR 0 isolate colour structures; DISENT gets the same)
+  cf_in = dble_val_opt('-CF', 4.0_dp/3.0_dp)
+  ca_in = dble_val_opt('-CA', 3.0_dp)
+  tf_in = dble_val_opt('-TR', 0.5_dp)
+  call scet_set_colour(cf_in, ca_in, tf_in)
 
   nflav = 5; NC = .true.; CC = .false.; noZ = .true.; Zonly = .false.
   intonly = .false.; neutrino = .false.; positron = .false.
   call InitPDFsetByName(trim(pdf))
   call InitPDF(0)
-  write(*,'(a,a,a,f8.5,a,f9.2,a,f10.1,a,i10,a,i2)') ' pdf ', trim(pdf), '  x ', xfix, '  Q2 ', Q2fix, '  s ', s, &
-       & '  nev ', nev, '  pdfmask ', pdf_mask
+  write(*,'(a,a,a,f8.5,a,f9.2,a,f10.1,a,i10,a,i2,a,3f9.5)') ' pdf ', trim(pdf), '  x ', xfix, '  Q2 ', Q2fix, '  s ', s, &
+       & '  nev ', nev, '  pdfmask ', pdf_mask, '  CF CA TR ', CF, CA, TF
 
   call DISENTFULL(nev, s, 5, slice_user, slice_cuts, seed1, seed2, npow1, npow2, &
-       & 1e-8_dp, 2, slice_muf, 4.0_dp/3.0_dp, 3.0_dp, 0.5_dp, .false.)
+       & 1e-8_dp, 2, slice_muf, CF, CA, TF, .false.)
   call report()
 end program tau2_nlo

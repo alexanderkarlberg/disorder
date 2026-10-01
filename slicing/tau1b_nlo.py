@@ -125,17 +125,47 @@ def z_intervals(xp, tc):
     return merged
 
 
-def z_intervals_geo(xp, tc):
+def z_intervals_geo(xp, tc, Y=0.0, rho=None):
     """tau_1 with the geometric measure (GSTW, Breit frame, axes by minimisation):
     tau = min(z, 1 - z, a), a = (1-xp)/xp (beam candidates n_B.p_k = z_k Q; merging the two
-    partons gives Q a for xp > 1/2 and Q for xp < 1/2)."""
+    partons gives Q a for xp > 1/2 and Q for xp < 1/2).
+    Y /= 0: the measure in a frame boosted along z by rapidity Y (n_B.p -> e^-Y n_B.p, merged
+    pair min(e^-Y Q, e^Y a Q)), tau = min(e^-Y min(z, 1-z), e^Y a)."""
     a = (1 - xp) / xp
-    if a <= tc or tc >= 0.5:
+    rB, rJ = rho if rho else (math.exp(-Y), math.exp(Y))
+    # general normalisations: tau = min(rho_B min(z, 1-z), rho_J a); rho_B rho_J /= 1 is a
+    # dipole with s_hat = rho_B rho_J (tests the L ln s_hat terms of the soft function)
+    tz = tc / rB
+    if a <= tc / rJ or tz >= 0.5:
         return []
-    return [(tc, 1 - tc)]
+    return [(tz, 1 - tz)]
 
 
-def real_above(P, x, y, tc, geo=False):
+def rho_shift(P, x, y, rB, rJ, L):
+    """Change of the cumulant for the measure min(rho_B n_B.k, rho_J n_J.k): lambda_B = tau/rho_B,
+    lambda_J = tau/rho_J, soft dipole with s_hat = rho_B rho_J (GSTW pieces). With b = ln rho_B,
+    j = ln rho_J: CF q [2 L (b + j) - 2 b j + (3/2)(b + j)] - b (P_qq x q + P_qg x g)."""
+    a = P.as_ / (2 * math.pi)
+    Yp = 1 + (1 - y) ** 2
+    b, j = math.log(rB), math.log(rJ)
+    pq = CF * conv(P.q, x, None, plus=lambda z: (1 + z * z) / (1 - z), delta=0.0)
+    pg = 2 * TR * conv(P.g, x, lambda z: z * z + (1 - z) ** 2)
+    return a * Yp * (CF * P.q(x) * (2 * L * (b + j) - 2 * b * j + 1.5 * (b + j)) - b * (pq + pg))
+
+
+def boost_shift(P, x, y, Y):
+    """Change of the geometric-measure cumulant for the measure boosted by Y: lambda_B = e^Y tau,
+    lambda_J = e^-Y tau (Born energies e^{+-Y} Q/2), soft unchanged (back to back). From the GSTW
+    pieces: L^2 terms CF[(L+Y)^2 + (L-Y)^2 - 2L^2] = 2 CF Y^2 (delta), the non-cusp single logs
+    cancel, and the beam's PDF-evolution log gives Y (P_qq x q + P_qg x g)."""
+    a = P.as_ / (2 * math.pi)
+    Yp = 1 + (1 - y) ** 2
+    pq = CF * conv(P.q, x, None, plus=lambda z: (1 + z * z) / (1 - z), delta=0.0)   # [(1+z^2)/(1-z)]_+
+    pg = 2 * TR * conv(P.g, x, lambda z: z * z + (1 - z) ** 2)
+    return a * Yp * (2 * CF * Y * Y * P.q(x) + Y * (pq + pg))
+
+
+def real_above(P, x, y, tc, geo=False, Y=0.0, rho=None):
     """O(alpha_s) real emission with tau_1^b > tc, in units of R (alpha_s/2pi normalisation).
     Quark channel (q and qbar):  2xF1-type CF[(xp^2+z^2)/((1-xp)(1-z)) + 2 xp z + 2] ... written as F2 and FL:
       F2: CF[(xp^2+z^2)/((1-xp)(1-z)) + 2 + 6 xp z],   FL: CF 4 xp z
@@ -148,7 +178,8 @@ def real_above(P, x, y, tc, geo=False):
     Returns (R part, F2/x part, FL/x part)."""
     a = P.as_ / (2 * math.pi)
     Yp = 1 + (1 - y) ** 2
-    xmax = 1 / (1 + tc)       # above this, tau_1^b <= a < tc everywhere
+    rJ = rho[1] if rho else math.exp(Y)
+    xmax = 1 / (1 + tc / rJ)   # above this, tau_1 <= rho_J a < tc everywhere
 
     k2q = lambda xp, z: CF * ((xp * xp + z * z) / ((1 - xp) * (1 - z)) + 2 + 6 * xp * z)
     kLq = lambda xp, z: CF * 4 * xp * z
@@ -158,7 +189,7 @@ def real_above(P, x, y, tc, geo=False):
     def inner(xp, which):
         kq, kg = (k2q, k2g) if which == 2 else (kLq, kLg)
         sq = sg = 0.0
-        for lo, hi in (z_intervals_geo(xp, tc) if geo else z_intervals(xp, tc)):
+        for lo, hi in (z_intervals_geo(xp, tc, Y, rho) if geo else z_intervals(xp, tc)):
             sq += integrate.quad(lambda z: kq(xp, z), lo, hi, **QUAD)[0]
             sg += integrate.quad(lambda z: kg(xp, z), lo, hi, **QUAD)[0]
         return (P.q(x / xp) * sq + P.g(x / xp) * sg) / xp
@@ -201,6 +232,8 @@ def main():
     ap.add_argument('--hoppet', action='store_true', help='also compare the exact NLO with hoppet')
     ap.add_argument('--cumulant-only', action='store_true', help='print only the tau_1^a and tau_1^b cumulants')
     ap.add_argument('--geo', action='store_true', help='geometric-measure 1-jettiness (axes by minimisation) with the tau_1^a cumulant')
+    ap.add_argument('--rho', help='with --geo: rho_B,rho_J measure normalisations (s_hat = rho_B rho_J)')
+    ap.add_argument('--boostY', type=float, default=0.0, help='with --geo: the measure in a frame boosted along z by this rapidity')
     ap.add_argument('--only', choices=['q', 'g'], help='one channel only (diagnostics; the Born then uses the quarks or nothing)')
     a = ap.parse_args()
     P = Pdfs(a.pdf, a.Q)
@@ -218,8 +251,10 @@ def main():
         print(f'hoppet: F2/x(1) = {hf2:.6e} (ratio {hf2 / f2:.6f}), FL/x(1) = {hfl:.6e} (ratio {hfl / fl:.6f})')
     print(f'{"tau_cut":>9s} {"below":>14s} {"above":>14s} {"sum":>14s} {"(sum-exact)/exact":>18s} {"/Born":>12s} {"FL_above/FL-1":>14s}')
     for t in map(float, a.taus.split(',')):
-        b = cumulant(P, a.x, a.y, t, taua=a.geo)
-        r, rf2, rfl = real_above(P, a.x, a.y, t, geo=a.geo)
+        rho = tuple(map(float, a.rho.split(','))) if a.rho else None
+        b = cumulant(P, a.x, a.y, t, taua=a.geo) + (boost_shift(P, a.x, a.y, a.boostY) if a.boostY else 0.0) \
+            + (rho_shift(P, a.x, a.y, rho[0], rho[1], math.log(t)) if rho else 0.0)
+        r, rf2, rfl = real_above(P, a.x, a.y, t, geo=a.geo, Y=a.boostY, rho=rho)
         s = b + r
         print(f'{t:9.1e} {b:14.6e} {r:14.6e} {s:14.6e} {(s - ex) / ex:18.3e} {(s - ex) / (born or ex):12.3e} {rfl / fl - 1:14.3e}')
 

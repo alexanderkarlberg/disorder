@@ -812,3 +812,136 @@ frame). Ingredients and how they were checked:
 - Open. Next diagnostic: the measure in a frame boosted along z (the beam
   piece is boost invariant, jet and soft are not); runs with Y = +1 and
   Y = -1 (the latter on idle th desktops, nice 19, AK's rule).
+
+## 2026-10-01 (afternoon) — tau_2 slicing 2+1: boosted frames, more checks, colour decomposition
+
+Continuing the open -0.42 C_a offset per Born (alpha_s/2pi) of the NLO 2+1
+slicing against DISENT (x = 0.01, Q^2 = 400 GeV^2, tau_zQ in [0.05, 0.5)).
+
+- Measure in a frame boosted along z (`-boostY`), per-Born offset at
+  tau_cut = 5e-4 / 2e-4 / 1e-4:
+  Y = 0 (106 runs) -0.78 +- 0.06 / -0.89 +- 0.08 / -0.88 +- 0.10;
+  Y = +1 (30 runs) -1.20 +- 0.09 / -1.30 +- 0.13 / -1.28 +- 0.16;
+  Y = -1 (28 runs) -0.86 +- 0.13 / -0.64 +- 0.18 / -0.57 +- 0.23.
+  Y = +1 is about 3 sigma more negative, Y = -1 slightly less. Not
+  conclusive: the power corrections at Y = +1 are about those of Y = 0 at
+  twice the cut, so slow convergence cannot be excluded. Settling it at
+  tau_cut = 1e-5 would need O(10^3) runs (the error there is about twice
+  that at 1e-4), so I moved to cheaper diagnostics.
+- 1+1 with the geometric measure in a boosted frame (`tau1b_nlo.py --geo
+  --boostY`, lambda_B = e^Y tau, lambda_J = e^-Y tau; the cumulant changes
+  by 2 C_F Y^2 q + Y (P x f)): converges at Y = +1 and -1 (remainder
+  3e-6 and -2e-5 of the Born at tau_cut = 1e-5). So the energy
+  dependence of beam vs jet logs is right, which matters in 2+1 where
+  E_a = Q/(2 x_p).
+- Soft I-terms, independent check with a fresh derivation of the
+  normalisation from the eikonal (dP = (alpha_s/2pi) sum_{i/=j} (-T_i.T_j)
+  dE/E dOmega/2pi W_ij): the third-direction correction is
+  sum_{i/=j} (-T_i.T_j) K_ij with K_ij = int dOmega/(2pi) W_ij ln(m_ij/m_true).
+  The code's (2 sum_m I_ij,m + 2 sum_m I_ji,m)/2 equals -K_ij at four
+  configurations to 1e-4 (quadrature-limited). The individual I_ij are
+  not symmetric in i <-> j; only the dipole sum enters.
+- Hard function, independent check: with the BDK/MCFM remainder of
+  2026-09 (tree terms N(-7/2 + pi^2/2 - (L13^2 + L23^2)/2) +
+  (1/N)(7/2 + L12^2/2), plus N/6 and the DRED -> CDR shift -C_F - C_A/6),
+  MCFM's finite part is N(-4 + pi^2/2 - (l13^2 + l23^2)/2) + (1/N)(4 + l12^2/2).
+  That is exactly QQ + I0_CS (worked out analytically: the single logs and
+  n_f cancel). So the quark-channel hard function is confirmed in DIS
+  kinematics, independent of DISENT's QQ and of my I-operator conversion.
+- **Correction of an assumption I was about to make:** I considered DISENT's
+  NLO 2+1 itself as the culprit, and looked at NLOJET++ for an independent
+  check. That is not needed: DISENT's O(alpha_s^2) event shapes
+  (P2B -nnlo) were validated against NNLOJET on 2026-09-26 (tau_zE with
+  E_cur > Q/10, B_zE, rho_E; chi^2 234/216, errors 0.2-0.6%). An error of
+  2.4% of the 2+1 Born would have shown there. The known gluon-channel
+  DISENT bug (Borsa et al., arXiv:2010.07354 App. A) is fixed in our copy
+  (src/libdisent.f:1760). So the reference is trusted and the problem is
+  on the slicing side.
+- Bookkeeping checked against DISENT's event loop: COLFOR puts parton 4
+  along the beam (tau_2 = 0, observable unchanged); counter-events have
+  tau_2 = 0; the Born and the virtual share the phase-space weight.
+- Colour decomposition (AK suggested leading colour first): colour factors
+  are now run-time options (`-CF -CA -TR`, passed to DISENT as well;
+  diagnostics only). C_F = 3/2 is refused by DISENT's range check, so
+  leading colour is C_F = 4/3, C_A = 8/3. For C_A = 0 the I-operator term
+  T_g.T_k gamma_g/C_g is a removable 0/0 (limit -gamma_g/2), now coded;
+  for T_R = 0 the gluon Born vanishes (guarded). Quark channel
+  (`-pdfmask 1`), 30 x 2M each: leading colour, leading colour with
+  T_R = 0, C_A = 0, T_R = 0, C_A = T_R = 0, and QCD
+  (`slicing-runs/col-*`), on thserv23/24 (nice 10) and 11 idle th desktops
+  (nobody logged in, nice 19, half the cores).
+- Cut list extended to 3e-5 and 1e-5 (nt = 10).
+
+### Later on 2026-10-01: corrections, and DISENT's aborted events
+
+- **Correction (job lists):** in the first colour-decomposition batch, the
+  QCD lines of the job lists ended in a blank, and `xargs -L 1` treats a
+  trailing blank as a line continuation. So 22 of the 30 "QCD" runs swallowed
+  the next leading-colour line and actually ran with C_A = 8/3 (with the QCD
+  seeds), and those 22 leading-colour jobs never ran. Regrouped by the colour
+  factors printed in each run.log: 30 leading-colour runs and 8 QCD runs. The
+  numbers I first quoted for "QCD" were mostly leading colour.
+- Regrouped fit, quark channel, o = (4/3) a + b C_A + c T_R n_f per Born at
+  tau_cut = 2e-4 / 1e-4: a = -0.47 +- 0.08 / -0.47 +- 0.10 (abelian C_F^2,
+  -0.63 per Born), b = -0.01 +- 0.04 / -0.04 +- 0.06, c = -0.11 +- 0.05 /
+  -0.07 +- 0.06. Mostly abelian.
+- **Correction (plateau):** with cuts down to 1e-5 the offset is not
+  constant; all configurations drift further negative below 1e-4 (about -0.8
+  per Born between 1e-4 and 1e-5).
+- Forward-jet power corrections: refuted. An IR-safe cut (`-smin`) on both
+  jets of the minimising 2-jettiness partition, s_1J > 0.003 or 0.03
+  (removing 2% or 10% of the Born rate), leaves the offset unchanged
+  (-0.80 +- 0.11 and -0.88 +- 0.12 at 5e-4).
+- Hard function, complete check: the full one-loop V/B used by tau2_nlo
+  (QQ + I0_CS + DISENT's non-factorising part / Born, normalisation
+  included) equals MCFM's BDK assembly (N A51 + A52/N + N/6 - C_F - C_A/6,
+  averaged over the reflected point) at 40 DIS points to 2e-13.
+- **Cause found (candidate):** DISENT's VIRTHR samples the collinear X and
+  executes `IF (1-X.LT.CUTOFF) RETURN 1`, which aborts the rest of the
+  event (alternate return to label 1000). By then the three-parton Born
+  (NA = 1) has already been passed to USER. GENCOL draws
+  X = 1 - (1 - X_min) R^npow2 half the time, so
+  P(1 - X < CUTOFF) = (1/2) CUTOFF^(1/npow2) = 0.5% for npow2 = 4,
+  CUTOFF = 1e-8 (the defaults of disorder as well). Measured: 335 of 67943
+  Born events in the bins (0.49%) have no O(alpha_s^2) part.
+  - In tau2_nlo those events still received the below-cut weight (about
+    -320 per Born at 1e-4, growing like ln^2 tau_cut), but no
+    above-cut, virtual or reference. tau2_nlo now drops their Born and
+    below-cut weights (`-keepall` restores the old behaviour) and prints the
+    count. Paired reruns (same seeds) of Y = 0, Y = +1 and the abelian case
+    are running.
+  - Note on the size: p times the below-cut per Born is -1.6 at 1e-4, more
+    than the observed -0.88, so this alone may over-correct; the paired
+    reruns will tell.
+  - Consequence for DISENT itself: its O(alpha_s^2) result is missing the
+    whole NA = 2 part (virtual, collinear, real, counter-events) of a
+    fraction p of the events, i.e. it is low by about p = 0.5% of the
+    O(alpha_s^2) coefficient, a cutoff effect scaling like CUTOFF^(1/npow2).
+    In disorder's P2B mode the same applies to the O(alpha_s^2) 2+1
+    events (and to their projections, so totals are unaffected but
+    distributions are). To report to AK; src/ not touched.
+- Paired reruns with the fix (same seeds as the old runs): new - old per Born
+  = +0.33, +0.75, +0.98, +1.31, +1.60 at tau_cut = 5e-3, 1e-3, 5e-4, 2e-4,
+  1e-4, i.e. exactly the below-cut weight of the aborted events (0.49%).
+  **Correction:** the abort fully explains the earlier "plateau": with the
+  fix the offset is positive and still moves with tau_cut. QCD, all
+  channels (89 runs): +0.22, +0.49, +0.81, +1.12, +1.14 at 5e-4, 2e-4,
+  1e-4, 3e-5, 1e-5.
+- Decomposition with the fix (quark channel unless stated), slope of the
+  offset in ln(1/tau_cut) between 2e-4 and 1e-5: QCD all 0.32 +- 0.07,
+  quark 0.34 +- 0.11, gluon 0.45 +- 0.13, abelian (90 runs) 0.17 +- 0.04,
+  C_A = 0 (90 runs) 0.23 +- 0.05, T_R = 0 0.10 +- 0.15, leading colour
+  0.18 +- 0.11. The abelian part is significant; n_f and C_A parts are
+  consistent with zero.
+- 1+1 test of the soft L ln s_hat terms: the geometric measure with
+  rescaled directions, min(rho_B n_B.k, rho_J n_J.k), is a dipole with
+  s_hat = rho_B rho_J (Lorentz covariance); `tau1b_nlo.py --geo --rho`.
+  Converges for rho = (2,2), (0.5,0.5), (3,0.7) (remainder 3e-7 to 1e-6 of
+  the Born at tau_cut = 1e-6, linear in tau_cut). So the dipole's L ln s_hat
+  and constant terms are right; with the soft I-terms, hard function,
+  beam and jet already checked, every abelian ingredient is verified.
+- The high-statistics sets flatten below 3e-5 (QCD 1.12 -> 1.14, abelian
+  0.56 -> 0.50), and the pure-log fit for QCD is poor (chi^2 6.3/2). Two
+  readings are open: a single-log mismatch, or convergence to a constant
+  (about +1.2 per Born in QCD, +0.55 abelian) with slow power corrections
+  (a sqrt(tau_cut) form fits). Not resolved.

@@ -21,11 +21,13 @@ module mod_slicing_scet
   implicit none
   private
   public :: cli2, soft_I0I1, soft_cum, soft_geom, soft_from_geom, jet_cum, beam_coeffs, hard_fact
-  public :: scet_set_nf, pi, zeta2
+  public :: scet_set_nf, scet_set_colour, pi, zeta2, CF, CA, TF
 
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884_dp
   real(dp), parameter :: zeta2 = pi**2 / 6
-  real(dp), parameter :: CF = 4.0_dp/3.0_dp, CA = 3.0_dp, TF = 0.5_dp
+  ! colour factors (QCD; other values only for diagnostics, with the same
+  ! values passed to DISENT)
+  real(dp), save :: CF = 4.0_dp/3.0_dp, CA = 3.0_dp, TF = 0.5_dp
   integer, save :: nf = 5
   real(dp), public, save :: soft_tol = 1e-11_dp   ! GK tolerance of soft_I0I1
   ! diagnostics: 0 = all PDFs, 1 = quarks only (gluon PDF set to zero), 2 = gluon only
@@ -60,6 +62,11 @@ contains
     integer, intent(in) :: n
     nf = n
   end subroutine scet_set_nf
+
+  subroutine scet_set_colour(cf_in, ca_in, tf_in)
+    real(dp), intent(in) :: cf_in, ca_in, tf_in
+    CF = cf_in; CA = ca_in; TF = tf_in
+  end subroutine scet_set_colour
 
   real(dp) function beta0()
     beta0 = 11.0_dp/3 * CA - 4.0_dp/3 * TF * nf
@@ -389,10 +396,22 @@ contains
     t13 = 0.5_dp * (cas(2) - cas(1) - cas(3))
     t23 = 0.5_dp * (cas(1) - cas(2) - cas(3))
     res = qqv + sum(cas * pi**2 / 3 - gam - kk) &
-         & + t12 * (l12**2 - (gam(1)/cas(1) + gam(2)/cas(2)) * l12) &
-         & + t13 * (l13**2 - (gam(1)/cas(1) + gam(3)/cas(3)) * l13) &
-         & + t23 * (l23**2 - (gam(2)/cas(2) + gam(3)/cas(3)) * l23) &
+         & + t12 * l12**2 - (tg(t12, 1) + tg(t12, 2)) * l12 &
+         & + t13 * l13**2 - (tg(t13, 1) + tg(t13, 3)) * l13 &
+         & + t23 * l23**2 - (tg(t23, 2) + tg(t23, 3)) * l23 &
          & + pi**2 / 12 * sum(cas)
+  contains
+    ! T_i.T_k gamma_i/C_i; for C_i = 0 (gluon with CA = 0, diagnostics)
+    ! T_i.T_k = -C_i/2 and the limit is -gamma_i/2
+    real(dp) function tg(t, i)
+      real(dp), intent(in) :: t
+      integer, intent(in) :: i
+      if (cas(i) == 0) then
+         tg = -gam(i) / 2
+      else
+         tg = t * gam(i) / cas(i)
+      endif
+    end function tg
   end function hard_fact
 
 end module mod_slicing_scet
