@@ -1012,3 +1012,108 @@ slicing against DISENT (x = 0.01, Q^2 = 400 GeV^2, tau_zQ in [0.05, 0.5)).
   geometric measure's rising residual (unexplained; it must not hide
   something the invariant measure shares) and more statistics for the
   abelian part.
+
+## 2026-10-02 (night) — the geometric residual was the driver drop, not the measure
+
+**Result.** With the fixed DISENT (branch `2026-10-disent-xcut`, zero
+Jacobian instead of the abort), the geometric (Breit-frame) measure converges
+like the invariant one. The "rising geometric residual" came only from runs
+that used the unfixed DISENT with the driver-side drop of aborted events.
+Offset per Born (QCD, all channels, x = 0.01, Q² = 400; scratchpad `edge.py`),
+τ_cut = 1e-4 / 3e-5 / 1e-5, slope per ln(1/τ_cut) over 5e-4 … 1e-5 (points
+treated as independent, indicative):
+
+| geometric measure | aborted | 1e-4 | 3e-5 | 1e-5 | slope |
+|---|---|---|---|---|---|
+| unfixed + drop, CUTOFF 1e-6 (`cut-old-1e-6`, 100 runs) | 1.6% | +1.94 ± 0.11 | +2.60 ± 0.16 | +3.06 ± 0.22 | 0.58 ± 0.04 |
+| unfixed + drop, CUTOFF 1e-8 (`fix-qcd`, 90) | 0.5% | +0.80 ± 0.11 | +1.09 ± 0.17 | +1.14 ± 0.23 | 0.29 ± 0.04 |
+| unfixed + drop, CUTOFF 1e-10 (`cut-old-1e-10`, 100) | 0.16% | +0.17 ± 0.11 | +0.20 ± 0.16 | +0.58 ± 0.22 | 0.17 ± 0.04 |
+| fixed, CUTOFF 1e-6 (`cut-new-1e-6`, 100) | 0 | +0.02 ± 0.11 | +0.12 ± 0.16 | −0.32 ± 0.22 | 0.06 ± 0.04 |
+| fixed, CUTOFF 1e-8 (`cut-new-1e-8`, 100) | 0 | −0.00 ± 0.11 | +0.03 ± 0.16 | −0.10 ± 0.22 | 0.06 ± 0.04 |
+| fixed, CUTOFF 1e-10 (`cut-new-1e-10`, 100) | 0 | −0.02 ± 0.11 | −0.07 ± 0.16 | +0.17 ± 0.22 | 0.08 ± 0.04 |
+| fixed, Born with min s_ij(geo) < 0.01 removed (`edge-geo-s0.01`, 90) | 0 | see below | | | |
+| invariant, fixed (`inv-qcd`, 90; for comparison) | 0 | −0.13 ± 0.11 | −0.06 ± 0.16 | +0.11 ± 0.22 | 0.12 ± 0.04 |
+
+The bias scales with the abort rate and vanishes with the fix at every
+cutoff. All `inv-*` sets used the fixed DISENT (0 aborted events) and all
+geometric `fix-*` sets the unfixed one with the drop (e.g. 310591 aborted
+events in `fix-qcd`), so yesterday's measure comparison was confounded with the
+DISENT version. (The `cut-new` sets were made for the DISENT cutoff validation,
+and I had only read their O(αs²) coefficients.)
+
+**Mechanism** (`main:src/libdisent.f`). GENCOL stores the X it draws in
+VIRTHR; COLFOR and the initial-state-spectator branch of GENFOR
+(`OMIT.EQ.1`) take it back with GETCOL and weight with its full-range
+Jacobian. These X-dependent pieces (K+P, COLFOR, IS-spectator reals with their
+dipoles) are therefore unbiased over X < 1 − CUTOFF and are not thinned by the
+abort, while the X-independent ones (virtual, final-state-spectator reals) are
+lost with probability p. Neither treatment of the slicing's Born-level weights
+matches this: dropping them (the driver drop) leaves −p × [IS-branch real
+below τ_cut + its dipoles + K+P + COLFOR], whose real-below-cut part grows like
+ln²(1/τ_cut); keeping them (`-keepall`) leaves +p × [virtual + FS-branch
+reals below cut]. Only the fixed DISENT is consistent.
+
+**Corrections of the record.**
+- 1 Oct ("Later on 2026-10-01"): "tau2_nlo now drops their Born and
+  below-cut weights" and the "paired reruns with the fix" / "decomposition
+  with the fix" refer to the driver drop, which does not remove the bias. The
+  slopes quoted there (QCD 0.32, quark 0.34, gluon 0.45, abelian 0.17, C_A = 0
+  0.23, …) are driver-drop artefacts, as is the reading "a single-log mismatch
+  or slow power corrections".
+- 1 Oct evening: "geometric … still rising (slope 0.31 ± 0.07): unexplained"
+  is explained above; the geometric measure does not have a residual. The
+  invariant measure remains the working choice for its frame independence,
+  not because the geometric one fails.
+
+**Edge test** (fixed DISENT, 90 × 2M each, IR-safe cut on the Born: all pairs
+beam/jet/jet at s_ij > s_min in the Breit frame, `-smin`, applied to DISENT and
+slicing alike). Born fraction with geometric min s_ij < 1e-2 / 1e-3 / 1e-4
+before the cut: printed per run (`Born fraction …` line); with s_min = 1e-3,
+3.8% of the remaining Born weight has s_ij < 1e-2. Offsets at 1e-4 / 3e-5 /
+1e-5: s_min = 0.01 +0.11 / −0.04 / +0.19 (± 0.14 / 0.21 / 0.29), s_min = 0.001
+−0.00 / −0.17 / +0.07; invariant with s_min = 0.01 +0.03 / −0.10 / −0.51
+(± 0.13 / 0.20 / 0.28). All consistent with zero, as is the uncut fixed run,
+so the near-collinear Born configurations do not produce a visible NLO
+effect at these τ_cut.
+
+**Soft function near the edge** (AK, after talking to Rudi Rahn: a single log
+in the soft function when two legs become collinear). Bell et al. 2312.11626
+§4: when a third direction a approaches leg i of the dipole (i,j)
+(n_ai = 2δ → 0), gluons at angle ~√δ around n_i (the "correction region")
+shift the renormalised NLO dipole coefficient by −π²/3 (finite, approached
+like √δ); the dipole spanned by i and a tends to the 0-jettiness value. At NNLO
+the correction diverges: c⁽²⁾ = (4π²/9) T_F n_f ln(2δ/n_ij) − (11π²/9) C_A ln(2δ/n_ij)
++ const, i.e. −(π²/3) β₀ ln(2δ/n_ij): the running-coupling dressing of the NLO
+offset. That is the single log. Check of our NLO soft function (GSTW form,
+`soft_from_s`, scratchpad `softlim/softlim.f90`): for m → i the extra term
+4[I₀ ln(s_jm/s_ij) + I₁] of g(i,j) tends to −6.57975 = −2π²/3, i.e. −π²/3 for
+each ordering of the pair as in Bell et al. (constants differ from theirs only
+by a universal Laplace-space shift), approached like √δ (0.049, 0.016, 0.005,
+0.0016 at δ = 1e-4 … 1e-7), stable to δ = 1e-9, for back-to-back and generic
+(i,j); g(j,i) changes by O(δ); g(i,m) = ln² s_im − ζ₂ + O(δ) (0-jettiness).
+So the NLO soft function is right and numerically stable in this limit. For
+NNLO the log matters for Born configurations with nearly collinear
+directions; the invariant measure avoids small s_ij for resolved jets.
+
+**arXiv:2604.13167** (Buonocore, Delto, Melnikov, Monni, Pikelner, Vita), read
+in full. Dipole part of the N-jettiness soft function = inclusive soft function
+(T_N evaluated on the total soft momentum; analytic from the fully differential
+soft function, known to three loops) + Δ, with Δ = 0 at NLO, a finite
+five-dimensional tree-level integral at NNLO (eq. 4.25: the double-soft
+maximally non-abelian matrix element times ln[T_N(k̂₁+ξk̂₂)/T_N(k̂₁,ξk̂₂)]),
+and NLO-like at N3LO. The geometry enters only through c_Ai = n_A·n_i/n_i·n_j,
+c_Aj and the azimuth of n_A (eqs. 4.3–4.5); the inclusive part is
+(n_ij/2)^{2ε} × the 0-jettiness one + a finite three-dimensional integral of
+t^{4ε} − t₀^{4ε} (eq. 4.18). Tripoles: compact two-dimensional formula
+(4.43–4.45), not needed for DIS 2+1 (three coloured legs, tripoles vanish by
+colour conservation through N3LO, as for pp → V+j). Timing quoted: 0.1–1 s per
+dipole at 1%, 1–10 s at 0.1%. No discussion of collinear hard directions; in
+their variables Bell's correction region is z ~ c_Ai, so a numerical
+implementation must sample z logarithmically when c_Ai is small. For DIS 2+1
+with the invariant measure the soft function depends on the three ŝ_ij; with
+the overall homogeneity that is a two-dimensional grid of the three dipoles,
+which their method makes cheap. This is the route for the NNLO soft function.
+
+**VBF (proVBFH notes for details).** Fixed-scale coefficient of the old
+code's missing initial-state region: B(≥3 jets) = (2.63 ± 0.01)e-4 pb per
+e-fold of k_T² (proVBFH-cs `cs_estimate 2`, `runs/estimate-coll-fixmh`).

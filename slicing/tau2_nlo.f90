@@ -50,7 +50,7 @@ module tau2_run
   ! and the SCET ingredients (geometric measure in another frame); the
   ! observable stays in the Breit frame
   real(dp), save :: boostY = 0
-  ! diagnostics: both jets at s_1J > smin (no cut for 0)
+  ! diagnostics: all pairs (beam, jet 1, jet 2) at s_ij > smin in the Breit frame (no cut for 0)
   real(dp), save :: smin = 0
   ! measure: 0 = geometric (Q_i = 2 E_i in the Breit frame), 1 = invariant
   ! (Q_i = Q for all regions, frame independent):
@@ -60,6 +60,9 @@ module tau2_run
   ! of the invariants s_ij = 2 p_i.p_j/Q^2 of the Born
   integer, save :: measure = 0
   real(dp), save :: sdis = 0
+  ! diagnostics: Born weight (total bin) with min_ij s_ij below 1e-2, 1e-3, 1e-4,
+  ! for the Breit-frame directions (geo) and the invariants 2p_i.p_j/Q^2 (inv)
+  real(dp), save :: wsmall_geo(3) = 0, wsmall_inv(3) = 0, wborn_tot = 0
   real(dp), external :: DOT, LEIV, ERTV, alphasPDF
 
 contains
@@ -93,8 +96,8 @@ contains
     endif
   end subroutine observable
 
-  ! diagnostics (-smin): smallest s_1J = (1 - cos theta_J)/2 of the two
-  ! jets of the minimising 2-jettiness partition (Breit frame): for three
+  ! diagnostics (-smin): smallest s_ij = (1 - cos theta_ij)/2 among the beam
+  ! and the two jets of the minimising 2-jettiness partition (Breit frame): for three
   ! partons the partons 2, 3; for four, the two left when one parton goes
   ! to the beam, or the merged pair and the third parton
   real(dp) function jet_min_shat(n, p) result(sm)
@@ -128,8 +131,15 @@ contains
        enddo
        ja = jj(:,1); jb = jj(:,2)
     endif
-    sm = min(shat1(ja), shat1(jb))
+    sm = min(shat1(ja), shat1(jb), shatjj(ja, jb))
   contains
+    ! the two jets with each other (Breit-frame angle)
+    real(dp) function shatjj(qa, qb)
+      real(dp), intent(in) :: qa(4), qb(4)
+      real(dp) :: a, b
+      a = sqrt(sum(qa(1:3)**2)); b = sqrt(sum(qb(1:3)**2))
+      shatjj = merge(0.5_dp * (1 - dot_product(qa(1:3), qb(1:3)) / (a * b)), 1.0_dp, a > 0 .and. b > 0)
+    end function shatjj
     real(dp) function shat1(q)
       real(dp), intent(in) :: q(4)
       real(dp) :: a
@@ -285,6 +295,25 @@ contains
     if (gqb /= 0) hg = hg + ggnf / gqb   ! (no gluon Born for TR = 0, diagnostics)
     ! soft function: directions (incoming parton along +z, partons 2 and 3),
     ! in the frame of the measure (Breit frame unless -boostY)
+    ! edge diagnostics (Born weight in the total bin)
+    block
+      real(dp) :: sg, si, wb, u(3,3)
+      integer :: a, b2
+      wb = r * dot_product(M, xf) * as2pi * fb(nb)
+      do a = 1, 3
+         u(:,a) = p(1:3,a) / sqrt(sum(p(1:3,a)**2))
+      enddo
+      sg = huge(1.0_dp); si = huge(1.0_dp)
+      do a = 1, 3
+         do b2 = a + 1, 3
+            sg = min(sg, 0.5_dp * (1 - dot_product(u(:,a), u(:,b2))))
+            si = min(si, 2 * DOT(p,a,b2) / Q2)
+         enddo
+      enddo
+      wborn_tot = wborn_tot + wb
+      wsmall_geo = wsmall_geo + merge(wb, 0.0_dp, sg < [1e-2_dp, 1e-3_dp, 1e-4_dp])
+      wsmall_inv = wsmall_inv + merge(wb, 0.0_dp, si < [1e-2_dp, 1e-3_dp, 1e-4_dp])
+    end block
     call zboost(p, pb)
     if (measure == 1) then
        ! invariant measure: directions n_i = 2 p_i/Q, s_ij = 2 p_i.p_j/Q^2,
@@ -368,6 +397,8 @@ contains
          & '  max tau_2 of counter-events/collinear terms ', tau2max_ct
     write(*,'(a,i12,a,l2)') ' events in the bins without O(alpha_s^2) part (DISENT abort) ', nabort, &
          & '  kept ', keepall
+    write(*,'(a,3es11.3,a,3es11.3)') ' Born fraction with min s_ij < 1e-2,1e-3,1e-4: Breit-frame angles', &
+         & wsmall_geo / wborn_tot, '  invariants', wsmall_inv / wborn_tot
     do ib = 1, nb
        write(*,'(/a,f5.2,a,f5.2,a,es14.6,a,es10.3,a,es14.6)') ' tau_zQ in [', blo(ib), ',', bhi(ib), &
             & ')   NLO coefficient (DISENT) ', s1_ref(ib), ' +- ', err(s1_ref(ib), s2_ref(ib)), &
