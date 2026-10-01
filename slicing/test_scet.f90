@@ -49,6 +49,17 @@ program test_scet
   call chk('I1(2,0.3) (log point inside)', I1, -1.00628977909669_dp, 1e-10_dp)
   call soft_I0I1(0.3_dp, 2.5_dp, I0, I1)
   call chk('I0(0.3,2.5) empty region', I0, 0.0_dp, 1e-14_dp)
+  ! extreme ratios (mpmath, 25 digits): narrow supports at large alpha
+  call soft_I0I1(30.0_dp, 0.2_dp, I0, I1)
+  call chk('I0 ln a + I1 (30, 0.2)', I0 * log(30.0_dp) + I1, -0.0336153051830945_dp, 1e-8_dp)
+  call soft_I0I1(200.0_dp, 50.0_dp, I0, I1)
+  call chk('I0 ln a + I1 (200, 50)', I0 * log(200.0_dp) + I1, -0.00500626392807682_dp, 1e-8_dp)
+  call soft_I0I1(5000.0_dp, 4000.0_dp, I0, I1)
+  call chk('I0 ln a + I1 (5000, 4000)', I0 * log(5000.0_dp) + I1, -0.000200010000888989_dp, 1e-8_dp)
+  call soft_I0I1(0.01_dp, 0.02_dp, I0, I1)
+  call chk('I0 ln a + I1 (0.01, 0.02)', I0 * log(0.01_dp) + I1, -7.66198710923967_dp, 1e-8_dp)
+  call soft_I0I1(50.0_dp, 60.0_dp, I0, I1)
+  call chk('I0 ln a + I1 (50, 60)', I0 * log(50.0_dp) + I1, -0.000502003785089934_dp, 1e-8_dp)
 
   call InitPDFsetByName('NNPDF30_nlo_as_0118')
   call InitPDF(0)
