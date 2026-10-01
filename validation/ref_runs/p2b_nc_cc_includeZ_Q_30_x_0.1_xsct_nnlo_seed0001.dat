@@ -1,4 +1,4 @@
- # Stamped by ./disorder on 29/09/2026 at 12:43:53
+ # Stamped by ./disorder on  2/10/2026 at 00:19:30
  #./disorder -nnlo -yorder 5 -lnlnQorder 4 -NC -includeZ -CC -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b -prefix p2b_nc_cc_includeZ_Q_30_x_0.1_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)

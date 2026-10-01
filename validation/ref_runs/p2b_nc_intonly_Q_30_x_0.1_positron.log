@@ -37,7 +37,7 @@ nf =  5
          0, ISEED=     12345      67890
  Outputting results to: p2b_nc_intonly_Q_30_x_0.1_positron_disorder_nnlo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  5.07E+00 s.
+==================== TOTAL TIME :  8.94E+00 s.
 
 -----------------------------------------------------------[1m
               Welcome to HOPPET v. 2.3.1-dev0
@@ -60,8 +60,8 @@ nf =  5
  the DIS coefficient functions should be cited when used.  
 -----------------------------------------------------------
 -----------------------------------------------------------
-               Welcome to disorder v. 1.0.0                
-        Written by Alexander Karlberg (2023-2024)          
+               Welcome to disorder v. 2.2.0                
+        Written by Alexander Karlberg (2023-2026)          
                                                            
  It is made available under the GNU public license,        
  with the additional request that if you use it or any     
@@ -75,7 +75,7 @@ nf =  5
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ./disorder on 29/09/2026 at 12:42:38
+ # Stamped by ./disorder on  2/10/2026 at 00:19:22
  #./disorder -nnlo -yorder 5 -lnlnQorder 4 -NC -includeZ -intonly -positron -toyQ0 2.0 -Q 30.0 -x 0.1 -scaleuncert -p2b -prefix p2b_nc_intonly_Q_30_x_0.1_positron_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^+ + p)

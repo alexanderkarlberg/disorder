@@ -1,5 +1,14 @@
-LHAPDF 6.5.5 loading /usr/local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0000.dat
+LHAPDF 6.5.6 loading /home/thA371a/akarlber/.local/share/LHAPDF/MSHT20an3lo_as118/MSHT20an3lo_as118_0000.dat
 MSHT20an3lo_as118 PDF set, member #0, version 2; LHAPDF ID = 29100
+ # ----------------------------------------------------------
+ # WARNING!: The order of the PDF, MSHT20an3lo_as118, is
+ # not the same as the perturbative order, nnlo, being computed,
+ # which is the order at which disorder initialises a running
+ # coupling. Make sure results are consistent!
+ # ----------------------------------------------------------
+ PDF member:           0
+Starting the structure functions with fixed number of flavours
+nf =  5
 #--------------------------------------------------------------------------
 #                         FastJet release 3.5.1
 #                 M. Cacciari, G.P. Salam and G. Soyez                  
@@ -13,17 +22,6 @@ MSHT20an3lo_as118 PDF set, member #0, version 2; LHAPDF ID = 29100
 # It uses T. Chan's closest pair algorithm, S. Fortune's Voronoi code
 # and 3rd party plugin jet algorithms. See COPYING file for details.
 #--------------------------------------------------------------------------
-Thanks for using LHAPDF 6.5.5. Please make sure to cite the paper:
-  Eur.Phys.J. C75 (2015) 3, 132  (http://arxiv.org/abs/1412.7420)
- # ----------------------------------------------------------
- # WARNING!: The order of the PDF, MSHT20an3lo_as118, is
- # not the same as the perturbative order, nnlo, being computed,
- # which is the order at which disorder initialises a running
- # coupling. Make sure results are consistent!
- # ----------------------------------------------------------
- PDF member:           0
-Starting the structure functions with fixed number of flavours
-nf =  5
 
  This is DISENT, a program for calculating jet quantities in
  deep inelastic scattering to next-to-leading order in alpha_s
@@ -46,8 +44,10 @@ nf =  5
          0, ISEED=     12345      67890
  Outputting results to: p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_disorder_nnlo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  5.29E+00 s.
+==================== TOTAL TIME :  6.64E+00 s.
 
+Thanks for using LHAPDF 6.5.6. Please make sure to cite the paper:
+  Eur.Phys.J. C75 (2015) 3, 132  (http://arxiv.org/abs/1412.7420)
 -----------------------------------------------------------[1m
               Welcome to HOPPET v. 2.3.1-dev0
     Higher Order Perturbative Parton Evolution Toolkit     [0m
@@ -69,8 +69,8 @@ nf =  5
  the DIS coefficient functions should be cited when used.  
 -----------------------------------------------------------
 -----------------------------------------------------------
-               Welcome to disorder v. 1.0.0                
-        Written by Alexander Karlberg (2023-2024)          
+               Welcome to disorder v. 2.2.0                
+        Written by Alexander Karlberg (2023-2026)          
                                                            
  It is made available under the GNU public license,        
  with the additional request that if you use it or any     
@@ -84,8 +84,8 @@ nf =  5
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on  3/06/2026 at 15:01:56
- #../build/disorder -nnlo -yorder 5 -lnlnQorder 4 -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_
+ # Stamped by ./disorder on  2/10/2026 at 00:19:22
+ #./disorder -nnlo -yorder 5 -lnlnQorder 4 -NC -pdf MSHT20an3lo_as118 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_MSHT20an3lo_as118_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)
  # Using DISENT with projection-to-Born

@@ -1,3 +1,7 @@
+ WARNING: Using toy PDF
+Starting the structure functions with fixed number of flavours
+nf =  5
+ WARNING: Using toy PDF
 #--------------------------------------------------------------------------
 #                         FastJet release 3.5.1
 #                 M. Cacciari, G.P. Salam and G. Soyez                  
@@ -11,10 +15,6 @@
 # It uses T. Chan's closest pair algorithm, S. Fortune's Voronoi code
 # and 3rd party plugin jet algorithms. See COPYING file for details.
 #--------------------------------------------------------------------------
- WARNING: Using toy PDF
-Starting the structure functions with fixed number of flavours
-nf =  5
- WARNING: Using toy PDF
 
  This is DISENT, a program for calculating jet quantities in
  deep inelastic scattering to next-to-leading order in alpha_s
@@ -37,7 +37,7 @@ nf =  5
          0, ISEED=     12345      67890
  Outputting results to: p2b_nc_Q_10_x_0.01_disorder_nnlo_seed0001_pdfmem000
 
-==================== TOTAL TIME :  5.73E+00 s.
+==================== TOTAL TIME :  6.74E+00 s.
 
 -----------------------------------------------------------[1m
               Welcome to HOPPET v. 2.3.1-dev0
@@ -60,8 +60,8 @@ nf =  5
  the DIS coefficient functions should be cited when used.  
 -----------------------------------------------------------
 -----------------------------------------------------------
-               Welcome to disorder v. 1.0.0                
-        Written by Alexander Karlberg (2023-2024)          
+               Welcome to disorder v. 2.2.0                
+        Written by Alexander Karlberg (2023-2026)          
                                                            
  It is made available under the GNU public license,        
  with the additional request that if you use it or any     
@@ -75,8 +75,8 @@ nf =  5
  encouraged to cite the LO, NLO, NNLO, and N3LO coefficient
  functions and the disent references.                      
 -----------------------------------------------------------
- # Stamped by ../build/disorder on  3/06/2026 at 15:01:55
- #../build/disorder -nnlo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_
+ # Stamped by ./disorder on  2/10/2026 at 00:19:22
+ #./disorder -nnlo -yorder 5 -lnlnQorder 4 -NC -toyQ0 2.0 -Q 10.0 -x 0.01 -scaleuncert -p2b -prefix p2b_nc_Q_10_x_0.01_
  # ----------------------------------------------------------
  # Doing DIS @ nnlo  (e^- + p)
  # Using DISENT with projection-to-Born

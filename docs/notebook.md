@@ -753,3 +753,9 @@ notebook entries of the same day). AK: fix it on a new branch.
   - Fixed vs unfixed at 1e-8: +0.67 ± 0.22% (expected +0.51%).
   - The unfixed values divided by (1 − abort fraction), 0.16930, 0.16879,
     0.16881, agree with the fixed ones at each cutoff.
+- 2026-10-02: AK: keep the fix on the branch, regenerate the references.
+  Regenerated only the 13 P2B NNLO configurations (`run_validation.py
+  --generate --prefix …`, worktree build with the g++ wrapper); in their
+  `xsct` files only the stamp lines change (totals identical), the
+  histograms change statistically as shown above. Full ctest afterwards:
+  82 of 82 pass.
