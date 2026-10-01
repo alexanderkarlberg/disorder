@@ -684,3 +684,57 @@ With this, disorder's p2b O(αs²) event shapes agree with NNLOJET for:
 - Why it was not caught: CI runs only on pushes and PRs to main (and on the
   schedule), not on branches. The full ctest was not rerun after the banner
   commit went onto the branch before the merge.
+
+## 2026-10-01 — N-jettiness slicing for DIS: NLO 1+1 with tau_1^b (branch 2026-10-tau-slicing)
+
+Context: the route to fully differential N3LO DIS (and VBF line by line) is
+P2B with an NNLO DIS 2+1 calculation. AK and I agreed to try N-jettiness
+slicing first (NLO 3+1 with dipoles above the cut, the SCET singular
+cumulant below), keeping P2B + EFT matching (arXiv:2609.36007) as the later
+upgrade. First step: the SCET ingredients at NLO, in the simplest setting.
+
+`slicing/tau1b_nlo.py`: NLO DIS at fixed (x, Q^2, y), photon exchange,
+mu_R = mu_F = Q, deterministic integration (scipy quad, rel. 1e-9 to 1e-11):
+- tau_1^b of Kang, Lee, Stewart (arXiv:1303.6952): q_B = xP, q_J = q + xP
+  (DIS thrust in the Breit frame). For two final partons
+  tau = min(z, a(1-z)) + min(1-z, a z), a = (1-x_p)/x_p.
+- Below the cut: the O(alpha_s) cumulant of KLS Eqs. (173)-(174) (hard
+  function, quark jet function, hemisphere soft function, quark beam
+  function with I_qq and I_qg). Checked by hand that its delta(1-z) terms
+  are the sum of H, J, S and B (-9 - 2pi^2/3 - 6 ln tau - 4 ln^2 tau at
+  mu = Q, in units of alpha_s CF/4pi, with the ln tau P_qq term).
+- Above the cut: the O(alpha_s) real emission in (x_p, z_p), F2 and FL
+  kernels, over the z intervals with tau > tau_cut (solved exactly; tau is
+  piecewise linear in z).
+- Exact NLO: the MS-bar coefficient functions C_q, C_g, C_Lq, C_Lg; they
+  agree with hoppet's StrFctNLO (F2 to 1.5e-5, FL to 1e-6).
+
+Two mistakes found on the way, both mine:
+- The plus-distribution identity (1+z^2)[ln(1-z)/(1-z)]_+ =
+  [(1+z^2) ln(1-z)/(1-z)]_+ + (7/4) delta(1-z): first coded with -7/4.
+- The gluon F2 real kernel: first written from memory with 16 x_p(1-x_p),
+  which gave a tau-independent offset of exactly 8 TR x_p(1-x_p) per flavour.
+  The correct constant is 8 x_p(1-x_p) (no polynomial term in the
+  transverse part; FL = 8 TR x_p(1-x_p)). This was fixed by requiring the
+  tau -> 0 limit with the standard C_g and the beam-function constant
+  2z(1-z), so it still needs an independent pointwise check against DISENT's
+  MATTHR. The quark channel converged with the kernels as first written.
+
+Result (sum - exact, relative to the O(alpha_s) correction):
+
+| x, Q, y | tau_cut 1e-2 | 1e-3 | 1e-4 | 1e-5 | 1e-6 |
+|---|---|---|---|---|---|
+| 0.01, 20, 0.5 | 5.0e-2 | 6.1e-3 | 7.2e-4 | 8.3e-5 | 9.4e-6 |
+| 0.001, 10, 0.9 | 2.8e-2 | 4.2e-3 | 5.6e-4 | 7.0e-5 | 8.4e-6 |
+| 0.1, 50, 0.1 | -4.2e-2 | -1.0e-2 | -1.6e-3 | -2.2e-4 | -2.8e-5 |
+| 0.4, 100, 0.3 | 1.6e-1 | 2.8e-2 | 4.0e-3 | 5.2e-4 | 6.4e-5 |
+
+O(tau_cut ln tau_cut) convergence at all four points (y from 0.1 to 0.9,
+so the FL separation is tested); FL alone converges linearly (FL is
+power suppressed). Quark-only and gluon-only runs converge separately. The
+same table relative to the Born is below 1.5e-6 at tau_cut = 1e-6.
+
+Next: NLO 2+1 with tau_2 slicing against DISENT (one-loop hard function of
+gamma* q -> q g, three-direction one-loop soft function, beam and jet
+functions for both channels), and the pointwise MATTHR check of the real
+kernels.
