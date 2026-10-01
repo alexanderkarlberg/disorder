@@ -73,9 +73,11 @@ def exact_nlo(P, x, y):
     return a * (Yp * (c2q + c2g) - y * y * (cLq + cLg)), a * (c2q + c2g), a * (cLq + cLg)
 
 
-def cumulant(P, x, y, tau):
-    """sigma_0 Sigma_c^(1)(tau) for tau_1^b at mu = Q (KLS (173) + (174)), O(alpha_s) part, in units of R."""
+def cumulant(P, x, y, tau, taua=False):
+    """sigma_0 Sigma_c^(1)(tau) for tau_1^b at mu = Q (KLS (173) + (174)), O(alpha_s) part, in units of R.
+    taua=True: tau_1^a (KLS (173) alone, i.e. without the ln z terms of (174))."""
     a = P.as_ / (2 * math.pi)
+    lzb = 0.0 if taua else 1.0
     Yp = 1 + (1 - y) ** 2
     L = math.log(tau)
     # quark: delta term -(CF/2)(9 + 2pi^2/3 + 6L + 4L^2) [alpha_s/4pi -> alpha_s/2pi: factor 1/2]
@@ -84,7 +86,7 @@ def cumulant(P, x, y, tau):
     # ln(tau z) Pqq = L [(1+z^2)/(1-z)]_+ + (1+z^2) ln z/(1-z)  (regular), and L1(1-z)(1+z^2): [ln(1-z)/(1-z)]_+ (1+z^2)
     # Write [g]_+ h with h(1) != 0 via conv(plus=g*h): [g]_+ h = [g h]_+ + h(1) delta * int... handled below.
     def reg(z):
-        return 1 - z - (1 + z * z) / (1 - z) * math.log(z) + (1 + z * z) * math.log(z) / (1 - z)
+        return 1 - z - (1 + z * z) / (1 - z) * math.log(z) + lzb * (1 + z * z) * math.log(z) / (1 - z)
     # (1+z^2)[ln(1-z)/(1-z)]_+ = [(1+z^2) ln(1-z)/(1-z)]_+ + delta(1-z) int_0^1 ((1+z^2) - 2) ln(1-z)/(1-z) dz,
     #   int_0^1 (z^2 - 1) ln(1-z)/(1-z) dz = -int_0^1 (1+z) ln(1-z) dz = +7/4
     cq = CF * (conv(P.q, x, reg, plus=lambda z: ((1 + z * z) * math.log(1 - z) + L * (1 + z * z)) / (1 - z),
@@ -92,7 +94,8 @@ def cumulant(P, x, y, tau):
     # note: [(1+z^2)/(1-z)]_+ L is already a pure plus distribution (Pqq without the 3/2 delta? KLS: Pqq = [(1+z^2)/(1-z)]_+)
     quark = Yp * (dq * P.q(x) + cq)
     # gluon: TF [ ln(tau (1-z)) Pqg(z) + 2 z(1-z) ] per q and per qbar
-    glu = Yp * 2 * TR * conv(P.g, x, lambda z: math.log(tau * (1 - z)) * (z * z + (1 - z) ** 2) + 2 * z * (1 - z))
+    glu = Yp * 2 * TR * conv(P.g, x, lambda z: (math.log(tau * (1 - z)) - (1 - lzb) * math.log(z)) * (z * z + (1 - z) ** 2)
+                             + 2 * z * (1 - z))
     return a * (quark + glu)
 
 
@@ -186,11 +189,16 @@ def main():
     ap.add_argument('--y', type=float, default=0.5)
     ap.add_argument('--taus', default='1e-1,3e-2,1e-2,3e-3,1e-3,3e-4,1e-4,3e-5,1e-5,1e-6')
     ap.add_argument('--hoppet', action='store_true', help='also compare the exact NLO with hoppet')
+    ap.add_argument('--cumulant-only', action='store_true', help='print only the tau_1^a and tau_1^b cumulants')
     ap.add_argument('--only', choices=['q', 'g'], help='one channel only (diagnostics; the Born then uses the quarks or nothing)')
     a = ap.parse_args()
     P = Pdfs(a.pdf, a.Q)
     P.only = a.only
     born = (1 + (1 - a.y) ** 2) * P.q(a.x)
+    if a.cumulant_only:
+        for t in map(float, a.taus.split(',')):
+            print(f'tau {t:9.1e}  cumulant tau1a {cumulant(P, a.x, a.y, t, taua=True):.10e}  tau1b {cumulant(P, a.x, a.y, t):.10e}')
+        return
     ex, f2, fl = exact_nlo(P, a.x, a.y)
     print(f'x = {a.x}, Q = {a.Q}, y = {a.y}, {a.pdf}, alpha_s(Q) = {P.as_:.6f}')
     print(f'Born R0 = {born:.8e};  exact O(as): {ex:.8e} ({ex / (born or ex):+.6f} of Born);  F2/x(1) = {f2:.6e}, FL/x(1) = {fl:.6e}')

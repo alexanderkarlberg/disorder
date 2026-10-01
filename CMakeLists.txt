@@ -187,6 +187,12 @@ if(DISORDER_TESTS)
   add_subdirectory(validation)
 endif()
 
+# N-jettiness slicing studies (experimental, off by default)
+option(DISORDER_SLICING "Build the N-jettiness slicing programs in slicing/" OFF)
+if(DISORDER_SLICING)
+  add_subdirectory(slicing)
+endif()
+
 cmake_print_variables(CMAKE_CXX_FLAGS)
 cmake_print_variables(CMAKE_Fortran_FLAGS)
 
