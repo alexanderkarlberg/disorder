@@ -125,7 +125,17 @@ def z_intervals(xp, tc):
     return merged
 
 
-def real_above(P, x, y, tc):
+def z_intervals_geo(xp, tc):
+    """tau_1 with the geometric measure (GSTW, Breit frame, axes by minimisation):
+    tau = min(z, 1 - z, a), a = (1-xp)/xp (beam candidates n_B.p_k = z_k Q; merging the two
+    partons gives Q a for xp > 1/2 and Q for xp < 1/2)."""
+    a = (1 - xp) / xp
+    if a <= tc or tc >= 0.5:
+        return []
+    return [(tc, 1 - tc)]
+
+
+def real_above(P, x, y, tc, geo=False):
     """O(alpha_s) real emission with tau_1^b > tc, in units of R (alpha_s/2pi normalisation).
     Quark channel (q and qbar):  2xF1-type CF[(xp^2+z^2)/((1-xp)(1-z)) + 2 xp z + 2] ... written as F2 and FL:
       F2: CF[(xp^2+z^2)/((1-xp)(1-z)) + 2 + 6 xp z],   FL: CF 4 xp z
@@ -148,7 +158,7 @@ def real_above(P, x, y, tc):
     def inner(xp, which):
         kq, kg = (k2q, k2g) if which == 2 else (kLq, kLg)
         sq = sg = 0.0
-        for lo, hi in z_intervals(xp, tc):
+        for lo, hi in (z_intervals_geo(xp, tc) if geo else z_intervals(xp, tc)):
             sq += integrate.quad(lambda z: kq(xp, z), lo, hi, **QUAD)[0]
             sg += integrate.quad(lambda z: kg(xp, z), lo, hi, **QUAD)[0]
         return (P.q(x / xp) * sq + P.g(x / xp) * sg) / xp
@@ -190,6 +200,7 @@ def main():
     ap.add_argument('--taus', default='1e-1,3e-2,1e-2,3e-3,1e-3,3e-4,1e-4,3e-5,1e-5,1e-6')
     ap.add_argument('--hoppet', action='store_true', help='also compare the exact NLO with hoppet')
     ap.add_argument('--cumulant-only', action='store_true', help='print only the tau_1^a and tau_1^b cumulants')
+    ap.add_argument('--geo', action='store_true', help='geometric-measure 1-jettiness (axes by minimisation) with the tau_1^a cumulant')
     ap.add_argument('--only', choices=['q', 'g'], help='one channel only (diagnostics; the Born then uses the quarks or nothing)')
     a = ap.parse_args()
     P = Pdfs(a.pdf, a.Q)
@@ -207,8 +218,8 @@ def main():
         print(f'hoppet: F2/x(1) = {hf2:.6e} (ratio {hf2 / f2:.6f}), FL/x(1) = {hfl:.6e} (ratio {hfl / fl:.6f})')
     print(f'{"tau_cut":>9s} {"below":>14s} {"above":>14s} {"sum":>14s} {"(sum-exact)/exact":>18s} {"/Born":>12s} {"FL_above/FL-1":>14s}')
     for t in map(float, a.taus.split(',')):
-        b = cumulant(P, a.x, a.y, t)
-        r, rf2, rfl = real_above(P, a.x, a.y, t)
+        b = cumulant(P, a.x, a.y, t, taua=a.geo)
+        r, rf2, rfl = real_above(P, a.x, a.y, t, geo=a.geo)
         s = b + r
         print(f'{t:9.1e} {b:14.6e} {r:14.6e} {s:14.6e} {(s - ex) / ex:18.3e} {(s - ex) / (born or ex):12.3e} {rfl / fl - 1:14.3e}')
 

@@ -40,6 +40,10 @@ module tau2_run
   real(dp), save :: ev_born(nb) = 0, s1_born(nb) = 0, s2_born(nb) = 0   ! O(alpha_s) Born rate
   integer(8), save :: nevt = 0, nborn = 0
   integer, save :: ndebug = 0
+  ! diagnostics: rapidity of a boost along z applied before computing T_2
+  ! and the SCET ingredients (geometric measure in another frame); the
+  ! observable stays in the Breit frame
+  real(dp), save :: boostY = 0
   real(dp), external :: DOT, LEIV, ERTV, alphasPDF
 
 contains
@@ -70,11 +74,25 @@ contains
     fb = merge(1.0_dp, 0.0_dp, t >= blo .and. t < bhi)
   end subroutine observable
 
-  real(dp) function tau2_of(n, p) result(T)
+  subroutine zboost(pin, pout)
+    real(dp), intent(in) :: pin(4,7)
+    real(dp), intent(out) :: pout(4,7)
+    real(dp) :: ch, sh
+    integer :: i
+    ch = cosh(boostY); sh = sinh(boostY)
+    pout = pin
+    do i = 1, 7
+       pout(4,i) = ch * pin(4,i) + sh * pin(3,i)
+       pout(3,i) = sh * pin(4,i) + ch * pin(3,i)
+    enddo
+  end subroutine zboost
+
+  real(dp) function tau2_of(n, pin) result(T)
     integer, intent(in) :: n
-    real(dp), intent(in) :: p(4,7)
+    real(dp), intent(in) :: pin(4,7)
     integer :: j, k
-    real(dp) :: v(3)
+    real(dp) :: v(3), p(4,7)
+    call zboost(pin, p)
     T = huge(1.0_dp)
     do j = 2, n
        T = min(T, p(4,j) - p(3,j))
@@ -142,7 +160,7 @@ contains
     real(dp) :: nhat(3,3), g(3,3), ls(3,3), casq(3), casg(3), ttq(3,3), ttg(3,3)
     real(dp) :: c0(-6:6), c1(-6:6), c2(-6:6), lb, wq, wg, tot, Ea, E2, E3, tc
     real(dp), parameter :: CF = 4.0_dp/3, CA = 3.0_dp, TR = 0.5_dp
-    real(dp) :: EQ(-6:6)
+    real(dp) :: EQ(-6:6), pb(4,7)
     integer :: i, it, imax
     nborn = nborn + 1
     Q2 = Q * Q
@@ -166,16 +184,18 @@ contains
     gqb = M(0) / eq2sum
     hq = hq + qqnf / qqb
     hg = hg + ggnf / gqb
-    ! soft function: directions (incoming parton along +z, partons 2 and 3)
+    ! soft function: directions (incoming parton along +z, partons 2 and 3),
+    ! in the frame of the measure (Breit frame unless -boostY)
+    call zboost(p, pb)
     nhat(:,1) = [0.0_dp, 0.0_dp, 1.0_dp]
-    nhat(:,2) = p(1:3,2) / sqrt(sum(p(1:3,2)**2))
-    nhat(:,3) = p(1:3,3) / sqrt(sum(p(1:3,3)**2))
+    nhat(:,2) = pb(1:3,2) / sqrt(sum(pb(1:3,2)**2))
+    nhat(:,3) = pb(1:3,3) / sqrt(sum(pb(1:3,3)**2))
     call soft_geom(3, nhat, g, ls)
     casq = [CF, CF, CA]; casg = [CA, CF, CF]
     call ttmat(casq, ttq); call ttmat(casg, ttg)
     ! beam function
     call beam_coeffs(eta, Q, c0, c1, c2)
-    Ea = p(4,1); E2 = p(4,2); E3 = p(4,3)
+    Ea = pb(4,1); E2 = pb(4,2); E3 = pb(4,3)
     do it = 1, nt
        tc = taus(it)
        lb = log(2 * Ea * tc / Q)
@@ -279,6 +299,7 @@ program tau2_nlo
   soft_tol = dble_val_opt('-softtol', 1e-9_dp)
   pdf_mask = int_val_opt('-pdfmask', 0)   ! 1: quarks only, 2: gluon only (diagnostics)
   ndebug = int_val_opt('-debug', 0)       ! print the cumulant pieces for this many Born events
+  boostY = dble_val_opt('-boostY', 0.0_dp) ! measure in a frame boosted along z (diagnostics)
 
   nflav = 5; NC = .true.; CC = .false.; noZ = .true.; Zonly = .false.
   intonly = .false.; neutrino = .false.; positron = .false.

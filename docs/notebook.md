@@ -789,3 +789,26 @@ frame). Ingredients and how they were checked:
   conversion gives the timelike form factor CF(-8 + 7 pi^2/6).
 - Rerun with IR-safe bins (tau_zQ in [0.05, 0.5), five bins), tau_cut 2e-2
   ... 1e-4, 106 x 2M events (`slicing-runs/nlo21v2-x0.01-Q400`).
+- IR-safe rerun (106 x 2M events, `nlo21v2-x0.01-Q400`): the offset per
+  Born (alpha_s/2pi) in tau_zQ in [0.05, 0.5) is -6.8, -4.3, -2.5, -1.3,
+  -0.94, -0.79 +- 0.06, -0.91 +- 0.09, -0.87 +- 0.11 for tau_cut = 2e-2 ...
+  1e-4: a plateau at about -0.85, i.e. -7 to -8% of the NLO coefficient,
+  roughly uniform over the bins. Not power corrections.
+- By channel (30 x 2M each, `-pdfmask`): quark only -0.55 +- 0.1, gluon
+  only -1.27 +- 0.12; x = 0.1, Q^2 = 1000 (quark dominated) -0.56 +- 0.1;
+  x = 0.001, Q^2 = 50 (gluon dominated) -1.1 +- 0.2. So about -0.42 C_a
+  per Born, C_a the Casimir of the incoming parton (close to -pi^2/24 C_a;
+  ratio g/q 2.3 +- 0.5, also compatible with 2 = number of quark jets).
+- Checked and excluded since: the 1+1 test with the geometric-measure
+  tau_1 (axes by minimisation, the measure of the 2+1 code; KLS (173)
+  cumulant) converges to the exact NLO at three points (1e-5 relative at
+  tau_cut = 1e-6), so beam, jet, two-direction soft and hard pieces are
+  right in 1+1; the three-direction soft I-terms equal a direct angular
+  integral of the eikonal times ln(m_hemi/m_true) (4.780559 both); the
+  soft integrals agree with mpmath at extreme ratios; the hard function
+  matches CS (D.16)-(D.18) and the incoming-parton I operator of CS (8.25)
+  (DISENT's QQ contains only the symmetric operator; I^(1), I^(2) are in
+  its sampled K+P terms).
+- Open. Next diagnostic: the measure in a frame boosted along z (the beam
+  piece is boost invariant, jet and soft are not); runs with Y = +1 and
+  Y = -1 (the latter on idle th desktops, nice 19, AK's rule).
