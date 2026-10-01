@@ -945,3 +945,54 @@ slicing against DISENT (x = 0.01, Q^2 = 400 GeV^2, tau_zQ in [0.05, 0.5)).
   readings are open: a single-log mismatch, or convergence to a constant
   (about +1.2 per Born in QCD, +0.55 abelian) with slow power corrections
   (a sqrt(tau_cut) form fits). Not resolved.
+
+### 1 Oct, evening: DISENT fix on its own branch, invariant measure, literature
+
+- DISENT's abort fixed on branch `2026-10-disent-xcut` (worktree
+  `~/work/disorder-disent-xcut`, see its notebook): the fixed DISENT is
+  cutoff independent within 0.3% (1e-10 vs 1e-6: −0.41 ± 0.27%), the unfixed
+  one shows the predicted CUTOFF^(1/4) dependence (+1.18 ± 0.26%, expected
+  +1.44%). New slicing runs use the fixed DISENT (`tau2_nlo_fixed2`), where
+  the driver's own drop of aborted events is a no-op (0 aborted events).
+- Frame-independent measure (`-measure inv`, AK agreed after reading
+  arXiv:2408.05265): Q_i = Q for all regions,
+  τ₂ = min(min_j 2η_j P·p_j, min_{j<k} 2p_j·p_k)/Q², η_j = x(1 + s_kl/Q²),
+  cumulant at λ_B = λ_J = τ_cut, soft function of the Born invariants
+  ŝ_ij = 2p_i·p_j/Q² (`soft_from_s`). Same output as before for the
+  geometric default with the same seeds.
+- Results, 90 × 2M each, offset per Born at τ_cut = 2e-4 / 1e-4 / 3e-5 / 1e-5:
+  - invariant, QCD: −0.17 ± 0.08 / −0.13 ± 0.09 / −0.06 ± 0.14 / +0.11 ± 0.24,
+    slope 0.07 ± 0.07: converges (from below, as power corrections), consistent
+    with zero, i.e. within about 1% of the NLO coefficient (9.9 per Born);
+  - invariant, abelian quark channel: −0.42 ± 0.08 / −0.24 ± 0.09 / −0.30 ± 0.14
+    / −0.30 ± 0.18, slope 0.08 ± 0.05; similar in all τ_zQ bins; open (1.7σ at
+    1e-5);
+  - geometric (Breit frame), QCD: +0.48 / +0.80 / +1.09 / +1.14 ± 0.24, still
+    rising (slope 0.31 ± 0.07): unexplained; the invariant measure is now the
+    working choice. Decomposition of the invariant measure by channel and
+    colour is running.
+- Literature (AK asked): no DIS 2+1 at NNLO by slicing exists. NNLO DIS dijets
+  only from NNLOJET (antenna; 1606.03991, 1703.05977), N3LO DIS jets by P2B on
+  NNLOJET (1803.09973). Slicing with jets: H+1 jet in MCFM (1906.01020: NLO
+  converges to the dipole result like ε ln ε, 0.15%, with the geometric
+  measure in the rest frame of the Born system; the hadronic-frame definition
+  converges much more slowly), V+jet NLP (1907.12213: √(T₁/Q) terms cancel;
+  frame of the Born system recommended), DIS single-inclusive jet at NNLO
+  with τ₁ᵃ (1607.04921). P2B-improved slicing (2408.05265) removes fiducial
+  √τ corrections; same decomposition as disorder's P2B.
+- k_T-like slicing (y₂₃; Buonocore, Grazzini, Guadagni 2508.19226,
+  2512.03954): NNLO only for two-jet final states (quark jet function, two-
+  direction soft function, E-scheme factorisation-breaking term); "to compute
+  NNLO corrections to e+e− → 3 jets, the gluon jet function is needed". Not
+  usable for DIS 2+1 at NNLO yet.
+- τ₂ at NNLO: all ingredients exist: two-loop γ*qg amplitudes (Garland et al.
+  hep-ph/0112081, hep-ph/0206067, crossed by Gehrmann–Remiddi), jet functions
+  (Becher–Neubert hep-ph/0603140, Becher–Bell 1008.1936), beam functions
+  (Gaunt–Stahlhofen–Tackmann 1401.5478, 1405.1044), the three-direction NNLO
+  soft function (Campbell et al. 1711.09984, generic kinematics; Bell et al.
+  2312.11626). Crossing (AK asked): Bell et al. §2.4: the process dependence
+  (incoming vs outgoing) sits only in the real-virtual tripoles, weighted by
+  λ_AB, and "in processes with three hard partons, the sum of the tripole
+  contributions vanishes because of colour conservation"; the dipole part has
+  a universal cos(πε). So the pp → V+jet soft function applies to DIS 2+1
+  (qq̄g: one-dimensional colour space, tripoles vanish identically).
