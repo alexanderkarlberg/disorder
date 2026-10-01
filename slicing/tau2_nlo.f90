@@ -52,6 +52,14 @@ module tau2_run
   real(dp), save :: boostY = 0
   ! diagnostics: both jets at s_1J > smin (no cut for 0)
   real(dp), save :: smin = 0
+  ! measure: 0 = geometric (Q_i = 2 E_i in the Breit frame), 1 = invariant
+  ! (Q_i = Q for all regions, frame independent):
+  !   tau_2 = min( min_j 2 eta_j P.p_j, min_{j<k} 2 p_j.p_k ) / Q^2,
+  !   eta_j = x (1 + s_kl/Q^2) (Born momentum fraction of the other two)
+  ! with the cumulant at lambda_B = lambda_J = tau_cut and the soft function
+  ! of the invariants s_ij = 2 p_i.p_j/Q^2 of the Born
+  integer, save :: measure = 0
+  real(dp), save :: sdis = 0
   real(dp), external :: DOT, LEIV, ERTV, alphasPDF
 
 contains
@@ -147,7 +155,21 @@ contains
     integer, intent(in) :: n
     real(dp), intent(in) :: pin(4,7)
     integer :: j, k
-    real(dp) :: v(3), p(4,7)
+    real(dp) :: v(3), p(4,7), Q2, eta, ppj
+    if (measure == 1) then
+       ! invariant measure, returned as T = tau_2 Q (Q = sqrt(Q2))
+       Q2 = -DOT(pin,5,5); eta = 2 * DOT(pin,1,6) / sdis
+       T = huge(1.0_dp)
+       do j = 2, n
+          ppj = DOT(pin,1,j) / eta          ! P.p_j
+          T = min(T, 2 * xfix * (1 + spair(j) / Q2) * ppj)
+          do k = j + 1, n
+             T = min(T, 2 * DOT(pin,j,k))
+          enddo
+       enddo
+       T = max(T, 0.0_dp) / sqrt(Q2)
+       return
+    endif
     call zboost(pin, p)
     T = huge(1.0_dp)
     do j = 2, n
@@ -158,6 +180,19 @@ contains
        enddo
     enddo
     T = max(T, 0.0_dp)
+  contains
+    ! 2 p_k.p_l summed over the pairs of outgoing partons other than j (the
+    ! Born left when j goes to the beam; one pair for four partons)
+    real(dp) function spair(j)
+      integer, intent(in) :: j
+      integer :: k, l
+      spair = 0
+      do k = 2, n
+         do l = k + 1, n
+            if (k /= j .and. l /= j) spair = spair + 2 * DOT(pin,k,l)
+         enddo
+      enddo
+    end function spair
   end function tau2_of
 
   subroutine slice_user(n, na, ntyp, p, s, weight, scale2)
@@ -188,6 +223,7 @@ contains
        return
     endif
     if (na == 2) ev_na2 = .true.
+    sdis = s
     eta = 2 * DOT(p,1,6) / s
     Q2 = -DOT(p,5,5); Q = sqrt(Q2)
     call observable(n, p, Q, fb)
@@ -223,8 +259,8 @@ contains
     real(dp) :: M(-6:6), r, Q2, l12, l13, l23, hq, hg, qqnf, ggnf, qqb, gqb, eq2sum
     real(dp) :: nhat(3,3), g(3,3), ls(3,3), casq(3), casg(3), ttq(3,3), ttg(3,3)
     real(dp) :: c0(-6:6), c1(-6:6), c2(-6:6), lb, wq, wg, tot, Ea, E2, E3, tc
-    real(dp) :: EQ(-6:6), pb(4,7)
-    integer :: i, it, imax
+    real(dp) :: EQ(-6:6), pb(4,7), sij(3,3)
+    integer :: i, j, it, imax
     nborn = nborn + 1
     Q2 = Q * Q
     call MATTHR(p, M)
@@ -250,10 +286,22 @@ contains
     ! soft function: directions (incoming parton along +z, partons 2 and 3),
     ! in the frame of the measure (Breit frame unless -boostY)
     call zboost(p, pb)
-    nhat(:,1) = [0.0_dp, 0.0_dp, 1.0_dp]
-    nhat(:,2) = pb(1:3,2) / sqrt(sum(pb(1:3,2)**2))
-    nhat(:,3) = pb(1:3,3) / sqrt(sum(pb(1:3,3)**2))
-    call soft_geom(3, nhat, g, ls)
+    if (measure == 1) then
+       ! invariant measure: directions n_i = 2 p_i/Q, s_ij = 2 p_i.p_j/Q^2,
+       ! and all logs at tau_cut (the energies below enter as 2 E/Q = 1)
+       do i = 1, 3
+          do j = 1, 3
+             sij(i,j) = merge(0.0_dp, 2 * DOT(p,i,j) / Q2, i == j)
+          enddo
+       enddo
+       call soft_from_s(3, sij, g, ls)
+       pb(4,1:3) = Q / 2
+    else
+       nhat(:,1) = [0.0_dp, 0.0_dp, 1.0_dp]
+       nhat(:,2) = pb(1:3,2) / sqrt(sum(pb(1:3,2)**2))
+       nhat(:,3) = pb(1:3,3) / sqrt(sum(pb(1:3,3)**2))
+       call soft_geom(3, nhat, g, ls)
+    endif
     casq = [CF, CF, CA]; casg = [CA, CF, CF]
     call ttmat(casq, ttq); call ttmat(casg, ttg)
     ! beam function
@@ -348,7 +396,7 @@ program tau2_nlo
   use sub_defs_io
   implicit none
   character(len=100) :: pdf
-  real(dp) :: s, npow1, npow2, cf_in, ca_in, tf_in
+  real(dp) :: s, npow1, npow2, cf_in, ca_in, tf_in, cutoff
   integer :: nev, seed1, seed2
   external :: DISENTFULL
 
@@ -366,7 +414,9 @@ program tau2_nlo
   ndebug = int_val_opt('-debug', 0)       ! print the cumulant pieces for this many Born events
   boostY = dble_val_opt('-boostY', 0.0_dp) ! measure in a frame boosted along z (diagnostics)
   smin = dble_val_opt('-smin', 0.0_dp)     ! jets away from the beam: s_1J > smin (diagnostics)
+  measure = merge(1, 0, string_val_opt('-measure', 'geo') == 'inv')   ! geo (default) or inv
   keepall = log_val_opt('-keepall')        ! keep Born/below-cut of aborted events (old behaviour)
+  cutoff = dble_val_opt('-cutoff', 1e-8_dp)  ! DISENT's technical cutoff
   ! colour factors (diagnostics: e.g. -CA 0 or -TR 0 isolate colour structures; DISENT gets the same)
   cf_in = dble_val_opt('-CF', 4.0_dp/3.0_dp)
   ca_in = dble_val_opt('-CA', 3.0_dp)
@@ -377,10 +427,10 @@ program tau2_nlo
   intonly = .false.; neutrino = .false.; positron = .false.
   call InitPDFsetByName(trim(pdf))
   call InitPDF(0)
-  write(*,'(a,a,a,f8.5,a,f9.2,a,f10.1,a,i10,a,i2,a,3f9.5)') ' pdf ', trim(pdf), '  x ', xfix, '  Q2 ', Q2fix, '  s ', s, &
-       & '  nev ', nev, '  pdfmask ', pdf_mask, '  CF CA TR ', CF, CA, TF
+  write(*,'(a,a,a,f8.5,a,f9.2,a,f10.1,a,i10,a,i2,a,3f9.5,a,i2)') ' pdf ', trim(pdf), '  x ', xfix, '  Q2 ', Q2fix, '  s ', s, &
+       & '  nev ', nev, '  pdfmask ', pdf_mask, '  CF CA TR ', CF, CA, TF, '  measure ', measure
 
   call DISENTFULL(nev, s, 5, slice_user, slice_cuts, seed1, seed2, npow1, npow2, &
-       & 1e-8_dp, 2, slice_muf, CF, CA, TF, .false.)
+       & cutoff, 2, slice_muf, CF, CA, TF, .false.)
   call report()
 end program tau2_nlo

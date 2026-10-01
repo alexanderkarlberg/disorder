@@ -20,7 +20,7 @@ module mod_slicing_scet
   use types, only: dp
   implicit none
   private
-  public :: cli2, soft_I0I1, soft_cum, soft_geom, soft_from_geom, jet_cum, beam_coeffs, hard_fact
+  public :: cli2, soft_I0I1, soft_cum, soft_geom, soft_from_s, soft_from_geom, jet_cum, beam_coeffs, hard_fact
   public :: scet_set_nf, scet_set_colour, pi, zeta2, CF, CA, TF
 
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884_dp
@@ -231,13 +231,26 @@ contains
     integer, intent(in) :: n
     real(dp), intent(in) :: nhat(3,n)
     real(dp), intent(out) :: g(n,n), ls(n,n)
-    real(dp) :: sij(n,n), I0, I1
-    integer :: i, j, m
+    real(dp) :: sij(n,n)
+    integer :: i, j
     do i = 1, n
        do j = 1, n
           sij(i,j) = 0.5_dp * (1 - dot_product(nhat(:,i), nhat(:,j)))
        enddo
     enddo
+    call soft_from_s(n, sij, g, ls)
+  end subroutine soft_geom
+
+  ! the same from s_ij = n_i.n_j/2 directly: by Lorentz invariance the soft
+  ! function of the measure min_i n_i.k depends only on the n_i.n_j, also for
+  ! directions that are not normalised to energy 1 (e.g. n_i = 2 q_i/Q for
+  ! the invariant measure, s_ij = 2 q_i.q_j/Q^2)
+  subroutine soft_from_s(n, sij, g, ls)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: sij(n,n)
+    real(dp), intent(out) :: g(n,n), ls(n,n)
+    real(dp) :: I0, I1
+    integer :: i, j, m
     g = 0; ls = 0
     do i = 1, n
        do j = 1, n
@@ -251,7 +264,7 @@ contains
           enddo
        enddo
     enddo
-  end subroutine soft_geom
+  end subroutine soft_from_s
 
   ! soft cumulant (alpha_s/2pi) from the geometry part, for Casimirs cas
   ! and colour correlators tt, at lambda = T_cut/mu
