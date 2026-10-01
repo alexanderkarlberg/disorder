@@ -1133,6 +1133,14 @@ independent although they come from the same events. Fitting a slope per run
 +0.03 ± 0.05 / +0.05 ± 0.06, invariant +0.11 ± 0.06, invariant with edge cut
 −0.05 ± 0.06; channels: geometric quark +0.09 ± 0.10, gluon +0.14 ± 0.12,
 invariant quark +0.03 ± 0.06, gluon +0.22 ± 0.10, abelian +0.11 ± 0.05. Driver
-drop: `fix-qcd` +0.25 ± 0.06, `cut-old-1e-6` +0.56 ± 0.06. All fixed-DISENT
-sets are consistent with no slope (largest pulls 2.3σ, gluon and abelian,
-among 14 sets); the driver-drop sets are 4σ and 9σ.
+drop: `fix-qcd` +0.25 ± 0.06, `cut-old-1e-6` +0.56 ± 0.06.
+**Correction (same night):** I first wrote that all fixed-DISENT sets are
+consistent with no slope, but had left out the C_A = 0 quark set (`inv-qA0`):
++0.17 ± 0.04 over 5e-4 … 1e-5 (4σ). That slope is the approach from below
+(−0.78 ± 0.05 at 5e-4, −0.36 at 2e-4, −0.18 at 1e-4, 0.00 ± 0.13 at 3e-5,
+−0.10 ± 0.18 at 1e-5), i.e. power corrections: over τ_cut ≤ 1e-4 its slope is
++0.04 ± 0.07 (abelian −0.03 ± 0.07, gluon +0.23 ± 0.14, QCD invariant
++0.10 ± 0.10). So a slope over 5e-4 … 1e-5 is not a clean test of a log
+mismatch for the invariant sets, which converge from below; the offsets at
+3e-5 and 1e-5 are all consistent with zero. The driver-drop sets rise
+monotonically and cross zero (4σ and 9σ slopes, offsets +1.1 and +3.1 at 1e-5).
