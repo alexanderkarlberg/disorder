@@ -735,3 +735,21 @@ notebook entries of the same day). AK: fix it on a new branch.
   Against the references χ²/n = 1.05 over 546 bins (central scale, both
   errors), max |pull| 2.6. The references are not regenerated; to be decided
   after review.
+- **Cutoff validation** (DISENT's O(αs²) coefficient for τ_zQ in [0.05, 0.5) at
+  x = 0.01, Q² = 400 GeV², from `tau2_nlo`'s reference sum; 100 × 2M events per
+  set, 196 for the unfixed code at 1e-8; runs in `slicing-runs/cut-*`):
+
+  | DISENT | cutoff 1e-6 | 1e-8 | 1e-10 |
+  |---|---|---|---|
+  | unfixed | 0.16657 ± 0.00026 | 0.16793 ± 0.00021 | 0.16854 ± 0.00034 |
+  | fixed | 0.16931 ± 0.00031 | 0.16906 ± 0.00030 | 0.16861 ± 0.00033 |
+  | measured abort fraction (unfixed) | 1.61% | 0.51% | 0.16% |
+
+  - The abort fractions match CUTOFF^(1/4)/2 (1.58%, 0.50%, 0.16%).
+  - Unfixed: 1e-10 vs 1e-6 +1.18 ± 0.26% (expected from the abort fractions
+    +1.44%).
+  - Fixed: 1e-10 vs 1e-6 −0.41 ± 0.27%, 1e-8 vs 1e-6 −0.15 ± 0.25%: no
+    significant cutoff dependence.
+  - Fixed vs unfixed at 1e-8: +0.67 ± 0.22% (expected +0.51%).
+  - The unfixed values divided by (1 − abort fraction), 0.16930, 0.16879,
+    0.16881, agree with the fixed ones at each cutoff.
