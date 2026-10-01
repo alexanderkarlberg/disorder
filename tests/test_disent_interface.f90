@@ -14,7 +14,11 @@
 !     momentum is conserved, and the outgoing lepton is the same as
 !     in the projected Born event, as it must be in DIS.
 ! It also checks dis_cuts, disent_muf and the mapping of DISENT's
-! three muF points onto our 7-point scale variation.
+! three muF points onto our 7-point scale variation, that every event
+! whose three-parton Born is handed over also gets its O(alphas^2)
+! virtual (DISENT used to abort the event when the collinear X of VIRTHR
+! fell in the cutoff region, 0.5% of the events), and that all weights
+! are finite.
 module disent_checks
   use types, only: dp
   use mod_parameters
@@ -25,6 +29,9 @@ module disent_checks
   logical, save :: ok_cons = .true., ok_mass = .true., ok_cuts = .true.
   logical, save :: ok_kin = .true., ok_lab = .true., ok_lepton = .true.
   real(dp), save :: cut_xmin, cut_xmax, cut_Q2min, cut_Q2max, cut_ymin, cut_ymax
+  ! per event: three-parton Born (3,1,0) and O(alphas^2) virtual (3,2,2) seen
+  logical, save :: ev_born = .false., ev_virt = .false., ok_finite = .true.
+  integer, save :: nborn_ev = 0, nborn_novirt = 0
 
 contains
 
@@ -35,7 +42,15 @@ contains
     real(dp) :: p2bbreit(0:3,4), p2blab(0:3,4), Qlab(0:3), escale
     integer :: i
 
-    if (n == 0) return
+    if (n == 0) then
+       if (ev_born) nborn_ev = nborn_ev + 1
+       if (ev_born .and. .not. ev_virt) nborn_novirt = nborn_novirt + 1
+       ev_born = .false.; ev_virt = .false.
+       return
+    endif
+    if (n == 3 .and. na == 1 .and. nt == 0) ev_born = .true.
+    if (n == 3 .and. na == 2 .and. nt == 2) ev_virt = .true.
+    ok_finite = ok_finite .and. all(abs(weight) <= huge(1.0_dp))
     ncalls(n) = ncalls(n) + 1
     escale = p(4,6) + p(4,1)
 
@@ -146,7 +161,7 @@ program test_disent_interface
   ymin = Q2min / (s * xmin); ymax = ymin
   call dis_cuts(s, cut_xmin, cut_xmax, cut_Q2min, cut_Q2max, cut_ymin, cut_ymax)
   cut_ymin = ymin; cut_ymax = ymax
-  ncalls = 0
+  ncalls = 0; nborn_ev = 0; nborn_novirt = 0
   call DISENTFULL(2000, s, 5, checking_user, dis_cuts, 12345, 67890, &
        & 2.0_dp, 4.0_dp, 1e-8_dp, 2, disent_muf, 4.0_dp/3.0_dp, 3.0_dp, &
        & 0.5_dp, .false.)
@@ -169,6 +184,9 @@ contains
     call check_true(tag//': Q2 = x y s and x <= eta <= 1', ok_kin)
     call check_true(tag//': lab frame beams and momentum conservation', ok_lab)
     call check_true(tag//': lab frame lepton same as in projected Born', ok_lepton)
+    call check_true(tag//': every Born handed over gets its O(alphas^2) virtual', &
+         & nborn_ev > 1000 .and. nborn_novirt == 0)
+    call check_true(tag//': all weights finite', ok_finite)
   end subroutine report
 
 end program test_disent_interface

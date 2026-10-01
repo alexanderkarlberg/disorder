@@ -684,3 +684,54 @@ With this, disorder's p2b O(αs²) event shapes agree with NNLOJET for:
 - Why it was not caught: CI runs only on pushes and PRs to main (and on the
   schedule), not on branches. The full ctest was not rerun after the banner
   commit went onto the branch before the merge.
+
+## 2026-10-01 — DISENT dropped the O(αs²) part of 0.5% of its events (branch 2026-10-disent-xcut)
+
+Found with the τ₂ slicing of NLO DIS 2+1 (branch 2026-10-tau-slicing, see its
+notebook entries of the same day). AK: fix it on a new branch.
+
+- **Mechanism.** `VIRTHR` samples the collinear momentum fraction X of the K
+  and P terms (`GENCOL(2,…)`) and then did `IF (1-X.LT.CUTOFF) RETURN 1`.
+  The alternate return ends the event, but the three-parton Born (NA = 1)
+  has already been given to `USER`. So for those events the virtual, the
+  collinear term, the real emission and its counter-events (all NA = 2) were
+  never computed.
+- **Rate.** `GENCOL` draws X = 1 − (1 − X_min) R^npow2 half of the time, so
+  P(1 − X < CUTOFF) = CUTOFF^(1/npow2)/2 = 0.5% for npow2 = 4 and CUTOFF = 1e-8
+  (disorder's defaults). Measured in the slicing runs: 0.49%.
+- **Consequence.** DISENT's O(αs²) result was low by about 0.5% of the
+  O(αs²) coefficient, a cutoff effect that falls only like CUTOFF^(1/4)
+  (1.6% at 1e-6, 0.16% at 1e-10). In P2B the O(αs²) 2+1 events and their
+  projections drop together, so the totals are unaffected and distributions
+  lose about 0.5% of their O(αs²) 2+1 part. The cutoff test of 2026-09-26
+  (1e-6 vs 1e-10) was not precise enough to see it.
+- **Not affected:** `VIRTWO` has the same check on its own X (`GENCOL(1,…)`,
+  npow1 = 2), but that X generates the 2+1 phase space and the abort comes
+  before the Born; it only cuts the x_p → 1 corner (probability 5e-5).
+- **Fix** (`src/libdisent.f`):
+  - `VIRTHR` no longer aborts: for 1 − X < CUTOFF it sets XJAC = 0 and stores
+    it (new entry `SETCOL` of `GENCOL`), and evaluates the X-sampled K and P
+    terms at a safe X. All of them are proportional to XJAC, while the δ(1−x)
+    terms and the virtual are kept. X can be exactly 1 (probability 5e-5), where
+    the plus terms would give 0·∞.
+  - `COLFOR` gets XJAC = 0, so its weight vanishes; the main loop no longer
+    hands that zero-weight configuration to `USER` (its parton 4 can have zero
+    momentum).
+  - `GENFOR`, initial-state-spectator branch (which reuses X): `RETURN 1`
+    when XJAC = 0. That dipole configuration is singular, like the ones its
+    existing z cuts drop.
+  - Remaining cutoff dependence: O(CUTOFF ln CUTOFF), independent of npow2,
+    at no extra CPU cost.
+- **Unit test** (`tests/test_disent_interface.f90`): every event whose Born
+  is handed over must also get its O(αs²) virtual, and all weights must be
+  finite. Negative control: with the old `libdisent.f` the new check fails in
+  both settings (33 of 35 checks), with the fix all 35 pass.
+- **Full ctest** (FastJet + exclusive analysis, g++ wrapper for the stale
+  `~/.local/include/fastjet`): 69 of 82 pass, including all unit and guard
+  tests, all inclusive validation runs and the two P2B NLO runs (no VIRTHR).
+  The 13 failures are exactly the P2B NNLO runs, and only their histogram files
+  (`disorder_*.dat`); every `xsct` total is unchanged. Previously aborted
+  events now draw their remaining random numbers, so the event stream changes.
+  Against the references χ²/n = 1.05 over 546 bins (central scale, both
+  errors), max |pull| 2.6. The references are not regenerated; to be decided
+  after review.
