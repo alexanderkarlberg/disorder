@@ -1031,7 +1031,7 @@ treated as independent, indicative):
 | fixed, CUTOFF 1e-6 (`cut-new-1e-6`, 100) | 0 | +0.02 ± 0.11 | +0.12 ± 0.16 | −0.32 ± 0.22 | 0.06 ± 0.04 |
 | fixed, CUTOFF 1e-8 (`cut-new-1e-8`, 100) | 0 | −0.00 ± 0.11 | +0.03 ± 0.16 | −0.10 ± 0.22 | 0.06 ± 0.04 |
 | fixed, CUTOFF 1e-10 (`cut-new-1e-10`, 100) | 0 | −0.02 ± 0.11 | −0.07 ± 0.16 | +0.17 ± 0.22 | 0.08 ± 0.04 |
-| fixed, Born with min s_ij(geo) < 0.01 removed (`edge-geo-s0.01`, 90) | 0 | see below | | | |
+| fixed, Born with min s_ij(geo) < 0.01 removed (`edge-geo-s0.01`, 90) | 0 | −0.05 ± 0.12 | −0.22 ± 0.17 | −0.10 ± 0.24 | 0.07 ± 0.05 |
 | invariant, fixed (`inv-qcd`, 90; for comparison) | 0 | −0.13 ± 0.11 | −0.06 ± 0.16 | +0.11 ± 0.22 | 0.12 ± 0.04 |
 
 The bias scales with the abort rate and vanishes with the fix at every
@@ -1117,3 +1117,22 @@ which their method makes cheap. This is the route for the NNLO soft function.
 **VBF (proVBFH notes for details).** Fixed-scale coefficient of the old
 code's missing initial-state region: B(≥3 jets) = (2.63 ± 0.01)e-4 pb per
 e-fold of k_T² (proVBFH-cs `cs_estimate 2`, `runs/estimate-coll-fixmh`).
+
+**Per channel, geometric, fixed DISENT** (`geofix-qQCD`, `geofix-gQCD`, 45 × 2M
+each), offset at 1e-4 / 3e-5 / 1e-5: quark +0.21 ± 0.17 / +0.24 ± 0.25 /
++0.12 ± 0.36 (the driver-drop set `fix-qQCD` had +1.23 ± 0.44 at 1e-5), gluon
++0.02 ± 0.22 / +0.33 ± 0.32 / +0.21 ± 0.45 (`fix-gQCD`: +1.92 ± 0.56).
+Born weight with geometric min s_ij < 1e-2 / 1e-3 / 1e-4: quark 2.5% / 0.42% /
+0.029%, gluon 7.2% / 0.76% / 0.019%.
+
+**Slopes, properly.** The slopes in the table above treat the τ_cut points as
+independent although they come from the same events. Fitting a slope per run
+(over τ_cut ≤ 5e-4) and taking the mean and its error over runs
+(scratchpad `slopes.py`): fixed DISENT, QCD total: cut-new 1e-6 / 1e-8 / 1e-10
+−0.01 ± 0.05 / +0.01 ± 0.05 / +0.07 ± 0.06, edge s_min 0.01 / 0.001
++0.03 ± 0.05 / +0.05 ± 0.06, invariant +0.11 ± 0.06, invariant with edge cut
+−0.05 ± 0.06; channels: geometric quark +0.09 ± 0.10, gluon +0.14 ± 0.12,
+invariant quark +0.03 ± 0.06, gluon +0.22 ± 0.10, abelian +0.11 ± 0.05. Driver
+drop: `fix-qcd` +0.25 ± 0.06, `cut-old-1e-6` +0.56 ± 0.06. All fixed-DISENT
+sets are consistent with no slope (largest pulls 2.3σ, gluon and abelian,
+among 14 sets); the driver-drop sets are 4σ and 9σ.
