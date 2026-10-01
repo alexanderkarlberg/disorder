@@ -71,3 +71,26 @@ and Q^2) gives in the same events
   (counter-events and collinear terms have tau_2 = 0 exactly);
 - below the cut: the three-parton Born reweighted with the cumulant.
 Observable: tau_zQ bins above 0.05. `tau2_combine.py` combines runs.
+
+## 1+1 at NNLO three ways: `nnlo11.f90`, `mcfm_lp/`, `nnlo11_ref.py`, `nnlo11_combine.py`
+
+One DISENT run (fixed x, Q^2) gives, for lab-frame jet observables of 1+1
+(anti-k_t R = 1, p_t > 5 GeV, -1 < eta < 2.5), the O(alpha_s^2) coefficient
+- by DISENT + P2B (DISENT's O(alpha_s^2) 2+1 weights minus their Born
+  projection, plus the inclusive part C2_incl O(Born) from hoppet),
+- by tau_2 slicing + P2B (the same with the 2+1 part sliced with the invariant
+  measure, absolute cuts or cuts relative to tau_1 of the Born),
+- by pure tau_1 slicing: tau_1 = min over partitions [2 x P.p(beam) + m^2(jet)]/Q^2
+  (recoil-free), DISENT's O(alpha_s^2) weights above the cut and the NNLO
+  leading-power cumulant below it.
+`nnlo11` needs DISENT's two-parton Born given to USER (`USER(2,0,0)`,
+commented out in `src/libdisent.f`): build a copy of the fixed DISENT with
+that call and link it instead of `libdisent.f.o`.
+`mcfm_lp/build.sh /path/to/MCFM-10.3` builds `dis_tau1_lp`, the NNLO
+leading-power cumulant (per Born, in (alpha_s/2pi)^k at mu = Q) from MCFM's
+0-jettiness pieces: beam = quark beam function, the second "beam" = quark jet
+function (MCFM's `jetq` is in alpha_s/4pi: J1/2, J2/4), soft = qqbar
+0-jettiness soft function (equal for DIS at O(alpha_s^2), arXiv:1501.04110),
+hard = `hardqq` at Qsq = -Q^2 (spacelike). Its NLO part equals the tau_1^a
+cumulant of `tau1b_nlo.py` to 2e-6. `nnlo11_ref.py`: the exact inclusive
+coefficients from hoppet. `nnlo11_combine.py` combines runs.
