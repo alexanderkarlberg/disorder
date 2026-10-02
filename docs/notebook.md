@@ -1367,3 +1367,19 @@ functions. Pitfalls: MCFM's `dot` clashes with DISENT's `DOT` (inlined);
 the four-quark routine has the leptons fixed in slots 3, 4; the
 identical-quark interference needs MCFM's own (phase-consistent)
 construction. Harnesses: `dis31/tests`.
+
+**me31: 3+1 trees with absolute normalisation (2 Oct, night).**
+`dis31/me31.f90`: |M|^2 for a given flavour assignment of the four partons
+(photon exchange), averaged over the incoming lepton and parton, in DISENT's
+MATFOR normalisation (α = 1/137, divided by (αs/2π)²), no final-state
+symmetry factors. Against MATFOR, summed over the labellings with 1/2 for
+identical pairs: ratio 1 to 7e-14 for every incoming flavour −5..5 (50
+random points; `dis31/tests/harness_me31.f90`, stops with an error above
+1e-10). The normalisation follows from MCFM's colour factors and the
+averages: |M|²/MATFOR = (αs/2π)² with α = 1/137.
+Timing (thA371a, one point): MATFOR 2.6 µs (all flavours, fixed labels);
+me31 41.6 µs for all 71 flavour assignments of one labelling, dominated by
+recomputing the spinor products 71 times and by amplitudes that differ
+only by charges. To do in the Born interface: spinors once per point,
+q g g, g → q q̄ g and the four-quark A, B once per labelling, charges
+afterwards.
