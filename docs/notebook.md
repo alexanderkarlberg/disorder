@@ -1516,3 +1516,27 @@ Tests (`dis31/tests/harness_born31.f90`):
 The initial-state q → g kernel is CF[−g x − 4(1−x)/x k⊥k⊥/k⊥²]: that sign
 of the k⊥ term is the one that matches the azimuthal dependence and, when
 averaged, gives CF(1 + (1−x)²)/x. To keep in mind for the IF dipoles.
+
+**CS dipoles for DIS 4+1 → 3+1 (2 Oct, night).** `dis31/dip41.f90`:
+`dip41_list` returns every dipole with its mapped Born momenta, flavours
+and value, ready for integration with a jet function on the mapped Born.
+- Types: FF D_{ij,k}, FI D_ij^a (the incoming parton as spectator), IF
+  D^{ai}_k (incoming q → q g, q → g q, g → q q̄, g → g g). No II dipoles
+  (one coloured incoming parton).
+- Formulas from CS section 5 at ε = 0. Colour and spin correlations come
+  from born31, with the spin vectors (z̃_i p_i − z̃_j p_j) and
+  (p_i/u − p_k/(1−u)). They are orthogonal to the Born gluon (checked
+  algebraically), as born31_sc requires.
+- Normalisation as me41: 8π α_s → 16π².
+
+Test (`dis31/tests/harness_dip41.f90`): me41 / Σ dipoles → 1, 3 random
+points, worst 1.9e-4 at the smallest parameter:
+- 11 final-state collinear limits at fixed azimuth (q ∥ g, g ∥ g,
+  Q ∥ Q̄, identical quarks, gluon-initiated);
+- 7 initial-state limits (q → q, q → g, q̄ → g, g → q, g → g);
+- 7 soft-gluon limits.
+Dipoles whose mapped Born is itself unresolved (an invariant below
+1e-3 W²) are left out, as in DISENT's test_subtraction. Their Born still
+holds the limit pair, and the jet function removes them in a calculation.
+My first run without that filter gave ratios around 0.5; that was the test
+set-up, not the dipoles.
