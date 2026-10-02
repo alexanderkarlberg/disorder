@@ -1267,3 +1267,16 @@ the 2+1 leading-power weights take 90%).
   error. For 2+1 the Born region is present in every bin, the soft function
   depends on the Born, and the above-cut NLO 3+1 must be numerically clean far
   below τ_cut (DISENT at 1e-8 is not below τ₁ ≈ 3e-5).
+- **Results for plotting** (AK asked, 2 Oct morning): every bin, method, cut,
+  order and DISENT cutoff of both points in
+  `slicing/results/nnlo11/nnlo11_results.csv` (long format: value, error,
+  difference to DISENT + P2B with its paired error), figures and
+  `plot_nnlo11.py` in the same directory: `nnlo11_<point>_jets` (C₂ per
+  leading-jet p_t and η bin, four methods, differences below),
+  `nnlo11_<point>_pulls[_cut1e-10]` (slicing + P2B minus DISENT + P2B for every
+  bin and cut), `nnlo11_pure_tau1_total` (pure τ₁ slicing, total, against
+  τ_cut for the three DISENT cutoffs). Bins: lab frame, anti-k_t R = 1, jets
+  with p_t > 5 GeV, −1 < η < 2.5; total, ≥ 1 jet, leading-jet p_t (5, 10, 14,
+  15, 16, 17, 20, 40 GeV at x = 0.01), leading-jet η (−1, −0.6, −0.4, −0.2, 0.2,
+  1, 2.5), ≥ 2 jets; at x = 0.05 the p_t edges scaled by 28.33/15.553 and the η
+  edges shifted by +1.293.
