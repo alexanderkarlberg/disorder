@@ -1446,3 +1446,33 @@ If MCFM's trees remain the bottleneck, consider our own helicity-summed
 trees with FORM (AK).
 Next: NNLOJET pointwise (B3g0Z/C1g0Z/D1g0Z) for the 4+1 trees, then
 colour- and spin-correlated 3+1 Borns and the CS dipoles.
+
+**3+1 and 4+1 trees against NNLOJET, pointwise (2 Oct, night).**
+Harnesses in `~/cernbox/disorder-comparisons/dis31_nnlojet` (outside the
+repository; README there). NNLOJET v1.0.2's public Z+partons functions,
+photon only (`igamma_proc = 1`), at the same random DIS momenta. Charge
+structure resolved into the e_q², e_Q², e_q e_Q coefficients (three charge
+assignments at the same momenta).
+- me31 four-quark (d → d u ū) against C0g0Z, as NNLOJET's DIS real calls it:
+  all three coefficients 1.000000000000. This is a third independent
+  confirmation of the corrected sign of the charge-odd term.
+- me41 against NNLOJET, all to 7e-14 including the absolute normalisation:
+  - q → q g g g and g → q q̄ g g (B3g0Z, Bt3g0Z, Btt3g0Z);
+  - d → d u ū g and g → d d̄ u ū (C1g0Z, Ct1g0Z, Ctt1g0Z; all three
+    coefficients);
+  - identical quarks d → d d d̄ g and g → d d̄ d d̄ (+ D1g0Z, Dt1g0Z).
+- One wrong turn on the way: I first took the colour weights from
+  NNLOJET's `FullC1g0Z` (+(Ct − Ctt)/N²) and found disagreements of tens of
+  percent. NNLOJET's DIS process uses −(Ct − Ctt)/N² (`qcdnormDIS.f`), and
+  with that everything agrees. Other pitfalls are listed in the README:
+  the `astore` amplitude cache, quark types in /CZFlav/, and NNLOJET's
+  pair-slot order.
+- NNLOJET's DIS symmetrises its incoming-quark four-quark channels over
+  Q ↔ Q̄ (sC1g0Z), which drops the charge-odd term. That is fine for
+  flavour-blind observables.
+Status: the photon-exchange trees for DIS 3+1 and 4+1 (me31, me41) are
+validated pointwise in every channel by three independent references:
+- Feynman diagrams (3+1 four-quark);
+- DISENT's MATFOR (3+1, symmetrised);
+- NNLOJET (3+1 four-quark, all of 4+1);
+plus all single-collinear limits 4+1 → 3+1.
