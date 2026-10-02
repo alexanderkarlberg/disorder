@@ -13,6 +13,18 @@ all-incoming convention). Changes are marked with "disorder (date)":
   `msq_ZqqQQg` and `makemb` (with `makem` inlined); the charges of the two
   quark lines are arguments instead of the electroweak common blocks.
 
+- `loop/`: the one-loop amplitudes of Bern, Dixon, Kosower for q qbar g g + V
+  (hep-ph/9708239) and q qbar Q Qbar + V (hep-ph/9610370) as in MCFM 10.3
+  (`src/BDK`, `src/W2jet`, `src/Wbb`, `src/Z2jet`, `src/Need/lnrat.f`,
+  `lib/SpecialFunctions/ddilog.f`, `dclaus.f`; 51 files, the dependency
+  closure of the routines used, found from MCFM's object files), plus
+  `loop/xzqqgg_wrappers.f` (helicity wrappers from `src/Zbb/xzqqgg*.f`).
+  Changed: `a6routine.f` and `a61g.f` stop instead of calling the exact
+  top-loop routines (not ported; we use toploops = none, n_f = 5).
+  Includes added: `epinv.f`, `epinv2.f` (MCFM's poles: epinv = epinv2 =
+  1/eps, double pole epinv*epinv2), `heldefs.f`, `scale.f`, `toploops.f`,
+  `masses.f`.
+
 Routines:
 - 3+1: `z2jetsq.f` (+ `storecsz.f`, `subqcd.f`): q qbar g g; `ampqqb_qqb.f`,
   `aqqb_zbb.f` (`src/Zbb`): q qbar Q Qbar. The four-quark routine takes the
@@ -63,6 +75,15 @@ incoming antiquark q1 = the incoming antiquark, qb2 = the outgoing one, q3 =
 the pair quark), and the identical-quark exchange E = -(MCFM's exchange
 amplitude) in this basis.
 
+One loop (`virt31`): q qbar g g from `a6treeg1`, `a61g1lc`, `a61g1slc`,
+`a61g1nf`, `a63g1` with xzqqgg_v's colour weights (colourchoice 0), MCFM
+labels 1 = outgoing quark, 2, 3 = gluons, 4 = -incoming quark (or the
+outgoing antiquark), 5 = outgoing lepton, 6 = -incoming lepton; four quarks
+from `atreez`, `a61z`, `a62z` as qqb_z2jet_v's q q channel, MCFM slots
+1 = -incoming quark, 5 = outgoing quark of that line, 2 = the pair's
+antiquark, 6 = its quark (identical quarks: 5 <-> 6). The vector-loop
+(a63z, a64v) and axial pieces vanish for the photon and are left out.
+
 ## Checks (`../tests`, 2 Oct 2026)
 
 - me31 against DISENT's MATFOR (`harness_me31`), summed over the
@@ -84,3 +105,11 @@ amplitude) in this basis.
 - me41 against me31 in single-collinear limits (`harness_lim41`): final-state
   q||g, g||g, g -> q qbar, initial-state q -> q g, g -> q qbar, all channels;
   ratio 1 to < 5e-4 at y = 1e-10, approaching 1 linearly in y.
+- virt31 (`harness_virt31`), nine channels, two scales: tree = me31
+  (2e-14); double pole -sum_i C_i |M0|^2 (3e-14); single pole of the
+  renormalised virtual = the I-operator prediction with born31's T_i.T_k
+  (7e-13). Finite part against NNLOJET v1.0.2 (outside the repository,
+  `~/cernbox/disorder-comparisons/dis31_nnlojet`): equal up to
+  (pi^2/12) sum_i C_i |M0|^2 (NNLOJET's normalisation) in q -> q g g,
+  g -> q qbar g, four quarks (all charge structures) and identical quarks,
+  at two scales.

@@ -1540,3 +1540,46 @@ Dipoles whose mapped Born is itself unresolved (an invariant below
 holds the limit pair, and the jet function removes them in a calculation.
 My first run without that filter gave ratios around 0.5; that was the test
 set-up, not the dipoles.
+
+**3+1 one loop (3 Oct, early morning).** `dis31/virt31.f90` with the BDK
+one-loop amplitudes ported from MCFM 10.3 (`dis31/mcfm/loop`).
+- The 51 source files are the dependency closure of the routines used,
+  computed from MCFM's object files.
+- Left out: the exact top loops, and the boson-on-loop (vector and axial)
+  pieces. The latter vanish for a photon by Furry's theorem: γ*gg through a
+  quark loop has the symmetric colour factor Tr(T^a T^b).
+- MCFM's pole convention is epinv = epinv2 = 1/ε, with the double pole
+  given by epinv·epinv2. The Laurent coefficients come from evaluating at
+  1/ε = 0, 1, −1. My first extraction set epinv2 = 1/ε² and gave a zero
+  double pole.
+
+`virt31_ren` returns 2Re⟨M0|M1⟩ renormalised in MS-bar, in the HV scheme,
+with (4π)^ε/Γ(1−ε) factored out (CS's normalisation), for n_f = 5.
+
+Checks:
+- tree = me31 in every channel;
+- the poles are those of −⟨I⟩: the double pole −Σ_i C_i|M0|², and the
+  single pole Σ⟨T_i·T_k⟩ ln(μ²/2p_i·p_k) − Σ_i γ_i|M0|² with born31's
+  colour correlations; nine channels, two scales, ≤ 7e-13
+  (`tests/harness_virt31`).
+- Finite part against NNLOJET's one-loop functions, using its DIS
+  real-virtual colour weights (qcdnormDIS): all channels (q → q g g,
+  g → q q̄ g, four quarks with each charge structure, identical quarks) at
+  μ² = 130 and 500. Ours − NNLOJET is one constant × tree per channel type:
+  −(π²/12)ΣC_i + C_F (q q̄ g g) and −(π²/12)ΣC_i + 2C_F (four quarks).
+  - The π² term is NNLOJET's normalisation (e^{−γε}-type instead of
+    1/Γ(1−ε)); its code comment calls this "a correction for C(ε)".
+  - The rest is the scheme conversion of MCFM's raw output. FDH → HV is
+    −Σγ̃_i with γ̃_q = C_F/2, γ̃_g = C_A/6. For q q̄ g g the DRED → MS-bar
+    coupling conversion (+N/3) is still to be applied (MCFM does it in
+    qqb_z2jet_v's subuv); a6routine has already applied it for four quarks.
+  - Net conversions in virt31_ren: q q̄ g g −C_F × tree (and the UV pole
+    −2β₀/ε), four quarks −2C_F × tree. Two independent channel types fix
+    γ̃_q and γ̃_g consistently.
+- Harnesses for the NNLOJET comparison:
+  `~/cernbox/disorder-comparisons/dis31_nnlojet/harness_v31{,q}.f90`.
+
+This completes the matrix-element ingredients of NLO 3+1: trees (me31,
+me41), correlated Borns (born31), dipoles (dip41) and one loop (virt31).
+Still to do: I, K, P (the integrated dipoles, from CS with born31's
+correlations), the 3+1 phase space and the integration.
