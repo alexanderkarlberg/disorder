@@ -1,0 +1,47 @@
+! NNLOJET v1.0.2 runcard for the validation of dis31's NLO 3+1 (nlo31):
+! e p -> e + >= 3 jets, photon exchange, alpha = 1/137, set-up identical
+! to nlo31.f90. CHANNEL: R gives the LO 3-jet cross section (= nlo31 lo);
+! RV + RR give the NLO 3-jet correction (= nlo31 vi + kp + r).
+! Do NOT add 'dis_frame = BREIT': in this NNLOJET build it gives zero (R)
+! or NaN (RV); the DIS process clusters in the Breit frame by default.
+! Do NOT use 'beam1 = EM beam2 = P ...': it gives zero; use 'collider = ep'.
+! NNLOJET histograms are dsigma/dQ^2 in fb/GeV^2; nlo31 prints sigma per
+! bin in pb.
+PROCESS epLJJ
+  collider = ep    Ebeam1 = 27.5  Ebeam2 = 920
+  jet = kt[1.0]  jet_exclusive = .false.  jet_recomb = V4
+  V_NC = GAMMA
+END_PROCESS
+
+RUN nlo3j
+  PDF = NNPDF30_nlo_as_0118[0]
+  iseed = SEED
+  warmup = WARMUP
+  production = PRODUCTION
+END_RUN
+
+PARAMETERS
+  MASS[Z] = 91.1876
+  MASS[W] = 80.398
+  SCHEME[ALPHA] = FIX
+  alpha = 0.0072992700729927
+END_PARAMETERS
+
+SELECTORS
+  select q2 min = 150 max = 15000
+  select y min = 0.1 max = 0.9
+  select jets_pt min = 5
+  select njets min = 3
+END_SELECTORS
+
+HISTOGRAMS
+  q2 [150,200,300,500,1000,3000,15000]
+END_HISTOGRAMS
+
+SCALES
+  mur = 1.0 * q   muf = 1.0 * q
+END_SCALES
+
+CHANNELS
+  CHANNEL
+END_CHANNELS

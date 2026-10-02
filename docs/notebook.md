@@ -1606,3 +1606,51 @@ Tests (`tests/harness_iop31`, nine channels, two scales):
 - for four quarks G/B = −2 exactly.
 Not yet tested: K + P against an integrated real minus dipoles, which needs
 the phase-space integration (next).
+
+**NLO 3+1 integrated: first results and LO validation (3 Oct, night).**
+AK: "Keep working over night and see if you can finish the 3+1 NLO … if
+you hit [the cluster] point you can stop and write instructions."
+
+`dis31/nlo31.f90`: an integrator for σ(e p → e + ≥ 3 jets) at LO and NLO
+(photon exchange).
+- Breit-frame phase space: Q² (log), y, η (log), the hadronic system by
+  sequential two-body decays.
+- Inclusive kt jets (R = 1, E-scheme) in the Breit frame; our own VEGAS.
+- Parts: lo, vi = V + I, kp = K + P (x-convolution with the
+  plus-distribution integrals below ξ done analytically), r = R − Σ
+  dipoles, with each dipole's jet function on its mapped Born.
+- The flavour sums use that all pieces are bilinear in the quark charges
+  and C-symmetric. Per point there are 1–3 evaluations per channel
+  topology instead of about 65 (Born) and 80 (real) assignments; checked
+  against the explicit sums to 1e-12 (`nlo31 chk`).
+- `virt31_finite_only` evaluates only the finite part in production:
+  identical result, 2.8 times faster.
+- Standalone build: `dis31/build_nlo31.sh`.
+
+Set-up (as NNLOJET's epLJJ runcard `dis31/validation/nnlojet_epLJJ_3j.run`):
+27.5 × 920 GeV, photon, α = 1/137, 150 < Q² < 15000, 0.1 < y < 0.9,
+p_T,jet > 5 GeV, ≥ 3 jets, μ_R = μ_F = Q, NNPDF30_nlo_as_0118.
+
+| | nlo31 [pb] | NNLOJET [pb] |
+|---|---|---|
+| LO | 84.852 ± 0.092 | 84.739 ± 0.099 (R channel, 10 M points) |
+| V + I | 28.881 ± 0.072 | |
+| K + P | 31.092 ± 0.035 | |
+| R − dipoles | −30.025 ± 0.455 (4 seeds × 6 M) | |
+| NLO correction | 29.95 ± 0.46 (K = 1.353) | RV + RR: needs the cluster |
+
+LO agrees: 0.8σ in total, and every Q² bin within about 0.5%. This tests
+the normalisation, phase space, jets and cuts. Pointwise checks added in
+`tests/harness_iop31`: the renormalisation-group structure of V + I
+(2β₀ ln μ² |M0|² at fixed α_s, 7e-14).
+
+NNLOJET pitfalls found (also in the runcard header):
+- `dis_frame = BREIT` gives zero (R) or NaN (RV) in v1.0.2. It also calls
+  setfixT(.false.), and the DIS process clusters in the Breit frame by
+  default anyway.
+- `beam1 = EM beam2 = P …` gives zero for epLJJ; `collider = ep` works.
+
+NNLOJET's RV converges (≈ 56 pb; its antenna terms distribute differently
+from ours, so only RV + RR compares). Its RR is very slow (≈ 0.1 s per point
+on a loaded core), so the reference needs the cluster:
+`dis31/validation/CLUSTER-INSTRUCTIONS.md`.
