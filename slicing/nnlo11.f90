@@ -31,6 +31,7 @@ module nnlo11_run
   use types, only: dp
   use mod_slicing_scet
   use tau2_run, only: xfix, Q2fix, measure, sdis, tau2_of, lp21_weights, nb
+  use sub_defs_io, only: log_val_opt
   implicit none
   integer, parameter :: nb11 = 16, nt1 = 9, nt2 = 11
   real(dp), parameter :: tc1(nt1) = [1e-1_dp, 3e-2_dp, 1e-2_dp, 3e-3_dp, 1e-3_dp, 3e-4_dp, 1e-4_dp, 3e-5_dp, 1e-5_dp]
@@ -38,8 +39,11 @@ module nnlo11_run
   real(dp), parameter :: tc2(nt2) = [1e-2_dp, 1e-3_dp, 1e-4_dp, 1e-5_dp, &
        & 1e-1_dp, 3e-2_dp, 1e-2_dp, 3e-3_dp, 1e-3_dp, 3e-4_dp, 1e-4_dp]
   logical, parameter :: rel2(nt2) = [.false., .false., .false., .false., .true., .true., .true., .true., .true., .true., .true.]
-  real(dp), parameter :: ptedge(8) = [5.0_dp, 10.0_dp, 14.0_dp, 15.0_dp, 16.0_dp, 17.0_dp, 20.0_dp, 40.0_dp]
-  real(dp), parameter :: etaedge(7) = [-1.0_dp, -0.6_dp, -0.4_dp, -0.2_dp, 0.2_dp, 1.0_dp, 2.5_dp]
+  ! bin edges for x = 0.01, Q^2 = 400 (Born jet p_t = 15.553 GeV, eta = -0.3353);
+  ! with -relbins they are scaled (p_t) and shifted (eta) to the Born jet of the
+  ! run's x and Q^2 (the jet cuts p_t > 5, -1 < eta < 2.5 stay fixed)
+  real(dp), save :: ptedge(8) = [5.0_dp, 10.0_dp, 14.0_dp, 15.0_dp, 16.0_dp, 17.0_dp, 20.0_dp, 40.0_dp]
+  real(dp), save :: etaedge(7) = [-1.0_dp, -0.6_dp, -0.4_dp, -0.2_dp, 0.2_dp, 1.0_dp, 2.5_dp]
   real(dp), parameter :: ptjmin = 5.0_dp, etamin = -1.0_dp, etamax = 2.5_dp, Rjet = 1.0_dp
   real(dp), save :: Ep = 920.0_dp, Ylab = 0, t1min = 1e-7_dp
   ! diagnostics: number and CPU time of the below-cut (LP) evaluations
@@ -298,6 +302,22 @@ contains
     enddo
   end subroutine report11
 
+  ! Born jet (struck quark) in the lab: p_t = Q sqrt(1-y), eta from E and p_z
+  subroutine relative_bins(s)
+    real(dp), intent(in) :: s
+    real(dp) :: Ee, y, Q, Eep, ptB, pze, Eq, pzq, etaB
+    Ee = s / (4 * Ep); Q = sqrt(Q2fix); y = Q2fix / (xfix * s)
+    Eep = Ee * (1 - y) + xfix * y * Ep
+    ptB = Q * sqrt(1 - y)
+    pze = -sqrt(max(Eep**2 - ptB**2, 0.0_dp))
+    Eq = xfix * Ep + Ee - Eep; pzq = xfix * Ep - Ee - pze
+    etaB = 0.5_dp * log((Eq + pzq) / (Eq - pzq))
+    ptedge(2:8) = ptedge(2:8) * ptB / 15.553_dp
+    etaedge(2:6) = etaedge(2:6) + (etaB - (-0.3353_dp))
+    write(*,'(a,f9.4,a,f8.4,a,8f8.3,a,7f8.3)') ' relative bins: Born jet p_t ', ptB, ' eta ', etaB, &
+         & '  p_t edges ', ptedge, '  eta edges ', etaedge
+  end subroutine relative_bins
+
 end module nnlo11_run
 
 program nnlo11
@@ -329,6 +349,7 @@ program nnlo11
   cutoff = dble_val_opt('-cutoff', 1e-8_dp)
   measure = 1                                    ! invariant tau_2 measure for the slicing
   Ylab = 0.5_dp * log(Ep / (s / (4 * Ep)))       ! lab rapidity of the (P + k) rest frame
+  if (log_val_opt('-relbins')) call relative_bins(s)
   call scet_set_colour(4.0_dp/3.0_dp, 3.0_dp, 0.5_dp)
 
   nflav = 5; NC = .true.; CC = .false.; noZ = .true.; Zonly = .false.
