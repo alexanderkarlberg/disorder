@@ -2,13 +2,16 @@
 !  - the poles of <I(eps)> cancel those of virt31_ren (all channels, two
 !    scales);
 !  - P: d lp/d ln muf^2 = -|M_b|^2 (colour conservation, CS eq. 8.42);
+!  - renormalisation-group structure: at fixed alpha_s, the finite part of
+!    V + I changes with the scale as 2 beta0 ln(mu1^2/mu2^2) |M0|^2;
 !  - V + I finite part printed per channel (for the record).
 program harness_iop31
   use virt31
   use iop31
   implicit none
   integer, parameter :: dp = kind(1.0d0)
-  real(dp) :: P3(4,7), r(8), v(-2:0), t, iv(-2:0), mu2, worst(3), b, g, lp1, lp2
+  real(dp) :: P3(4,7), r(8), v(-2:0), t, iv(-2:0), mu2, worst(4), b, g, lp1, lp2, v2(-2:0), iv2(-2:0)
+  real(dp), parameter :: b0 = (11*3.0_dp - 2*5)/6
   integer :: ipt, ic, imu
   integer, parameter :: nfl = 9
   integer, parameter :: fls(4,nfl) = reshape([2,2,0,0, -1,-1,0,0, 0,1,-1,0, 0,2,-2,0, 1,1,2,-2, &
@@ -26,12 +29,15 @@ program harness_iop31
            call iop31_kp(P3, fls(:,ic), mu2, b, g, lp1)
            call iop31_kp(P3, fls(:,ic), mu2*exp(0.1_dp), b, g, lp2)
            worst(3) = max(worst(3), abs((lp2 - lp1)/0.1_dp + b)/b)
+           call virt31_ren(P3, fls(:,ic), 3*mu2, v2, t)
+           call iop31_i(P3, fls(:,ic), 3*mu2, iv2)
+           worst(4) = max(worst(4), abs((v2(0) + iv2(0)) - (v(0) + iv(0)) - 2*b0*log(3.0_dp)*t)/t)
            if (ipt == 1 .and. imu == 1) write(*,'(a,4i3,a,f12.6,a,2f12.6)') ' fl', fls(:,ic), &
                 & '  (V + I)/tree finite:', (v(0) + iv(0))/t, '   g/b, lp/b:', g/b, lp1/b
         enddo
      enddo
   enddo
-  write(*,'(a,3es10.2)') ' largest |V + I| poles (1/eps^2, 1/eps) per tree, dlp/dln muf^2 + b:', worst
+  write(*,'(a,4es10.2)') ' largest |V + I| poles (1/eps^2, 1/eps) per tree, dlp/dln muf^2 + b, RG:', worst
   if (any(worst > 1d-10)) stop 1
 contains
   subroutine dis_point(r, P)
