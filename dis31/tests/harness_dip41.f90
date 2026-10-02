@@ -21,10 +21,16 @@ program harness_dip41
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884197_dp
   real(dp) :: P3(4,7), r(8), worst
   integer :: ipt
+  call seed_rng()
   worst = 0
   do ipt = 1, 3
-     call random_number(r)
-     call dis_point(r, P3)
+     ! a resolved 3+1 point (all 2 p_i.p_j above 2% of W^2), as a jet
+     ! function would require; near-singular Borns converge slowly
+     do
+        call random_number(r)
+        call dis_point(r, P3)
+        if (resolved3(P3, 0.02_dp)) exit
+     enddo
      write(*,'(a,i2)') ' point', ipt
      ! final-state collinear: Born slot i split into i and 5, spectator k
      call ffc('q;qggg   q||g ', P3, 2, 3, [2,2,0,0,0], 0.3_dp, 0.0_dp)
@@ -59,6 +65,35 @@ program harness_dip41
   if (worst > 2d-3) stop 1
 
 contains
+
+  logical function resolved3(P3, frac)
+    real(dp), intent(in) :: P3(4,7), frac
+    real(dp) :: W2, smin
+    integer :: i, j
+    W2 = mdot(P3(:,1) + P3(:,5), P3(:,1) + P3(:,5))
+    smin = huge(1.0_dp)
+    do i = 1, 4
+       do j = i + 1, 4
+          smin = min(smin, 2*abs(mdot(P3(:,i), P3(:,j))))
+       enddo
+    enddo
+    resolved3 = smin > frac*W2
+  end function resolved3
+
+  ! reproducible random points: fixed seed, optionally shifted by the first
+  ! command-line argument
+  subroutine seed_rng()
+    integer :: nseed, off, m
+    integer, allocatable :: seed(:)
+    character(32) :: arg
+    off = 0
+    if (command_argument_count() > 0) then
+       call get_command_argument(1, arg); read(arg, *) off
+    endif
+    call random_seed(size=nseed); allocate(seed(nseed))
+    seed = [(4711 + 7919*off + 104729*m, m = 1, nseed)]
+    call random_seed(put=seed)
+  end subroutine seed_rng
 
   real(dp) function dsum(P4, fl4)
     real(dp), intent(in) :: P4(4,8)
