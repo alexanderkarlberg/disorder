@@ -1217,7 +1217,8 @@ the 2+1 leading-power weights take 90%).
   fluctuation (1e-10: −0.011 ± 0.043, −0.005 ± 0.084, +0.29 ± 0.15 at 1e-3,
   3e-4, 1e-4).
 - **DISENT + P2B itself is cutoff independent** within the statistics: 1e-10
-  vs 1e-8 largest pull 1.9σ in 16 bins; 1e-6 vs 1e-8 3.0σ in the Born p_t bin
+  vs 1e-8 largest pull 1.9σ in 16 bins (final: χ² = 18.9/15 at O(αs²), largest
+  NLO pull 1.6σ); 1e-6 vs 1e-8 3.0σ in the Born p_t bin
   but not monotonic (1e-10 is on the same side as 1e-6). disorder's default
   1e-8 is fine for P2B; the subtraction integrand (O − O_proj) suppresses the
   near-1+1 region where the cutoff acts.
