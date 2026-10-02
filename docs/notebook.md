@@ -1144,3 +1144,125 @@ consistent with no slope, but had left out the C_A = 0 quark set (`inv-qA0`):
 mismatch for the invariant sets, which converge from below; the offsets at
 3e-5 and 1e-5 are all consistent with zero. The driver-drop sets rise
 monotonically and cross zero (4σ and 9σ slopes, offsets +1.1 and +3.1 at 1e-5).
+
+## 2026-10-02 (night) — NNLO DIS 1+1 three ways (AK: slicing+P2B, pure slicing, DISENT+P2B)
+
+Purpose (AK): judge how realistic NNLO 2+1 by slicing and N3LO 1+1 by
+slicing+P2B are, from the analogue one order lower.
+
+**Set-up** (`slicing/nnlo11.f90`, commit 3c595f2; x = 0.01, Q² = 400,
+√s = 318 GeV, photon exchange, μ_R = μ_F = Q, NNPDF30_nlo_as_0118). One DISENT
+run (fixed DISENT plus its two-parton Born given to USER, scratch copy
+`libdisent_born.f`) gives for lab-frame jet observables (anti-k_t R = 1,
+p_t > 5 GeV, −1 < η < 2.5; Born jet p_t = 15.55 GeV, η = −0.335; bins: total,
+≥ 1 jet, leading-jet p_t and η, ≥ 2 jets) the O(αs²) coefficient per Born:
+1. DISENT + P2B: DISENT's O(αs²) 2+1 weights minus their Born projection, plus
+   C₂^incl O(Born) from hoppet (C₂^incl = −34.2727, C₁^incl = −2.49506 per Born
+   in (αs/2π)^k, stable to 4e-5 in the grid; `nnlo11_ref.py`);
+2. τ₂ slicing + P2B: the same with the 2+1 part sliced (invariant measure),
+   absolute cuts τ₂ > c or relative cuts τ₂ > ρ τ₁;
+3. pure τ₁ slicing: τ₁ = min over partitions [2x P·p(beam) + m²(jet)]/Q²
+   (recoil-free, thrust-like at leading power), DISENT's O(αs²) 2+1 weights with
+   τ₁ > τ_cut plus the NNLO leading-power cumulant times the Born.
+
+**NNLO leading-power cumulant** (`slicing/mcfm_lp/`): MCFM 10.3's 0-jettiness
+pieces with the DY structure: beam a = quark beam function (xbeam1bis/xbeam2bis,
+z-integrated with adaptive Gauss–Kronrod, e_q² weighted), "beam b" = quark jet
+function (MCFM's `jetq` is in αs/4π: its own 1-jettiness assembly uses J1/2,
+J2/4 — my first version missed this and had half the double log), soft = qq̄
+0-jettiness soft function (equal to the DIS hemisphere soft function at
+O(αs²), Kang–Labun–Lee 1501.04110), hard = `hardqq` at Qsq = −Q² (real logs:
+the spacelike form factor). Q_B = Q_J = Q, so L = ln τ_cut at μ = Q. Check: the
+NLO part equals the τ₁ᵃ cumulant of `tau1b_nlo.py` (validated deterministically
+on 1 Oct) to 2e-6 relative at τ_cut = 1e-1 … 1e-6.
+
+**Production**: 240 × 2M events (thservs, nice 10, 24 CPU-min per job, of which
+the 2+1 leading-power weights take 90%).
+
+**Findings** (240 runs unless stated; per Born, (αs/2π)²):
+- Slicing + P2B against DISENT + P2B (difference with paired errors), largest
+  pull over the 15 non-trivial bins: absolute τ₂ > 1e-4: 4.5σ (p_t 16–17),
+  1e-5: 2.9σ (1.1σ with CUTOFF 1e-10); relative ρ = 3e-3: 2.2σ (3.3σ in one
+  bin of the 1e-10 sample), 1e-3: 1.1σ; with CUTOFF 1e-10 also ρ = 3e-4, 1e-4
+  (2.1σ, 1.7σ). (About 165 comparisons, so a few pulls above 2σ are expected.)
+  The errors of the difference are 0.1–6 per Born where DISENT + P2B has
+  0.01–0.6. Larger cuts show power corrections, largest next
+  to the Born p_t (abs 1e-3: −38, −56 in the p_t 14–15, 16–17 bins; ρ = 3e-2:
+  −17, −27). Smaller relative cuts (ρ ≤ 3e-4, i.e. absolute cuts down to 1e-7
+  and below for small τ₁) drift (Born p_t bin +28 (3.4σ) and +83 (7.7σ)).
+- Pure τ₁ slicing, total (exact −34.27): power corrections +25 to +31 at
+  τ_cut = 1e-1 … 1e-2 (80–90% of C₂), consistent at 1e-3 (+3 ± 10), then
+  +41 ± 24, +43 ± 50, +364 ± 119, +1357 ± 225 at 3e-4 … 1e-5. Slice by slice
+  (leading power vs DISENT above the cut) the mismatch switches on below 1e-4
+  and grows roughly like 1/τ₁ (≈ 0.014/τ₁ per Born), which no wrong log
+  coefficient can produce (it would show at 1e-3, where the result agrees to
+  ±10). The variance errors agree with the run-to-run scatter and the medians
+  with the means (no heavy tails). NLO, same events: −2.540 ± 0.030 at 1e-3,
+  −2.76 ± 0.10 at 1e-4 against −2.4951 (2.4σ); the slice 1e-5…3e-5 agrees
+  at NLO (−0.14 ± 0.3). Hypothesis: a DISENT technical cutoff (CUTOFF = 1e-8)
+  effect relative to τ₁.
+- **Cutoff test (confirmed).** Same set-up with CUTOFF 1e-6 (30 runs) and
+  1e-10 (90 runs); pure τ₁ slicing, total, minus exact at τ_cut = 3e-4 / 1e-4 /
+  3e-5 / 1e-5: 1e-6: +253 ± 50 / +802 ± 110 / +2562 ± 214 / +5279 ± 401;
+  1e-8 (240 runs, final): +28 ± 21 / +29 ± 44 / +401 ± 103 / +1330 ± 196;
+  1e-10: +48 ± 37 / −31 ± 81 / +103 ± 247 / −400 ± 429 (and +14.7 ± 13.9 at
+  1e-3). Slicing + P2B, Born p_t bin, relative cut ρ = 1e-4: +2063 ± 20,
+  +85 ± 10, +11.5 ± 16.7. The deviation grows roughly like CUTOFF^(1/4)
+  (factor ≈ 4 at 1e-5 from 1e-8 to 1e-6), the scaling of a sampling
+  probability: most likely DISENT's z and x cuts in GENFOR/COLFOR (events
+  whose real emission falls in the cut region lose it), which matter once the
+  slicing variable gets close to the region they remove. With 1e-10 pure τ₁
+  slicing is consistent with the exact NNLO total at every τ_cut ≤ 1e-3, and
+  slicing + P2B agrees down to ρ = 1e-4. The NLO trend at 1e-8 was a
+  fluctuation (1e-10: −0.011 ± 0.043, −0.005 ± 0.084, +0.29 ± 0.15 at 1e-3,
+  3e-4, 1e-4).
+- **DISENT + P2B itself is cutoff independent** within the statistics: 1e-10
+  vs 1e-8 largest pull 1.9σ in 16 bins; 1e-6 vs 1e-8 3.0σ in the Born p_t bin
+  but not monotonic (1e-10 is on the same side as 1e-6). disorder's default
+  1e-8 is fine for P2B; the subtraction integrand (O − O_proj) suppresses the
+  near-1+1 region where the cutoff acts.
+- The τ₁ < 1e-7 skip of the 2+1 leading-power weights has no effect (same
+  seeds with 1e-7 and 1e-10: identical sums, the same 156273 evaluations).
+- Pure τ₁ slicing in fiducial bins: bins whose τ₁ range lies above the cut are
+  DISENT exactly; bins next to the Born p_t have large fiducial power
+  corrections (+48, +72 at 1e-3, +13, +25 at 3e-4: the leading power puts all
+  events below the cut at the Born kinematics).
+- **Cost** (errors per Born from 240 × 2M events): DISENT + P2B 0.006 (≥ 1
+  jet), 0.59 (Born p_t bin), 0.31, 0.23, 0.13, 0.10 (p_t 16–17, Born η bin,
+  η −0.2…0.2, ≥ 2 jets); slicing + P2B with τ₂ > 1e-4: 0.040, 2.2, 1.2, 1.4,
+  0.94, 0.83; with ρ = 1e-3: 0.060, 5.3, 3.8, 2.1, 1.04, 0.74; pure τ₁ at 1e-3:
+  8.7 in every bin that contains the Born, DISENT's errors elsewhere. So slicing
+  + P2B needs 15–150× the events of DISENT + P2B for the same error, plus the
+  leading-power CPU (now about 10× DISENT per event, mostly the soft-function
+  angular integrals; tabulable on a two-dimensional grid).
+
+- **Second kinematic point** x = 0.05, Q² = 1000 (`nnlo11 -relbins`, commit
+  11d2796: p_t bins scaled and η bins shifted to the Born jet, p_t = 28.3 GeV,
+  η = 0.96; jet cuts unchanged; DISENT CUTOFF 1e-10; 180 × 2M). hoppet:
+  C₂ = −13.7365, C₁ = −2.23893 (dy = 0.05 was off by 0.2% here; converged at
+  dy ≤ 0.0125; x = 0.01 unchanged). Slicing + P2B, largest pull over 15 bins:
+  τ₂ > 1e-5: 1.8σ; ρ = 3e-4, 1e-4: 1.6σ, 1.5σ; ρ = 1e-3: 2.8σ (≥ 2 jets, four
+  bins above 2σ); ρ = 3e-3: 7.2σ; τ₂ > 1e-4: 6.8σ. So the relative cut is not
+  uniformly better: for 2+1 configurations with large τ₁ it is looser in
+  absolute terms than τ₂ = 1e-5. Pure τ₁ slicing, total − exact: +12.3, +14.9,
+  +10.6 ± 1.3 at 1e-1, 3e-2, 1e-2 (about 100% of C₂), +6.4 ± 4.0 at 3e-3,
+  −23.5 ± 10.4 at 1e-3 (2.3σ), consistent below (−1.5 ± 22.4, −6.6 ± 49.3,
+  −55 ± 126, −290 ± 266). NLO converges (+0.007 ± 0.007 at 1e-2).
+- Page: https://claude.ai/artifact/GD64FDm4dLzUzoYRrHf7Ao (version 4).
+
+**What it says** (AK's question):
+- N3LO 1+1 by slicing + P2B: the one-order-lower analogue works. The sliced
+  NLO 2+1 inside P2B reproduces the subtraction result in all bins at both
+  points with τ₂ > 1e-5 (or ρ ≲ 3e-4 with DISENT's cutoff at 1e-10), at 4–12×
+  the statistical error. The N3LO version needs
+  the NNLO 2+1 part by τ₂ slicing (two-loop γ*qg hard function, NNLO beam, jet
+  and three-direction soft functions, and an NLO 3+1 calculation above the
+  cut), but inside P2B it is an N3LO correction and needs much less relative
+  precision.
+- NNLO 2+1 by pure slicing: hard. Already for 1+1 the NNLO power corrections
+  are 75–90% of C₂ at τ_cut ~ 1e-2, the fiducial ones next to the Born are
+  larger (+48, +72 per Born at 1e-3), and at 1e-3 the cancellation against the
+  leading power costs 15× (Born p_t bin) to 1400× (≥ 1 jet) the subtraction
+  error. For 2+1 the Born region is present in every bin, the soft function
+  depends on the Born, and the above-cut NLO 3+1 must be numerically clean far
+  below τ_cut (DISENT at 1e-8 is not below τ₁ ≈ 3e-5).
