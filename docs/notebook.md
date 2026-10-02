@@ -1340,3 +1340,18 @@ the runs are now dominated by DISENT itself (10–15 µs per event). Memory
   convolutions of the PDFs with fixed kernels).
 - The NLO 2+1 and NNLO 1+1 results above were obtained with direct
   evaluation; nothing to redo.
+
+## 2026-10-02 (afternoon) — start of DIS 3+1 at NLO / 4+1 at LO
+
+AK: "push both and start on LO 4+1 / NLO 3+1" (after the VBF scale
+variations were handed over to a cluster session). Branch `2026-10-dis31`
+(off `2026-10-tau-slicing`); plan in `docs/dis31-plan.md`.
+
+- Reference for the matrix elements: NNLOJET v1.0.2's public core library
+  exports the Z/γ* + partons functions needed, with their colour-ordered
+  subleading pieces: B2g0Z, Bt2g0Z, C0g0Z, D0g0Z (3+1 trees), B3g0Z,
+  Bt3g0Z, Btt3g0Z, C1g0Z, D1g0Z (4+1 trees), B2g1Z, Bt2g1Z, Btt2g1Z, C0g1Z,
+  D0g1Z (3+1 one loop), and a DIS crossing `Bt2g1ZDIS`
+  (`~/work/disorder-comparisons/nnlojet-v1.0.2/build/libnnlojet_core.so`).
+- Source for our own implementation: MCFM 10.3's Z+2 jet routines
+  (`src/Z2jet`), crossed to DIS.
