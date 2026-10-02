@@ -518,6 +518,7 @@ contains
           hist = hist + hacc/s2; hist2 = hist2 + 1/s2
        endif
        write(*,'(a,i3,a,es16.8,a,es12.4)') ' iteration', it, ':', s1, ' +-', sqrt(s2)
+       flush(6)
        ! refine the grid
        do j = 1, ndim
           ! smooth
@@ -656,6 +657,7 @@ program nlo31
   call initPDFSetByName('NNPDF30_nlo_as_0118')
   call initPDF(0)
   call setup_flavours()
+  virt31_finite_only = .true.
   if (trim(part) == 'chk') then
      call check_sums(); stop
   endif

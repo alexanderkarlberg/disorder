@@ -37,6 +37,9 @@ module virt31
   real(dp), parameter :: avg4 = 1.0_dp/(2*2*xn)
   real(dp), parameter :: eq(5) = [-1.0_dp/3, 2.0_dp/3, -1.0_dp/3, 2.0_dp/3, -1.0_dp/3]
   public :: virt31_ren, virt31_qqgg, virt31_4q
+  ! production: only the finite part (one evaluation at 1/eps = 0 instead of
+  ! three); the poles are then returned as zero
+  logical, public :: virt31_finite_only = .false.
 contains
 
   subroutine virt31_ren(P, fl, mu2, v, t)
@@ -105,7 +108,8 @@ contains
     ! MCFM's poles: epinv = epinv2 = 1/eps (the double pole is
     ! epinv*epinv2), so the result is a quadratic in e = 1/eps: evaluate at
     ! e = 0, 1, -1
-    do ie = 1, 3
+    w = 0
+    do ie = 1, merge(1, 3, virt31_finite_only)
        epinv = evals(ie); epinv2 = epinv
        call qqgg_photon(w(ie,:), tr)
     enddo
@@ -117,6 +121,7 @@ contains
     v(0) = 96*xn*avg*cnorm*ch*w(1,1)
     v(-1) = 96*xn*avg*cnorm*ch*(w(2,1) - w(3,1))/2
     v(-2) = 96*xn*avg*cnorm*ch*((w(2,1) + w(3,1))/2 - w(1,1))
+    if (virt31_finite_only) v(-2:-1) = 0
   end subroutine virt31_qqgg
 
   ! xzqqgg_v (MCFM src/Zbb) for colourchoice = 0, photon exchange, no
@@ -234,7 +239,8 @@ contains
     call spinoru(6, pm, za, zb)
     toploops = 1; toplight = .false.; topvector = .false.; topaxial = .false.; onlyaxial = .false.
     musq = mu2; scale = sqrt(mu2)
-    do ie = 1, 3
+    w = 0
+    do ie = 1, merge(1, 3, virt31_finite_only)
        epinv = evals(ie); epinv2 = epinv
        call fourq_photon(cq, cQ2, ident, w(ie), tr)
     enddo
@@ -242,6 +248,7 @@ contains
     v(0) = avg4*cnorm*w(1)
     v(-1) = avg4*cnorm*(w(2) - w(3))/2
     v(-2) = avg4*cnorm*((w(2) + w(3))/2 - w(1))
+    if (virt31_finite_only) v(-2:-1) = 0
   end subroutine virt31_4q
 
   ! qqb_z2jet_v's q q branch for the photon (couplings Q(j) q1 -> charges;
