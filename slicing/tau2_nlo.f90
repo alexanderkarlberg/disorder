@@ -24,10 +24,14 @@ program tau2_nlo
   use types, only: dp
   use mod_parameters, only: nflav, NC, CC, noZ, Zonly, intonly, neutrino, positron
   use tau2_run
-  use mod_slicing_scet, only: soft_tol, pdf_mask, scet_set_colour, CF, CA, TF
+  use mod_slicing_scet, only: soft_tol, pdf_mask, scet_set_colour, CF, CA, TF, soft_table_init, soft_ncalls, &
+       & beam_table_init, beam_ncalls
   use sub_defs_io
   implicit none
   character(len=100) :: pdf
+  character(len=300) :: softtab
+  real(dp) :: hw
+  logical :: beamtab
   real(dp) :: s, npow1, npow2, cf_in, ca_in, tf_in, cutoff
   integer :: nev, seed1, seed2
   external :: DISENTFULL
@@ -42,6 +46,10 @@ program tau2_nlo
   npow1 = dble_val_opt('-npow1', 2.0_dp)
   npow2 = dble_val_opt('-npow2', 4.0_dp)
   soft_tol = dble_val_opt('-softtol', 1e-9_dp)
+  ! tabulated soft function: table file (built there if missing), node spacing in w (in v: twice that)
+  softtab = string_val_opt('-softtable', '')
+  hw = dble_val_opt('-softtable-h', 0.025_dp)
+  beamtab = log_val_opt('-beamtable')      ! tabulate the beam coefficients at the fixed Q
   pdf_mask = int_val_opt('-pdfmask', 0)   ! 1: quarks only, 2: gluon only (diagnostics)
   ndebug = int_val_opt('-debug', 0)       ! print the cumulant pieces for this many Born events
   boostY = dble_val_opt('-boostY', 0.0_dp) ! measure in a frame boosted along z (diagnostics)
@@ -57,12 +65,16 @@ program tau2_nlo
 
   nflav = 5; NC = .true.; CC = .false.; noZ = .true.; Zonly = .false.
   intonly = .false.; neutrino = .false.; positron = .false.
+  if (softtab /= '') call soft_table_init(trim(softtab), hw, 2 * hw)
   call InitPDFsetByName(trim(pdf))
   call InitPDF(0)
+  if (beamtab) call beam_table_init(sqrt(Q2fix), 0.999_dp * xfix, 0.001_dp)
   write(*,'(a,a,a,f8.5,a,f9.2,a,f10.1,a,i10,a,i2,a,3f9.5,a,i2)') ' pdf ', trim(pdf), '  x ', xfix, '  Q2 ', Q2fix, '  s ', s, &
        & '  nev ', nev, '  pdfmask ', pdf_mask, '  CF CA TR ', CF, CA, TF, '  measure ', measure
 
   call DISENTFULL(nev, s, 5, slice_user, slice_cuts, seed1, seed2, npow1, npow2, &
        & cutoff, 2, slice_muf, CF, CA, TF, .false.)
+  write(*,'(a,2i14)') ' soft function G: table / direct evaluations ', soft_ncalls
+  write(*,'(a,2i14)') ' beam coefficients: table / direct evaluations ', beam_ncalls
   call report()
 end program tau2_nlo

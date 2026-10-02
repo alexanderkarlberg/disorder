@@ -1280,3 +1280,63 @@ the 2+1 leading-power weights take 90%).
   15, 16, 17, 20, 40 GeV at x = 0.01), leading-jet η (−1, −0.6, −0.4, −0.2, 0.2,
   1, 2.5), ≥ 2 jets; at x = 0.05 the p_t edges scaled by 28.33/15.553 and the η
   edges shifted by +1.293.
+
+## 2026-10-02 (morning) — tabulated soft function and beam coefficients
+
+AK: "do the tabulation first and get that to work and tell me what speed-up it
+leads to" (scale variations and W/Z not needed for now).
+
+**What** (`slicing/mod_slicing_scet.f90`; options in `tau2_nlo` and `nnlo11`,
+off by default):
+- `-softtable FILE`: `soft_G` interpolates G(a,b) = I0(a,b) ln a + I1(a,b), the
+  only expensive piece of the soft function (six calls per three-parton Born),
+  from a table on (w, v): v = ln b, w = u + asinh(u/ε(v)), u = ln a,
+  ε(v) = e^{v/2}/(1 + e^{v/2}). G has a near-logarithmic singularity at a = 1
+  on the scale √b; in w it is smooth, so 0.025 in w and 0.05 in v suffice
+  (|u|, |v| ≤ 21, outside direct; 2825 × 840 nodes, 19 MB). Built once at GK
+  tolerance 1e-10 (80 s) into FILE (temporary file + rename, safe for
+  concurrent jobs) and read by later runs (0.05 s). Catmull–Rom bicubic.
+  Grid studies (scratch `gridtest4.f90`): maximum error of G 8e-4 at
+  (0.05, 0.1), 2.2e-4 at (0.025, 0.05), at the worst points next to a = 1;
+  typical errors much smaller.
+- `-beamtable`: the beam coefficients c0, c1, c2 (`beam_coeffs`, 64-point
+  convolutions, 11.7 µs per call) tabulated at the run's fixed Q, cubic in
+  ln(η/(1−η)), spacing 0.001 (0.25 s); used when the event's Q agrees with
+  that Q to 1e-6. Error ≤ 1.7e-6 of the largest coefficient (x = 0.01, Q = 20
+  and x = 0.05, Q = 31.6; 1.5e-6 at 0.001, 5e-6 at 0.002, 4e-5 at 0.005).
+- `test_scet` part 4 checks both against direct evaluation.
+
+**Checks**: without the options, `nnlo11.dat` and `tau2_nlo.dat` are bitwise
+identical to the production binaries (nnlo11 at 11d2796, tau2_nlo_fixed3, both
+measures). With both tables, same events (200k, x = 0.01, Q² = 400): nnlo11's
+sliced O(αs²) pieces (E2s, D2s) differ from direct evaluation (GK 1e-6) by at
+most 4.7e-6 per Born, 4e-7 of the MC error of that run (about 2e-5 of the
+error of the 240 × 2M production); everything not involving the
+leading power is identical. tau2_nlo outputs: at most 8.6e-6 (geometric),
+1.7e-6 (invariant) relative to direct at 1e-9; in units of the MC error of
+that run, at most 8.7e-6 (geometric) and 1.3e-6 (invariant) for the below-cut
+sums and 1.1e-6, 2.8e-7 for the differences to DISENT; above the cut
+identical. Direct at 1e-6 is closer to
+1e-9 (1e-8, 4e-8): the table is less accurate than GK at 1e-6, but both are
+far below the statistical errors. (A table with 0.0125 in w would cut the
+error by about 4 at 76 MB.)
+
+**Speed** (thA371a, one job alone, 200k events, CPU seconds, two passes
+agreeing to 1%):
+
+| | direct, GK 1e-6 (production) | direct, 1e-9 (default) | soft table | soft + beam tables | speed-up |
+|---|---|---|---|---|---|
+| nnlo11 | 71.5 (below cut 68.6) | – | 5.3 (2.4) | 3.7 (0.54) | 19× |
+| tau2_nlo, geometric | 33.6 | 60.4 | – | 2.24 | 15× (27× vs 1e-9) |
+| tau2_nlo, invariant | 29.6 | 55.5 | – | 2.25 | 13× (25× vs 1e-9) |
+
+The below-cut part of nnlo11 is 127× faster (440 → 3.4 µs per evaluation);
+the runs are now dominated by DISENT itself (10–15 µs per event). Memory
+37 MB instead of 12 MB.
+
+- The soft table does not depend on Q or the PDFs and works as it is for runs
+  integrated over x and Q². The beam table is per Q; for varying Q it needs a
+  second dimension, or hoppet convolutions on its grid (the coefficients are
+  convolutions of the PDFs with fixed kernels).
+- The NLO 2+1 and NNLO 1+1 results above were obtained with direct
+  evaluation; nothing to redo.

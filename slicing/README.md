@@ -72,6 +72,19 @@ and Q^2) gives in the same events
 - below the cut: the three-parton Born reweighted with the cumulant.
 Observable: tau_zQ bins above 0.05. `tau2_combine.py` combines runs.
 
+**Tables** (`tau2_nlo` and `nnlo11`, off by default): `-softtable FILE`
+interpolates G(a,b) = I0(a,b) ln a + I1(a,b) from a table (`soft_G`; built
+into FILE on first use, about 80 s, 19 MB; nodes in v = ln b and
+w = u + asinh(u/eps(v)), u = ln a, eps(v) = e^(v/2)/(1 + e^(v/2)), which
+resolves the near-logarithmic behaviour at a = 1 on the scale sqrt(b);
+spacing `-softtable-h` 0.025 in w, twice that in v; bicubic; |ln a|,
+|ln b| <= 21, else direct); interpolation error of G below 2.2e-4 at the
+worst points. `-beamtable` tabulates the beam coefficients at the run's
+fixed Q in ln(eta/(1-eta)) (0.25 s; error below 2e-6 of the largest
+coefficient). Effect on the outputs of a 200k-event run: at most 4e-7
+(nnlo11) and 9e-6 (tau2_nlo, below-cut sums) of their MC errors; speed-up
+13-19x (docs/notebook.md, 2 Oct 2026).
+
 ## 1+1 at NNLO three ways: `nnlo11.f90`, `mcfm_lp/`, `nnlo11_ref.py`, `nnlo11_combine.py`
 
 One DISENT run (fixed x, Q^2) gives, for lab-frame jet observables of 1+1

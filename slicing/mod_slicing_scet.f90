@@ -30,6 +30,30 @@ module mod_slicing_scet
   real(dp), save :: CF = 4.0_dp/3.0_dp, CA = 3.0_dp, TF = 0.5_dp
   integer, save :: nf = 5
   real(dp), public, save :: soft_tol = 1e-11_dp   ! GK tolerance of soft_I0I1
+
+  ! table of G(alpha, beta) = I0 ln(alpha) + I1 (soft_table_init, soft_G):
+  ! nodes in v = ln(beta) and w = u + asinh(u/eps(v)), u = ln(alpha),
+  ! eps(v) = e^(v/2)/(1 + e^(v/2)), which resolves the near-logarithmic
+  ! behaviour at alpha = 1 on the scale sqrt(beta) for small beta; bicubic
+  ! (Catmull-Rom) interpolation; |u|, |v| <= tab_umax, else direct
+  logical, save :: tab_on = .false.
+  integer, parameter :: tab_version = 1
+  real(dp), parameter :: tab_umax = 21, tab_ucap = 25, tab_tol = 1e-10_dp
+  real(dp), save :: tab_hw, tab_hv, tab_wmax
+  integer, save :: tab_nw, tab_nv
+  real(dp), allocatable, save :: tab(:,:)
+  integer(8), public, save :: soft_ncalls(2) = 0     ! soft_G: (table, direct)
+  public :: soft_G, soft_table_init
+
+  ! table of the beam coefficients at one scale Q (beam_table_init), cubic
+  ! (Catmull-Rom) in t = ln(eta/(1-eta)); beam_coeffs uses it when its Q
+  ! agrees with that scale to 1e-6 (fixed-Q runs, Q recomputed per event)
+  logical, save :: btab_on = .false.
+  real(dp), save :: btab_Q, btab_t0, btab_t1, btab_h
+  integer, save :: btab_n
+  real(dp), allocatable, save :: btab(:,:,:)        ! (3, -6:6, -1:btab_n+1): c0, c1, c2
+  integer(8), public, save :: beam_ncalls(2) = 0     ! beam_coeffs: (table, direct)
+  public :: beam_table_init, beam_coeffs_direct
   ! diagnostics: 0 = all PDFs, 1 = quarks only (gluon PDF set to zero), 2 = gluon only
   integer, public, save :: pdf_mask = 0
   public :: mask_pdf
@@ -191,6 +215,118 @@ contains
   end subroutine soft_I0I1
 
   !--------------------------------------------------------------------
+  ! G(alpha, beta) = I0 ln(alpha) + I1, the combination entering the soft
+  ! function, from the table if one is loaded and (alpha, beta) lies
+  ! inside it, else directly (soft_I0I1 at soft_tol)
+  real(dp) function soft_G(alpha, beta) result(res)
+    real(dp), intent(in) :: alpha, beta
+    real(dp) :: u, v, x, y, fx, fy, wx(4), wy(4), I0, I1
+    integer :: ix, iy, q
+    u = log(alpha); v = log(beta)
+    if (tab_on .and. abs(u) <= tab_umax .and. abs(v) <= tab_umax) then
+       x = (u + asinh(u / tab_eps(v)) + tab_wmax) / tab_hw
+       y = (v + tab_umax) / tab_hv
+       ix = min(max(int(x), 0), tab_nw - 1); iy = min(max(int(y), 0), tab_nv - 1)
+       fx = x - ix; fy = y - iy
+       call catmull_rom(fx, wx); call catmull_rom(fy, wy)
+       res = 0
+       do q = 1, 4
+          res = res + wy(q) * dot_product(wx, tab(ix-1:ix+2, iy+q-2))
+       enddo
+       soft_ncalls(1) = soft_ncalls(1) + 1
+    else
+       call soft_I0I1(alpha, beta, I0, I1)
+       res = I0 * u + I1
+       soft_ncalls(2) = soft_ncalls(2) + 1
+    endif
+  end function soft_G
+
+  ! load the table of G from file, or build it (at tolerance tab_tol; about
+  ! 80 s for hw = 0.025, hv = 0.05) and write it there through a temporary
+  ! file and a rename, so that concurrent jobs see either no table or a
+  ! complete one; hw, hv: node spacings in w and v
+  subroutine soft_table_init(file, hw, hv)
+    character(len=*), intent(in) :: file
+    real(dp), intent(in) :: hw, hv
+    integer :: un, ios, ver, nw, nv, i, j
+    real(dp) :: hw0, hv0, umax0, wmax0, tol0, tol_save, u, v, I0, I1
+    character(len=len_trim(file)+32) :: tmp
+    logical :: ex
+    tab_on = .false.
+    tab_hw = hw; tab_hv = hv
+    tab_wmax = tab_umax + asinh(tab_umax / tab_eps(-tab_umax)) + 3 * hw
+    tab_nw = nint(2 * tab_wmax / hw); tab_nv = nint(2 * tab_umax / hv)
+    if (allocated(tab)) deallocate(tab)
+    allocate(tab(-1:tab_nw+1, -1:tab_nv+1))
+    inquire(file=trim(file), exist=ex)
+    if (ex) then
+       open(newunit=un, file=trim(file), access='stream', form='unformatted', status='old', &
+            & action='read', iostat=ios)
+       if (ios == 0) then
+          read(un, iostat=ios) ver, nw, nv, hw0, hv0, umax0, wmax0, tol0
+          if (ios == 0 .and. ver == tab_version .and. nw == tab_nw .and. nv == tab_nv .and. hw0 == hw &
+               & .and. hv0 == hv .and. umax0 == tab_umax .and. wmax0 == tab_wmax .and. tol0 == tab_tol) then
+             read(un, iostat=ios) tab
+             if (ios == 0) tab_on = .true.
+          endif
+          close(un)
+       endif
+       if (tab_on) then
+          write(*,'(2a)') ' soft_table_init: read ', trim(file)
+          return
+       endif
+       write(*,'(3a)') ' soft_table_init: ', trim(file), ' unreadable or for other parameters, rebuilding'
+    endif
+    tol_save = soft_tol; soft_tol = tab_tol
+    do j = -1, tab_nv + 1
+       v = -tab_umax + j * hv
+       do i = -1, tab_nw + 1
+          u = max(-tab_ucap, min(tab_ucap, u_of_w(-tab_wmax + i * hw, v)))
+          call soft_I0I1(exp(u), exp(v), I0, I1)
+          tab(i,j) = I0 * u + I1
+       enddo
+    enddo
+    soft_tol = tol_save
+    write(tmp,'(2a,i0)') trim(file), '.tmp', getpid()
+    open(newunit=un, file=trim(tmp), access='stream', form='unformatted', status='replace', action='write')
+    write(un) tab_version, tab_nw, tab_nv, hw, hv, tab_umax, tab_wmax, tab_tol
+    write(un) tab
+    close(un)
+    call rename(trim(tmp), trim(file))
+    tab_on = .true.
+    write(*,'(2a,2i6)') ' soft_table_init: built and wrote ', trim(file), tab_nw, tab_nv
+  contains
+    ! inverse of w = u + asinh(u/eps(v)) (Newton)
+    real(dp) function u_of_w(w, v) result(uu)
+      real(dp), intent(in) :: w, v
+      real(dp) :: e, f
+      integer :: it
+      e = tab_eps(v)
+      uu = sign(min(abs(w), 60.0_dp), w)
+      if (abs(w) < 30) uu = e * sinh(w) / (1 + e * cosh(w))
+      do it = 1, 200
+         f = uu + asinh(uu / e) - w
+         uu = uu - f / (1 + 1 / sqrt(e * e + uu * uu))
+         if (abs(f) < 1e-14_dp * (1 + abs(w))) exit
+      enddo
+    end function u_of_w
+  end subroutine soft_table_init
+
+  real(dp) function tab_eps(v)
+    real(dp), intent(in) :: v
+    tab_eps = 1 / (1 + exp(-v / 2))
+  end function tab_eps
+
+  subroutine catmull_rom(t, w)
+    real(dp), intent(in) :: t
+    real(dp), intent(out) :: w(4)
+    w(1) = 0.5_dp * t * (-1 + t * (2 - t))
+    w(2) = 0.5_dp * (2 + t * t * (-5 + 3 * t))
+    w(3) = 0.5_dp * t * (1 + t * (4 - 3 * t))
+    w(4) = 0.5_dp * t * t * (t - 1)
+  end subroutine catmull_rom
+
+  !--------------------------------------------------------------------
   ! One-loop soft cumulant (alpha_s/2pi units) for the N-jettiness soft
   ! function with directions nhat(3,n), Casimirs cas(n), colour
   ! correlators tt(n,n) (T_i.T_j), at lambda = T_cut/mu. GSTW (A.24),
@@ -198,7 +334,7 @@ contains
   real(dp) function soft_cum(n, nhat, cas, tt, lam) result(res)
     integer, intent(in) :: n
     real(dp), intent(in) :: nhat(3,n), cas(n), tt(n,n), lam
-    real(dp) :: sij(n,n), s1, s0, sm1, I0, I1, L
+    real(dp) :: sij(n,n), s1, s0, sm1, L
     integer :: i, j, m
     do i = 1, n
        do j = 1, n
@@ -214,8 +350,7 @@ contains
           sm1 = sm1 + tt(i,j) * (log(sij(i,j))**2 - zeta2)
           do m = 1, n
              if (m == i .or. m == j) cycle
-             call soft_I0I1(sij(j,m) / sij(i,j), sij(i,m) / sij(i,j), I0, I1)
-             sm1 = sm1 + tt(i,j) * 4 * (I0 * log(sij(j,m) / sij(i,j)) + I1)
+             sm1 = sm1 + tt(i,j) * 4 * soft_G(sij(j,m) / sij(i,j), sij(i,m) / sij(i,j))
           enddo
        enddo
     enddo
@@ -249,7 +384,6 @@ contains
     integer, intent(in) :: n
     real(dp), intent(in) :: sij(n,n)
     real(dp), intent(out) :: g(n,n), ls(n,n)
-    real(dp) :: I0, I1
     integer :: i, j, m
     g = 0; ls = 0
     do i = 1, n
@@ -259,8 +393,7 @@ contains
           g(i,j) = ls(i,j)**2 - zeta2
           do m = 1, n
              if (m == i .or. m == j) cycle
-             call soft_I0I1(sij(j,m) / sij(i,j), sij(i,m) / sij(i,j), I0, I1)
-             g(i,j) = g(i,j) + 4 * (I0 * log(sij(j,m) / sij(i,j)) + I1)
+             g(i,j) = g(i,j) + 4 * soft_G(sij(j,m) / sij(i,j), sij(i,m) / sij(i,j))
           enddo
        enddo
     enddo
@@ -296,6 +429,54 @@ contains
   ! (0 = gluon) B(I) = c0(I) + c1(I) ln(lambda_B) + c2(I) ln^2(lambda_B),
   ! to be used instead of x f_I(eta) at O(alpha_s).
   subroutine beam_coeffs(eta, Q, c0, c1, c2)
+    real(dp), intent(in) :: eta, Q
+    real(dp), intent(out) :: c0(-6:6), c1(-6:6), c2(-6:6)
+    real(dp) :: t, x, fx, wx(4), c(3,-6:6)
+    integer :: ix, k
+    if (btab_on .and. abs(Q / btab_Q - 1) < 1e-6_dp .and. eta > 0 .and. eta < 1) then
+       t = log(eta / (1 - eta))
+       if (t >= btab_t0 .and. t <= btab_t1) then
+          x = (t - btab_t0) / btab_h
+          ix = min(int(x), btab_n - 1); fx = x - ix
+          call catmull_rom(fx, wx)
+          c = 0
+          do k = 1, 4
+             c = c + wx(k) * btab(:,:,ix+k-2)
+          enddo
+          c0 = c(1,:); c1 = c(2,:); c2 = c(3,:)
+          beam_ncalls(1) = beam_ncalls(1) + 1
+          return
+       endif
+    endif
+    call beam_coeffs_direct(eta, Q, c0, c1, c2)
+    beam_ncalls(2) = beam_ncalls(2) + 1
+  end subroutine beam_coeffs
+
+  ! tabulate beam_coeffs at scale Q for etamin <= eta <= 1 - 1e-7, nodes
+  ! spaced by h in ln(eta/(1-eta)) (h = 0.001: about 21000 direct
+  ! evaluations, 0.25 s, interpolation error below 2e-6 of the largest
+  ! coefficient at x = 0.01 and 0.05); needs the PDFs (and pdf_mask) set up
+  subroutine beam_table_init(Q, etamin, h)
+    real(dp), intent(in) :: Q, etamin, h
+    real(dp) :: t, e, c0(-6:6), c1(-6:6), c2(-6:6)
+    integer :: i
+    btab_on = .false.
+    btab_Q = Q; btab_h = h
+    btab_t0 = log(etamin / (1 - etamin)); btab_t1 = log((1 - 1e-7_dp) / 1e-7_dp)
+    btab_n = ceiling((btab_t1 - btab_t0) / h)
+    btab_t1 = btab_t0 + btab_n * h
+    if (allocated(btab)) deallocate(btab)
+    allocate(btab(3, -6:6, -1:btab_n+1))
+    do i = -1, btab_n + 1
+       t = btab_t0 + i * h
+       e = 1 / (1 + exp(-t))
+       call beam_coeffs_direct(e, Q, c0, c1, c2)
+       btab(1,:,i) = c0; btab(2,:,i) = c1; btab(3,:,i) = c2
+    enddo
+    btab_on = .true.
+  end subroutine beam_table_init
+
+  subroutine beam_coeffs_direct(eta, Q, c0, c1, c2)
     real(dp), intent(in) :: eta, Q
     real(dp), intent(out) :: c0(-6:6), c1(-6:6), c2(-6:6)
     real(dp) :: f1(-6:6), fz(-6:6), z, w, dz, sq, l1m, lz, pqg, pgq, pggr, r1q, r1g
@@ -354,7 +535,7 @@ contains
     c0(0) = ag0 + CA * hg1 * 0.5_dp * log(1 - eta)**2 - CA * zeta2 * f1(0)
     c1(0) = ag1 + CA * hg1 * log(1 - eta)
     c2(0) = CA * f1(0)
-  end subroutine beam_coeffs
+  end subroutine beam_coeffs_direct
 
   subroutine init_gl()
     integer :: i, j

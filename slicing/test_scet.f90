@@ -8,7 +8,8 @@
 !  3. the complete one-loop 1-jettiness cumulant for a 1+1 Born (beam,
 !     jet, two-direction soft and hard functions) against the validated
 !     Python implementation of KLS (173) (tau_1^a; slicing/tau1b_nlo.py
-!     --cumulant-only) at x = 0.01, Q = 20, y = 0.5, NNPDF30_nlo_as_0118.
+!     --cumulant-only) at x = 0.01, Q = 20, y = 0.5, NNPDF30_nlo_as_0118;
+!  4. the beam-coefficient and soft-function tables against direct evaluation.
 !----------------------------------------------------------------------
 program test_scet
   use types, only: dp
@@ -18,6 +19,7 @@ program test_scet
   complex(dp) :: z(6), ref(6)
   real(dp) :: I0, I1, x, Q, y, a, Yp, tau, f1(-6:6), c0(-6:6), c1(-6:6), c2(-6:6)
   real(dp) :: nhat(3,2), cas(2), tt(2,2), h2, s2, jq, res, eq2(-6:6), pyref(2), taus(2)
+  real(dp) :: emax, r, rr(2), eta, b, d0(-6:6), d1(-6:6), d2(-6:6)
   integer :: i, it
   logical :: ok
 
@@ -89,6 +91,33 @@ program test_scet
      res = a * Yp * res / x
      call chk('1+1 tau_1^a cumulant vs Python (KLS 173)', res, pyref(it), 2e-6_dp)
   enddo
+
+  ! 4. the tables: beam coefficients at the fixed Q (spacing 0.001), and G =
+  !    I0 ln(alpha) + I1 (a coarse table, hw = 0.1, built in a few seconds;
+  !    production uses 0.025) against direct evaluation at random points
+  call beam_table_init(Q, 0.999_dp * x, 0.001_dp)
+  emax = 0
+  do i = 1, 3000
+     call random_number(r)
+     eta = x + (1 - x) * r**4
+     if (mod(i, 3) == 0) eta = 1 - 10**(-1 - 6 * r)
+     call beam_coeffs(eta, Q, c0, c1, c2)
+     call beam_coeffs_direct(eta, Q, d0, d1, d2)
+     emax = max(emax, max(maxval(abs(c0 - d0)), maxval(abs(c1 - d1)), maxval(abs(c2 - d2))) &
+          & / max(maxval(abs(d0)), maxval(abs(d1)), maxval(abs(d2))))
+  enddo
+  call chk('beam table: max |table - direct| / max |c|', emax, 0.0_dp, 3e-6_dp)
+  call soft_table_init('test_scet_softG.tmp', 0.1_dp, 0.2_dp)
+  emax = 0
+  do i = 1, 3000
+     call random_number(rr)
+     a = exp(-15 + 30 * rr(1)); b = exp(-15 + 30 * rr(2))
+     if (mod(i, 2) == 0) a = exp((-1 + 2 * rr(1)) * sqrt(b) * 10**(-2 + 3 * rr(1)))   ! alpha near 1, on the scale sqrt(beta)
+     call soft_I0I1(a, b, I0, I1)
+     emax = max(emax, abs(soft_G(a, b) - (I0 * log(a) + I1)))
+  enddo
+  call chk('soft table (hw 0.1): max |G_table - G|', emax, 0.0_dp, 2e-2_dp)
+  open(newunit=it, file='test_scet_softG.tmp'); close(it, status='delete')
   if (.not. ok) stop 1
   print *, 'all checks passed'
 contains

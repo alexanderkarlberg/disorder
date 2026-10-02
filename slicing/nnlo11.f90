@@ -325,10 +325,14 @@ program nnlo11
   use mod_parameters, only: nflav, NC, CC, noZ, Zonly, intonly, neutrino, positron
   use tau2_run, only: xfix, Q2fix, measure, slice_cuts, slice_muf
   use nnlo11_run
-  use mod_slicing_scet, only: soft_tol, pdf_mask, scet_set_colour, CF, CA, TF
+  use mod_slicing_scet, only: soft_tol, pdf_mask, scet_set_colour, CF, CA, TF, soft_table_init, soft_ncalls, &
+       & beam_table_init, beam_ncalls
   use sub_defs_io
   implicit none
   character(len=100) :: pdf
+  character(len=300) :: softtab
+  real(dp) :: hw
+  logical :: beamtab
   real(dp) :: s, npow1, npow2, cutoff
   integer :: nev, seed1, seed2
   external :: DISENTFULL
@@ -345,6 +349,10 @@ program nnlo11
   npow1 = dble_val_opt('-npow1', 2.0_dp)
   npow2 = dble_val_opt('-npow2', 4.0_dp)
   soft_tol = dble_val_opt('-softtol', 1e-9_dp)
+  ! tabulated soft function: table file (built there if missing), node spacing in w (in v: twice that)
+  softtab = string_val_opt('-softtable', '')
+  hw = dble_val_opt('-softtable-h', 0.025_dp)
+  beamtab = log_val_opt('-beamtable')      ! tabulate the beam coefficients at the fixed Q
   pdf_mask = int_val_opt('-pdfmask', 0)
   cutoff = dble_val_opt('-cutoff', 1e-8_dp)
   measure = 1                                    ! invariant tau_2 measure for the slicing
@@ -354,12 +362,16 @@ program nnlo11
 
   nflav = 5; NC = .true.; CC = .false.; noZ = .true.; Zonly = .false.
   intonly = .false.; neutrino = .false.; positron = .false.
+  if (softtab /= '') call soft_table_init(trim(softtab), hw, 2 * hw)
   call InitPDFsetByName(trim(pdf))
   call InitPDF(0)
+  if (beamtab) call beam_table_init(sqrt(Q2fix), 0.999_dp * xfix, 0.001_dp)
   write(*,'(a,a,a,f8.5,a,f9.2,a,f10.1,a,f8.2,a,i10,a,i2,a,es9.2)') ' pdf ', trim(pdf), '  x ', xfix, '  Q2 ', Q2fix, &
        & '  s ', s, '  Ep ', Ep, '  nev ', nev, '  pdfmask ', pdf_mask, '  cutoff ', cutoff
 
   call DISENTFULL(nev, s, 5, nnlo11_user, slice_cuts, seed1, seed2, npow1, npow2, &
        & cutoff, 2, slice_muf, CF, CA, TF, .false.)
+  write(*,'(a,2i14)') ' soft function G: table / direct evaluations ', soft_ncalls
+  write(*,'(a,2i14)') ' beam coefficients: table / direct evaluations ', beam_ncalls
   call report11()
 end program nnlo11
