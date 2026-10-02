@@ -1583,3 +1583,26 @@ This completes the matrix-element ingredients of NLO 3+1: trees (me31,
 me41), correlated Borns (born31), dipoles (dip41) and one loop (virt31).
 Still to do: I, K, P (the integrated dipoles, from CS with born31's
 correlations), the 3+1 phase space and the integration.
+
+**Integrated dipoles I, K, P (3 Oct, morning).** `dis31/iop31.f90`, from
+CS section 8 (one incoming hadron; eqs. 8.25, 8.38, 8.39 with 7.27, 7.28,
+8.32–8.35; MS-bar, K_F.S. = 0, n_f = 5). The paper is in the scratchpad
+(hep-ph/9605323).
+- ⟨I(ε)⟩ as Laurent coefficients, in the same normalisation as virt31_ren
+  ((4π)^ε/Γ(1−ε) factored out).
+- K + P per Born point reduces to three numbers:
+  B = |M_b|², G = Σ_i γ_i/T_i² ⟨T_i·T_b⟩ and
+  L_P = Σ_i ⟨T_i·T_b⟩/T_b² ln(μ_F²/2p_b·p_i).
+  Then K^{a,b}(x) + P^{a,b}(x) = K̄^{ab}(x) B
+  + δ^{ab}[(1/(1−x))₊ + δ(1−x)] G + P^{ab}(x) L_P, with K̄ and P split into
+  regular, plus-distribution and δ parts (`iop31_kernel`).
+- DISENT's KPFUNS has the same structure for 2+1, but there the
+  correlations are proportional to the Born and its δ term contains part
+  of DISENT's own I convention, so it is not reused.
+
+Tests (`tests/harness_iop31`, nine channels, two scales):
+- the poles of V + I cancel to 1e-13 per tree;
+- ∂L_P/∂ln μ_F² = −B to 1e-14 (CS 8.42);
+- for four quarks G/B = −2 exactly.
+Not yet tested: K + P against an integrated real minus dipoles, which needs
+the phase-space integration (next).

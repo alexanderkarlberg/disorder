@@ -3,7 +3,7 @@
 # (objects of disorder_core and the test support), e.g.
 #   dis31/tests/build.sh /path/to/build [workdir]
 # run with: ./harness_gluon -toyQ0 2 ; ./harness_quark -toyQ0 2 ;
-#   ./harness_me31 -toyQ0 2 ; ./harness_lim41 ; ./harness_born31 ; ./harness_dip41 ; ./harness_virt31 ; ./dump_fd31 && python3 fd31.py
+#   ./harness_me31 -toyQ0 2 ; ./harness_lim41 ; ./harness_born31 ; ./harness_dip41 ; ./harness_virt31 ; ./harness_iop31 ; ./dump_fd31 && python3 fd31.py
 set -e
 B=$(cd "$1" && pwd); D=$(cd "$(dirname "$0")/.." && pwd); W=${2:-$PWD}
 cd "$W"
@@ -38,4 +38,7 @@ done
 gfortran -O2 -ffree-line-length-none -I$D/mcfm/Inc -c $D/virt31.f90 -o virt31.o
 gfortran -O2 -ffree-line-length-none -c $D/tests/harness_virt31.f90 -o harness_virt31.o
 gfortran -O2 harness_virt31.o me31.o born31.o virt31.o $MO $L -o harness_virt31
+gfortran -O2 -ffree-line-length-none -c $D/iop31.f90 -o iop31.o
+gfortran -O2 -ffree-line-length-none -c $D/tests/harness_iop31.f90 -o harness_iop31.o
+gfortran -O2 harness_iop31.o born31.o virt31.o iop31.o $MO $L -o harness_iop31
 cp $D/tests/fd31.py .
