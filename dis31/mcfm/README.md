@@ -6,6 +6,9 @@ incoming parton and incoming lepton as negative momenta in MCFM's
 all-incoming convention). Changes are marked with "disorder (date)":
 - `spinoru.f`: Minkowski product inline (MCFM's `dot` clashes with DISENT's
   `DOT`).
+- `subqcdn.f` (`src/W2jet`), `spinork.f`, `checkndotp.f` (`src/Need`),
+  `Inc/nwz.f`: q qbar g g with one gluon contracted with a vector n (spin
+  correlations; `nwz` must be 0 for photon/Z).
 - `msq_gqqQQg.f`, `makemb_photon.f`: photon-exchange versions of
   `msq_ZqqQQg` and `makemb` (with `makem` inlined); the charges of the two
   quark lines are arguments instead of the electroweak common blocks.
@@ -45,6 +48,21 @@ Slots: 1 = -incoming parton, 2 = outgoing quark of the incoming line,
 - g -> q qbar Q Qbar: `msq_gqqQQg(2, 5, 6, 7, 1, 4, 3, e_q, e_Q)` (q, qbar,
   Q, Qbar at 2, 5, 6, 7).
 
+Colour- and spin-correlated 3+1 Borns (`born31`): the colour-ordered
+amplitudes of `subqcd` (A1: gluon order (A, B) of the call, A2: (B, A))
+belong to c1 = (T^A T^B)_{q qbar}, c2 = (T^B T^A), with q = MCFM's first
+quark slot (our outgoing quark) and qbar = its second (our incoming quark,
+or the outgoing antiquark of g -> q qbar g). `subqcdn`'s qcdab/qcdba have
+the opposite assignment (qcdab <-> the order (contracted, other)), and its
+n-contraction is normalised to half the polarisation sum. For an incoming
+antiquark the q qbar g g roles stay as for a quark (charge conjugation
+swaps q <-> qbar and the colour order). Four quarks: the direct colour
+structure D = T^a_{q1 qb2} T^a_{q3 qb4} with q1 = the outgoing quark of the
+incoming line, qb2 = the incoming quark, q3, qb4 = the pair (for an
+incoming antiquark q1 = the incoming antiquark, qb2 = the outgoing one, q3 =
+the pair quark), and the identical-quark exchange E = -(MCFM's exchange
+amplitude) in this basis.
+
 ## Checks (`../tests`, 2 Oct 2026)
 
 - me31 against DISENT's MATFOR (`harness_me31`), summed over the
@@ -55,6 +73,14 @@ Slots: 1 = -incoming parton, 2 = outgoing quark of the incoming line,
   Dirac matrices (`fd31.py`): ratio 1 to 1e-12 (d -> d u ubar, u -> u u
   ubar, dbar -> dbar ubar u). This fixed the sign of the e_q e_Q term and
   the identical-quark interference.
+- born31 (`harness_born31`): msq = me31 (4e-16); colour conservation
+  (1e-15); polarisation sums of the spin-correlated Borns (3e-14); soft-
+  gluon limit of me41 against the eikonal sum with born31's T_i.T_k, nine
+  channels including antiquarks, gluon-initiated and identical quarks
+  (2e-4 at lambda = 1e-5); gluon-splitting collinear limits at fixed
+  azimuth with the spin-correlated Borns (final g -> g g, g -> q qbar;
+  initial q -> g, g -> g; 5e-4 at y = 1e-9). Colour matrices from
+  `colour.py` (explicit SU(3)).
 - me41 against me31 in single-collinear limits (`harness_lim41`): final-state
   q||g, g||g, g -> q qbar, initial-state q -> q g, g -> q qbar, all channels;
   ratio 1 to < 5e-4 at y = 1e-10, approaching 1 linearly in y.

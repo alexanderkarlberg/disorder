@@ -1476,3 +1476,43 @@ validated pointwise in every channel by three independent references:
 - DISENT's MATFOR (3+1, symmetrised);
 - NNLOJET (3+1 four-quark, all of 4+1);
 plus all single-collinear limits 4+1 → 3+1.
+
+**Colour- and spin-correlated 3+1 Borns (2 Oct, night).** `dis31/born31.f90`:
+- `born31_cc` returns |M|² (equal to me31) and ⟨T_i·T_k⟩ for all parton
+  pairs (all partons outgoing, CS conventions).
+- `born31_sc` contracts a Born gluon with a vector n (colour-summed and
+  colour-correlated), for the gluon-splitting dipoles.
+
+Construction:
+- The colour matrices ⟨c_m|T_i·T_k|c_n⟩ for the q q̄ g g basis (T^A T^B,
+  T^B T^A) and the four-quark basis (direct, exchange) are computed exactly
+  with explicit SU(3) (`dis31/tests/colour.py`); colour conservation is
+  checked there to 1e-15.
+- They are combined with MCFM's colour-ordered amplitudes: `subqcd`, and
+  `subqcdn` with one gluon contracted with n (ported from MCFM `src/W2jet`
+  with `spinork` and `checkndotp`).
+
+Assignments fixed by the tests:
+- `subqcd`'s ordering (A, B) belongs to (T^A T^B)_{q q̄}.
+- `subqcdn` has the opposite assignment, and its contraction is normalised
+  to half the polarisation sum. The polarisation-sum identity showed both:
+  |M|² alone cannot see the ordering, because the metric is symmetric.
+- An incoming antiquark keeps the quark's roles (C swaps q ↔ q̄ and the
+  colour order).
+- The gluon channel needs MCFM slots (2,5,1,6). My first version
+  hard-coded the quark channel's (2,1,5,6); the soft test caught it.
+
+Tests (`dis31/tests/harness_born31.f90`):
+- msq = me31 to 4e-16;
+- colour conservation to 1e-15;
+- polarisation sums to 3e-14;
+- soft-gluon limit of me41 against −8π² Σ p_a·p_b/(p_a·q p_b·q) ⟨T_a·T_b⟩,
+  nine channels (quark, antiquark, gluon-initiated, four quarks, identical),
+  to 2e-4 at λ = 1e-5, converging linearly;
+- collinear limits at fixed azimuth (three φ, no averaging), which need the
+  spin correlations, to 5e-4 at y = 1e-9: final g → g g and g → q q̄;
+  initial q → g + q and g → g + g.
+
+The initial-state q → g kernel is CF[−g x − 4(1−x)/x k⊥k⊥/k⊥²]: that sign
+of the k⊥ term is the one that matches the azimuthal dependence and, when
+averaged, gives CF(1 + (1−x)²)/x. To keep in mind for the IF dipoles.
