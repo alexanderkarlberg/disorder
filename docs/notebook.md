@@ -778,3 +778,11 @@ fixed − unfixed at 1e-8 (+0.67 ± 0.22% against +0.51%) do not resolve the
 difference. The fix is unaffected: with XJAC = 0 the X-dependent pieces get
 zero weight in that region and the X-independent ones are kept, which is the
 unbiased estimator.
+
+### 2 Oct, morning: version 2.2.1
+
+AK: the DISENT fix goes out as a bug-fix release 2.2.1. Version set to 2.2.1
+(welcome message and CMake project, the only places in the code); the
+release-notes entry "Unreleased" became "2.2.1" and now says that an aborted
+event lost, in expectation, its X-independent pieces. The validation ignores
+the version in the banner, so no reference changes.

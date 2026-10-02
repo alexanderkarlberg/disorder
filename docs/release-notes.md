@@ -4,18 +4,19 @@ Changes since version 1.0.0 (SciPost Phys. Codebases 32, arXiv:2401.16964).
 The 1.0.0 manual (`docs/disorder-1.0.0-manual.tex`) is left unchanged;
 where it no longer applies, this file says so.
 
-## Unreleased
+## 2.2.1
 
 ### Physics
 
 - **DISENT no longer drops the O(αs²) part of a fraction of its events.**
   With 1 − X < CUTOFF for the collinear X of the K and P terms, `VIRTHR`
   ended the event after the three-parton Born had been handed over, so the
-  virtual, collinear, real and counter-event contributions of about
-  CUTOFF^(1/npow2)/2 of the events (0.5% with the defaults `-npow2 4`,
-  `-cutoff 1e-8`) were lost. Now only the excluded sliver of the x integral is
-  dropped. With `-p2b`, O(αs²) distributions change by about +0.5% of their
-  O(αs²) 2+1 part; total cross sections are unchanged.
+  O(αs²) contributions of about CUTOFF^(1/npow2)/2 of the events (0.5% with
+  the defaults `-npow2 4`, `-cutoff 1e-8`) were lost; in expectation this
+  removed the pieces that do not depend on that X (the virtual and the reals
+  with a final-state spectator). Now only the excluded sliver of the x
+  integral is dropped. With `-p2b`, O(αs²) distributions change by about half
+  a percent of their O(αs²) 2+1 part; total cross sections are unchanged.
 
 ## 2.2.0
 

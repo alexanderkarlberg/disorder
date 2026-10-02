@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 include(CMakePrintHelpers)
-project(disorder VERSION 2.2.0 LANGUAGES CXX Fortran)
+project(disorder VERSION 2.2.1 LANGUAGES CXX Fortran)
 
 IF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     MESSAGE(FATAL_ERROR "Fortran compiler does not support F90")

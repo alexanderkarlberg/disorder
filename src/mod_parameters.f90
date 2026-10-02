@@ -489,7 +489,7 @@ contains
 
   subroutine welcome_message
     write(0,'(a)') '-----------------------------------------------------------'
-    write(0,'(a)') '               Welcome to disorder v. 2.2.0                '
+    write(0,'(a)') '               Welcome to disorder v. 2.2.1                '
     write(0,'(a)') '        Written by Alexander Karlberg (2023-2026)          '
     write(0,'(a)') '                                                           '
     write(0,'(a)') ' It is made available under the GNU public license,        '
