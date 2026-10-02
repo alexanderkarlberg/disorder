@@ -1355,3 +1355,15 @@ variations were handed over to a cluster session). Branch `2026-10-dis31`
   (`~/work/disorder-comparisons/nnlojet-v1.0.2/build/libnnlojet_core.so`).
 - Source for our own implementation: MCFM 10.3's Z+2 jet routines
   (`src/Z2jet`), crossed to DIS.
+
+**3+1 trees, photon exchange (2 Oct, evening).** MCFM's Z+2 jet tree
+routines, crossed to DIS (`dis31/mcfm`, rules in its README), agree with
+DISENT's MATFOR, summed over the labellings of the outgoing partons, up to
+one constant: γ* g → q q̄ g to 3e-14 (20 random points), γ* q → q g g +
+q Q Q̄ (five flavours, identical-quark interference included) to 1e-13 for
+d and u. Piece by piece (q g g, boson on the incoming line, on the pair,
+identical-quark interference) each agrees separately with the ERT
+functions. Pitfalls: MCFM's `dot` clashes with DISENT's `DOT` (inlined);
+the four-quark routine has the leptons fixed in slots 3, 4; the
+identical-quark interference needs MCFM's own (phase-consistent)
+construction. Harnesses: `dis31/tests`.
