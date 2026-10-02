@@ -1,33 +1,60 @@
 # MCFM 10.3 routines for DIS 3+1 / 4+1 (GPL-3.0-or-later)
 
-Copied from MCFM 10.3 (`src/Z2jet`, `src/W2jet`, `src/Need`, `src/Inc`),
-crossed to DIS by the callers (incoming parton and incoming lepton as
-negative momenta in MCFM's all-incoming convention). Changes are marked
-with "disorder (date)":
+Copied from MCFM 10.3 (`src/Z2jet`, `src/Zbb`, `src/Wbb`, `src/Need`,
+`src/Inc`), crossed to DIS by the callers (`../me31.f90`, `../me41.f90`;
+incoming parton and incoming lepton as negative momenta in MCFM's
+all-incoming convention). Changes are marked with "disorder (date)":
 - `spinoru.f`: Minkowski product inline (MCFM's `dot` clashes with DISENT's
   `DOT`).
+- `msq_gqqQQg.f`, `makemb_photon.f`: photon-exchange versions of
+  `msq_ZqqQQg` and `makemb` (with `makem` inlined); the charges of the two
+  quark lines are arguments instead of the electroweak common blocks.
 
-Checks (scratch harness, 2 Oct 2026): `z2jetsq` crossed to gamma* g -> q
-qbar g agrees with DISENT's MATFOR (photon exchange, incoming gluon,
-summed over the labellings of the outgoing partons) up to a constant
-normalisation, 3e-14 over 20 random points.
-- `ampqqb_qqb.f`, `aqqb_zbb.f` (`src/Zbb`): four-quark amplitudes. They
-  take the spinor products from the common block `/zprods/` and have the
-  lepton pair fixed in slots 3, 4.
+Routines:
+- 3+1: `z2jetsq.f` (+ `storecsz.f`, `subqcd.f`): q qbar g g; `ampqqb_qqb.f`,
+  `aqqb_zbb.f` (`src/Zbb`): q qbar Q Qbar. The four-quark routine takes the
+  spinor products from `/zprods/` and has the lepton pair fixed in slots 3, 4.
+- 4+1: `xzqqggg.f` (+ `amp_qqggg.f`): q qbar g g g (couplings g_s, e from
+  `/qcdcouple/`, `/ewcouple/`, all colour structures with `/ColC/` = 0);
+  `msq_gqqQQg.f` (+ `makemb_photon.f`, `nagyqqqqg.f` from `src/Wbb`):
+  q qbar Q Qbar g, non-identical (MN) and identical (MI) quarks.
 
-Crossing rules found with the harnesses (`dis31/tests`, photon exchange,
-against DISENT's MATFOR, all to 1e-13 up to one constant):
-- slots: 1 = -incoming parton, 2 = outgoing quark of the incoming line,
-  3 = outgoing lepton, 4 = -incoming lepton, 5, 6 = the other two partons;
+## Crossing rules (photon exchange)
+
+Slots: 1 = -incoming parton, 2 = outgoing quark of the incoming line,
+3 = outgoing lepton, 4 = -incoming lepton, then the other partons.
+
+3+1 (`me31`):
 - q g g: `z2jetsq(2, 1, 3, 4, 5, 6)` (the outgoing quark in MCFM's quark
-  slot, the incoming quark in its antiquark slot);
-- q Q Qbar: `ampqqb_qqb(2, 1, 5, 6)` (Q at 5, Qbar at 6); the boson on the
-  incoming line (A) and on the pair (B), amplitude e_q A + e_Q B;
-- identical quarks: the squares from `ampqqb_qqb(2,1,5,6)` and the
-  exchanged `ampqqb_qqb(5,1,2,6)`; the interference only from MCFM's own
-  construction, crossed (MCFM slots 1,2,5,6 = ours 1,6,2,5): direct
-  `ampqqb_qqb(1,2,6,5)` with j2 swapped and B negated, exchange
-  `ampqqb_qqb(1,5,2,6)`, interference (2/N) Re[(Ad - Bd)(j,swap(j)) (Ae + Be)*(j,j)]
-  (other argument orders give the right squares but inconsistent phases);
-- weights relative to each other: q g g (N/4)(1/2) sum(msq), four-quark
-  4 |.|^2, identical (1/2) 4 [squares + interference].
+  slot, the incoming quark in its antiquark slot); g -> q qbar g:
+  `z2jetsq(2, 5, 3, 4, 1, 6)` (q at 2, qbar at 5).
+- q Q Qbar: `ampqqb_qqb(2, 1, 5, 6)` (Q at 5, Qbar at 6). The incoming line
+  is read as (2,1), opposite to MCFM's orientation (`qqb_z2jet` uses (1,2)
+  for the same channel), so the amplitude is e_q A - e_Q B. (Reversing one
+  quark line flips the sign of the charge-odd e_q e_Q term; checked:
+  `ampqqb_qqb(1,2,5,6)` with + equals `(2,1,5,6)` with -.)
+- identical quarks: direct D = A - B from `ampqqb_qqb(2,1,5,6)`, exchange
+  E = Ae - Be from `ampqqb_qqb(5,1,2,6)`; |M|^2 = 4V e_q^2 [sum |D|^2 +
+  sum |E|^2 + (2/N) sum_{j,j3} Re D(j,swap(j),j3) E*(j,swap(j),j3)].
+
+4+1 (`me41`), MCFM's own sign conventions (as `qqb_z2jet_g`):
+- q g g g: `xzqqggg(2, 5, 6, 7, 1, 3, 4)`; g -> q qbar g g:
+  `xzqqggg(2, 1, 6, 7, 5, 3, 4)` (q at 2, qbar at 5).
+- q Q Qbar g: `msq_gqqQQg(2, 1, 5, 6, 7, 4, 3, e_q, e_Q)` (Q at 5, Qbar at
+  6, g at 7), MN; identical quarks the same with e_Q = e_q, MI.
+- g -> q qbar Q Qbar: `msq_gqqQQg(2, 5, 6, 7, 1, 4, 3, e_q, e_Q)` (q, qbar,
+  Q, Qbar at 2, 5, 6, 7).
+
+## Checks (`../tests`, 2 Oct 2026)
+
+- me31 against DISENT's MATFOR (`harness_me31`), summed over the
+  labellings of the outgoing partons: ratio 1 to 1e-13 for all incoming
+  flavours. This sum is blind to the charge-odd e_q e_Q terms of the four-
+  quark channels (they are odd under Q <-> Qbar and cancel in it).
+- me31 four-quark channels pointwise against Feynman diagrams with explicit
+  Dirac matrices (`fd31.py`): ratio 1 to 1e-12 (d -> d u ubar, u -> u u
+  ubar, dbar -> dbar ubar u). This fixed the sign of the e_q e_Q term and
+  the identical-quark interference.
+- me41 against me31 in single-collinear limits (`harness_lim41`): final-state
+  q||g, g||g, g -> q qbar, initial-state q -> q g, g -> q qbar, all channels;
+  ratio 1 to < 5e-4 at y = 1e-10, approaching 1 linearly in y.

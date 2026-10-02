@@ -1383,3 +1383,66 @@ recomputing the spinor products 71 times and by amplitudes that differ
 only by charges. To do in the Born interface: spinors once per point,
 q g g, g → q q̄ g and the four-quark A, B once per labelling, charges
 afterwards.
+
+**Correction: me31's four-quark channels were wrong pointwise (2 Oct,
+late evening).** The two entries above claim agreement with MATFOR for the
+four-quark channels. That is true for the sum over the labellings of the
+outgoing partons, but that sum is blind to the charge-odd e_q e_Q term
+(photon on the incoming line times photon on the pair). The term is odd
+under Q ↔ Q̄ and cancels in the sum. me31 had this term with the wrong
+sign: `ampqqb_qqb(2,1,5,6)` reads the incoming line opposite to MCFM's
+orientation (MCFM's `qqb_z2jet` uses (1,2) for that channel), and
+reversing a quark line flips the relative sign of the two photon couplings.
+For identical quarks, me31 had also dropped the A·B cross terms (of the
+same odd type). The "piece by piece" agreement claimed above was for the
+symmetrised sums and therefore did not test these terms.
+Found because the 4+1 trees (below), built with MCFM's own conventions,
+did not factorise onto me31 in the q ∥ g limits of the four-quark
+channels. The squares with only A or only B did factorise, which isolated
+the problem to the interference.
+Settled independently: `dis31/tests/fd31.py` evaluates γ* q → q Q Q̄ from
+Feynman diagrams (explicit Dirac matrices and helicity spinors, physical
+momenta, explicit SU(3) colour sums; two diagrams with the photon on each
+line, and for identical quarks minus the same with the two quarks
+exchanged). Fixed me31:
+- non-identical: e_q A − e_Q B;
+- identical: D = A − B and E = A_e − B_e from `ampqqb_qqb(5,1,2,6)`. The
+  interference is (2/N) Re D(j,swap(j),j₃) E*(j,swap(j),j₃) over equal
+  quark helicities, with the helicity labels found by a least-squares fit
+  of the 32 possible D·E* terms to the Feynman diagrams. Exactly four terms
+  have coefficient 1 and all others 0.
+Now me31/FD = 1 to 1.3e-14 pointwise (d → d u ū, u → u u ū, d̄ → d̄ ū u;
+10 points). The MATFOR sum test still gives 1 (2.6e-14). Consequence for
+physics: none for flavour-blind observables (the term integrates to zero
+under Q ↔ Q̄), but the subtraction needs the pointwise matrix element.
+
+**4+1 trees, photon exchange (2 Oct, late evening).** `dis31/me41.f90`:
+|M|² for a flavour assignment of the five partons (DIS layout P(4,8): 1
+incoming parton, 2–5 outgoing, 6 q, 7 and 8 the leptons), normalisation
+as me31 with one more power of αs/2π. From MCFM 10.3:
+- `xzqqggg` (q q̄ g g g) for q → q g g g and g → q q̄ g g;
+- `msq_ZqqQQg` (q q̄ Q Q̄ g) in a photon version `msq_gqqQQg` (with
+  `makemb_photon`, `nagyqqQQg`), with the line charges as arguments, for
+  q → q Q Q̄ g, identical quarks, and g → q q̄ Q Q̄.
+The crossing follows MCFM's `qqb_z2jet_g` calls with MCFM's own sign
+conventions; rules in `dis31/mcfm/README.md`.
+Check (`dis31/tests/harness_lim41.f90`): me41 against me31 in
+single-collinear limits, for every channel (20 limits, 3 random points
+each):
+- final state: q ∥ g, g ∥ g, g → q q̄ (CS FF map, y → 0, averaged over
+  φ and φ + π/2 for the gluon splittings);
+- initial state: q → q g, g → q q̄ (IF map, u → 0; averaged matrix
+  elements with the averaged AP kernels).
+All ratios tend to 1 linearly in y; at y = 1e-10 the largest deviation is
+1e-4.
+Timing (thA371a): 24 µs per call for q g g g and q q̄ g g, 33 µs for the
+four-quark channels (MATFOR: 2.6 µs). To optimise in the integrand:
+- spinors once per point;
+- the e_q², e_Q², e_q e_Q pieces once per momentum assignment, not per
+  flavour;
+- the non-identical case without the exchange amplitudes (8 → 2 calls to
+  `nagyqqQQg`).
+If MCFM's trees remain the bottleneck, consider our own helicity-summed
+trees with FORM (AK).
+Next: NNLOJET pointwise (B3g0Z/C1g0Z/D1g0Z) for the 4+1 trees, then
+colour- and spin-correlated 3+1 Borns and the CS dipoles.

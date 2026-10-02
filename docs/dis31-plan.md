@@ -23,7 +23,10 @@ P2B in disorder and the (3,0)/(0,3) pieces of N3LO VBF.
    Source: MCFM 10.3's Z+2 jet / Z+3 parton amplitudes (`src/Z2jet`: trees,
    real, and the colour structures its own CS dipoles use), crossed to DIS
    (the lepton pair with one incoming electron, q² < 0), as for
-   `src/disent_virt3.f`.
+   `src/disent_virt3.f`. Efficiency matters at every step: spinors once
+   per point, charges applied after the amplitudes; if MCFM's trees are the
+   bottleneck, derive our own helicity-summed trees with FORM (e.g. a
+   five-parton MATFVE in DISENT's style).
 2. One loop, 3+1: MCFM's Z+2 jet virtual (BDK amplitudes, `qqb_z2jet_v`),
    crossed; renormalised in MS-bar, finite part in the CS convention.
 3. Subtraction: CS dipoles for one incoming parton (FF, FI, IF) with
@@ -41,14 +44,18 @@ P2B in disorder and the (3,0)/(0,3) pieces of N3LO VBF.
    and at one loop B2g1Z, Bt2g1Z, Btt2g1Z, C0g1Z, D0g1Z (colour-ordered
    pieces, combined with their colour factors). No code from the private
    dis-1jet program.
-2. Dipole limits: the 4+1 real against the sum of dipoles in all single
+2. Pointwise against Feynman diagrams where the symmetrised comparisons
+   are blind (the charge-odd e_q e_Q terms of the four-quark channels:
+   `dis31/tests/fd31.py`), and 4+1 against 3+1 in all single-collinear
+   limits (`dis31/tests/harness_lim41.f90`).
+3. Dipole limits: the 4+1 real against the sum of dipoles in all single
    collinear and soft limits (as `tests/test_subtraction.f90` for DISENT).
-3. Poles of the one loop against the I operator (the finite part's μ_R
+4. Poles of the one loop against the I operator (the finite part's μ_R
    dependence must be the renormalisation-group one).
-4. Integrated NLO 3+1 cross sections and distributions against an
+5. Integrated NLO 3+1 cross sections and distributions against an
    independent code (NLOJet++'s dis3jet if obtainable; otherwise
    cross-checks of cutoff independence and of the IR limits).
-5. Above-cut part of NNLO 2+1: τ₂ > τ_cut on all events, combined with the
+6. Above-cut part of NNLO 2+1: τ₂ > τ_cut on all events, combined with the
    slicing below the cut, against DISENT-based NNLO 1+1 projections where
    possible.
 

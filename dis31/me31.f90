@@ -31,9 +31,8 @@ contains
     real(dp), intent(out) :: msq
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     common /zprods/ za, zb
-    real(dp) :: pm(mxpart,4), m2(2,2), avg, c1, c2
-    complex(dp) :: A(2,2,2), B(2,2,2), Ad(2,2,2), Bd(2,2,2), Ae(2,2,2), Be(2,2,2), a1, b1
-    integer :: nq, ng, i, iq, iqb, ig(2), j1, j2, j3, iother(3), k
+    real(dp) :: pm(mxpart,4), m2(2,2), avg, c1
+    integer :: nq, ng, i, iq, iqb, ig(2), iother(3), k
     msq = 0
     ng = count(fl == 0)
     if (fl(1) == 0) then
@@ -95,7 +94,7 @@ contains
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     common /zprods/ za, zb
     real(dp) :: pm(mxpart,4), cq, cQ2, sg
-    complex(dp) :: A(2,2,2), B(2,2,2), Ad(2,2,2), Bd(2,2,2), Ae(2,2,2), Be(2,2,2), aa, bb
+    complex(dp) :: A(2,2,2), B(2,2,2), Ae(2,2,2), Be(2,2,2)
     integer :: i, k, kq, kqb, j1, j2, j3, f0, nsame, ip(3)
     s = 0
     f0 = fl(1)
@@ -117,22 +116,20 @@ contains
     pm(1,:) = -P(:,1); pm(3,:) = P(:,7); pm(4,:) = -P(:,6); pm(6,:) = P(:,kqb)
     cq = eq(abs(f0))
     if (fl(ip(1)) == f0 .and. fl(ip(2)) == f0) then
-       ! identical quarks: the pair has the flavour of the incoming quark
+       ! identical quarks: direct D (lines 2-1, 5-6) and exchange E (5-1, 2-6)
+       ! amplitudes, interfering for opposite helicity labels j1, j2 (fixed
+       ! against Feynman diagrams, dis31/tests/fd31.py)
        if (fl(kqb) /= -f0) return
        pm(2,:) = P(:,ip(1)); pm(5,:) = P(:,ip(2))
        call spinoru(6, pm, za, zb)
        call ampqqb_qqb(2, 1, 5, 6, A, B)
        call ampqqb_qqb(5, 1, 2, 6, Ae, Be)
-       do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
-          s = s + cq**2*(abs(A(j1,j2,j3))**2 + abs(B(j1,j2,j3))**2 + abs(Ae(j1,j2,j3))**2 + abs(Be(j1,j2,j3))**2)
-       enddo; enddo; enddo
-       ! interference from MCFM's own (phase-consistent) construction
-       call ampqqb_qqb(1, 2, 6, 5, Ad, Bd)
-       call ampqqb_qqb(1, 5, 2, 6, Ae, Be)
+       A = A - B; Ae = Ae - Be
+       s = sum(abs(A)**2) + sum(abs(Ae)**2)
        do j1 = 1, 2; do j3 = 1, 2
-          s = s + cq**2*2/xn*real((Ad(j1,swp(j1),j3) - Bd(j1,swp(j1),j3))*conjg(Ae(j1,j1,j3) + Be(j1,j1,j3)), dp)
+          s = s + 2/xn*real(A(j1,swp(j1),j3)*conjg(Ae(j1,swp(j1),j3)), dp)
        enddo; enddo
-       s = 4*V*s
+       s = 4*V*cq**2*s
        return
     endif
     ! different flavours: one outgoing parton continues the incoming line
@@ -148,8 +145,11 @@ contains
     call spinoru(6, pm, za, zb)
     call ampqqb_qqb(2, 1, 5, 6, A, B)
     cQ2 = eq(abs(fl(kq)))
+    ! the incoming line is read as (2,1), against MCFM's orientation (1,2)
+    ! (qqb_z2jet): the photon on the pair line (B) has the opposite sign
+    ! (charge-odd e_q e_Q term; checked against Feynman diagrams, fd31.py)
     do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
-       s = s + abs(cq*A(j1,j2,j3) + cQ2*B(j1,j2,j3))**2
+       s = s + abs(cq*A(j1,j2,j3) - cQ2*B(j1,j2,j3))**2
     enddo; enddo; enddo
     s = 4*V*s
   end subroutine four_quark
