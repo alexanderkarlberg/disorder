@@ -1,5 +1,11 @@
 # NLO DIS 3+1 validation on the cluster: instructions for Claude
 
+**Done without the cluster (3 Oct 2026, MPP machines):** NNLOJET RV + RR =
+29.99 ± 0.68 pb against nlo31's 30.34 ± 0.29 pb (0.5σ), six Q² bins
+χ² = 9.2/6; see `docs/notebook.md` (3 Oct, "NLO 3+1 validated"). The
+instructions below are kept for a more precise or extended run (Z/W,
+distributions).
+
 Written 3 Oct 2026 (night, on thA371a) for the Claude session that AK starts
 on the cluster (Slurm, partition `alma`, 24 h wall time, at most 10k running
 and 30k queued jobs). Read this file, `CLAUDE.md`, `docs/dis31-plan.md` and

@@ -66,3 +66,47 @@ P2B in disorder and the (3,0)/(0,3) pieces of N3LO VBF.
 3. LO 4+1 integration (with jet cuts), checks of the cross section.
 4. One loop 3+1 (crossed BDK) vs NNLOJET; I, K, P; NLO 3+1.
 5. Validation 4; then the τ₂-sliced NNLO 2+1.
+
+## Next: NNLO 2+1 below the cut (survey, 3 Oct)
+
+The O(α_s²) terms of σ(τ₂ < τ_cut) = H × B × J × J × S for one beam and two
+jets. MCFM 10.3 (`src/SCET1j`, Z+jet by 1-jettiness, the same three
+coloured directions crossed) gives:
+- beam functions at NNLO (`SCET/xbeam1bis.f`, `I2qq.f`, `I2gg.f`) and jet
+  functions (`SCET1j/jet.f90`, GSTW (A.10)–(A.12)): usable as they are (Q_B,
+  Q_J = 2E as in our NLO slicing);
+- soft function (`SCET1j/soft1.f90`, geometric measure): the logarithmic
+  and abelian two-loop terms are analytic in general y_ij; the non-abelian
+  two-loop constant is a fit (Campbell, Ellis, Mondini, Williams,
+  arXiv:1711.09984) in y31, y23 with y12 = 1 (back-to-back beams): not
+  usable for DIS as it is;
+- two-loop hard function (`Zampqqbgsq`, Becher–Lorentzen–Schwartz
+  coefficients): timelike regions only (q² > 0), no spacelike continuation:
+  not usable.
+Replacements:
+- hard: Gehrmann, Glover, arXiv:0904.2665, two-loop helicity amplitudes for
+  (2+1)-jet DIS, with FORM/Fortran files in the arXiv sources and the
+  variable transformations for the spacelike regions; check against
+  NNLOJET's DIS double-virtual pointwise;
+- soft: Bell, Dehnadi, Mohrmann, Rahn, arXiv:2312.11626 (SoftSERVE, NNLO
+  N-jettiness soft function, numerical grids for 1- and 2-jettiness as
+  ancillary files): to check whether its 1-jettiness grids (three Wilson
+  lines) cover our geometry and normalisations (Breit frame, Q_i = 2E_i),
+  possibly after a boost; otherwise compute with the SoftSERVE method or
+  Buonocore et al., arXiv:2604.13167. Check: the τ_cut independence of the
+  sliced NNLO 2+1 and its projection against DISENT-based NNLO 1+1.
+
+Soft function, follow-up (2312.11626, from the abstract page and HTML): with
+Q_i = 2ω_i in a given frame the soft function depends only on
+n_ij = 1 − n̂_i·n̂_j. For three directions that is three numbers; the
+1-jettiness grids (about 30,000 points, Laplace space, α_s/4π) have the
+two beams back to back (n_12 = 2), a two-parameter slice. Our Breit-frame
+definition has all three n_ij general, so it is not covered. Option: define
+τ₂ event by event in the frame where the incoming parton and one jet are
+back to back (as MCFM's `tauboost` uses the Z+jet rest frame), with
+Q_i = 2E_i there. Then the three directions are "beam, back-to-back jet,
+other jet", i.e. the hadronic 1-jettiness geometry, and the grids (or the
+CEMW fit, where valid) apply, with the colour assignment by which direction
+is the gluon. The NLO slicing (beam/jet Q_i, the I_ijm) must then move to
+the same frame. To settle by reading the paper and the grids before
+building.

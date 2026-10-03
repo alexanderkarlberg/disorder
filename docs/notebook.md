@@ -1661,3 +1661,58 @@ Technical cut on R − dipoles (smallest 2p_i·p_j / W², default 1e-9;
 - 1e-11: −29.06 ± 0.48 pb.
 No trend; the largest difference is 1.4σ. All 12 seeds together give
 R − D ≈ −29.5 ± 0.3 pb and an NLO correction ≈ 30.5 ± 0.3 pb.
+
+**NLO 3+1 validated against NNLOJET (3 Oct, day).** Runs on the MPP machines
+(AK's rules: thservs nice 10, desktops nice 19 with at most half the cores;
+dispatcher `dis31/validation/dispatch.sh`).
+
+NNLOJET v1.0.2, runcard `dis31/validation/nnlojet_epLJJ_3j.run`:
+- RV: 15 jobs × 300k points from the pilot grid, 56.03 ± 0.14 pb;
+- RR: 220 independent jobs (warm-up 3 × 10k, production 40k each),
+  −26.04 ± 0.66 pb. These are equal weights with error = scatter/√N.
+  - The per-job values have heavy tails on both sides (−65 to +67 pb;
+    median per-job error 5.0 pb, scatter 9.8 pb).
+  - Inverse variance gives −25.12 ± 0.32 pb, which is biased.
+  - Symmetric trimming of 1–5% gives −26.3 ± 0.5 pb.
+
+nlo31: 36 r seeds (12 from the night run plus 24 new, 1 M × 6 each), 6 vi,
+2 kp; the vi and kp from the new runs.
+
+| | nlo31 [pb] | NNLOJET [pb] |
+|---|---|---|
+| NLO correction (≥ 3 jets) | 30.34 ± 0.29 | RV + RR 29.99 ± 0.68 (0.5σ) |
+
+| Q² [GeV²] | nlo31 | NNLOJET | pull |
+|---|---|---|---|
+| 150–200 | 7.417 ± 0.131 | 7.178 ± 0.288 | +0.8 |
+| 200–300 | 7.786 ± 0.122 | 7.606 ± 0.259 | +0.6 |
+| 300–500 | 6.624 ± 0.091 | 7.143 ± 0.477 | −1.1 |
+| 500–1000 | 4.944 ± 0.082 | 4.500 ± 0.170 | +2.3 |
+| 1000–3000 | 2.858 ± 0.055 | 2.766 ± 0.133 | +0.6 |
+| 3000–15000 | 0.715 ± 0.023 | 0.794 ± 0.069 | −1.1 |
+
+χ² = 9.2 for 6 bins (p ≈ 0.16). The NNLOJET bin errors are themselves
+uncertain because of the tails. With the LO agreement (0.8σ), this
+validates the NLO 3+1 (photon exchange) at the 2% level of the correction,
+i.e. about 0.6% of the NLO cross section.
+
+**Correction (combination of the r seeds).** The night entry's "R − D ≈
+−29.5 ± 0.3 pb, NLO correction ≈ 30.5 ± 0.3 pb" (and the −30.025 ± 0.455
+of 4 seeds) used inverse-variance weights of the VEGAS errors.
+- For R − dipoles these errors are correlated with the values: low
+  fluctuations come with small errors. One new seed is −37.5 ± 1.9 pb, a 4σ
+  pull.
+- Inverse-variance weighting is therefore biased: for the 24 new seeds it
+  gives −29.37 against −29.75 ± 0.40 pb with equal weights.
+- `dis31/combine_nlo31.py` now uses equal weights with scatter errors and
+  prints inverse variance as a check.
+- Corrected values for the night runs (equal weights):
+  - technical cut 1e-7: −29.31 ± 0.65 pb;
+  - 1e-9: −29.81 ± 0.39 pb;
+  - 1e-11: −28.76 ± 0.69 pb;
+  - all 12 seeds: −29.29 ± 0.34 pb.
+  The technical-cut independence still holds.
+
+Operational note: the first nlo31 batch on the thservs was lost. The
+launch line ended in `> /dev/null 2>&1` after the job's own redirect, so the
+last redirect won and the output was discarded. The batch was rerun.

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""Combine nlo31 outputs: per part (lo, vi, kp, r) the seeds by inverse
-variance (the VEGAS errors), then the NLO correction vi + kp + r and LO + NLO.
+"""Combine nlo31 outputs: per part (lo, vi, kp, r) the seeds with equal
+weights (runs with equal statistics), error = seed scatter/sqrt(N); then the
+NLO correction vi + kp + r and LO + NLO. The real part has heavy tails and
+VEGAS errors correlated with the values, which biases inverse-variance
+weighting (3 Oct 2026: -29.37 against -29.75 +- 0.40 pb for 24 seeds), so
+that is only printed as a cross check (and used when there is one seed).
 Usage: combine_nlo31.py file1.out file2.out ...
 The Q^2 bins are combined with the same weights as the totals of each seed."""
 import re, sys, collections, math
@@ -22,18 +26,21 @@ for fn in sys.argv[1:]:
 
 comb = {}
 for part, lst in sorted(res.items()):
+    n = len(lst)
     w = [1/e**2 for _, e, _, _ in lst]
-    tot = sum(t*wi for (t, _, _, _), wi in zip(lst, w))/sum(w)
-    err = math.sqrt(1/sum(w))
+    tiv = sum(t*wi for (t, _, _, _), wi in zip(lst, w))/sum(w)
+    eiv = math.sqrt(1/sum(w))
     nb = len(lst[0][2])
-    bins = [sum(b[2][i]*wi for b, wi in zip(lst, w))/sum(w) for i in range(nb)]
-    # seed scatter as a cross check of the VEGAS errors
-    sc = 0
-    if len(lst) > 1:
-        sc = math.sqrt(sum((t - tot)**2 for t, _, _, _ in lst)/(len(lst) - 1)/len(lst))
+    if n > 1:
+        tot = sum(t for t, _, _, _ in lst)/n
+        err = math.sqrt(sum((t - tot)**2 for t, _, _, _ in lst)/(n - 1)/n)
+        bins = [sum(b[2][i] for b in lst)/n for i in range(nb)]
+        berr = [math.sqrt(sum((b[2][i] - bins[i])**2 for b in lst)/(n - 1)/n) for i in range(nb)]
+    else:
+        tot, err, bins, berr = tiv, eiv, lst[0][2], [0]*nb
     comb[part] = (tot, err, bins)
-    print('%-3s %2d seeds: %14.6e +- %.3e   (seed scatter %.3e)' % (part, len(lst), tot, err, sc))
-    print('     Q2 bins:', ' '.join('%.4e' % b for b in bins))
+    print('%-3s %2d seeds: %14.6e +- %.3e   (inverse variance %.6e +- %.3e)' % (part, n, tot, err, tiv, eiv))
+    print('     Q2 bins:', ' '.join('%.4e(%.1e)' % (b, e) for b, e in zip(bins, berr)))
 if all(p in comb for p in ('vi', 'kp', 'r')):
     t = sum(comb[p][0] for p in ('vi', 'kp', 'r'))
     e = math.sqrt(sum(comb[p][1]**2 for p in ('vi', 'kp', 'r')))
