@@ -98,6 +98,26 @@ Q² bins to about 2%.
 - Optional, cheap: NNLOJET channel R at high statistics for a sharper LO
   check.
 
+### MPP machines (instead of, or in addition to, the cluster)
+
+AK (3 Oct): the institute machines may be used, and should be scanned
+first:
+- thservs (thserv05–24, 64 logical cores each): nice 10, at most 30 of
+  your jobs per machine, and keep the machine's total load at or below ~32
+  (beyond that hyperthreading slows every job);
+- other th machines (desktops; fewer cores but much faster): nice 19,
+  never more than half of the logical cores, and not more than the cores
+  that are actually free (several run other people's jobs);
+- AK's own thA371a: never niced.
+A dispatcher that respects these limits and starts queued jobs every 10
+minutes: `dis31/validation/dispatch.sh <queue dir> <command>` (log next to it) on
+thA371a (start it from an interactive session so that ssh has Kerberos
+credentials; it skips hosts without the NFS mount of /home/thA371a, where
+`ssh -f` would otherwise report success for a job that never started).
+After a launch, check that the jobs really run (state R, not T: the
+desktops' overheatd stops hot jobs) and audit running processes against the
+queue.
+
 ## 4. Comparison
 
 - σ(≥ 3 jets): nlo31 vi + kp + r against NNLOJET RV + RR; also LO + NLO.
