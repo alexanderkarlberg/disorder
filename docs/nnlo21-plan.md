@@ -81,3 +81,25 @@ Checks of the measure:
 3. Against NNLOJET's DIS dijet NNLO (epLJJ, photon exchange): the inclusive
    dijet cross section and distributions at HERA kinematics.
 4. The projection to 1+1 at N3LO later (P2B with disorder).
+
+## Steps (3 Oct, evening)
+
+1. Done: measure (NLO converges); two-loop hard function (`nnlo21/hard21.f90`,
+   one loop equal to the DISENT-based one to 1e-9).
+2. Below-cut cumulant per 2+1 Born (`nnlo21/lp21`), from MCFM 10.3's
+   SCET1j pieces (built from an MCFM tree, not copied):
+   - beam: `xbeam1bis`/`xbeam2bis`, z-integrated and tabulated in ξ at
+     μ = Q, Q_B = μ; the Q_B = 2E_a dependence as an exact shift of the
+     cumulant polynomial in ln(τ_cut/μ) + ln(Q_B/μ);
+   - jets: `jetq`/`jetg` at Q_J = 2E_J;
+   - soft: `soft_ab_*` + `soft_nab_*` (quark channel = MCFM's qgq with
+     1 = jet q, 2 = jet g, 3 = beam q; gluon channel = qag with
+     1 = jet q, 2 = jet q̄, 3 = beam g), y_ij in the jets' frame;
+   - hard: `hard21` (the n_f,γ term per quark charge);
+   - assembly: `assemblejet`, with jet 2 in place of beam b.
+   Check: the O(α_s) part equals the NLO cumulant of `mod_tau2_run`
+   (measure 2) pointwise.
+3. Driver: 2+1 Born integration in the HERA set-up (dijets) with the
+   below-cut weight; above the cut, `nlo31` with τ₂ > τ_cut in place of
+   ≥ 3 jets and a 2+1 observable.
+4. Validation: τ_cut independence; NNLOJET epLJJ dijet NNLO (photon).
