@@ -1767,3 +1767,76 @@ of 4 seeds) used inverse-variance weights of the VEGAS errors.
 Operational note: the first nlo31 batch on the thservs was lost. The
 launch line ended in `> /dev/null 2>&1` after the job's own redirect, so the
 last redirect won and the output was discarded. The batch was rerun.
+
+## 2026-10-03 (evening) — NNLO DIS 2+1: measure, hard function (branch 2026-10-nnlo21)
+
+AK: "If it all looks right I suggest you move on to the 2+1 NNLO (after
+pushing and publishing)." Plan: `docs/nnlo21-plan.md`. Branch
+`2026-10-nnlo21` off `2026-10-dis31`, with the DISENT fix 5262826
+cherry-picked (slicing must not use the unfixed DISENT). The notebook
+conflict was resolved by keeping both entries.
+
+**Measure: geometric in the jets' rest frame** (`-measure cm`, measure = 2
+in `slicing/mod_tau2_run.f90`). For each partition of the outgoing partons
+into beam / jet 1 / jet 2, let u be the four-velocity of P_J1 + P_J2. Then
+T_π = Σ_beam P·p_k/P·u + Σ_jets (u·P_J − |P_J|_u) (covariant), and T₂ = min_π T_π.
+- In every singular limit the frame is the Born's partonic CM frame, where
+  the two jets are back to back. The NNLO soft function then depends on one
+  angle and is known numerically: Bell, Dehnadi, Mohrmann, Rahn
+  2312.11626 (grids), and the CEMW fit in MCFM.
+- **Change of route against the 2 Oct entry** (invariant measure plus our
+  own 2604.13167 soft function). With the invariant measure the soft
+  function depends on two variables and is not tabulated anywhere; the
+  new measure needs only published results.
+- Unit test: boost invariance to 1e-15; the soft limit equals
+  min_i n_i·k in the Born CM frame. Jet masses are computed as
+  m²/(u·P + |P|), avoiding a cancellation at small mass.
+- NLO 2+1 against DISENT (x = 0.01, Q² = 400 GeV², 60 × 2M events,
+  `slicing-runs/cm-x0.01-Q400`), all τ bins, (below + above − DISENT)/DISENT:
+
+  | τ_cut | (sum − DISENT)/DISENT |
+  |---|---|
+  | 5e-4 | −0.080 ± 0.006 |
+  | 2e-4 | −0.029 ± 0.008 |
+  | 1e-4 | −0.029 ± 0.011 |
+  | 3e-5 | −0.024 ± 0.016 |
+  | 1e-5 | −0.012 ± 0.022 |
+
+  Each τ bin is within 1σ of zero at 1e-5, and power corrections approach
+  from below, as for the Breit-frame measure.
+
+**Two-loop hard function** (`nnlo21/hard21.f90`, README there).
+- Two-loop helicity coefficients for (2+1)-jet DIS: Gehrmann, Glover,
+  0904.2665. Their arXiv Fortran covers eight DIS regions, but the helicity
+  sum of the quark channel also needs the q ↔ q̄ partner of each region
+  (as MCFM's `iperm` loop), which is in none of the eight.
+- NNLOJET v1.0.2 (GPL) has all 16 regions of the analytic continuation
+  with their partners (`B1gNZ.f`, `helcoeff`).
+  - Its region coefficients equal 0904.2665's in all eight shared regions:
+    all two-loop coefficients exactly, and the one-loop ones after
+    a = a_NJ + (11/24)(L13+L23), c = c_NJ − (1/3)(L13+L23).
+  - The shift was fitted at 12 points and then checked at 4–16 points per
+    region, 30 coefficients, ≤ 1e-6.
+- Catani → SCET: C1 = Ω1 + I1 Ω0 and C2 = Ω2 + I1 Ω1 + (I1²/2 + R⁰) Ω0 at
+  μ² = Q², complex logs ln(−s_ij/μ² − i0).
+  - Derived in `nnlo21/scheme_conversion.py`.
+  - Symbolically equal to MCFM's timelike `schemeconvC0` and
+    `schemeconv2lM0`. MCFM's factors 2 and 4 belong to its α_s/4π
+    coefficients.
+- Tests (`nnlo21/tests/harness_hard21.f90`):
+  - tree ∝ MATTHR (ratio × Q⁴ constant);
+  - **one loop equal to the DISENT-based hard function of the NLO slicing
+    to 3e-11 (quark) and 1e-9 (gluon) at 40 random points**;
+  - two loop smooth along angular scans, except a 0.2% step at
+    2p₁·p₂ = Q² (NNLOJET's displacement of v by 1e-3 at v → 1); negligible
+    after integration.
+
+Surveyed for the rest (plan):
+- beam functions (MCFM `xbeam*`, `I2qq`, `I2gg`) and jet functions
+  (`SCET1j/jet.f90`) at NNLO;
+- soft function: MCFM `soft1.f90`, analytic in general y_ij except the
+  non-abelian constant (CEMW fit, valid for back-to-back 1, 2). The quark
+  channel maps onto MCFM's "qgq" (jets q, g back to back, beam q) and the
+  gluon channel onto "qag". Cross-check against 2312.11626's grids.
+- assembly: MCFM's `assemblejet`, with our second jet function in place of
+  its second beam.
