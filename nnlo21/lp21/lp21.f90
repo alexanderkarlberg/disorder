@@ -50,7 +50,7 @@ module lp21
   real(dp), allocatable, save :: tab(:,:,:)       ! (0:nt, 9, 3)
   real(dp), save :: zx                              ! xi of the z integrand
   integer, save :: zlim = 30
-  public :: lp21_init, lp21_born, lp21_beam_direct, lp21_shift
+  public :: lp21_init, lp21_born, lp21_beam_direct, lp21_shift, beam_at
 contains
 
   ! MCFM's common blocks at mu = mu_F = Q; table of the beam coefficients

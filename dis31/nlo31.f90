@@ -13,7 +13,14 @@
 ! Phase space in the Breit frame: Q^2 (log), y, eta (log, x_B < eta < 1),
 ! the hadronic system by sequential two-body decays; mu_R = mu_F = Q.
 !
-! Usage: nlo31 part ncall itmx [seed]   (part = lo, vi, kp, r)
+! Mode 1 (nnlo21): the above-cut part of tau_2-sliced NNLO DIS 2+1 at fixed
+! (x, Q^2): dsigma/dx dQ^2 [pb/GeV^2] with the jet function replaced by
+! theta(tau_2 > tau_cut) for ntc values of tau_cut (tau_2 = T_2/Q in the
+! jets' rest frame, slicing/mod_tau2_run.f90 measure 2) in bins of tau_zQ
+! (as the NLO slicing tests); lo then is the O(alpha_s^2) part of NLO 2+1
+! above the cut, vi + kp + r the O(alpha_s^3) part of NNLO 2+1 above it.
+!
+! Usage: nlo31 part ncall itmx [seed [techcut [mode x Q2]]]   (part = lo, vi, kp, r)
 !-----------------------------------------------------------------------
 module nlo31_mod
   use born31
@@ -41,6 +48,17 @@ module nlo31_mod
   integer, parameter :: nq = 6
   real(dp), parameter :: qedge(0:nq) = [150.0_dp, 200.0_dp, 300.0_dp, 500.0_dp, 1000.0_dp, 3000.0_dp, 15000.0_dp]
   real(dp) :: hist(nq), hist2(nq), hacc(nq)
+  ! mode 1: fixed (x, Q^2), cells (tau_cut k, tau_zQ bin b) -> k + ntc*(b - 1)
+  integer :: mode = 0
+  real(dp) :: xfix = 0.01_dp, Q2fix = 400
+  integer, parameter :: ntc = 10, nzb = 6, ncell = ntc*nzb
+  real(dp), parameter :: tcs(ntc) = [2e-2_dp, 1e-2_dp, 5e-3_dp, 2e-3_dp, 1e-3_dp, 5e-4_dp, 2e-4_dp, 1e-4_dp, &
+       & 3e-5_dp, 1e-5_dp]
+  real(dp), parameter :: zlo(nzb) = [0.05_dp, 0.1_dp, 0.2_dp, 0.3_dp, 0.4_dp, 0.05_dp]
+  real(dp), parameter :: zhi(nzb) = [0.1_dp, 0.2_dp, 0.3_dp, 0.4_dp, 0.5_dp, 0.5_dp]
+  integer :: nv = 1                ! length of the acceptance vector: 1 (mode 0), ncell (mode 1)
+  integer :: iv = 1                ! the cell VEGAS integrates (mode 1: smallest tau_cut, all tau_zQ)
+  real(dp) :: hc(ncell), hc2, hcacc(ncell)
 contains
 
   subroutine setup_flavours()
@@ -89,6 +107,16 @@ contains
     real(dp), intent(in) :: r(3)
     real(dp), intent(out) :: Q2, y, xB, eta, jac
     logical, intent(out) :: ok
+    if (mode == 1) then
+       ! fixed (x, Q^2): dsigma/dx dQ^2 = (y/x) dsigma/dQ^2 dy
+       Q2 = Q2fix; xB = xfix; y = Q2/(xB*s)
+       ok = y < 1
+       jac = 0; eta = 0
+       if (.not. ok) return
+       eta = xB*(1/xB)**r(3)
+       jac = y/xB*eta*log(1/xB)
+       return
+    endif
     Q2 = q2min*(q2max/q2min)**r(1)
     y = ymin + (ymax - ymin)*r(2)
     xB = Q2/(y*s)
@@ -233,14 +261,15 @@ contains
     real(dp), intent(in) :: r(:), wgt
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,7), dphi, as, fpdf(-5:5), w, x, fa(-5:5)
-    real(dp) :: u1(3), u2(3), u4(3), m3(3,3), c3(3,3), t(3), eq1, eq2
+    real(dp) :: u1(3), u2(3), u4(3), m3(3,3), c3(3,3), t(3), eq1, eq2, acc(nv)
     logical :: ok
     integer :: f, Q, k
     res = 0
     call lepton(r(1:3), Q2, y, xB, eta, jac, ok)
     if (.not. ok) return
     call breit(3, r(4:8), Q2, y, xB, eta, Pk, dphi)
-    if (njets(Pk(:,2:4), 3) < njmin) return
+    call accept(Pk(:,1), Pk(:,2:4), 3, sqrt(Q2), acc)
+    if (all(acc == 0)) return
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**2
@@ -279,7 +308,12 @@ contains
        enddo
     enddo
     res = res*w
-    if (res /= 0) call fill(Q2, res*wgt)
+    if (mode == 1) then
+       hcacc = hcacc + res*wgt*acc
+       res = res*acc(iv)
+    elseif (res /= 0) then
+       call fill(Q2, res*wgt)
+    endif
   contains
     ! one Born flavour class with incoming fb and values val(3)
     real(dp) function bterm(fb, val)
@@ -347,26 +381,39 @@ contains
     real(dp), intent(in) :: Pk(4,8)
     integer, intent(in) :: fl(5)
     logical, intent(in) :: pass4
-    real(dp) :: m4, P3(4,7,dip41_max), val(dip41_max)
+    real(dp) :: subv(nv), F4(nv)
+    F4 = merge(1.0_dp, 0.0_dp, pass4)
+    call real_evalv(Pk, fl, F4, subv)
+    sub = subv(1)
+  end function real_eval
+
+  ! the same with acceptance vectors: F4 for the real, accept() for each
+  ! dipole's mapped Born
+  subroutine real_evalv(Pk, fl, F4, sub)
+    real(dp), intent(in) :: Pk(4,8), F4(nv)
+    integer, intent(in) :: fl(5)
+    real(dp), intent(out) :: sub(nv)
+    real(dp) :: m4, P3(4,7,dip41_max), val(dip41_max), F3(nv)
     integer :: fl3(4,dip41_max), nd, id
     sub = 0
-    if (pass4) then
+    if (any(F4 /= 0)) then
        call me41_tree(Pk, fl, m4)
-       sub = m4
+       sub = m4*F4
     endif
     call dip41_list(Pk, fl, nd, P3, fl3, val)
     do id = 1, nd
-       if (njets(P3(:,2:4,id), 3) >= njmin) sub = sub - val(id)
+       call accept(P3(:,1,id), P3(:,2:4,id), 3, sqrt(-mdot(P3(:,5,id), P3(:,5,id))), F3)
+       sub = sub - val(id)*F3
     enddo
-  end function real_eval
+  end subroutine real_evalv
 
   real(dp) function real_part(r, wgt) result(res)
     real(dp), intent(in) :: r(:), wgt
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,8), dphi, as, fpdf(-5:5), w, smin, W2
-    real(dp) :: u1, u2, u4, u6, m3(3), c3(3), m5(3), c5(3), eq1, eq2, sg
-    integer :: i, j, f, Q, Q2i
-    logical :: ok, pass4
+    real(dp) :: u1(nv), u2(nv), u4(nv), u6(nv), m3(nv,3), c3(nv,3), m5(nv,3), c5(nv,3), eq1, eq2, sg(nv), F4(nv)
+    integer :: i, j, f, Q, Q2i, ic
+    logical :: ok
     res = 0
     call lepton(r(1:3), Q2, y, xB, eta, jac, ok)
     if (.not. ok) return
@@ -379,20 +426,22 @@ contains
        enddo
     enddo
     if (smin < techcut*W2) return
-    pass4 = njets(Pk(:,2:5), 4) >= njmin
+    call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(Q2), F4)
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**3
     ! unit-charge values
-    u1 = 9*real_eval(Pk, [1, 1, 0, 0, 0], pass4)        ! q -> q g g g
-    u2 = 9*real_eval(Pk, [0, 1, -1, 0, 0], pass4)       ! g -> q qbar g g
-    u4 = 9*real_eval(Pk, [1, 1, 1, -1, 0], pass4)       ! q -> q q qbar g
-    u6 = 9*real_eval(Pk, [0, 1, -1, 1, -1], pass4)      ! g -> q qbar q qbar
-    m3 = [real_eval(Pk, [1, 1, 2, -2, 0], pass4), real_eval(Pk, [2, 2, 1, -1, 0], pass4), &
-         & real_eval(Pk, [1, 1, 3, -3, 0], pass4)]
-    m5 = [real_eval(Pk, [0, 1, -1, 2, -2], pass4), real_eval(Pk, [0, 2, -2, 1, -1], pass4), &
-         & real_eval(Pk, [0, 1, -1, 3, -3], pass4)]
-    call solve3(m3, c3); call solve3(m5, c5)
+    call real_evalv(Pk, [1, 1, 0, 0, 0], F4, u1); u1 = 9*u1        ! q -> q g g g
+    call real_evalv(Pk, [0, 1, -1, 0, 0], F4, u2); u2 = 9*u2       ! g -> q qbar g g
+    call real_evalv(Pk, [1, 1, 1, -1, 0], F4, u4); u4 = 9*u4       ! q -> q q qbar g
+    call real_evalv(Pk, [0, 1, -1, 1, -1], F4, u6); u6 = 9*u6      ! g -> q qbar q qbar
+    call real_evalv(Pk, [1, 1, 2, -2, 0], F4, m3(:,1)); call real_evalv(Pk, [2, 2, 1, -1, 0], F4, m3(:,2))
+    call real_evalv(Pk, [1, 1, 3, -3, 0], F4, m3(:,3))
+    call real_evalv(Pk, [0, 1, -1, 2, -2], F4, m5(:,1)); call real_evalv(Pk, [0, 2, -2, 1, -1], F4, m5(:,2))
+    call real_evalv(Pk, [0, 1, -1, 3, -3], F4, m5(:,3))
+    do ic = 1, nv
+       call solve3(m3(ic,:), c3(ic,:)); call solve3(m5(ic,:), c5(ic,:))
+    enddo
     sg = 0
     do f = -5, 5
        if (f == 0) cycle
@@ -401,7 +450,7 @@ contains
        do Q = 1, 5
           if (Q == abs(f)) cycle
           eq2 = ech(Q)
-          sg = sg + fpdf(f)*(eq1**2*c3(1) + eq2**2*c3(2) + eq1*eq2*c3(3))
+          sg = sg + fpdf(f)*(eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3))
        enddo
     enddo
     do Q = 1, 5
@@ -409,12 +458,87 @@ contains
        sg = sg + fpdf(0)*eq1**2*(u2/2 + u6/4)
        do Q2i = Q + 1, 5
           eq2 = ech(Q2i)
-          sg = sg + fpdf(0)*(eq1**2*c5(1) + eq2**2*c5(2) + eq1*eq2*c5(3))
+          sg = sg + fpdf(0)*(eq1**2*c5(:,1) + eq2**2*c5(:,2) + eq1*eq2*c5(:,3))
        enddo
     enddo
-    res = sg*w
-    if (res /= 0) call fill(Q2, res*wgt)
+    if (mode == 1) then
+       hcacc = hcacc + sg*w*wgt
+       res = sg(iv)*w
+    else
+       res = sg(1)*w
+       if (res /= 0) call fill(Q2, res*wgt)
+    endif
   end function real_part
+
+  ! acceptance vector F(nv) of the n outgoing partons p(4,n) (incoming parton
+  ! pin): mode 0: F(1) = (>= njmin jets); mode 1: F(k + ntc*(b-1)) =
+  ! theta(tau_2 > tcs(k)) theta(zlo(b) <= tau_zQ < zhi(b))
+  subroutine accept(pin, p, n, Q, F)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: pin(4), p(4,n), Q
+    real(dp), intent(out) :: F(nv)
+    real(dp) :: t2, tz
+    integer :: k, b, i
+    if (mode == 0) then
+       F(1) = merge(1.0_dp, 0.0_dp, njets(p, n) >= njmin)
+       return
+    endif
+    F = 0
+    tz = 1
+    do i = 1, n
+       if (p(3,i) < 0) tz = tz + 2*p(3,i)/Q
+    enddo
+    t2 = tau2cm(pin, p, n)/Q
+    do b = 1, nzb
+       if (tz < zlo(b) .or. tz >= zhi(b)) cycle
+       do k = 1, ntc
+          if (t2 > tcs(k)) F(k + ntc*(b - 1)) = 1
+       enddo
+    enddo
+  end subroutine accept
+
+  ! T_2 in the jets' rest frame (slicing/mod_tau2_run.f90, measure 2): min over
+  ! partitions into beam / jet 1 / jet 2 of sum_beam P.p/P.u + sum_jets m^2/(u.P + |P|_u),
+  ! u = (P_J1 + P_J2)/m; the incoming parton gives the beam direction
+  real(dp) function tau2cm(pin, p, n) result(T)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: pin(4), p(4,n)
+    integer :: code, m, k, a(6), fj
+    real(dp) :: PJ(4,2), u(4), mu2, tp, uP, m2
+    T = huge(1.0_dp)
+    do code = 0, 3**n - 1
+       m = code
+       do k = 1, n
+          a(k) = mod(m, 3); m = m/3
+       enddo
+       if (.not. (any(a(1:n) == 1) .and. any(a(1:n) == 2))) cycle
+       fj = 0
+       do k = 1, n
+          if (a(k) > 0) then
+             fj = a(k); exit
+          endif
+       enddo
+       if (fj == 2) cycle
+       PJ = 0
+       do k = 1, n
+          if (a(k) > 0) PJ(:,a(k)) = PJ(:,a(k)) + p(:,k)
+       enddo
+       u = PJ(:,1) + PJ(:,2)
+       mu2 = mdot(u, u)
+       if (mu2 <= 0) cycle
+       u = u/sqrt(mu2)
+       tp = 0
+       do k = 1, n
+          if (a(k) == 0) tp = tp + mdot(pin, p(:,k))/mdot(pin, u)
+       enddo
+       do k = 1, 2
+          uP = mdot(u, PJ(:,k)); m2 = max(mdot(PJ(:,k), PJ(:,k)), 0.0_dp)
+          tp = tp + m2/(uP + sqrt(max(uP*uP - m2, 0.0_dp)))
+       enddo
+       T = min(T, tp)
+    enddo
+    T = max(T, 0.0_dp)
+  end function tau2cm
 
   ! inclusive kt (R = rjet, E-scheme) on n massless partons in the Breit
   ! frame (z = the proton direction); number of jets with p_T > ptmin
@@ -479,8 +603,14 @@ contains
   ! VEGAS (Lepage), importance sampling with a factorised grid; per
   ! iteration estimates combined with inverse-variance weights. Histograms:
   ! per-iteration sums of w f, combined the same way as the integral.
-  subroutine vegas(ndim, ncall, itmx, avg, err, chi2)
+  subroutine vegas(ndim, ncall, itmx, avg, err, chi2, fun)
     integer, intent(in) :: ndim, ncall, itmx
+    interface
+       real(dp) function fun(r, wgt)
+         import :: dp
+         real(dp), intent(in) :: r(:), wgt
+       end function fun
+    end interface
     real(dp), intent(out) :: avg, err, chi2
     integer, parameter :: nbin = 50
     real(dp) :: xi(0:nbin,ndim), d(nbin,ndim), r(ndim), x(ndim), jac, f, f2, s1, s2, wsum, sumw, sumwi
@@ -489,10 +619,10 @@ contains
     do j = 1, ndim
        xi(:,j) = [(real(i, dp)/nbin, i = 0, nbin)]
     enddo
-    hist = 0; hist2 = 0
+    hist = 0; hist2 = 0; hc = 0; hc2 = 0
     sumw = 0; sumwi = 0
     do it = 1, itmx
-       d = 0; s1 = 0; s2 = 0; hacc = 0
+       d = 0; s1 = 0; s2 = 0; hacc = 0; hcacc = 0
        do ic = 1, ncall
           call random_number(r)
           jac = 1
@@ -503,7 +633,7 @@ contains
              x(j) = xi(ia(j)-1,j) + (xn - (ia(j) - 1))*xo
              jac = jac*xo*nbin
           enddo
-          f = integrand(x, jac/ncall)*jac
+          f = fun(x, jac/ncall)*jac
           if (f /= f) f = 0
           s1 = s1 + f; s2 = s2 + f*f
           do j = 1, ndim
@@ -516,6 +646,7 @@ contains
        ! histograms: this iteration's estimate, weighted like the integral
        if (it >= min(2, itmx)) then
           hist = hist + hacc/s2; hist2 = hist2 + 1/s2
+          hc = hc + hcacc/s2; hc2 = hc2 + 1/s2
        endif
        write(*,'(a,i3,a,es16.8,a,es12.4)') ' iteration', it, ':', s1, ' +-', sqrt(s2)
        flush(6)
@@ -558,6 +689,7 @@ contains
     enddo
     chi2 = chi2/max(itmx - min(2, itmx), 1)
     hist = hist/hist2
+    if (hc2 > 0) hc = hc/hc2
     if (.false.) print *, f2, sumw, sumwi
   end subroutine vegas
 
@@ -651,6 +783,14 @@ program nlo31
   if (command_argument_count() > 4) then
      call get_command_argument(5, arg); read(arg, *) techcut
   endif
+  if (command_argument_count() > 7) then
+     call get_command_argument(6, arg); read(arg, *) mode
+     call get_command_argument(7, arg); read(arg, *) xfix
+     call get_command_argument(8, arg); read(arg, *) Q2fix
+  endif
+  if (mode == 1) then
+     nv = ncell; iv = ntc + ntc*(nzb - 1)
+  endif
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]
   call random_seed(put=sd)
@@ -667,12 +807,20 @@ program nlo31
   case ('r'); ndim = 11
   case default; stop 'part: lo, vi, kp or r'
   end select
-  write(*,'(a,a,a,i10,a,i4,a,i6,a,es9.2)') ' nlo31 part ', trim(part), ' ncall', ncall, ' itmx', itmx, &
-       & ' seed', seed, ' techcut', techcut
-  call vegas(ndim, ncall, itmx, avg, err, chi2)
+  write(*,'(a,a,a,i10,a,i4,a,i6,a,es9.2,a,i2,a,f9.6,a,f10.2)') ' nlo31 part ', trim(part), ' ncall', ncall, &
+       & ' itmx', itmx, ' seed', seed, ' techcut', techcut, ' mode', mode, ' x', xfix, ' Q2', Q2fix
+  call vegas(ndim, ncall, itmx, avg, err, chi2, integrand)
   write(*,'(a,a,a,es16.8,a,es12.4,a,f8.3)') ' RESULT ', trim(part), ' sigma(>=3 jets) [pb] = ', avg, ' +- ', err, &
        & '   chi2/it', chi2
-  do i = 1, nq
-     write(*,'(a,2f9.1,es16.8)') ' Q2bin', qedge(i-1), qedge(i), hist(i)
-  enddo
+  if (mode == 1) then
+     write(*,'(a)') ' CELLS dsigma/dx dQ2 [pb/GeV2] above the cut: tau_zQ bin, then tau_cut columns'
+     write(*,'(a,10es12.3)') ' tau_cut     ', tcs
+     do i = 1, nzb
+        write(*,'(a,2f5.2,10es16.8)') ' CELL ', zlo(i), zhi(i), hc(1 + ntc*(i - 1):ntc*i)
+     enddo
+  else
+     do i = 1, nq
+        write(*,'(a,2f9.1,es16.8)') ' Q2bin', qedge(i-1), qedge(i), hist(i)
+     enddo
+  endif
 end program nlo31

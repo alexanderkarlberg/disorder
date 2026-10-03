@@ -24,6 +24,6 @@ gfortran -O2 -ffixed-line-length-132 -std=legacy -I$R/dis31/mcfm/Inc -c $R/nnlo2
 gfortran -O2 -ffree-line-length-none -I$R/nnlo21 -c $R/nnlo21/hard21.f90
 $FF -c "$here/lp21.f90"
 $FF -c "$here/test_lp21.f90"
-gfortran -o test_lp21 *.o $(lhapdf-config --libs) -Wl,-rpath,$(lhapdf-config --libdir) \
+gfortran -o test_lp21 $(ls *.o | grep -v "^sliced21.o$") $(lhapdf-config --libs) -Wl,-rpath,$(lhapdf-config --libdir) \
   -L$L -Wl,-rpath,$L -lnnlojet_core
 echo "built $B/test_lp21"
