@@ -1654,3 +1654,10 @@ NNLOJET's RV converges (≈ 56 pb; its antenna terms distribute differently
 from ours, so only RV + RR compares). Its RR is very slow (≈ 0.1 s per point
 on a loaded core), so the reference needs the cluster:
 `dis31/validation/CLUSTER-INSTRUCTIONS.md`.
+Technical cut on R − dipoles (smallest 2p_i·p_j / W², default 1e-9;
+4 seeds × 6 M points each):
+- 1e-7: −29.35 ± 0.50 pb;
+- 1e-9: −30.02 ± 0.46 pb;
+- 1e-11: −29.06 ± 0.48 pb.
+No trend; the largest difference is 1.4σ. All 12 seeds together give
+R − D ≈ −29.5 ± 0.3 pb and an NLO correction ≈ 30.5 ± 0.3 pb.

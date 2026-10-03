@@ -89,7 +89,8 @@ Q² bins to about 2%.
   `nlo31 kp 1000000 8 <seed>`. Use distinct seeds; combine with
   `dis31/combine_nlo31.py` (inverse-variance per part, then vi + kp + r).
 - Technical-cut check: r with `techcut` 1e-7 and 1e-11 (default 1e-9)
-  must agree (on thA371a: see the notebook for the result of 3 Oct).
+  must agree (thA371a, 3 Oct: −29.35 ± 0.50, −30.02 ± 0.46, −29.06 ± 0.48 pb
+  for 1e-7, 1e-9, 1e-11; consistent).
 - NNLOJET: a pilot of RV and RR (e.g. 20 jobs each, warmup 100000[4],
   production 1000000[1]) to measure the time per point and the error per
   point; then size the production for ±0.3 pb on RV + RR and report to AK.
