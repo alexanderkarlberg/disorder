@@ -54,7 +54,11 @@ program tau2_nlo
   ndebug = int_val_opt('-debug', 0)       ! print the cumulant pieces for this many Born events
   boostY = dble_val_opt('-boostY', 0.0_dp) ! measure in a frame boosted along z (diagnostics)
   smin = dble_val_opt('-smin', 0.0_dp)     ! jets away from the beam: s_1J > smin (diagnostics)
-  measure = merge(1, 0, string_val_opt('-measure', 'geo') == 'inv')   ! geo (default) or inv
+  select case (string_val_opt('-measure', 'geo'))   ! geo (default), inv, or cm (jets' rest frame)
+  case ('inv'); measure = 1
+  case ('cm'); measure = 2
+  case default; measure = 0
+  end select
   keepall = log_val_opt('-keepall')        ! keep Born/below-cut of aborted events (old behaviour)
   cutoff = dble_val_opt('-cutoff', 1e-8_dp)  ! DISENT's technical cutoff
   ! colour factors (diagnostics: e.g. -CA 0 or -TR 0 isolate colour structures; DISENT gets the same)

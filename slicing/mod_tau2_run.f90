@@ -37,7 +37,15 @@ module tau2_run
   !   tau_2 = min( min_j 2 eta_j P.p_j, min_{j<k} 2 p_j.p_k ) / Q^2,
   !   eta_j = x (1 + s_kl/Q^2) (Born momentum fraction of the other two)
   ! with the cumulant at lambda_B = lambda_J = tau_cut and the soft function
-  ! of the invariants s_ij = 2 p_i.p_j/Q^2 of the Born
+  ! of the invariants s_ij = 2 p_i.p_j/Q^2 of the Born;
+  ! 2 = geometric in the rest frame of the two jets (Q_i = 2 E_i there): for
+  ! each partition of the outgoing partons into beam, jet 1, jet 2 the frame
+  ! is u = (P_J1 + P_J2)/m, and
+  !   T_pi = sum_beam P.p_k/P.u + sum_jets [u.P_J - sqrt((u.P_J)^2 - P_J^2)],
+  ! T_2 = min_pi T_pi (jet axes along the jet momenta minimise each T_pi).
+  ! In every singular limit the frame is the Born's partonic CM frame, where
+  ! the two jets are back to back (n_12 = 2 for the soft function grids of
+  ! arXiv:2312.11626); the cumulant is evaluated there.
   integer, save :: measure = 0
   real(dp), save :: sdis = 0
   ! diagnostics: Born weight (total bin) with min_ij s_ij below 1e-2, 1e-3, 1e-4,
@@ -160,6 +168,10 @@ contains
        T = max(T, 0.0_dp) / sqrt(Q2)
        return
     endif
+    if (measure == 2) then
+       T = tau2_jetframe(n, pin)
+       return
+    endif
     call zboost(pin, p)
     T = huge(1.0_dp)
     do j = 2, n
@@ -184,6 +196,60 @@ contains
       enddo
     end function spair
   end function tau2_of
+
+  ! T_2 of measure 2 (see above); outgoing partons 2..n, the incoming parton
+  ! 1 gives the beam direction (P.p_k/P.u = p_1.p_k/p_1.u)
+  real(dp) function tau2_jetframe(n, p) result(T)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: p(4,7)
+    integer :: m, nf, code, k, a(6)
+    real(dp) :: PJ(4,2), u(4), mu2, tp, uP
+    nf = n - 1
+    T = huge(1.0_dp)
+    do code = 0, 3**nf - 1
+       m = code
+       do k = 1, nf
+          a(k) = mod(m, 3); m = m / 3        ! 0 = beam, 1, 2 = jets
+       enddo
+       if (.not. (any(a(1:nf) == 1) .and. any(a(1:nf) == 2))) cycle
+       if (first_jet(a, nf) == 2) cycle      ! jets unordered: jet 1 holds the first jet parton
+       PJ = 0
+       do k = 1, nf
+          if (a(k) > 0) PJ(:,a(k)) = PJ(:,a(k)) + p(:,k+1)
+       enddo
+       u = PJ(:,1) + PJ(:,2)
+       mu2 = mdot(u, u)
+       if (mu2 <= 0) cycle
+       u = u / sqrt(mu2)
+       tp = 0
+       do k = 1, nf
+          if (a(k) == 0) tp = tp + mdot(p(:,1), p(:,k+1)) / mdot(p(:,1), u)
+       enddo
+       do k = 1, 2
+          uP = mdot(u, PJ(:,k))
+          ! u.P - |P| in the frame u, as m^2/(u.P + |P|) (no cancellation)
+          tp = tp + max(mdot(PJ(:,k), PJ(:,k)), 0.0_dp) / (uP + sqrt(max(uP * uP - mdot(PJ(:,k), PJ(:,k)), 0.0_dp)))
+       enddo
+       T = min(T, tp)
+    enddo
+    T = max(T, 0.0_dp)
+  contains
+    integer function first_jet(a, nf)
+      integer, intent(in) :: a(:), nf
+      integer :: k
+      first_jet = 0
+      do k = 1, nf
+         if (a(k) > 0) then
+            first_jet = a(k); return
+         endif
+      enddo
+    end function first_jet
+    ! Minkowski product of DISENT four-vectors (x, y, z, E)
+    real(dp) function mdot(x, y)
+      real(dp), intent(in) :: x(4), y(4)
+      mdot = x(4) * y(4) - x(1) * y(1) - x(2) * y(2) - x(3) * y(3)
+    end function mdot
+  end function tau2_jetframe
 
   subroutine slice_user(n, na, ntyp, p, s, weight, scale2)
     integer, intent(in) :: n, na, ntyp
@@ -314,7 +380,23 @@ contains
       wsmall_inv = wsmall_inv + merge(wb, 0.0_dp, si < [1e-2_dp, 1e-3_dp, 1e-4_dp])
     end block
     endif
-    call zboost(p, pb)
+    if (measure == 2) then
+       ! the Born's partonic CM frame (rest frame of partons 2 + 3), a boost
+       ! along z from the Breit frame
+       block
+         real(dp) :: y, ch, sh
+         integer :: k
+         y = -atanh((p(3,2) + p(3,3)) / (p(4,2) + p(4,3)))
+         ch = cosh(y); sh = sinh(y)
+         pb = p
+         do k = 1, 7
+            pb(4,k) = ch * p(4,k) + sh * p(3,k)
+            pb(3,k) = sh * p(4,k) + ch * p(3,k)
+         enddo
+       end block
+    else
+       call zboost(p, pb)
+    endif
     if (measure == 1) then
        ! invariant measure: directions n_i = 2 p_i/Q, s_ij = 2 p_i.p_j/Q^2,
        ! and all logs at tau_cut (the energies below enter as 2 E/Q = 1)
