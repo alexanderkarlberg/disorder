@@ -1840,3 +1840,41 @@ Surveyed for the rest (plan):
   gluon channel onto "qag". Cross-check against 2312.11626's grids.
 - assembly: MCFM's `assemblejet`, with our second jet function in place of
   its second beam.
+
+**Note (3 Oct): the Gehrmann–Glover DIS two-loop files miss half of the
+quark-channel helicity sum.** Recorded so that it is not forgotten.
+
+Gehrmann, Glover (arXiv:0904.2665) give the hadronic current for one
+helicity configuration (q+, g+, q̄−) as coefficients α, β, γ(x, y, z).
+- Parity flips all helicities with the same coefficients.
+- The other gluon helicity follows from charge conjugation plus parity: the
+  same current with the quark and antiquark momenta swapped (x fixed,
+  y ↔ z).
+- So |M|² summed over helicities needs the coefficients at P and at
+  P(p₁ ↔ p₂), as MCFM's `Zampqqbgsq` does with its `iperm` loop.
+
+In e⁺e⁻ → 3 jets (and Z+jet) both points lie in the same analytic region.
+In DIS they do not:
+- **Gluon channel:** the gluon is incoming on leg 3; the swap stays in the
+  region, and 0904.2665's regions 5–8 cover it.
+- **Quark channel:** the incoming parton moves from leg 1 to leg 2, i.e. from
+  (y > 0, z < 0) to (y < 0, z > 0). The paper's eight Fortran regions
+  (its "1d, 2c, 3b, 4d" for lepton–quark) contain only one of each pair. The
+  partners 1c, 2b, 4b, 3d are missing.
+- The text's labelling of the lepton–quark process (incoming quark = −p₂)
+  contradicts the signs of the invariants it states (s₂₃ > 0, s₁₂, s₁₃ < 0
+  imply the incoming parton on leg 1). This hides the issue.
+- With only those files, half of the quark-channel helicity sum would be
+  evaluated outside the range of the 2dHPL representation. `tdhpl` as
+  distributed in MCFM 10.3 only prints a warning there (its `stop` is
+  commented out).
+
+Fix used in `nnlo21/hard21.f90`: NNLOJET v1.0.2's `helcoeff`/`makecoef`.
+- It has all 16 regions and evaluates each together with its partner
+  (`kinregion(1:2)`).
+- Its coefficients equal 0904.2665's in all eight shared regions: all
+  two-loop coefficients exactly, the one-loop ones after
+  a = a_NJ + (11/24)(L13+L23), c = c_NJ − (1/3)(L13+L23).
+- The one-loop hard function then equals the DISENT-based one to 1e-9 at
+  random points. That check uses both members of every pair, including the
+  four regions 0904.2665 lacks.
