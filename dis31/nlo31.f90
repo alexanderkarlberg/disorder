@@ -20,7 +20,8 @@
 ! (as the NLO slicing tests); lo then is the O(alpha_s^2) part of NLO 2+1
 ! above the cut, vi + kp + r the O(alpha_s^3) part of NNLO 2+1 above it.
 !
-! Usage: nlo31 part ncall itmx [seed [techcut [mode x Q2 [logmap]]]]   (part = lo, vi, kp, r)
+! Usage: nlo31 part ncall itmx [seed [techcut [mode x Q2 [logmap|uniform [pdfmask]]]]]
+!        (part = lo, vi, kp, r; pdfmask 0 all, 1 quarks only, 2 gluon only)
 !-----------------------------------------------------------------------
 module nlo31_mod
   use born31
@@ -64,6 +65,8 @@ module nlo31_mod
   ! the 2+1 limits (tau_2 ~ 1e-5 needs two small invariants at once in the
   ! 4+1 real) are sampled; VEGAS adapts on top. Off in mode 0.
   logical :: logmap = .false.
+  ! incoming-parton mask (diagnostics): 0 all, 1 quarks only, 2 gluon only
+  integer :: pdfmask = 0
   real(dp), parameter :: tmap = 27.631021115928547_dp     ! ln(1e12)
 contains
 
@@ -234,6 +237,10 @@ contains
     real(dp) :: xf(-6:6)
     call evolvePDF(x, mu, xf)
     f = xf(-5:5)/x
+    if (pdfmask == 1) f(0) = 0
+    if (pdfmask == 2) then
+       f(-5:-1) = 0; f(1:5) = 0
+    endif
   end subroutine pdfs
 
   ! charge structures: the matrix elements are bilinear in the quark
@@ -335,6 +342,9 @@ contains
     enddo
     res = res*w
     if (mode == 1) then
+       if (res /= res) then
+          res = 0; return
+       endif
        hcacc = hcacc + res*wgt*acc
        res = res*acc(iv)
     elseif (res /= 0) then
@@ -488,6 +498,11 @@ contains
        enddo
     enddo
     if (mode == 1) then
+       ! points where a matrix element is not finite (extreme configurations
+       ! of the logmap sampling) are dropped, as VEGAS does for the integral
+       if (any(sg /= sg)) then
+          res = 0; return
+       endif
        hcacc = hcacc + sg*w*wgt
        res = sg(iv)*w
     else
@@ -859,6 +874,9 @@ program nlo31
   endif
   if (command_argument_count() > 8) then
      call get_command_argument(9, arg); logmap = trim(arg) == 'logmap'
+  endif
+  if (command_argument_count() > 9) then
+     call get_command_argument(10, arg); read(arg, *) pdfmask
   endif
   if (mode == 1) then
      nv = ncell; iv = ntc + ntc*(nzb - 1)

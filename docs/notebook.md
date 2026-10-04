@@ -1959,3 +1959,28 @@ https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
   - On lo it agrees with uniform sampling to 0.5% at large τ_cut, which
     checks its Jacobian. At small τ_cut it has more variance.
   - r with logmap: 30 seeds running (`runs/tcut4`).
+
+**Sampling and dipole-stability checks (4 Oct, afternoon).**
+- **Log-mapped `r`** (30 seeds, `runs/tcut4`): at τ_cut = 1e-5, all bins,
+  −2321 ± 118 (median −2463), against uniform −2734 ± 57 (technical cut 1e-12).
+  - Undersampling would need ≈ −3800 to remove the drift. The log map moves
+    the result the other way, by 3σ, and is skewed.
+- **Real ME stability under a random Lorentz transformation:** median 1e-9,
+  99% quantile ≤ 1e-2 even at s_min/W² ~ 1e-11. Stable.
+- **Dipole sum: correction of a statement made to AK the same afternoon**
+  ("the problem is our dipoles").
+  - In the corners the log map populates (several small invariants at once,
+    double unresolved), individual dipoles are 1e4–1e7 times the real and
+    cancel among themselves. Their relative precision (1e-5 … 1e-9) is fine,
+    but the absolute rounding exceeds R. In 1e-9 < s_min/W² < 1e-6,
+    |Δdipole| > 0.1 R occurs in ≈ 86k of 445k log-mapped points, against 1
+    case with uniform sampling (total number of uniform points not
+    recorded).
+  - No dipole bug. `harness_dip41` (fixed azimuth, resolved Borns) stands.
+    The pointwise ratio tests that seemed to fail summed dipoles whose mapped
+    Born was itself unresolved.
+  - Consequence: the log map is unsuitable (it samples rounding-dominated
+    corners). The uniform runs, which show the drift, hardly visit them.
+- So the small-τ_cut drift is still unexplained. Next: quark/gluon channel
+  split (`runs/chan1`, PDF masks `pdfmask` in nlo31 and sliced21/lp21), and
+  an RG check of the below-cut cumulant.

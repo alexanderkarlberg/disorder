@@ -32,8 +32,14 @@ subroutine fdist(ih, x, xmu, fx, ibeam)
   implicit none
   integer :: ih, ibeam
   double precision :: x, xmu, fx(-5:5), f(-6:6)
+  integer :: lpmask
+  common/lpmask/lpmask
   call evolvePDF(x, xmu, f)
   fx = f(-5:5) / x
+  if (lpmask == 1) fx(0) = 0
+  if (lpmask == 2) then
+     fx(-5:-1) = 0; fx(1:5) = 0
+  endif
 end subroutine fdist
 
 module lp21

@@ -10,7 +10,7 @@
 ! factored out, the normalisation of born31/me41), parton 2 the quark and 3
 ! the gluon (quark Born) or the antiquark (gluon Born).
 !
-! Usage: sliced21 part ncall itmx seed x Q2 [softtable [h]]   (part = b0, b1, b2;
+! Usage: sliced21 part ncall itmx seed x Q2 [softtable [h [pdfmask]]]   (part = b0, b1, b2;
 ! tabchk: beam table at node spacing h (default 0.02) against direct evaluation)
 !-----------------------------------------------------------------------
 module sliced21_mod
@@ -18,6 +18,7 @@ module sliced21_mod
   use lp21
   implicit none
   character(8) :: bpart
+
 contains
 
   real(dp) function b21_part(r, wgt) result(res)
@@ -85,6 +86,8 @@ program sliced21
   character(256) :: arg, softtab
   integer :: ncall, itmx, seed, nseed, i
   integer, allocatable :: sd(:)
+  integer :: lpmask
+  common/lpmask/lpmask
   real(dp) :: avg, err, chi2, hb, bt(9,3), bd(9,3), xi, rr, em(3)
   integer :: k
   call get_command_argument(1, bpart)
@@ -98,6 +101,12 @@ program sliced21
   if (softtab == '-') softtab = ''
   if (command_argument_count() > 7) then
      call get_command_argument(8, arg); read(arg, *) hb
+  endif
+  if (command_argument_count() > 8) then
+     ! incoming-parton mask on the PDFs everywhere (Born luminosity of
+     ! nlo31_mod and the beam functions of lp21): 1 quarks only, 2 gluon only
+     call get_command_argument(9, arg); read(arg, *) pdfmask
+     lpmask = pdfmask
   endif
   mode = 1; nv = ncell; iv = ntc + ntc*(nzb - 1)
   call random_seed(size=nseed); allocate(sd(nseed))

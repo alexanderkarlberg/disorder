@@ -25,6 +25,9 @@ module dip41
   real(dp), parameter :: CF = 4.0_dp/3, CA = 3, TR = 0.5_dp
   real(dp), parameter :: c16 = 16*pi**2
   integer, parameter, public :: dip41_max = 48
+  ! labels of the last dip41_list call (diagnostics): type (1 FF, 2 FI, 3 IF),
+  ! emitter i (IF: the final-state parton i), j (FF/FI) and spectator k
+  integer, public, save :: dip41_lab(4,dip41_max)
   public :: dip41_list
 contains
 
@@ -44,6 +47,7 @@ contains
           do k = 1, 5
              if (k == i .or. k == j) cycle
              nd = nd + 1
+             dip41_lab(:,nd) = [merge(2, 1, k == 1), i, j, k]
              if (k == 1) then
                 call dip_fi(P4, fl4, i, j, fij, P3(:,:,nd), fl3(:,nd), val(nd))
              else
@@ -58,6 +62,7 @@ contains
        do k = 2, 5
           if (k == i) cycle
           nd = nd + 1
+          dip41_lab(:,nd) = [3, i, 0, k]
           call dip_if(P4, fl4, i, k, fa, P3(:,:,nd), fl3(:,nd), val(nd))
        enddo
     enddo
