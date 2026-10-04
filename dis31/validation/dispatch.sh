@@ -14,7 +14,12 @@
 Q=$1; CMD=$2
 LOG=$(dirname "$0")/dispatch.log
 SSH="ssh -n -o BatchMode=yes -o ConnectTimeout=5"
-pending() { for d in "$Q"/s*; do [ -f "$d/host" ] || echo "$d"; done; }
+# only job directories count (a binary named s* in the queue directory made
+# the queue never empty, 3-4 Oct); one dispatcher at a time (two started
+# together overfilled thserv05/06 on 4 Oct): lock
+pending() { for d in "$Q"/s*/; do d=${d%/}; [ -f "$d/host" ] || echo "$d"; done; }
+exec 9> "$(dirname "$0")/dispatch.lock"
+flock -n 9 || { echo "$(date) another dispatcher holds the lock, exit" >> "$(dirname "$0")/dispatch.log"; exit 1; }
 while true; do
   P=($(pending))
   [ ${#P[@]} -eq 0 ] && { echo "$(date) queue empty, exit" >> "$LOG"; exit 0; }

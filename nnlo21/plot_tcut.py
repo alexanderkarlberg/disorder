@@ -3,7 +3,7 @@
 
   plot_tcut.py nlo-disent <tau2_combine output> out.svg
       (below + above - DISENT)/DISENT against tau_cut, per tau_zQ bin
-  plot_tcut.py nnlo <combine_tcut json> out.svg
+  plot_tcut.py nnlo <combine_tcut json> out.svg [sliced21 b0 output]
       the NLO (b1 + lo, against DISENT) and NNLO (b2 + vi + kp + r)
       coefficients against tau_cut, per tau_zQ bin
 Colours are placeholders replaced by CSS variables (--ink, --muted, --a1..--a6),
@@ -51,8 +51,17 @@ def nlo_disent(src, out):
     save(fig, out)
 
 
-def nnlo(src, out):
+def born_cells(fn):
+    b = {}
+    for l in open(fn):
+        if l.startswith(' CELL '):
+            w = l.split(); b['%.2f-%.2f' % (float(w[1]), float(w[2]))] = float(w[3])
+    return b
+
+
+def nnlo(src, out, bornfile=None):
     d = json.load(open(src))
+    born = born_cells(bornfile) if bornfile else None
     tc = np.array(d['tau_cut'])
     bins = list(d['bins'])
     fig, axs = plt.subplots(2, 1, figsize=(6.2, 5.6), sharex=True)
@@ -65,15 +74,18 @@ def nnlo(src, out):
             axs[0].errorbar(tc * sh, r / ref - 1, e / abs(ref), fmt='o', ms=3, lw=1, color=ACC[k % 6], label='τ_zQ ' + b)
         if v['nnlo']:
             r, e = np.array(v['nnlo'][0]), np.array(v['nnlo'][1])
-            norm = abs(np.mean(r[4:8])) if np.mean(np.abs(r[4:8])) > 0 else 1
+            norm = born[b] if born else 1
             axs[1].errorbar(tc * sh, r / norm, e / norm, fmt='o', ms=3, lw=1, color=ACC[k % 6], label='τ_zQ ' + b)
     axs[0].axhline(0, color=MUTED, lw=0.8)
     axs[0].set_ylabel('NLO: (b1 + lo)/DISENT − 1')
-    axs[1].set_ylabel('NNLO coefficient / |mean at\nτ_cut = 1e-3 … 1e-4|')
+    axs[1].set_ylabel('NNLO correction / LO' if born else 'NNLO correction')
+    axs[1].axhline(0, color=MUTED, lw=0.8)
+    if born:
+        axs[1].set_ylim(-1.5, 6)
     axs[1].set_xscale('log'); axs[1].set_xlabel('τ_cut')
     axs[0].legend(frameon=False, fontsize=7, ncol=2)
     save(fig, out)
 
 
 if __name__ == '__main__':
-    {'nlo-disent': nlo_disent, 'nnlo': nnlo}[sys.argv[1]](sys.argv[2], sys.argv[3])
+    {'nlo-disent': nlo_disent, 'nnlo': nnlo}[sys.argv[1]](*sys.argv[2:])
