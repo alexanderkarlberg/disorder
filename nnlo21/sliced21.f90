@@ -25,7 +25,7 @@ contains
     real(dp), intent(in) :: r(:), wgt
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,6), P(4,7), dphi, as, fpdf(-5:5), w, Q, tz
-    real(dp) :: QQ, GQ, born(3), f0(3), c1(ntc,3), c2(ntc,3), val(ntc)
+    real(dp) :: QQ, GQ, born(3), f0(3), c1(ntc,3), c2(ntc,3), val(ntc), mu(3)
     logical :: ok
     integer :: b, k, c
     res = 0
@@ -56,13 +56,16 @@ contains
        val = sum(born)
     case ('b1', 'b2')
        call lp21_born(P, eta, ntc, tcs, f0, c1, c2)
+       ! unit-charge matrix element times the cumulant coefficients (which
+       ! carry the e^2-weighted PDFs themselves; with a PDF mask a class can
+       ! have f0 = 0 but c1, c2 /= 0 through the off-diagonal beam functions)
+       mu(1:2) = QQ; mu(3) = GQ*11.0_dp/9
        val = 0
        do c = 1, 3
-          if (f0(c) == 0) cycle
           if (trim(bpart) == 'b1') then
-             val = val + born(c)*c1(:,c)/f0(c)*(as/(2*pi))
+             val = val + mu(c)*c1(:,c)*(as/(2*pi))
           else
-             val = val + born(c)*c2(:,c)/f0(c)*(as/(2*pi))**2
+             val = val + mu(c)*c2(:,c)*(as/(2*pi))**2
           endif
        enddo
     end select

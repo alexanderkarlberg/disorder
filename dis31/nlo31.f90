@@ -22,6 +22,7 @@
 !
 ! Usage: nlo31 part ncall itmx [seed [techcut [mode x Q2 [logmap|uniform [pdfmask]]]]]
 !        (part = lo, vi, kp, r; pdfmask 0 all, 1 quarks only, 2 gluon only)
+!        optional 11th: vslice k (VEGAS adapts to tcs(k) < tau_2 < tcs(k-1))
 !-----------------------------------------------------------------------
 module nlo31_mod
   use born31
@@ -67,6 +68,10 @@ module nlo31_mod
   logical :: logmap = .false.
   ! incoming-parton mask (diagnostics): 0 all, 1 quarks only, 2 gluon only
   integer :: pdfmask = 0
+  ! mode 1: VEGAS adapts to the slice tcs(vslice) < tau_2 < tcs(vslice-1) of
+  ! all tau_zQ bins (0: to tau_2 > tcs(ntc), the default); the cells are
+  ! filled as before
+  integer :: vslice = 0
   real(dp), parameter :: tmap = 27.631021115928547_dp     ! ln(1e12)
 contains
 
@@ -346,7 +351,7 @@ contains
           res = 0; return
        endif
        hcacc = hcacc + res*wgt*acc
-       res = res*acc(iv)
+       res = res*vtarget(acc)
     elseif (res /= 0) then
        call fill(Q2, res*wgt)
     endif
@@ -504,12 +509,24 @@ contains
           res = 0; return
        endif
        hcacc = hcacc + sg*w*wgt
-       res = sg(iv)*w
+       res = vtarget(sg)*w
     else
        res = sg(1)*w
        if (res /= 0) call fill(Q2, res*wgt)
     endif
   end function real_part
+
+  ! the quantity VEGAS integrates in mode 1: the cell iv, or a tau_2 slice
+  real(dp) function vtarget(a) result(t)
+    real(dp), intent(in) :: a(nv)
+    integer :: k
+    if (vslice <= 1) then
+       t = a(iv)
+    else
+       k = vslice + ntc*(nzb - 1)
+       t = a(k) - a(k - 1)
+    endif
+  end function vtarget
 
   ! acceptance vector F(nv) of the n outgoing partons p(4,n) (incoming parton
   ! pin): mode 0: F(1) = (>= njmin jets); mode 1: F(k + ntc*(b-1)) =
@@ -877,6 +894,9 @@ program nlo31
   endif
   if (command_argument_count() > 9) then
      call get_command_argument(10, arg); read(arg, *) pdfmask
+  endif
+  if (command_argument_count() > 10) then
+     call get_command_argument(11, arg); read(arg, *) vslice
   endif
   if (mode == 1) then
      nv = ncell; iv = ntc + ntc*(nzb - 1)

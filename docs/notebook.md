@@ -1984,3 +1984,35 @@ https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 - So the small-τ_cut drift is still unexplained. Next: quark/gluon channel
   split (`runs/chan1`, PDF masks `pdfmask` in nlo31 and sliced21/lp21), and
   an RG check of the below-cut cumulant.
+
+**Cause of the small-τ_cut drift: VEGAS adaptation bias above the cut (4 Oct, night).**
+- **Quark/gluon split** (`runs/chan1`, `chan2`; PDF masks):
+  - The drift is present in both channels: NNLO at 1e-5 is 406 ± 36 (q) and
+    582 ± 39 (g), after a roughly flat plateau.
+  - Additivity q + g = all holds within 0.5σ for b1, b2, kp at every τ_cut,
+    and within 1.5σ for vi. It fails for lo: −3.9 (2.0σ), −9.9 (2.3σ),
+    −19.4 (3.3σ) at 1e-4, 3e-5, 1e-5. r: −50, −88, −157 (1.2–1.7σ, same
+    sign).
+  - Fixed in the process: `sliced21` with a mask had dropped off-diagonal
+    beam terms (Born × c/f0 with f0 = 0). It now multiplies the unit
+    matrix element by c directly. Unmasked results are unchanged.
+- **Direct test:** VEGAS adapting to the slice 1e-5 < τ₂ < 3e-5 of lo (option
+  `vslice`, 11th argument).
+  - Iterations 1–6 (four seeds): 38 … 197; the 6-iteration result is
+    158.6 ± 9.1.
+  - With 12 iterations, iterations 7–12 give 169.3 ± 1.6, against DISENT's
+    171.9.
+  - The early iterations are strongly biased low. Even late ones fluctuate
+    107–272.
+- **Conclusion.** The near-2+1 region of the 3+1 phase space (relative
+  measure ~1e-5 under nlo31's sequential decays) is poorly mapped. VEGAS's
+  inverse-variance combination of iterations is biased low there, worst for
+  r (4+1, large cancellations), whose magnitude is underestimated at small
+  τ_cut, so the NNLO sum rises.
+  - The below-cut pieces pass every check (degree-4 polynomial structure,
+    additivity); the dipoles and the real ME are fine.
+  - The plateau 2e-2 … 2e-4 stands.
+- **Fix (= the efficiency work):** a slicing-adapted phase space for mode 1,
+  with 3+1 and 4+1 events as 2+1 Born × emissions sampled logarithmically
+  (DISENT style, multichannel over the dipole-like maps). Then redo the
+  τ_cut test.
