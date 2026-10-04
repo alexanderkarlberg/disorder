@@ -20,7 +20,7 @@
 ! (as the NLO slicing tests); lo then is the O(alpha_s^2) part of NLO 2+1
 ! above the cut, vi + kp + r the O(alpha_s^3) part of NNLO 2+1 above it.
 !
-! Usage: nlo31 part ncall itmx [seed [techcut [mode x Q2]]]   (part = lo, vi, kp, r)
+! Usage: nlo31 part ncall itmx [seed [techcut [mode x Q2 [logmap]]]]   (part = lo, vi, kp, r)
 !-----------------------------------------------------------------------
 module nlo31_mod
   use born31
@@ -59,6 +59,12 @@ module nlo31_mod
   integer :: nv = 1                ! length of the acceptance vector: 1 (mode 0), ncell (mode 1)
   integer :: iv = 1                ! the cell VEGAS integrates (mode 1: smallest tau_cut, all tau_zQ)
   real(dp) :: hc(ncell), hc2, hcacc(ncell)
+  ! mode 1: map the mass ratios and decay cosines logistically onto
+  ! [1e-12, 1 - 1e-12] (both ends logarithmic), so that configurations near
+  ! the 2+1 limits (tau_2 ~ 1e-5 needs two small invariants at once in the
+  ! 4+1 real) are sampled; VEGAS adapts on top. Off in mode 0.
+  logical :: logmap = .false.
+  real(dp), parameter :: tmap = 27.631021115928547_dp     ! ln(1e12)
 contains
 
   subroutine setup_flavours()
@@ -134,9 +140,20 @@ contains
     integer, intent(in) :: n
     real(dp), intent(in) :: rr(:), Q2, y, xB, eta
     real(dp), intent(out) :: Pk(4,n+4), dphi
-    real(dp) :: Q, W2, W, E, pz, beta, gam, k(4,4), m2(3), mtot2, pa(4), rest(4)
+    real(dp) :: Q, W2, W, E, pz, beta, gam, k(4,4), m2(3), mtot2, pa(4), rest(4), rm(size(rr))
     integer :: i, j, ir
     Q = sqrt(Q2); E = eta*Q/(2*xB)
+    ! mapped variables (mass ratios: the first n-2; cosines: every second after them)
+    rm = rr
+    dphi = 1
+    if (logmap) then
+       do i = 1, n - 2
+          call lmap(rm(i))
+       enddo
+       do i = n - 1, size(rr), 2
+          call lmap(rm(i))
+       enddo
+    endif
     Pk = 0
     Pk(:,1) = [0.0_dp, 0.0_dp, E, E]
     Pk(:,n+2) = [0.0_dp, 0.0_dp, -Q, 0.0_dp]
@@ -145,12 +162,11 @@ contains
     W2 = Q2*(eta/xB - 1); W = sqrt(W2)
     ! masses of the successive remainders: m2(1) = W2 > m2(2) > ... (last
     ! remainder massless pair)
-    dphi = 1
     m2(1) = W2
     ir = 0
     do i = 2, n - 1
        ir = ir + 1
-       m2(i) = m2(i-1)*rr(ir)
+       m2(i) = m2(i-1)*rm(ir)
        dphi = dphi*m2(i-1)/(2*pi)
     enddo
     ! decays: remainder of mass^2 m2(i) -> parton i + remainder m2(i+1)
@@ -158,10 +174,10 @@ contains
     do i = 1, n - 1
        mtot2 = m2(i)
        if (i < n - 1) then
-          call twobody(rest, 0.0_dp, m2(i+1), rr(ir+1), rr(ir+2), k(:,i), pa)
+          call twobody(rest, 0.0_dp, m2(i+1), rm(ir+1), rm(ir+2), k(:,i), pa)
           dphi = dphi*(1 - m2(i+1)/mtot2)/(8*pi)
        else
-          call twobody(rest, 0.0_dp, 0.0_dp, rr(ir+1), rr(ir+2), k(:,i), k(:,i+1))
+          call twobody(rest, 0.0_dp, 0.0_dp, rm(ir+1), rm(ir+2), k(:,i), k(:,i+1))
           dphi = dphi/(8*pi)
        endif
        ir = ir + 2
@@ -173,6 +189,16 @@ contains
     do j = 1, n
        Pk(:,j+1) = [k(1,j), k(2,j), gam*(k(3,j) + beta*k(4,j)), gam*(k(4,j) + beta*k(3,j))]
     enddo
+  contains
+    ! logistic map of a unit variable, both ends logarithmic down to 1e-12;
+    ! multiplies dphi by the jacobian
+    subroutine lmap(v)
+      real(dp), intent(inout) :: v
+      real(dp) :: t
+      t = tmap*(2*v - 1)
+      v = 1/(1 + exp(-t))
+      dphi = dphi*v*(1 - v)*2*tmap
+    end subroutine lmap
   end subroutine breit
 
   ! massless + mass^2 m2b decay of p (mass^2 p.p) isotropically in its rest
@@ -830,6 +856,9 @@ program nlo31
      call get_command_argument(6, arg); read(arg, *) mode
      call get_command_argument(7, arg); read(arg, *) xfix
      call get_command_argument(8, arg); read(arg, *) Q2fix
+  endif
+  if (command_argument_count() > 8) then
+     call get_command_argument(9, arg); logmap = trim(arg) == 'logmap'
   endif
   if (mode == 1) then
      nv = ncell; iv = ntc + ntc*(nzb - 1)

@@ -1923,3 +1923,39 @@ overnight. The dispatcher's queue pattern matched the `sliced21` binary in
 the run directory and looped with phantom launches; it was stopped.
 Starting two dispatchers at once overfilled thserv05/06 (35 and 57 jobs);
 the excess was killed by PID and re-queued.
+
+**NNLO τ_cut test with the fixed measure (4 Oct, day).** Set-up: x = 0.01,
+Q² = 400 GeV², τ_zQ bins; `nnlo21/runs/tcut2` (above the cut) with tcut1's b1,
+b2 (below the cut). Combination: `nnlo21/combine_tcut.py`. Page:
+https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
+
+- NLO with our own codes (b1 + lo) against DISENT, all bins: 16.4 ± 0.5,
+  17.4 ± 1.3, 18.3 ± 1.2 at τ_cut = 5e-4, 2e-4, 1e-4, against 16.87. Fine.
+- NNLO (b2 + vi + kp + r), all bins: near zero and flat from 2e-2 to ≈ 2e-4
+  (−5 ± 1, −3 ± 3, 4 ± 5, 5 ± 8, −11 ± 11, −19 ± 15, 9 ± 15). Then it rises:
+  81 ± 35, 342 ± 59, 1100 ± 91 at 1e-4, 3e-5, 1e-5. Bin [0.4, 0.5): 0.8,
+  0.5, 0.8, 0.7, −3.6, 5, 9, 20, 46, 107 (LO 3.4).
+- Technical cut of the real part (drops events with s_ij < c W²). NNLO at
+  τ_cut = 1e-5, all bins:
+  - c = 1e-7: 1073 ± 140 (15 seeds);
+  - c = 1e-9: 1100 ± 91;
+  - c = 1e-12: 840 ± 69.
+
+  r itself moves by −260 ± 100 from 1e-9 to 1e-12 at τ_cut = 1e-5, so the
+  technical cut has some effect, but it is not the cause (1e-7 = 1e-9).
+- Not a wrong log coefficient either: a wrong L² term that gives +1100 at
+  1e-5 would give several hundred between 2e-2 and 1e-3, where the sum is
+  flat. The mismatch switches on below 1e-4 and grows faster than any log,
+  roughly like τ^(−0.7).
+- The per-seed distributions of r have no heavy tails (mean = median).
+- Hypothesis: sampling. The above-cut 4+1 events with τ₂ just above τ_cut
+  need two small invariants at once. `nlo31`'s sequential decays sample the
+  mass ratios and cosines uniformly, so these configurations are hardly ever
+  generated. Every seed then misses the same region, which gives a bias
+  without tails.
+- Test: `logmap`, a logistic map of all mass ratios and decay cosines with
+  both ends logarithmic down to 1e-12 (mode 1 only; mode 0 unchanged,
+  checked bit-identical).
+  - On lo it agrees with uniform sampling to 0.5% at large τ_cut, which
+    checks its Jacobian. At small τ_cut it has more variance.
+  - r with logmap: 30 seeds running (`runs/tcut4`).
