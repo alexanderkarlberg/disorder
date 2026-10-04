@@ -65,7 +65,7 @@ def main():
         txt = open(dis).read()
         for blk in re.split(r'\ntau_zQ in ', txt)[1:]:
             lo, hi = map(float, re.match(r'\[([\d.]+),([\d.]+)\)', blk).groups())
-            m = re.search(r'NLO coefficient \(DISENT\) (\S+) \+- (\S+)', blk)
+            m = re.search(r'NLO coefficient \(DISENT\) ([-+.\deE]+) \+- ([-+.\deE]+)', blk)
             ref[(lo, hi)] = (float(m.group(1))/x, float(m.group(2))/x)
     out = {'tau_cut': tc, 'bins': {}}
     for b in sorted(next(iter(comb.values()))):

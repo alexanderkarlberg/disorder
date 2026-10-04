@@ -497,47 +497,90 @@ contains
     enddo
   end subroutine accept
 
-  ! T_2 in the jets' rest frame (slicing/mod_tau2_run.f90, measure 2): min over
-  ! partitions into beam / jet 1 / jet 2 of sum_beam P.p/P.u + sum_jets m^2/(u.P + |P|_u),
-  ! u = (P_J1 + P_J2)/m; the incoming parton gives the beam direction
+  ! T_2 in the jets' rest frame (slicing/mod_tau2_run.f90, measure 2). The
+  ! frame u = (P_J1 + P_J2)/m of the partition that minimises the geometric
+  ! T_2 in the input (Breit) frame; then the exact minimum over partitions
+  ! of sum_beam P.p/P.u + sum_jets m^2/(u.P + |P|_u), all in that one frame.
+  ! (A frame per partition is not IR safe: two collinear partons as the two
+  ! jets give a degenerate, infinitely boosted frame and T -> 0.)
   real(dp) function tau2cm(pin, p, n) result(T)
     integer, intent(in) :: n
     real(dp), intent(in) :: pin(4), p(4,n)
-    integer :: code, m, k, a(6), fj
-    real(dp) :: PJ(4,2), u(4), mu2, tp, uP, m2
+    real(dp) :: u(4), ub(4), tb, best
+    integer :: code
+    ! step 1: the Breit-frame partition (u = (1,0,0,0): energies in the input frame)
+    ub = [0.0_dp, 0.0_dp, 0.0_dp, 1.0_dp]
+    best = huge(1.0_dp); u = 0
+    do code = 0, 3**n - 1
+       tb = tpart(code, ub, .true.)
+       if (tb < best) then
+          best = tb; u = ujets(code)
+       endif
+    enddo
+    T = 0
+    if (best == huge(1.0_dp) .or. mdot(u, u) <= 0) return
+    u = u/sqrt(mdot(u, u))
+    ! step 2: exact minimisation in that frame
     T = huge(1.0_dp)
     do code = 0, 3**n - 1
-       m = code
-       do k = 1, n
-          a(k) = mod(m, 3); m = m/3
-       enddo
-       if (.not. (any(a(1:n) == 1) .and. any(a(1:n) == 2))) cycle
-       fj = 0
-       do k = 1, n
-          if (a(k) > 0) then
-             fj = a(k); exit
-          endif
-       enddo
-       if (fj == 2) cycle
-       PJ = 0
-       do k = 1, n
-          if (a(k) > 0) PJ(:,a(k)) = PJ(:,a(k)) + p(:,k)
-       enddo
-       u = PJ(:,1) + PJ(:,2)
-       mu2 = mdot(u, u)
-       if (mu2 <= 0) cycle
-       u = u/sqrt(mu2)
-       tp = 0
-       do k = 1, n
-          if (a(k) == 0) tp = tp + mdot(pin, p(:,k))/mdot(pin, u)
-       enddo
-       do k = 1, 2
-          uP = mdot(u, PJ(:,k)); m2 = max(mdot(PJ(:,k), PJ(:,k)), 0.0_dp)
-          tp = tp + m2/(uP + sqrt(max(uP*uP - m2, 0.0_dp)))
-       enddo
-       T = min(T, tp)
+       T = min(T, tpart(code, u, .false.))
     enddo
     T = max(T, 0.0_dp)
+  contains
+    ! the partition of code (0 beam, 1, 2 jets; both jets non-empty, jet 1
+    ! holds the first jet parton), or huge if not allowed
+    subroutine decode(code, a, okp)
+      integer, intent(in) :: code
+      integer, intent(out) :: a(6)
+      logical, intent(out) :: okp
+      integer :: m, k
+      m = code
+      do k = 1, n
+         a(k) = mod(m, 3); m = m/3
+      enddo
+      okp = any(a(1:n) == 1) .and. any(a(1:n) == 2)
+      if (.not. okp) return
+      do k = 1, n
+         if (a(k) > 0) then
+            okp = a(k) == 1; return
+         endif
+      enddo
+    end subroutine decode
+    function ujets(code) result(w)
+      integer, intent(in) :: code
+      real(dp) :: w(4)
+      integer :: a(6), k
+      logical :: okp
+      call decode(code, a, okp)
+      w = 0
+      do k = 1, n
+         if (a(k) > 0) w = w + p(:,k)
+      enddo
+    end function ujets
+    real(dp) function tpart(code, uu, breitf) result(tp)
+      integer, intent(in) :: code
+      real(dp), intent(in) :: uu(4)
+      logical, intent(in) :: breitf
+      integer :: a(6), k
+      logical :: okp
+      real(dp) :: PJ(4,2), uP, m2
+      call decode(code, a, okp)
+      tp = huge(1.0_dp)
+      if (.not. okp) return
+      PJ = 0
+      do k = 1, n
+         if (a(k) > 0) PJ(:,a(k)) = PJ(:,a(k)) + p(:,k)
+      enddo
+      tp = 0
+      do k = 1, n
+         if (a(k) == 0) tp = tp + mdot(pin, p(:,k))/mdot(pin, uu)
+      enddo
+      do k = 1, 2
+         uP = mdot(uu, PJ(:,k)); m2 = max(mdot(PJ(:,k), PJ(:,k)), 0.0_dp)
+         tp = tp + m2/(uP + sqrt(max(uP*uP - m2, 0.0_dp)))
+      enddo
+      if (.false. .and. breitf) tp = tp
+    end function tpart
   end function tau2cm
 
   ! inclusive kt (R = rjet, E-scheme) on n massless partons in the Breit

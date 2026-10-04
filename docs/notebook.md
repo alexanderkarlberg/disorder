@@ -1878,3 +1878,48 @@ Fix used in `nnlo21/hard21.f90`: NNLOJET v1.0.2's `helcoeff`/`makecoef`.
 - The one-loop hard function then equals the DISENT-based one to 1e-9 at
   random points. That check uses both members of every pair, including the
   four regions 0904.2665 lacks.
+
+## 2026-10-04 (morning) — NNLO 2+1 pilot: the jets'-frame measure was not IR safe from four partons on
+
+**Correction of the 3 Oct evening entry (measure 2).** "T_π in the rest frame
+of the jets of π, T₂ = min_π T_π" is **not IR safe for four or more partons**:
+- A partition that takes two collinear partons as the two jets has a nearly
+  massless jet pair. Its frame is infinitely boosted, and its T_π → 0.
+- With three partons that happens only in a genuine singular region, so the
+  NLO tests (DISENT, 3 Oct) were not affected. With four partons, real
+  events near a 3+1 collinear limit get τ₂ → 0 while the dipoles' mapped
+  Borns keep their finite τ₂.
+- Found in the first NNLO τ_cut pilot (54 jobs, x = 0.01, Q² = 400 GeV²,
+  `nnlo21/runs/tcut1`):
+  - in the all-bins cell at τ_cut = 2e-2, r = −1030 ± 420 pb/GeV² against
+    lo = 21;
+  - the NNLO sum drifted with τ_cut.
+- Diagnostic (`diag_r.f90`): near singular limits the real's acceptance
+  differed from that of its largest dipole in 33 of 570 events (τ₂(4) ≈ 2e-3
+  against τ₂(3) ≈ 3e-2).
+
+New definition (`tau2_jetframe`, `nlo31` `tau2cm`):
+1. the partition that minimises the geometric T₂ in the Breit frame
+   (measure 0, IR safe) fixes the frame u = (P_J1 + P_J2)/m;
+2. then the exact minimum over partitions, all evaluated in that one frame.
+
+It is the ordinary geometric 2-jettiness in a frame that tends to the Born's
+partonic CM frame in every singular limit, so the soft function is unchanged.
+- Check: no acceptance mismatches in 141 events with s_min < 1e-8 W². Eleven
+  remain at 1e-5 W², at near ties of two Breit partitions (a measure-zero
+  boundary, as for any jet algorithm).
+
+Reruns:
+- the NLO validation against DISENT with the new measure
+  (`slicing-runs/cm2-x0.01-Q400`, 60 × 2M);
+- the above-cut NNLO parts (`nnlo21/runs/tcut2`).
+
+The below-cut runs (b1, b2) are unchanged, since the Born frame does not
+change.
+
+Also: the pilot's waiter counted 56 jobs, but the directory listing it came
+from included two binaries; there were 54 jobs. So the results sat uncombined
+overnight. The dispatcher's queue pattern matched the `sliced21` binary in
+the run directory and looped with phantom launches; it was stopped.
+Starting two dispatchers at once overfilled thserv05/06 (35 and 57 jobs);
+the excess was killed by PID and re-queued.

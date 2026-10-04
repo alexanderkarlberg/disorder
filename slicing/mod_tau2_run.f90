@@ -38,9 +38,9 @@ module tau2_run
   !   eta_j = x (1 + s_kl/Q^2) (Born momentum fraction of the other two)
   ! with the cumulant at lambda_B = lambda_J = tau_cut and the soft function
   ! of the invariants s_ij = 2 p_i.p_j/Q^2 of the Born;
-  ! 2 = geometric in the rest frame of the two jets (Q_i = 2 E_i there): for
-  ! each partition of the outgoing partons into beam, jet 1, jet 2 the frame
-  ! is u = (P_J1 + P_J2)/m, and
+  ! 2 = geometric in the rest frame of the two jets (Q_i = 2 E_i there): the
+  ! frame u = (P_J1 + P_J2)/m of the partition into beam, jet 1, jet 2 that
+  ! minimises the geometric T_2 in the Breit frame, then in that frame
   !   T_pi = sum_beam P.p_k/P.u + sum_jets [u.P_J - sqrt((u.P_J)^2 - P_J^2)],
   ! T_2 = min_pi T_pi (jet axes along the jet momenta minimise each T_pi).
   ! In every singular limit the frame is the Born's partonic CM frame, where
@@ -198,52 +198,85 @@ contains
   end function tau2_of
 
   ! T_2 of measure 2 (see above); outgoing partons 2..n, the incoming parton
-  ! 1 gives the beam direction (P.p_k/P.u = p_1.p_k/p_1.u)
+  ! 1 gives the beam direction (P.p_k/P.u = p_1.p_k/p_1.u). The frame u is
+  ! that of the partition minimising the geometric T_2 in the input (Breit)
+  ! frame; then the exact minimum over partitions in that one frame. (A
+  ! frame per partition is not IR safe from four partons on: two collinear
+  ! partons as the two jets give a degenerate frame and T -> 0.)
   real(dp) function tau2_jetframe(n, p) result(T)
     integer, intent(in) :: n
     real(dp), intent(in) :: p(4,7)
-    integer :: m, nf, code, k, a(6)
-    real(dp) :: PJ(4,2), u(4), mu2, tp, uP
+    integer :: nf, code
+    real(dp) :: u(4), ub(4), tb, best
     nf = n - 1
+    ub = [0.0_dp, 0.0_dp, 0.0_dp, 1.0_dp]
+    best = huge(1.0_dp); u = 0
+    do code = 0, 3**nf - 1
+       tb = tpart(code, ub)
+       if (tb < best) then
+          best = tb; u = ujets(code)
+       endif
+    enddo
+    T = 0
+    if (best == huge(1.0_dp) .or. mdot(u, u) <= 0) return
+    u = u / sqrt(mdot(u, u))
     T = huge(1.0_dp)
     do code = 0, 3**nf - 1
-       m = code
-       do k = 1, nf
-          a(k) = mod(m, 3); m = m / 3        ! 0 = beam, 1, 2 = jets
-       enddo
-       if (.not. (any(a(1:nf) == 1) .and. any(a(1:nf) == 2))) cycle
-       if (first_jet(a, nf) == 2) cycle      ! jets unordered: jet 1 holds the first jet parton
-       PJ = 0
-       do k = 1, nf
-          if (a(k) > 0) PJ(:,a(k)) = PJ(:,a(k)) + p(:,k+1)
-       enddo
-       u = PJ(:,1) + PJ(:,2)
-       mu2 = mdot(u, u)
-       if (mu2 <= 0) cycle
-       u = u / sqrt(mu2)
-       tp = 0
-       do k = 1, nf
-          if (a(k) == 0) tp = tp + mdot(p(:,1), p(:,k+1)) / mdot(p(:,1), u)
-       enddo
-       do k = 1, 2
-          uP = mdot(u, PJ(:,k))
-          ! u.P - |P| in the frame u, as m^2/(u.P + |P|) (no cancellation)
-          tp = tp + max(mdot(PJ(:,k), PJ(:,k)), 0.0_dp) / (uP + sqrt(max(uP * uP - mdot(PJ(:,k), PJ(:,k)), 0.0_dp)))
-       enddo
-       T = min(T, tp)
+       T = min(T, tpart(code, u))
     enddo
     T = max(T, 0.0_dp)
   contains
-    integer function first_jet(a, nf)
-      integer, intent(in) :: a(:), nf
-      integer :: k
-      first_jet = 0
+    subroutine decode(code, a, okp)
+      integer, intent(in) :: code
+      integer, intent(out) :: a(6)
+      logical, intent(out) :: okp
+      integer :: m, k
+      m = code
+      do k = 1, nf
+         a(k) = mod(m, 3); m = m / 3        ! 0 = beam, 1, 2 = jets
+      enddo
+      okp = any(a(1:nf) == 1) .and. any(a(1:nf) == 2)
+      if (.not. okp) return
       do k = 1, nf
          if (a(k) > 0) then
-            first_jet = a(k); return
+            okp = a(k) == 1; return          ! jets unordered: jet 1 holds the first jet parton
          endif
       enddo
-    end function first_jet
+    end subroutine decode
+    function ujets(code) result(w)
+      integer, intent(in) :: code
+      real(dp) :: w(4)
+      integer :: a(6), k
+      logical :: okp
+      call decode(code, a, okp)
+      w = 0
+      do k = 1, nf
+         if (a(k) > 0) w = w + p(:,k+1)
+      enddo
+    end function ujets
+    real(dp) function tpart(code, uu) result(tp)
+      integer, intent(in) :: code
+      real(dp), intent(in) :: uu(4)
+      integer :: a(6), k
+      logical :: okp
+      real(dp) :: PJ(4,2), uP, m2
+      call decode(code, a, okp)
+      tp = huge(1.0_dp)
+      if (.not. okp) return
+      PJ = 0
+      do k = 1, nf
+         if (a(k) > 0) PJ(:,a(k)) = PJ(:,a(k)) + p(:,k+1)
+      enddo
+      tp = 0
+      do k = 1, nf
+         if (a(k) == 0) tp = tp + mdot(p(:,1), p(:,k+1)) / mdot(p(:,1), uu)
+      enddo
+      do k = 1, 2
+         ! u.P - |P| in the frame u, as m^2/(u.P + |P|) (no cancellation)
+         uP = mdot(uu, PJ(:,k)); m2 = max(mdot(PJ(:,k), PJ(:,k)), 0.0_dp)
+         tp = tp + m2 / (uP + sqrt(max(uP * uP - m2, 0.0_dp)))
+      enddo
+    end function tpart
     ! Minkowski product of DISENT four-vectors (x, y, z, E)
     real(dp) function mdot(x, y)
       real(dp), intent(in) :: x(4), y(4)
