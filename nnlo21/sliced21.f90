@@ -30,6 +30,8 @@ module sliced21_mod
   implicit none
   character(8) :: bpart
   integer :: nemit = 1      ! correlated sampling: emissions per Born (C1_NEMIT)
+  integer :: vbal = 0       ! c1: balanced VEGAS target (C1_VBAL)
+  integer, parameter :: ivb = 8   ! tau_cut column of the balanced target (1e-4)
   ! mode 2: beam-table grid in Q (lp21_grid_build/load)
   real(dp), parameter :: gqlo = 11.180339887498949_dp, gqhi = 141.42135623730951_dp, gdl = 0.1_dp
   real(dp), parameter :: gximin = 2e-3_dp, gh = 0.02_dp
@@ -69,7 +71,28 @@ contains
   ! emissions from the same Born (fresh unit numbers for the channel and the
   ! emission, r(3) and r(7:9), for all but the first): each is unbiased, b1
   ! (the expensive part) is evaluated once
+  ! VEGAS target for c1 with vbal (environment C1_VBAL = 1): the size of the
+  ! point's whole contribution vector, sqrt(sum_b f_b^2) over the jet bins at
+  ! tau_cut = tcs(ivb) (f = b1 + lo per bin, from the hcacc increments), so the
+  ! grid adapts to the variance of the cancelling sum in all bins at once
   real(dp) function c1_part(r, wgt) result(res)
+    real(dp), intent(in) :: r(:), wgt
+    real(dp) :: h0(ncell), f
+    integer :: b
+    if (vbal == 0) then
+       res = c1_core(r, wgt)
+       return
+    endif
+    h0 = hcacc
+    f = c1_core(r, wgt)
+    res = 0
+    do b = 2, nob
+       res = res + ((hcacc(ivb + ntc*(b - 1)) - h0(ivb + ntc*(b - 1)))/wgt)**2
+    enddo
+    res = sqrt(res)
+  end function c1_part
+
+  real(dp) function c1_core(r, wgt) result(res)
     real(dp), intent(in) :: r(:), wgt
     real(dp) :: rr(size(r)), u(4), a
     integer :: m, nc
@@ -101,7 +124,7 @@ contains
        res = res + born_part(rr, wgt/nemit)/nemit
     enddo
     res = res + b21c_part(r, wgt)
-  end function c1_part
+  end function c1_core
 
   real(dp) function b21_eval(Pk, Q2, xB, eta, jac, dphi, wgt) result(res)
     real(dp), intent(in) :: Pk(4,6), Q2, xB, eta, jac, dphi, wgt
@@ -295,7 +318,9 @@ program sliced21
      part = 'lo'; bpart = 'b1'; usepsmc = .true.
      call get_environment_variable('C1_NEMIT', arg)
      if (len_trim(arg) > 0) read(arg, *) nemit
-     write(*,'(a,i4)') ' correlated sampling c1: emissions per Born', nemit
+     call get_environment_variable('C1_VBAL', arg)
+     if (len_trim(arg) > 0) read(arg, *) vbal
+     write(*,'(a,i4,a,i2)') ' correlated sampling c1: emissions per Born', nemit, '  balanced VEGAS target', vbal
      call setup_flavours()
      call vegas(9, ncall, itmx, avg, err, chi2, c1_part)
      bpart = 'c1'
