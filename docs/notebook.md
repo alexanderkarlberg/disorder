@@ -2189,3 +2189,21 @@ Combination (r tcut6, lo/vi/kp tcut5, b1/b2 tcut1), all τ_zQ bins:
   1.5σ (n = 3), 1σ (n = 4).
 - `runs/tcut10`: edge 10⁻¹² with technical cut 10⁻⁹ (control), 10⁻¹⁰, 10⁻¹¹; 30
   seeds each (801–830, as tcut6).
+
+**ZEUS-like dijets at NLO: DISENT references disagree (5 Oct, evening).**
+- `slicing/dis2j_nlo.f90`: DISENTFULL driven directly (as tau2_nlo), ZEUS
+  selection of nlo31/sliced21 mode 2. DISENT's weights include 1/NEV and pb
+  (NRM): the cross section is the sum over events (first version divided by
+  NEV and multiplied by GeV→pb again; corrected). LO 103.2–103.5 ± 0.13
+  (4 seeds × 10M), = NNLOJET 103.17 and sliced21 b0 103.29. NLO coefficient:
+  −59, −54, −66, −61 (±3–4) total; m12 45–65: −49.5 ± 0.6 (LO 13.1).
+- disorder itself (`analysis/zeus_dijet_analysis.f`, FastJet-free, same
+  selection; `disorder -p2b -nlo|-nnlo -Q2min 125 -Q2max 20000 -ymin 0.2
+  -ymax 0.6 -Ehad 920`, 4 seeds × 10M): LO (−nlo) 103.35 ± 0.03, but LO + NLO
+  (−nnlo) −559 ± 5 total; −4.9 in ptavg 30–60 (LO 2.66), −104 in m12 45–65.
+- Our slicing (b1 + lo, mode 2): +9 … +10 at τ_cut ≤ 1e-4.
+- So the two DISENT drivers differ from each other by ~10 at O(α_s²), and both
+  are far from slicing; neither looks physical (−380% NLO in a bin). Not the
+  lepton azimuth (DISENT fixes the lepton plane and generates the hadronic
+  azimuth; reals are built from their 3-parton parents). Cause not found.
+- Tie-breaker: NNLOJET NLO (R + V) production, `nnlojet_zeus/nlo`.
