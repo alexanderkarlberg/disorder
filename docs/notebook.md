@@ -2431,3 +2431,9 @@ cuts (p̄_T 22–60, m12 65–120) are small and flat within errors.
   2.0σ: no sign of bias. Equal-weight iterations (`VEGAS_EQUAL=3`, `runs/corrve`):
   also unbiased (χ² 17.2, 20.9/15) but the poorly adapted early iterations
   inflate some errors enormously (y −1…0: ±60 instead of ±2); keep 1/s².
+- **Correlated NNLO 2+1 (`sliced21 c2`, mode 1, 6 Oct ~01:15):** one psmc Born
+  feeds b2 (below the cut), vi and kp (3+1 from psmc_gen(3) with that Born) and
+  r (4+1 from psmc_gen(4), whose 3+1 step takes the same Born numbers); 16 VEGAS
+  dimensions, balanced target over the τ_zQ bins. ~2 ms per point (vi and r).
+  Test: 48 seeds × 1.8M on thserv09/15 (`runs/corr2`) against the independent
+  τ_cut runs (tcut5/6/8; compare at τ_cut ≥ 3e-5, the old r used edge 1e-10).
