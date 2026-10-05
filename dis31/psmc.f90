@@ -41,6 +41,7 @@ module psmc
   ! channel lists: (type 1 FF / 2 FI / 3 IF, i, j or 0, k or 0)
   integer, save :: nch(3:4) = 0, ch(4,30,3:4)
   public :: psmc_init, psmc_gen, psmc_density
+  public :: psmc_born, psmc_nchan
 contains
 
   subroutine psmc_set_edge(e)
@@ -119,6 +120,29 @@ contains
     endif
     wps = 1/g
   end subroutine psmc_gen
+
+  integer function psmc_nchan(n)
+    integer, intent(in) :: n
+    psmc_nchan = nch(n)
+  end function psmc_nchan
+
+  ! the 2+1 Born of the CS channels for given unit numbers r(1:3) (in
+  ! psmc_gen(3, r) these are r(2:4)) and its density (same normalisation as
+  ! psmc_density): correlated sampling, the below-cut 2+1 term at the Born of
+  ! the above-cut 3+1 event (5 Oct)
+  subroutine psmc_born(r, B, eta, wps, ok)
+    real(dp), intent(in) :: r(3)
+    real(dp), intent(out) :: B(4,6), eta, wps
+    logical, intent(out) :: ok
+    real(dp) :: g
+    wps = 0; eta = 0
+    call gen_born2(r, B, ok)
+    if (.not. ok) return
+    eta = eta_of(B)
+    g = dens_born2(B)
+    ok = g > 0 .and. g == g
+    if (ok) wps = 1/g
+  end subroutine psmc_born
 
   ! flat: eta (log) and sequential decays (nlo31's breit); n-1 + 2(n-1) + 1 numbers
   subroutine gen_flat(n, r, P, ok)

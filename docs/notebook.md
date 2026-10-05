@@ -2348,3 +2348,27 @@ The τ₁ results stand as a separate check, but they are not the requested test
 - Efficiency, CPU × error², ours/disorder: τ_cut 1e-4: 2–5 (p_T 8–20), 11–28
   (≥ 1 jet, p_T 20–100, central/backward y), 52–163 (forward y, ≥ 2 jets, p_T
   5–8); τ_cut 1e-5: 17–396. Page v11.
+
+**Correlated sampling (5 Oct, night; AK: after the validation).**
+- `sliced21` part `c1` (modes 2, 3): the NLO 2+1 coefficient b1 + lo sampled
+  together. psmc builds every CS-channel 3+1 point from a 2+1 Born (unit numbers
+  r(4:6)); `psmc_born` returns that Born and its density, b1 is evaluated there
+  with weight 1/g_Born, lo (nlo31 `born_part`) at the 3+1 point from the same r.
+  Each term unbiased; the Born-to-Born fluctuation of the large logs should
+  cancel. Options: `C1_NEMIT = M` (M emissions per Born, fresh channel/emission
+  numbers), `C1_NEMIT = -1` (stratified: one emission per psmc channel, 12 CS +
+  flat, weighted by the channel probabilities).
+- Regressions: modes 0–2 bit-identical after splitting b21_part into kinematics
+  and `b21_eval`. Mode 3 VEGAS target changed from the total row (identically
+  zero in P2B, so VEGAS never adapted there) to ≥ 1 jet.
+- Correctness: c1 reproduces the independent b1 + lo in all bins (pulls ≤ 1.6).
+- Efficiency, CPU × error² relative to the independent b1 + lo (optimal split;
+  timing favours c1 by ~1.5–2× since thA371a is faster than a thserv):
+  - VEGAS-adapted c1 (target ≥ 1 jet): 20× (1e-4) / 90× (1e-5) better in ≥ 1
+    jet, much worse elsewhere: the adaptation starves the other bins (the
+    independent production effectively did not adapt). Not a fair comparison.
+  - unadapted c1, M = 1: 2–20× worse: b1 costs ~30× lo per point, so 1:1
+    points starve lo (optimal independent split ~7 lo per b1).
+  - unadapted c1, M = 8: about break-even (0.1–2 at 1e-4; up to 7 at 1e-5 in
+    ≥ 1 jet). Not the hoped one to two orders of magnitude.
+  - stratified (M = −1): running.

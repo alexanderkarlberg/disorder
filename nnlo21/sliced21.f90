@@ -29,6 +29,7 @@ module sliced21_mod
   use lp21
   implicit none
   character(8) :: bpart
+  integer :: nemit = 1      ! correlated sampling: emissions per Born (C1_NEMIT)
   ! mode 2: beam-table grid in Q (lp21_grid_build/load)
   real(dp), parameter :: gqlo = 11.180339887498949_dp, gqhi = 141.42135623730951_dp, gdl = 0.1_dp
   real(dp), parameter :: gximin = 2e-3_dp, gh = 0.02_dp
@@ -37,16 +38,80 @@ contains
 
   real(dp) function b21_part(r, wgt) result(res)
     real(dp), intent(in) :: r(:), wgt
-    real(dp), external :: alphasPDF
-    real(dp) :: Q2, y, xB, eta, jac, Pk(4,6), P(4,7), dphi, as, fpdf(-5:5), w, Q, tz
-    real(dp) :: QQ, GQ, born(3), f0(3), c1(ntc,3), c2(ntc,3), val(ntc), mu(3)
-    logical :: ok, inb(nobmax)
-    real(dp) :: dp2b(nobmax)
-    integer :: b, k, c
+    real(dp) :: Q2, y, xB, eta, jac, Pk(4,6), dphi
+    logical :: ok
     res = 0
     call lepton(r(1:3), Q2, y, xB, eta, jac, ok)
     if (.not. ok) return
     call breit(2, r(4:5), Q2, y, xB, eta, Pk, dphi)
+    res = b21_eval(Pk, Q2, xB, eta, jac, dphi, wgt)
+  end function b21_part
+
+  ! correlated sampling (5 Oct): the below-cut 2+1 term at the 2+1 Born that
+  ! psmc builds the above-cut 3+1 event from (same unit numbers: lepton2 from
+  ! r(1:2), the Born from r(4:6) = psmc_gen(3, r(3:9))'s r(2:4)); with
+  ! born_part (nlo31, part lo) on the same r this is the NLO 2+1 coefficient
+  ! b1 + lo sampled point by point together
+  real(dp) function b21c_part(r, wgt) result(res)
+    real(dp), intent(in) :: r(:), wgt
+    real(dp) :: Q2, y, xB, eta, jac, Pk(4,6), dphi
+    logical :: ok
+    res = 0
+    call lepton2(r(1:2), Q2, y, xB, jac, ok)
+    if (.not. ok) return
+    call psmc_born(r(4:6), Pk, eta, dphi, ok)
+    if (.not. ok) return
+    res = b21_eval(Pk, Q2, xB, eta, jac, dphi, wgt)
+  end function b21c_part
+
+  ! the correlated NLO 2+1 integrand: lo (nlo31) + b1 at the same point; with
+  ! nemit > 1 (environment C1_NEMIT) the lo term is averaged over nemit
+  ! emissions from the same Born (fresh unit numbers for the channel and the
+  ! emission, r(3) and r(7:9), for all but the first): each is unbiased, b1
+  ! (the expensive part) is evaluated once
+  real(dp) function c1_part(r, wgt) result(res)
+    real(dp), intent(in) :: r(:), wgt
+    real(dp) :: rr(size(r)), u(4), a
+    integer :: m, nc
+    if (nemit < 0) then
+       ! stratified over psmc's channels (nemit = -1): one emission per channel
+       ! from the same Born, weighted by the channel probabilities (psmc_gen uses
+       ! r(1) = rr(3) only to select the channel); fresh emission numbers except
+       ! for the flat channel, which takes r(4:9)
+       nc = psmc_nchan(3)
+       res = 0
+       do m = 0, nc
+          rr = r
+          if (m == 0) then
+             a = psmc_aflat; rr(3) = 0.5_dp*psmc_aflat
+          else
+             a = (1 - psmc_aflat)/nc; rr(3) = psmc_aflat + (1 - psmc_aflat)*(m - 0.5_dp)/nc
+             call random_number(u(1:3)); rr(7:9) = u(1:3)
+          endif
+          res = res + a*born_part(rr, wgt*a)
+       enddo
+       res = res + b21c_part(r, wgt)
+       return
+    endif
+    res = born_part(r, wgt/nemit)/nemit
+    do m = 2, nemit
+       rr = r
+       call random_number(u)
+       rr(3) = u(1); rr(7:9) = u(2:4)
+       res = res + born_part(rr, wgt/nemit)/nemit
+    enddo
+    res = res + b21c_part(r, wgt)
+  end function c1_part
+
+  real(dp) function b21_eval(Pk, Q2, xB, eta, jac, dphi, wgt) result(res)
+    real(dp), intent(in) :: Pk(4,6), Q2, xB, eta, jac, dphi, wgt
+    real(dp), external :: alphasPDF
+    real(dp) :: P(4,7), as, fpdf(-5:5), w, Q, tz
+    real(dp) :: QQ, GQ, born(3), f0(3), c1(ntc,3), c2(ntc,3), val(ntc), mu(3)
+    logical :: inb(nobmax)
+    real(dp) :: dp2b(nobmax)
+    integer :: b, k, c
+    res = 0
     Q = sqrt(Q2)
     if (mode == 2) then
        klep = Pk(:,5); Q2cur = Q2
@@ -112,12 +177,14 @@ contains
        hcacc(1 + ntc*(b - 1):ntc*b) = hcacc(1 + ntc*(b - 1):ntc*b) + val*wgt
     enddo
     res = val(ntc)
+    ! mode 3: the VEGAS target is the >= 1 jet row (the total row vanishes in P2B)
+    if (mode == 3) res = val(ntc)*dp2b(2)
   contains
     real(dp) function dd(i, j)
       integer, intent(in) :: i, j
       dd = mdot(P(:,i), P(:,j))
     end function dd
-  end function b21_part
+  end function b21_eval
 end module sliced21_mod
 
 program sliced21
@@ -188,7 +255,7 @@ program sliced21
      lpmask = pdfmask
   endif
   if (mode >= 2) then
-     nob = merge(15, 16, mode == 2); nv = ntc*nob; iv = ntc
+     nob = merge(15, 16, mode == 2); nv = ntc*nob; iv = merge(ntc, 2*ntc, mode == 2)
      q2lo = gqlo**2; q2hi = gqhi**2; ylo = 0.2_dp; yhi = 0.6_dp
   else
      mode = 1; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
@@ -222,7 +289,19 @@ program sliced21
   endif
   write(*,'(a,a,a,i10,a,i4,a,i6,a,f9.6,a,f10.2)') ' sliced21 part ', trim(bpart), ' ncall', ncall, ' itmx', itmx, &
        & ' seed', seed, ' x', xfix, ' Q2', Q2fix
-  call vegas(5, ncall, itmx, avg, err, chi2, b21_part)
+  if (trim(bpart) == 'c1') then
+     ! correlated b1 + lo (mode >= 2 with psmc): nlo31's lo on the same points
+     if (mode < 2) stop 'c1: mode 2 or 3 (zeus | p2b) only'
+     part = 'lo'; bpart = 'b1'; usepsmc = .true.
+     call get_environment_variable('C1_NEMIT', arg)
+     if (len_trim(arg) > 0) read(arg, *) nemit
+     write(*,'(a,i4)') ' correlated sampling c1: emissions per Born', nemit
+     call setup_flavours()
+     call vegas(9, ncall, itmx, avg, err, chi2, c1_part)
+     bpart = 'c1'
+  else
+     call vegas(5, ncall, itmx, avg, err, chi2, b21_part)
+  endif
   write(*,'(a,a,a,es16.8,a,es12.4,a,f8.3)') ' RESULT ', trim(bpart), ' dsigma/dx dQ2 [pb/GeV2] (smallest tau_cut, all bins) = ', &
        & avg, ' +- ', err, '   chi2/it', chi2
   if (mode == 3) then

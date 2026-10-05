@@ -1235,7 +1235,8 @@ program nlo31
      nob = 15; nv = ntc*nob; iv = ntc
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
   elseif (mode == 3) then
-     nob = 16; nv = ntc*nob; iv = ntc
+     ! VEGAS target: >= 1 jet row (the total row vanishes identically in P2B)
+     nob = 16; nv = ntc*nob; iv = 2*ntc
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
   endif
   call random_seed(size=nseed); allocate(sd(nseed))
