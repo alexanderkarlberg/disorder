@@ -2016,3 +2016,36 @@ https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
   with 3+1 and 4+1 events as 2+1 Born × emissions sampled logarithmically
   (DISENT style, multichannel over the dipole-like maps). Then redo the
   τ_cut test.
+
+**Slicing-adapted phase space `psmc` for the above-cut parts (5 Oct).**
+- `dis31/psmc.f90`, option `psmc` of nlo31 mode 1 (design in
+  `docs/nnlo21-plan.md`): flat sequential-decay channel plus Catani–Seymour
+  emission channels (FF, FI, IF for all labels; 12 for 3+1, 30 for 4+1 on top
+  of the full 3+1 mixture). y and 1−x are sampled logarithmically down to 1e-10,
+  z̃/u with a logistic map. The weight is the inverse of the mixture density,
+  with every channel density from the exact inverse CS map.
+- Checks:
+  - phase-space volume against the flat generator, n = 3 and 4, within 1–2σ
+    above the technical cut (`disorder-comparisons/nnlo21/pstest`);
+  - lo slice 1e-5 < τ₂ < 3e-5 (vslice): 172.08 ± 0.12 against DISENT's 171.9
+    (uniform: 169.3 ± 1.6 from late iterations only); all lo cells agree with
+    DISENT × 1/x within 1–1.5σ;
+  - mode 0 unchanged (bit-identical).
+- r, all bins, four seeds of 200k × 4 (`runs/rvar`), against the uniform tcut2
+  (30 × 1M × 6):
+
+  | τ_cut | uniform (tcut2) | psmc |
+  |---|---|---|
+  | 2e-2 | 18.9 ± 1.3 | 18.3 ± 4.6 |
+  | 1e-3 | −156 ± 11 | −136 ± 19 |
+  | 2e-4 | −619 ± 14 | −636 ± 34 |
+  | 1e-4 | −929 ± 34 | −957 ± 46 |
+  | 3e-5 | −1704 ± 57 | −1935 ± 49 |
+  | 1e-5 | −2474 ± 83 | −3270 ± 64 |
+
+  Agreement on the plateau; below 1e-4 the uniform r was too small in
+  magnitude by −28, −231, −796, most of the NNLO drift (81, 342, 1100). This
+  confirms the VEGAS-bias diagnosis. psmc is also about 1.6 times faster per
+  point (fewer ME calls in the cut-away region), and iterations are stable
+  (χ²/it 0.3).
+- Full rerun of lo, vi, kp, r with psmc: `runs/tcut5` (60 r, 12 vi, 6 lo, 4 kp).
