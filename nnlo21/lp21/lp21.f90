@@ -56,25 +56,22 @@ module lp21
   real(dp), allocatable, save :: tab(:,:,:)       ! (0:nt, 9, 3)
   real(dp), save :: zx                              ! xi of the z integrand
   integer, save :: zlim = 30
+  ! grid in Q (sliced21 mode 2, Q = mu varies per event): nodes ln Q =
+  ! gq0 + gqh*i, i = 0..nqg-1, each a table as tab; cubic in ln Q
+  integer, save :: nqg = 0
+  real(dp), save :: gq0, gqh
+  real(dp), allocatable, save :: tabg(:,:,:,:)    ! (0:nt, 9, 3, 0:nqg-1)
   public :: lp21_init, lp21_born, lp21_beam_direct, lp21_shift, beam_at
+  public :: lp21_grid_build, lp21_grid_load, lp21_setq
 contains
 
   ! MCFM's common blocks at mu = mu_F = Q; table of the beam coefficients
   ! for ximin <= xi < 1, nodes equally spaced in ln(xi/(1-xi)) by h
   subroutine lp21_init(Q, ximin, h)
     real(dp), intent(in) :: Q, ximin, h
-    real(dp) :: scale, musq, facscale, gsq, as, ason2pi, ason4pi, t1, t, b(9,3)
-    integer :: nflav, kpart, i
-    logical :: coeffonly
-    common/mcfmscale/scale, musq
-    common/facscale/facscale
-    common/nflav/nflav
-    common/qcdcouple/gsq, as, ason2pi, ason4pi
-    common/coeffonly/coeffonly
-    common/kpart/kpart
-    scale = Q; musq = Q*Q; facscale = Q; nflav = 5
-    ason2pi = 1; ason4pi = 0.5_dp; coeffonly = .true.; kpart = 0
-    tQ = Q
+    real(dp) :: t1, t, b(9,3)
+    integer :: i
+    call lp21_setq(Q)
     if (h <= 0) then
        nt = 0; return
     endif
@@ -88,6 +85,83 @@ contains
        tab(i,:,:) = b
     enddo
   end subroutine lp21_init
+
+  ! MCFM's common blocks and the beam scale at mu = mu_F = Q (per event in
+  ! sliced21 mode 2)
+  subroutine lp21_setq(Q)
+    real(dp), intent(in) :: Q
+    real(dp) :: scale, musq, facscale, gsq, as, ason2pi, ason4pi
+    integer :: nflav, kpart
+    logical :: coeffonly
+    common/mcfmscale/scale, musq
+    common/facscale/facscale
+    common/nflav/nflav
+    common/qcdcouple/gsq, as, ason2pi, ason4pi
+    common/coeffonly/coeffonly
+    common/kpart/kpart
+    scale = Q; musq = Q*Q; facscale = Q; nflav = 5
+    ason2pi = 1; ason4pi = 0.5_dp; coeffonly = .true.; kpart = 0
+    tQ = Q
+  end subroutine lp21_setq
+
+  ! Q grid: nodes ln Q = ln Qlo - dl + dl*i, i = 0..nq-1 (one node beyond each
+  ! end for the cubic interpolation), nq = ceiling(ln(Qhi/Qlo)/dl) + 3.
+  ! build: tables of nodes i0..i1 into files <prefix>_<i>.tab
+  subroutine lp21_grid_build(Qlo, Qhi, dl, ximin, h, i0, i1, prefix)
+    real(dp), intent(in) :: Qlo, Qhi, dl, ximin, h
+    integer, intent(in) :: i0, i1
+    character(*), intent(in) :: prefix
+    integer :: i, u, nq
+    character(16) :: num
+    nq = ceiling(log(Qhi/Qlo)/dl) + 3
+    do i = max(i0, 0), min(i1, nq - 1)
+       call lp21_init(exp(log(Qlo) - dl + dl*i), ximin, h)
+       write(num, '(i0)') i
+       open(newunit=u, file=prefix//'_'//trim(num)//'.tab', form='unformatted', access='stream', status='replace')
+       write(u) nt, t0, th, tQ
+       write(u) tab
+       close(u)
+    enddo
+  end subroutine lp21_grid_build
+
+  ! load the grid <prefix>_0.tab, _1.tab, ... (spacing in ln Q and the number
+  ! of nodes from the files; the Q range must be covered, Qlo/Qhi checked)
+  subroutine lp21_grid_load(Qlo, Qhi, prefix)
+    real(dp), intent(in) :: Qlo, Qhi
+    character(*), intent(in) :: prefix
+    integer :: i, u, n
+    real(dp) :: a, b, q, q0
+    character(16) :: num
+    logical :: ex
+    nqg = 0
+    do
+       write(num, '(i0)') nqg
+       inquire(file=prefix//'_'//trim(num)//'.tab', exist=ex)
+       if (.not. ex) exit
+       nqg = nqg + 1
+    enddo
+    if (nqg < 4) stop 'lp21_grid_load: fewer than 4 Q nodes'
+    do i = 0, nqg - 1
+       write(num, '(i0)') i
+       open(newunit=u, file=prefix//'_'//trim(num)//'.tab', form='unformatted', access='stream', status='old')
+       read(u) n, a, b, q
+       if (i == 0) then
+          nt = n; t0 = a; th = b; q0 = q
+          if (allocated(tabg)) deallocate(tabg)
+          allocate(tabg(0:nt, 9, 3, 0:nqg-1))
+       elseif (n /= nt .or. a /= t0 .or. b /= th) then
+          stop 'lp21_grid_load: tables differ in xi nodes'
+       endif
+       if (i == 1) then
+          gq0 = log(q0); gqh = log(q) - gq0
+       elseif (i > 1) then
+          if (abs(log(q) - (gq0 + gqh*i)) > 1e-10_dp) stop 'lp21_grid_load: Q nodes not equally spaced'
+       endif
+       read(u) tabg(:,:,:,i)
+       close(u)
+    enddo
+    if (log(Qlo) < gq0 + gqh .or. log(Qhi) > gq0 + gqh*(nqg - 2)) stop 'lp21_grid_load: Q range not covered'
+  end subroutine lp21_grid_load
 
   ! beam coefficients at xi (mu = Q, Q_B = mu) by adaptive z integration
   subroutine lp21_beam_direct(xi, b)
@@ -172,6 +246,10 @@ contains
     real(dp) :: t, x, fx, w(4)
     integer :: ix, k
     t = log(xi/(1 - xi))
+    if (nqg > 0) then
+       call grid_at(t, b)
+       return
+    endif
     if (nt > 0 .and. t >= t0 + th .and. t <= t0 + th*(nt - 2)) then
        x = (t - t0)/th; ix = int(x); fx = x - ix
        w = [-0.5_dp*fx**3 + fx**2 - 0.5_dp*fx, 1.5_dp*fx**3 - 2.5_dp*fx**2 + 1, &
@@ -184,6 +262,35 @@ contains
        call lp21_beam_direct(xi, b)
     endif
   end subroutine beam_at
+
+  ! Catmull-Rom in t = ln(xi/(1-xi)) and ln Q on the grid; direct outside it
+  subroutine grid_at(t, b)
+    real(dp), intent(in) :: t
+    real(dp), intent(out) :: b(9,3)
+    real(dp) :: x, fx, w(4), xq, fq, wq(4)
+    integer :: ix, iq, k, l
+    xq = (log(tQ) - gq0)/gqh
+    if (t < t0 + th .or. t > t0 + th*(nt - 2) .or. xq < 1 .or. xq > nqg - 2) then
+       call lp21_beam_direct(1/(1 + exp(-t)), b)
+       return
+    endif
+    x = (t - t0)/th; ix = int(x); fx = x - ix
+    iq = min(int(xq), nqg - 3); fq = xq - iq
+    w = cr(fx); wq = cr(fq)
+    b = 0
+    do l = 1, 4
+       do k = 1, 4
+          b = b + wq(l)*w(k)*tabg(ix + k - 2,:,:,iq + l - 2)
+       enddo
+    enddo
+  contains
+    function cr(f) result(c)
+      real(dp), intent(in) :: f
+      real(dp) :: c(4)
+      c = [-0.5_dp*f**3 + f**2 - 0.5_dp*f, 1.5_dp*f**3 - 2.5_dp*f**2 + 1, &
+           -1.5_dp*f**3 + 2*f**2 + 0.5_dp*f, 0.5_dp*f**3 - 0.5_dp*f**2]
+    end function cr
+  end subroutine grid_at
 
   ! shift of distribution coefficients s(-1:n) from logs of tau Q_i/mu^2 to
   ! logs of tau/mu: l = ln(Q_i/mu)

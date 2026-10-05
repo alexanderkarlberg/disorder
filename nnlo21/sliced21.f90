@@ -12,12 +12,23 @@
 !
 ! Usage: sliced21 part ncall itmx seed x Q2 [softtable [h [pdfmask]]]   (part = b0, b1, b2;
 ! tabchk: beam table at node spacing h (default 0.02) against direct evaluation)
+!
+! Mode 2 (ZEUS-like dijets, as dis31/nlo31 mode 2; sigma per bin in pb):
+!   sliced21 part ncall itmx seed zeus <table prefix> [softtable]
+! integrated over Q^2 and y with the selection on the 2+1 Born jets; the beam
+! tables on a grid in Q (mu = Q per event), built once by
+!   sliced21 mktab i0 i1 <prefix> [dlnQ [h]]   (nodes i0..i1, in parallel;
+!                                    defaults 0.1 in ln Q, 0.02 in ln(xi/(1-xi)))
+!   sliced21 tabchkg <prefix>          (grid against direct evaluation)
 !-----------------------------------------------------------------------
 module sliced21_mod
   use nlo31_mod
   use lp21
   implicit none
   character(8) :: bpart
+  ! mode 2: beam-table grid in Q (lp21_grid_build/load)
+  real(dp), parameter :: gqlo = 11.180339887498949_dp, gqhi = 141.42135623730951_dp, gdl = 0.1_dp
+  real(dp), parameter :: gximin = 2e-3_dp, gh = 0.02_dp
 
 contains
 
@@ -26,18 +37,25 @@ contains
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,6), P(4,7), dphi, as, fpdf(-5:5), w, Q, tz
     real(dp) :: QQ, GQ, born(3), f0(3), c1(ntc,3), c2(ntc,3), val(ntc), mu(3)
-    logical :: ok
+    logical :: ok, inb(nobmax)
     integer :: b, k, c
     res = 0
     call lepton(r(1:3), Q2, y, xB, eta, jac, ok)
     if (.not. ok) return
     call breit(2, r(4:5), Q2, y, xB, eta, Pk, dphi)
     Q = sqrt(Q2)
-    tz = 1
-    do k = 2, 3
-       if (Pk(3,k) < 0) tz = tz + 2*Pk(3,k)/Q
-    enddo
-    if (tz < zlo(nzb) .or. tz >= zhi(nzb)) return
+    if (mode == 2) then
+       klep = Pk(:,5); Q2cur = Q2
+       call zeus_bins(Pk(:,1), Pk(:,2:3), 2, inb)
+       if (.not. inb(1)) return
+       if (trim(bpart) /= 'b0') call lp21_setq(Q)
+    else
+       tz = 1
+       do k = 2, 3
+          if (Pk(3,k) < 0) tz = tz + 2*Pk(3,k)/Q
+       enddo
+       if (tz < zlo(nzb) .or. tz >= zhi(nzb)) return
+    endif
     P = 0
     P(:,1:3) = Pk(:,1:3); P(:,5) = Pk(:,4); P(:,6) = Pk(:,5); P(:,7) = Pk(:,6)
     ! DISENT's MATTHR per unit charge^2 (QQ: quark Born, GQ: gluon Born, one flavour)
@@ -70,8 +88,16 @@ contains
        enddo
     end select
     val = val*w
-    do b = 1, nzb
-       if (tz >= zlo(b) .and. tz < zhi(b)) hcacc(1 + ntc*(b - 1):ntc*b) = hcacc(1 + ntc*(b - 1):ntc*b) + val*wgt
+    if (val(ntc) /= val(ntc)) then
+       res = 0; return
+    endif
+    do b = 1, nob
+       if (mode == 2) then
+          if (.not. inb(b)) cycle
+       elseif (tz < zlo(b) .or. tz >= zhi(b)) then
+          cycle
+       endif
+       hcacc(1 + ntc*(b - 1):ntc*b) = hcacc(1 + ntc*(b - 1):ntc*b) + val*wgt
     enddo
     res = val(ntc)
   contains
@@ -86,7 +112,7 @@ program sliced21
   use sliced21_mod
   use mod_slicing_scet, only: soft_table_init, scet_set_colour
   implicit none
-  character(256) :: arg, softtab
+  character(256) :: arg, softtab, gprefix
   integer :: ncall, itmx, seed, nseed, i
   integer, allocatable :: sd(:)
   integer :: lpmask
@@ -94,15 +120,53 @@ program sliced21
   real(dp) :: avg, err, chi2, hb, bt(9,3), bd(9,3), xi, rr, em(3)
   integer :: k
   call get_command_argument(1, bpart)
+  if (trim(bpart) == 'mktab' .or. trim(bpart) == 'tabchkg') then
+     call initPDFSetByName('NNPDF30_nlo_as_0118')
+     call initPDF(0)
+     call scet_set_colour(4.0_dp/3, 3.0_dp, 0.5_dp)
+     if (trim(bpart) == 'mktab') then
+        call get_command_argument(2, arg); read(arg, *) i
+        call get_command_argument(3, arg); read(arg, *) k
+        call get_command_argument(4, softtab)
+        rr = gdl; hb = gh
+        if (command_argument_count() > 4) then
+           call get_command_argument(5, arg); read(arg, *) rr
+        endif
+        if (command_argument_count() > 5) then
+           call get_command_argument(6, arg); read(arg, *) hb
+        endif
+        call lp21_grid_build(gqlo, gqhi, rr, gximin, hb, i, k, trim(softtab))
+     else
+        call get_command_argument(2, softtab)
+        call lp21_grid_load(gqlo, gqhi, trim(softtab))
+        em = 0
+        do k = 1, 300
+           call random_number(rr); xi = gximin*(0.95_dp/gximin)**rr
+           call random_number(rr); call lp21_setq(gqlo*(gqhi/gqlo)**rr)
+           call beam_at(xi, bt); call lp21_beam_direct(xi, bd)
+           do i = 1, 3
+              em(i) = max(em(i), maxval(abs(bt(:,i) - bd(:,i)))/maxval(abs(bd(:,i))))
+           enddo
+        enddo
+        write(*,'(a,3es10.2)') ' beam grid: max deviation / max coefficient (up, down, gluon)', em
+     endif
+     stop
+  endif
   call get_command_argument(2, arg); read(arg, *) ncall
   call get_command_argument(3, arg); read(arg, *) itmx
   call get_command_argument(4, arg); read(arg, *) seed
-  call get_command_argument(5, arg); read(arg, *) xfix
-  call get_command_argument(6, arg); read(arg, *) Q2fix
+  call get_command_argument(5, arg)
+  if (trim(arg) == 'zeus') then
+     mode = 2
+     call get_command_argument(6, gprefix)
+  else
+     read(arg, *) xfix
+     call get_command_argument(6, arg); read(arg, *) Q2fix
+  endif
   softtab = ''; hb = 0.02_dp
   if (command_argument_count() > 6) call get_command_argument(7, softtab)
   if (softtab == '-') softtab = ''
-  if (command_argument_count() > 7) then
+  if (command_argument_count() > 7 .and. mode /= 2) then
      call get_command_argument(8, arg); read(arg, *) hb
   endif
   if (command_argument_count() > 8) then
@@ -111,7 +175,12 @@ program sliced21
      call get_command_argument(9, arg); read(arg, *) pdfmask
      lpmask = pdfmask
   endif
-  mode = 1; nv = ncell; iv = ntc + ntc*(nzb - 1)
+  if (mode == 2) then
+     nob = nobmax; nv = ntc*nob; iv = ntc
+     q2lo = gqlo**2; q2hi = gqhi**2; ylo = 0.2_dp; yhi = 0.6_dp
+  else
+     mode = 1; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
+  endif
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]
   call random_seed(put=sd)
@@ -119,7 +188,11 @@ program sliced21
   call initPDF(0)
   call scet_set_colour(4.0_dp/3, 3.0_dp, 0.5_dp)
   if (softtab /= '') call soft_table_init(trim(softtab), 0.025_dp, 0.05_dp)
-  if (trim(bpart) /= 'b0') call lp21_init(sqrt(Q2fix), xfix, hb)
+  if (mode == 2) then
+     if (trim(bpart) /= 'b0') call lp21_grid_load(gqlo, gqhi, trim(gprefix))
+  elseif (trim(bpart) /= 'b0') then
+     call lp21_init(sqrt(Q2fix), xfix, hb)
+  endif
   if (trim(bpart) == 'tabchk') then
      ! largest deviation per class, relative to the largest coefficient of the class
      em = 0
@@ -140,9 +213,24 @@ program sliced21
   call vegas(5, ncall, itmx, avg, err, chi2, b21_part)
   write(*,'(a,a,a,es16.8,a,es12.4,a,f8.3)') ' RESULT ', trim(bpart), ' dsigma/dx dQ2 [pb/GeV2] (smallest tau_cut, all bins) = ', &
        & avg, ' +- ', err, '   chi2/it', chi2
-  write(*,'(a)') ' CELLS dsigma/dx dQ2 [pb/GeV2] below the cut: tau_zQ bin, then tau_cut columns'
-  write(*,'(a,10es12.3)') ' tau_cut     ', tcs
-  do i = 1, nzb
-     write(*,'(a,2f5.2,10es16.8)') ' CELL ', zlo(i), zhi(i), hc(1 + ntc*(i - 1):ntc*i)
-  enddo
+  if (mode == 2) then
+     write(*,'(a)') ' ZCELLS sigma per bin [pb] below the cut: observable bin, then tau_cut columns'
+     write(*,'(a,10es12.3)') ' tau_cut     ', tcs
+     write(*,'(a,10es16.8)') ' ZCELL total     0     0', hc(1:ntc)
+     do i = 1, 6
+        write(*,'(a,2f8.0,10es16.8)') ' ZCELL q2   ', zq2e(i-1), zq2e(i), hc(1 + ntc*i:ntc*(i + 1))
+     enddo
+     do i = 1, 4
+        write(*,'(a,2f8.0,10es16.8)') ' ZCELL ptavg', zpte(i-1), zpte(i), hc(1 + ntc*(6 + i):ntc*(7 + i))
+     enddo
+     do i = 1, 4
+        write(*,'(a,2f8.0,10es16.8)') ' ZCELL m12  ', zmje(i-1), zmje(i), hc(1 + ntc*(10 + i):ntc*(11 + i))
+     enddo
+  else
+     write(*,'(a)') ' CELLS dsigma/dx dQ2 [pb/GeV2] below the cut: tau_zQ bin, then tau_cut columns'
+     write(*,'(a,10es12.3)') ' tau_cut     ', tcs
+     do i = 1, nzb
+        write(*,'(a,2f5.2,10es16.8)') ' CELL ', zlo(i), zhi(i), hc(1 + ntc*(i - 1):ntc*i)
+     enddo
+  endif
 end program sliced21

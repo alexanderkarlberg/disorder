@@ -2070,3 +2070,20 @@ the NNLOJET warmups start once the τ_cut test (tcut5) passes.
 - Our side still needs: sliced21 integrated over (x, Q²) with the jet
   selection on the projected 2+1 Born jets; nlo31 mode 0 with ≥ 2 jets,
   τ₂ > τ_cut, psmc, lab-frame boost for the η cut; a τ_cut scan in this set-up.
+
+**psmc r: catastrophic weights (5 Oct, late morning).** In `runs/tcut5`, 38 of
+the 60 r jobs (1M × 6 each) have an iteration with a point of weight ~1e150
+or more (e.g. seed 815: −2.3e150 ± Inf in iteration 3). VEGAS's grid is then
+destroyed and every later iteration is zero. lo, vi and kp (3+1) are clean.
+- The psmc 4+1 phase-space weight alone is bounded under uniform random
+  numbers (2e6 points with s_min > 1e-9 W²: all below 2.6e4, none non-finite;
+  `pstest/wscan.f90`). So the huge values come from the integrand (real minus
+  dipoles) at extreme points that the adapted VEGAS grid reaches, or from the
+  combination with VEGAS's own jacobian.
+- Consequence: the psmc r numbers above (`runs/rvar`, 4 seeds without
+  blow-ups) are **not yet trustworthy**. A rare wrong or unbounded weight
+  biases every seed, not only those where it shows. The comparison with the
+  uniform r (most of the drift removed) stands only as a hint until the
+  cause is found.
+- Debugging: seed 815 rerun with a dump of the first point with |weight| >
+  1e12.
