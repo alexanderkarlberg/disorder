@@ -2058,6 +2058,9 @@ the NNLOJET warmups start once the τ_cut test (tcut5) passes.
   m₁₂ > 20 GeV), with photon exchange only, α = 1/137, E-scheme
   recombination (V4, not ZEUS's E_T scheme, so that our jet code matches),
   μ_R = μ_F = Q.
+- NNLOJET's E_T (`v1_et`, ObsHelper.f90) is sqrt(p_T² + m²) of the jet, not
+  E p_T/|p| as the first version of the runcard comment said (corrected);
+  jets are ordered by Breit-frame p_T.
 - NNLOJET's order of the cuts (`driver/core/ecuts.f`, `ecuts_dis`): kt
   clustering and jets_et in the Breit frame, then jets outside the lab η
   window are dropped, then njets and m₁₂ of the two leading jets.

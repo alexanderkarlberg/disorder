@@ -3,8 +3,9 @@
 ! examples/epLJJ/nnlojet-1703.05977-ZEUS2j.run, ZEUS 1010.6167), with
 ! - photon exchange only, alpha = 1/137 (as dis31/validation),
 ! - E-scheme recombination (V4) instead of ZEUS's E_T scheme, so that our
-!   own jet code (E-scheme, as nlo31) can match exactly; jets_et is then
-!   E p_T/|p| of the massive jet in the Breit frame,
+!   own jet code (E-scheme, as nlo31) can match exactly; jets_et is
+!   NNLOJET's v1_et = sqrt(p_T^2 + m^2) of the jet in the Breit frame
+!   (ObsHelper.f90; jets ordered by Breit-frame p_T),
 ! - mu_R = mu_F = Q.
 ! NNLOJET clusters in the Breit frame, applies jets_et there, then drops jets
 ! outside the lab-frame (HERA) eta window, then njets >= 2 and m12 of the two
