@@ -2049,3 +2049,21 @@ https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
   point (fewer ME calls in the cut-away region), and iterations are stable
   (χ²/it 0.3).
 - Full rerun of lo, vi, kp, r with psmc: `runs/tcut5` (60 r, 12 vi, 6 lo, 4 kp).
+
+**NNLOJET dijet NNLO reference: set-up (5 Oct).** AK chose a ZEUS-like set-up;
+the NNLOJET warmups start once the τ_cut test (tcut5) passes.
+- Runcard `nnlo21/validation/nnlojet_epLJJ_zeus2j.run`: cuts of NNLOJET's
+  ZEUS dijet example (1703.05977 / ZEUS 1010.6167: 125 < Q² < 20000 GeV²,
+  0.2 < y < 0.6, Breit-frame jets_et > 8 GeV, lab −1 < η < 2.5, ≥ 2 jets,
+  m₁₂ > 20 GeV), with photon exchange only, α = 1/137, E-scheme
+  recombination (V4, not ZEUS's E_T scheme, so that our jet code matches),
+  μ_R = μ_F = Q.
+- NNLOJET's order of the cuts (`driver/core/ecuts.f`, `ecuts_dis`): kt
+  clustering and jets_et in the Breit frame, then jets outside the lab η
+  window are dropped, then njets and m₁₂ of the two leading jets.
+- Parse test: LO 102.2 ± 2.0 pb (tiny run). Warmups prepared (not started) in
+  `disorder-comparisons/nnlo21/nnlojet_zeus/warmup`: LO, V, VV 1M[5];
+  R, RV 2M[5]; RR 4M[5].
+- Our side still needs: sliced21 integrated over (x, Q²) with the jet
+  selection on the projected 2+1 Born jets; nlo31 mode 0 with ≥ 2 jets,
+  τ₂ > τ_cut, psmc, lab-frame boost for the η cut; a τ_cut scan in this set-up.

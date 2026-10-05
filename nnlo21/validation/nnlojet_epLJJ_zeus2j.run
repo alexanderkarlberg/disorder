@@ -1,0 +1,56 @@
+! NNLOJET v1.0.2 runcard for the validation of the tau_2-sliced NNLO DIS 2+1
+! (nnlo21): ZEUS-like dijets (cuts of NNLOJET's example
+! examples/epLJJ/nnlojet-1703.05977-ZEUS2j.run, ZEUS 1010.6167), with
+! - photon exchange only, alpha = 1/137 (as dis31/validation),
+! - E-scheme recombination (V4) instead of ZEUS's E_T scheme, so that our
+!   own jet code (E-scheme, as nlo31) can match exactly; jets_et is then
+!   E p_T/|p| of the massive jet in the Breit frame,
+! - mu_R = mu_F = Q.
+! NNLOJET clusters in the Breit frame, applies jets_et there, then drops jets
+! outside the lab-frame (HERA) eta window, then njets >= 2 and m12 of the two
+! leading jets (ecuts.f, ecuts_dis).
+! Placeholders: CHANNEL (LO | R | V | RR | RV | VV), SEED, WARMUP, PRODUCTION.
+! Do NOT add 'dis_frame = BREIT' (gives zero/NaN in this build, see
+! dis31/validation/nnlojet_epLJJ_3j.run). Histograms: dsigma/dX in fb/unit.
+PROCESS epLJJ
+  collider = ep    Ebeam1 = 27.5  Ebeam2 = 920
+  jet = kt[1.0]  jet_exclusive = .false.  jet_recomb = V4
+  V_NC = GAMMA
+END_PROCESS
+
+RUN zeus2j
+  PDF = NNPDF30_nlo_as_0118[0]
+  iseed = SEED
+  warmup = WARMUP
+  production = PRODUCTION
+END_RUN
+
+PARAMETERS
+  MASS[Z] = 91.1876
+  MASS[W] = 80.398
+  SCHEME[ALPHA] = FIX
+  alpha = 0.0072992700729927
+END_PARAMETERS
+
+SELECTORS
+  select q2            min = 125  max = 20000
+  select y             min = 0.2  max = 0.6
+  select jets_hera_eta min = -1   max = 2.5
+  select jets_et       min = 8
+  select njets         min = 2
+  select m12           min = 20
+END_SELECTORS
+
+HISTOGRAMS
+  q2       [125,250,500,1000,2000,5000,20000]
+  ptavg_12 [8,15,22,30,60]
+  m12      [20,30,45,65,120]
+END_HISTOGRAMS
+
+SCALES
+  mur = 1.0 * q   muf = 1.0 * q
+END_SCALES
+
+CHANNELS
+  CHANNEL
+END_CHANNELS
