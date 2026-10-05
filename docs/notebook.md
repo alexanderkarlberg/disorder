@@ -2324,3 +2324,18 @@ The τ₁ results stand as a separate check, but they are not the requested test
   r ≈ 1.4 ms (flat; psmc ≈ 1.6× faster); NNLOJET RV > 6 ms, RR > 3 ms (first
   warmup iterations). A proper CPU × error² comparison is part of the
   efficiency study.
+
+**NNLO 1+1 by P2B + τ₂ slicing: first results and efficiency (5 Oct, ~21:45).**
+- NLO 1+1 with high statistics (64 b0 × 45M; disorder 64 × 75M, cutoff 1e-10):
+  agreement below 0.01% of the jet rate in every bin (total −92.4060 ± 0.0014
+  vs −92.4058 ± 0.0007 pb). (AK: per-mille precision on the NLO coefficient;
+  enough here, more on the cluster.)
+- NNLO 1+1 (11 b1 + 48 lo seeds, disorder 16 × 10M): consistent within errors
+  at τ_cut 1e-4 … 1e-5; errors up to ±2% of the jet rate next to the Born p_T.
+  More statistics running (b1 144, lo 288 seeds; disorder 128 × 40M).
+- Efficiency, CPU × error² at τ_cut 1e-4 (thserv jobs, optimal b1/lo split):
+  ours / disorder = 2–7 (p_T bins around the Born jet), 9–12 (p_T 20–50),
+  30–100 (≥ 1 jet, central/backward y), 100–170 (forward y, ≥ 2 jets, p_T
+  5–8). Cause: b1 and lo each grow like ln² τ_cut and are sampled
+  independently. AK: after the validation, try correlated sampling (the
+  above-cut 3+1 and its below-cut 2+1 Born from the same point).

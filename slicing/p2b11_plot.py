@@ -50,7 +50,7 @@ def main():
     fb1 = [f for f in glob.glob(R + '/p2b2/s*/out.txt') if 'sliced21 part b1' in open(f).read() and lcell(f) is not None]
     flo = [f for f in glob.glob(R + '/p2b2/s*/out.txt') if 'nlo31 part lo' in open(f).read() and lcell(f) is not None]
     fi2 = glob.glob(R + '/p2b2/s*/i2_disorder*.dat') + glob.glob(R + '/p2b1/i2_disorder*.dat')
-    fd2 = glob.glob(R + '/lab11b/s*/c2x_disorder*.dat')
+    fd2 = pick(glob.glob(R + '/lab11b/s*/c2x_disorder*.dat'), glob.glob(R + '/p2b2/s*/c2h_disorder*.dat'))
     if len(fb1) > 1 and len(flo) > 1 and len(fi2) > 1:
         B1 = me([lcell(f) for f in fb1]); LO3 = me([lcell(f) for f in flo]); I2 = me([load_disorder(f) for f in fi2])
         D2 = me([load_disorder(f) for f in fd2])
@@ -62,7 +62,7 @@ def main():
         print('  NLO %-12s ours %10.4f +- %7.4f  disorder %10.4f +- %7.4f  pull %+5.1f' % (n, o, oe, d1[0][k], d1[1][k],
               (o - d1[0][k]) / np.hypot(oe, d1[1][k])))
     if nn:
-        print('NNLO: b1 %d, lo %d seeds' % (nn[3], nn[4]))
+        print('NNLO: b1 %d, lo %d seeds, disorder %d' % (nn[3], nn[4], nn[2][2]))
     fig, axs = pt.plt.subplots(3 if nn else 2, 2, figsize=(7.0, 7.6 if nn else 5.4), sharex='col',
                                gridspec_kw={'height_ratios': [1.6, 1, 1] if nn else [1.6, 1]})
     ljet = lo[0][1]     # LO cross section with >= 1 jet: normalisation of the differences
