@@ -4,6 +4,7 @@
 #  - thservs (thserv05..24): nice 10, at most 30 of my jobs, and the machine's
 #    load (max of the 1-min load average and the running-process count) plus
 #    new jobs at most 32;
+#  - order: thservs first 08:00-20:00, desktops first at night (AK);
 #  - th desktops (ruptime, up, not thA371a): nice 19, at most half the logical
 #    cores for my jobs, never more than the free cores; skipped if another
 #    user is logged in. Display-manager greeter sessions (lightdm, gdm, sddm)
@@ -36,8 +37,13 @@ PROBE='echo $(nproc) $(cut -d" " -f1 /proc/loadavg) $(cut -d" " -f4 /proc/loadav
 while true; do
   P=($(pending))
   [ ${#P[@]} -eq 0 ] && { echo "$(date) queue empty, exit" >> "$LOG"; exit 0; }
-  # desktops first: their CPUs are much faster than the thservs' Xeons (AK)
-  hosts=$(ruptime 2>/dev/null | awk '$1 ~ /^th[A-Z]/ && $2 == "up" && $1 != "thA371a" {print $1}'; for i in $(seq -w 5 24); do echo "thserv$i"; done)
+  # order of filling (AK): during the day (08:00-20:00) the thservs first, so
+  # that nobody logs into a desktop under heavy load; at night the desktops
+  # first (their CPUs are much faster than the thservs' Xeons)
+  desk=$(ruptime 2>/dev/null | awk '$1 ~ /^th[A-Z]/ && $2 == "up" && $1 != "thA371a" {print $1}')
+  serv=$(for i in $(seq -w 5 24); do echo "thserv$i"; done)
+  hr=$((10#$(date +%H)))
+  if [ $hr -ge 8 ] && [ $hr -lt 20 ]; then hosts="$serv $desk"; else hosts="$desk $serv"; fi
   T=$(mktemp -d); for h in $hosts; do (timeout 20 $SSH $h "$PROBE" > $T/$h 2>/dev/null) & done; wait
   for h in $hosts; do
     [ ${#P[@]} -eq 0 ] && break
