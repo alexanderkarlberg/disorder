@@ -144,5 +144,21 @@ def zeusnlo(src, ref, out):
     save(fig, out)
 
 
+def lab11(src, out):
+    d = json.load(open(src)); tc = np.array(d['tau_cut'])
+    bins = list(d['bins'])
+    fig, axs = plt.subplots(2, 1, figsize=(6.2, 5.4), sharex=True)
+    for ax, key, ref, lab in ((axs[0], 'nlo', 'disorder_nlo', 'NLO'), (axs[1], 'nnlo', 'disorder_nnlo', 'NNLO')):
+        for k, b in enumerate(bins):
+            v = d['bins'][b]
+            p = (np.array(v[key][0]) - v[ref][0])/np.hypot(np.array(v[key][1]), v[ref][1])
+            ax.plot(tc*(1 + 0.012*(k - 8)), p, 'o', ms=2.5, color=ACC[0] if b not in ('total', '>=2 jets') else ACC[1])
+        ax.axhspan(-2, 2, color=MUTED, alpha=0.15, lw=0); ax.axhline(0, color=MUTED, lw=0.8)
+        ax.set_ylim(-5, 5); ax.set_ylabel(lab + ': pull (slicing − disorder)')
+    axs[1].set_xscale('log'); axs[1].set_xlabel('τ_cut (τ₁)')
+    axs[0].annotate('16 bins per τ_cut (red: total, ≥ 2 jets); off scale above τ_cut ≈ 3·10⁻³: power corrections', (1.1e-5, 4.2), fontsize=7, color=MUTED)
+    save(fig, out)
+
+
 if __name__ == '__main__':
-    {'nlo-disent': nlo_disent, 'nnlo': nnlo, 'compare': compare, 'dist': dist, 'zeusnlo': zeusnlo}[sys.argv[1]](*sys.argv[2:])
+    {'nlo-disent': nlo_disent, 'nnlo': nnlo, 'compare': compare, 'dist': dist, 'zeusnlo': zeusnlo, 'lab11': lab11}[sys.argv[1]](*sys.argv[2:])

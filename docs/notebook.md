@@ -2249,3 +2249,17 @@ Combination (r tcut6, lo/vi/kp tcut5, b1/b2 tcut1), all τ_zQ bins:
   LHAPDF's by ≤ 0.08% (O(α_s)) and ≤ 0.44% (O(α_s²), at Q = 11 GeV).
 - Runs: `runs/lab11` (48 slicing seeds × 20M, DISENT cutoff 1e-10; 16 + 16
   disorder seeds × 10M). Combination: `slicing/lab11_combine.py`.
+- **ZEUS NLO with statistics (`runs/znlo2`, 32 + 32 seeds):** our NLO
+  coefficient converges to NNLOJET: total 12.52, 11.23, 10.95, 10.78 (± ≈ 0.27)
+  at τ_cut 1e-3, 1e-4, 3e-5, 1e-5 against 10.49 ± 0.07; at 1e-5 all 15 bins
+  within 1.5σ. The excess falls ≈ 2.6× per decade (≈ √τ): fiducial power
+  corrections of the recoil-free projection, concentrated next to the cuts
+  (p̄_T 8–15 next to E_T > 8, m12 20–30 next to m12 > 20, low Q²); bins away
+  from the cuts agree from τ_cut ≲ 1e-3. For the NNLO in this set-up: τ_cut ≈
+  1e-5 or a recoil-aware projection. Page v5/v6.
+- **1+1 lab-frame validation (`runs/lab11`):** τ₁ slicing against disorder,
+  pulls over 16 bins: NLO ≤ 1.2σ at 1e-5 (a few 2.7–2.9σ at 3e-4); NNLO mostly
+  ≤ 2σ from 1e-3 down; the NNLO total (inclusive, exact) +0.2σ at 1e-5. Open:
+  ≥ 2 jets at NNLO −2.9σ at every τ_cut (both sides DISENT NLO 2+1 there:
+  DISENT cutoff 1e-10 vs disorder's 1e-8, and α_s ≈ −1.4σ); disorder with
+  cutoff 1e-10 running (`runs/lab11b`). Plot: `plot_tcut.py lab11`.
