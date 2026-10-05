@@ -2409,3 +2409,18 @@ cuts (p̄_T 22–60, m12 65–120) are small and flat within errors.
   of iterations with an adapted target, to be checked. Running: 48 seeds on
   thserv09/15 (`runs/corrv`) for statistics and a timing on the same CPU as the
   disorder reference.
+- **Balanced correlated sampling, 48 seeds on thserv09/15 (`runs/corrv`, all
+  timings on thservs):**
+  - τ_cut 1e-4: pulls against the independent b1 + lo ≤ 1.8σ (no sign of
+    bias). Gain over the independent sampling 5–22× (≥ 1 jet, p_T 8–20, y −1…0),
+    4–11× (y 0…1, p_T 20–30), 1.4–2× (p_T 30–100), 1.8–6× (p_T 5–8, forward y,
+    ≥ 2 jets).
+  - **Against disorder (CPU × error², ours/disorder):** 0.2–0.97 in the core
+    bins (≥ 1 jet 0.63, p_T 8–11 0.29, 11–15 0.21, 15–20 0.36, y −1…−0.5 0.73,
+    −0.5…0 0.97): P2B + τ₂ slicing with correlated sampling is as fast as or
+    faster than disorder there. 1.8–2.8 (y 0…1, p_T 20–30), 5–6 (p_T 30–100),
+    25–90 (p_T 5–8, y 1…2.5, ≥ 2 jets: bins filled by hard emissions far from
+    the Born, where the correlation does not help).
+  - τ_cut 1e-5: gains up to 80×, but 4 of 15 bins at 2.1–2.9σ against the
+    independent result: test with equal-weight iterations (`VEGAS_EQUAL=3`,
+    `runs/corrve`).
