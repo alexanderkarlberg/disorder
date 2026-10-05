@@ -108,5 +108,41 @@ def compare(old, new, bornfile, out, labels='uniform r (4 Oct),psmc + tau2 fix (
     save(fig, out)
 
 
+def dist(src, out, it='7'):
+    it = int(it)
+    d = json.load(open(src)); tc = d['tau_cut'][it]
+    bins = sorted((b for b in d['bins'] if b != '0.05-0.50'), key=lambda b: float(b.split('-')[0]))
+    lo = np.array([float(b.split('-')[0]) for b in bins]); hi = np.array([float(b.split('-')[1]) for b in bins])
+    w = hi - lo; c = (lo + hi)/2
+    dis = np.array([d['bins'][b]['disent_nlo'][0] for b in bins])/w
+    dise = np.array([d['bins'][b]['disent_nlo'][1] for b in bins])/w
+    our = np.array([d['bins'][b]['nlo'][0][it] for b in bins])/w
+    oure = np.array([d['bins'][b]['nlo'][1][it] for b in bins])/w
+    fig, axs = plt.subplots(2, 1, figsize=(6.2, 4.8), sharex=True, gridspec_kw={'height_ratios': [1.6, 1]})
+    edges = np.append(lo, hi[-1])
+    axs[0].stairs(dis, edges, color=ACC[0], lw=1.4, label='DISENT (NLO coefficient × 1/x)')
+    axs[0].errorbar(c, our, oure, fmt='o', ms=3.5, lw=1, color=ACC[1], label='slicing: b1 + lo, τ_cut = %.0e' % tc)
+    axs[0].set_ylabel('dσ/dx dQ² dτ_zQ, O(α_s²) [pb/GeV²]'); axs[0].legend(frameon=False, fontsize=8)
+    axs[1].axhline(0, color=MUTED, lw=0.8)
+    axs[1].errorbar(c, our/dis - 1, np.hypot(oure/dis, our*dise/dis**2), xerr=w/2, fmt='o', ms=3.5, lw=1, color=ACC[1])
+    axs[1].set_ylabel('slicing/DISENT − 1'); axs[1].set_xlabel('τ_zQ'); axs[1].set_ylim(-0.08, 0.08)
+    save(fig, out)
+
+
+def zeusnlo(src, ref, out):
+    d = json.load(open(src)); r = json.load(open(ref)); tc = np.array(d['tau_cut'])
+    sel = [('total 0-0', 'total'), ('ptavg 8-15', 'p̄_T 8–15 (next to E_T > 8)'), ('m12 20-30', 'm₁₂ 20–30 (next to m₁₂ > 20)'),
+           ('q2 125-250', 'Q² 125–250'), ('ptavg 15-22', 'p̄_T 15–22'), ('m12 45-65', 'm₁₂ 45–65')]
+    fig, ax = plt.subplots(figsize=(6.2, 3.8))
+    for k, (b, lab) in enumerate(sel):
+        v = d['bins'][b]; lo = r[b]['lo']; nj, nje = r[b]['nlo']
+        y = (np.array(v['NLO'][0]) - nj)/lo*100; e = np.hypot(np.array(v['NLO'][1]), nje)/lo*100
+        ax.errorbar(tc*(1 + 0.06*(k - 2.5)), y, e, fmt='o-', ms=3, lw=1, color=ACC[k % 6], label=lab)
+    ax.axhline(0, color=MUTED, lw=0.8)
+    ax.set_xscale('log'); ax.set_xlabel('τ_cut'); ax.set_ylabel('(slicing − NNLOJET) NLO / LO  [%]')
+    ax.set_ylim(-1, 12); ax.legend(frameon=False, fontsize=7, ncol=2)
+    save(fig, out)
+
+
 if __name__ == '__main__':
-    {'nlo-disent': nlo_disent, 'nnlo': nnlo, 'compare': compare}[sys.argv[1]](*sys.argv[2:])
+    {'nlo-disent': nlo_disent, 'nnlo': nnlo, 'compare': compare, 'dist': dist, 'zeusnlo': zeusnlo}[sys.argv[1]](*sys.argv[2:])
