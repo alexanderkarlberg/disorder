@@ -36,12 +36,17 @@ def main():
     R = sys.argv[1]; out = sys.argv[2]
     its = [int(v) for v in sys.argv[3].split(',')] if len(sys.argv) > 3 else [5, 7, 9]
     lo = me([load_slicing(f)[1] for f in glob.glob(R + '/lab11/s*/nnlo11i.dat')])
-    b0 = me([c[:, 0] for c in map(lcell, glob.glob(R + '/p2b1/b0_*.out')) if c is not None])
-    i1 = me([load_disorder(f) for f in glob.glob(R + '/p2b1/i1_disorder*.dat')])
-    d1 = me([load_disorder(f) for f in glob.glob(R + '/lab11c/s*/c1x_disorder*.dat')])
+    # runs of different size are not mixed (equal-weight seed averages): the
+    # high-statistics sets replace the first ones once >= 8 of them exist
+    def pick(lo_stat, hi_stat):
+        return hi_stat if len(hi_stat) >= 8 else lo_stat
+    fb0 = pick(glob.glob(R + '/p2b1/b0_*.out'),
+               [f for f in glob.glob(R + '/p2b2/s*/out.txt') if 'sliced21 part b0' in open(f).read() and lcell(f) is not None])
+    b0 = me([c[:, 0] for c in map(lcell, fb0) if c is not None])
+    i1 = me([load_disorder(f) for f in pick(glob.glob(R + '/p2b1/i1_disorder*.dat'), glob.glob(R + '/p2b2/s*/i1h_disorder*.dat'))])
+    d1 = me([load_disorder(f) for f in pick(glob.glob(R + '/lab11c/s*/c1x_disorder*.dat'), glob.glob(R + '/p2b2/s*/c1h_disorder*.dat'))])
     nlo = (i1[0] + b0[0], np.hypot(i1[1], b0[1]))
     nn = None
-    b1 = [c for c in map(lcell, glob.glob(R + '/p2b2/s*/out.txt')) if c is not None and 'part b1' in '']
     fb1 = [f for f in glob.glob(R + '/p2b2/s*/out.txt') if 'sliced21 part b1' in open(f).read() and lcell(f) is not None]
     flo = [f for f in glob.glob(R + '/p2b2/s*/out.txt') if 'nlo31 part lo' in open(f).read() and lcell(f) is not None]
     fi2 = glob.glob(R + '/p2b2/s*/i2_disorder*.dat') + glob.glob(R + '/p2b1/i2_disorder*.dat')
@@ -51,6 +56,11 @@ def main():
         D2 = me([load_disorder(f) for f in fd2])
         nn = (I2[0][:, None] + B1[0] + LO3[0], np.sqrt(I2[1][:, None]**2 + B1[1]**2 + LO3[1]**2), D2, len(fb1), len(flo))
     print('LO %d seeds, b0 %d, disorder incl NLO %d, disorder p2b NLO %d' % (lo[2], b0[2], i1[2], d1[2]))
+    for k, n in enumerate(['total', '>=1 jet'] + ['pt %g-%g' % (a, b) for a, b in zip(PTE, PTE[1:])] +
+                          ['y %g..%g' % (a, b) for a, b in zip(YE, YE[1:])] + ['>=2 jets']):
+        o, oe = nlo[0][k], nlo[1][k]
+        print('  NLO %-12s ours %10.4f +- %7.4f  disorder %10.4f +- %7.4f  pull %+5.1f' % (n, o, oe, d1[0][k], d1[1][k],
+              (o - d1[0][k]) / np.hypot(oe, d1[1][k])))
     if nn:
         print('NNLO: b1 %d, lo %d seeds' % (nn[3], nn[4]))
     fig, axs = pt.plt.subplots(3 if nn else 2, 2, figsize=(7.0, 7.6 if nn else 5.4), sharex='col',
