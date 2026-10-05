@@ -92,6 +92,50 @@ contains
     res = sqrt(res)
   end function c1_part
 
+  ! correlated NNLO 2+1 (mode 1, fixed x, Q^2; 6 Oct): b2 at the 2+1 Born
+  ! from r(2:4); vi and kp at the 3+1 point of psmc_gen(3, v3), v3 = [r(1),
+  ! r(2:4), r(5:7)], kp's x = r(8); r (real minus dipoles) at the 4+1 point of
+  ! psmc_gen(4, v4), v4 = [r(9), r(10), r(2:4), r(11:16)] (its 3+1 sub-point
+  ! from the same Born when r(10) selects a CS channel). 16 dimensions.
+  ! With vbal the VEGAS target is the balanced one (all tau_zQ bins at tau_cut
+  ! tcs(ivb)).
+  real(dp) function c2_part(r, wgt) result(res)
+    real(dp), intent(in) :: r(:), wgt
+    real(dp) :: h0(ncell), f, v3(7), v4(11), rk(8)
+    integer :: b
+    h0 = hcacc
+    v3 = [r(1), r(2:4), r(5:7)]
+    rk = [v3, r(8)]
+    v4 = [r(9), r(10), r(2:4), r(11:16)]
+    f = 0
+    part = 'vi'; f = f + born_part(v3, wgt)
+    part = 'kp'; f = f + born_part(rk, wgt)
+    part = 'r'; f = f + real_part(v4, wgt)
+    f = f + b21c1_part(r(2:4), wgt)
+    if (vbal == 0) then
+       res = f
+       return
+    endif
+    res = 0
+    do b = 1, nob - 1
+       res = res + ((hcacc(ivb + ntc*(b - 1)) - h0(ivb + ntc*(b - 1)))/wgt)**2
+    enddo
+    res = sqrt(res)
+  end function c2_part
+
+  ! b2 (bpart) at the psmc Born from unit numbers rb(1:3), fixed (x, Q^2)
+  real(dp) function b21c1_part(rb, wgt) result(res)
+    real(dp), intent(in) :: rb(3), wgt
+    real(dp) :: Q2, y, xB, eta, jac, Pk(4,6), dphi
+    logical :: ok
+    res = 0
+    Q2 = Q2fix; xB = xfix; y = Q2/(xB*s)
+    call psmc_born(rb, Pk, eta, dphi, ok)
+    if (.not. ok) return
+    jac = y/xB
+    res = b21_eval(Pk, Q2, xB, eta, jac, dphi, wgt)
+  end function b21c1_part
+
   real(dp) function c1_core(r, wgt) result(res)
     real(dp), intent(in) :: r(:), wgt
     real(dp) :: rr(size(r)), u(4), a
@@ -312,7 +356,23 @@ program sliced21
   endif
   write(*,'(a,a,a,i10,a,i4,a,i6,a,f9.6,a,f10.2)') ' sliced21 part ', trim(bpart), ' ncall', ncall, ' itmx', itmx, &
        & ' seed', seed, ' x', xfix, ' Q2', Q2fix
-  if (trim(bpart) == 'c1') then
+  if (trim(bpart) == 'c2') then
+     ! correlated NNLO 2+1 at the fixed (x, Q^2) of mode 1 with psmc
+     if (mode /= 1) stop 'c2: mode 1 (fixed x, Q2) only'
+     bpart = 'b2'; usepsmc = .true.
+     call psmc_init(xfix, Q2fix, Q2fix/(xfix*s))
+     call setup_flavours()
+     virt31_finite_only = .true.
+     call get_environment_variable('C1_VBAL', arg)
+     if (len_trim(arg) > 0) read(arg, *) vbal
+     call get_environment_variable('PSMC_EDGE', arg)
+     if (len_trim(arg) > 0) then
+        read(arg, *) hb; call psmc_set_edge(hb)
+     endif
+     write(*,'(a,i2)') ' correlated NNLO 2+1 c2: balanced VEGAS target', vbal
+     call vegas(16, ncall, itmx, avg, err, chi2, c2_part)
+     bpart = 'c2'
+  elseif (trim(bpart) == 'c1') then
      ! correlated b1 + lo (mode >= 2 with psmc): nlo31's lo on the same points
      if (mode < 2) stop 'c1: mode 2 or 3 (zeus | p2b) only'
      part = 'lo'; bpart = 'b1'; usepsmc = .true.
