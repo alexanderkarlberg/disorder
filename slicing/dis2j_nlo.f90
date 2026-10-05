@@ -124,12 +124,20 @@ contains
           yr(i) = 0.5_dp * log(max(q(4,act(i)) + q(3,act(i)), 1d-300) / max(q(4,act(i)) - q(3,act(i)), 1d-300))
           ph(i) = atan2(q(2,act(i)), q(1,act(i)))
        enddo
+       ! beam distances first, so that ties go to the beam: DISENT passes
+       ! counter-events with partons exactly soft or exactly collinear to the
+       ! incoming parton (p_T = 0); for those d_iB = 0 but also d_ij =
+       ! min(p_T^2) Delta R^2 = 0, and a pair-first tie merged a
+       ! beam-collinear parton into a jet (unlike the nearby real events)
        dmin = huge(1.0_dp); ii = 0; jj = 0; beam = .true.
        do i = 1, m
           if (pt2(i) < dmin) then
-             dmin = pt2(i); ii = i; beam = .true.
+             dmin = pt2(i); ii = i
           endif
+       enddo
+       do i = 1, m
           do j = i + 1, m
+             if (min(pt2(i), pt2(j)) <= 0) cycle
              dy = yr(i) - yr(j)
              dphi = abs(ph(i) - ph(j)); if (dphi > pi) dphi = 2 * pi - dphi
              d = min(pt2(i), pt2(j)) * (dy**2 + dphi**2) / rjet**2

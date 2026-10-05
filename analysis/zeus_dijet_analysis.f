@@ -89,8 +89,10 @@
       integer act(4), m, i, j, ii, jj, own(4), k
       logical beam
       double precision, parameter :: pi = 3.141592653589793d0
-      integer jetof(4), njm
-      common /zktmap/ jetof, njm
+      integer jetof(4), njm, npm
+      common /zktmap/ jetof, njm, npm
+      jetof = 0
+      npm = np
       zq(:,1:np) = p(:,1:np)
       do i = 1, np
          act(i) = i
@@ -106,6 +108,9 @@
      $           /max(zq(0,k) - zq(3,k), 1d-300))
             ph(i) = atan2(zq(2,k), zq(1,k))
          enddo
+!        beam distances first (ties to the beam): DISENT's counter-events
+!        have partons exactly soft or collinear to the beam (p_T = 0),
+!        for which d_iB = 0 = d_ij
          dmin = huge(1d0)
          ii = 0
          jj = 0
@@ -114,9 +119,11 @@
             if (pt2(i) .lt. dmin) then
                dmin = pt2(i)
                ii = i
-               beam = .true.
             endif
+         enddo
+         do i = 1, m
             do j = i + 1, m
+               if (min(pt2(i), pt2(j)) .le. 0d0) cycle
                zdy = yr(i) - yr(j)
                dph = abs(ph(i) - ph(j))
                if (dph .gt. pi) dph = 2d0*pi - dph
@@ -156,10 +163,11 @@
       implicit none
       integer i, k
       double precision w(0:3)
-      integer jetof(4), njm
-      common /zktmap/ jetof, njm
+      integer jetof(4), njm, npm
+      common /zktmap/ jetof, njm, npm
       w = 0d0
-      do k = 1, 4
+!     only this event's partons (the map is reset in zkt)
+      do k = 1, npm
          if (jetof(k) .eq. i) w = w + plab(:,3+k)
       enddo
       end

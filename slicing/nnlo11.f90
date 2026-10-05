@@ -26,6 +26,16 @@
 ! 3-9 leading-jet p_t, 10-15 leading-jet eta, 16 at least two jets.
 !
 ! Usage: nnlo11 -x X -Q2 Q2 -s S -Ep EP -nev N -seed1 I -seed2 J [-cutoff 1e-8]
+!
+! Integrated mode (-integrated -lptable FILE [-Q2min 125 -Q2max 20000 -ymin
+! 0.2 -ymax 0.6]; 5 Oct, validation against disorder -p2b): DISENT integrates
+! over Q^2 and y; tau_1 uses each event's x; the jet bins are absolute (p_t
+! 5, 8, 11, 15, 20, 30, 50, 100 GeV; eta -1, -0.5, 0, 0.5, 1, 1.5, 2.5); the
+! pure tau_1 slicing below the cut is accumulated per Born event, LP_k(tau_cut;
+! x, Q) / Born from a table on (ln(x/(1-x)), ln Q) built with dis_tau1_lp
+! (slicing/mcfm_lp), bicubic. Methods 1 and 2 need the fixed-point inclusive
+! coefficients and are not used here (the tau_2 below-cut weights are
+! skipped): the reference is disorder itself. Output nnlo11i.dat.
 !----------------------------------------------------------------------
 module nnlo11_run
   use types, only: dp
@@ -58,6 +68,14 @@ module nnlo11_run
   integer(8), save :: nevt = 0, nborn11 = 0, nno = 0
   logical, save :: haveborn = .false.
   real(dp), save :: as2pi_save = 0, fbB_save(nb11) = 0
+  ! integrated mode
+  logical, save :: integ = .false.
+  real(dp), save :: q2lo = 125, q2hi = 20000, ylo = 0.2_dp, yhi = 0.6_dp, xev = 0
+  integer, parameter :: nlpt = 12                   ! tau_cut columns of dis_tau1_lp
+  integer, save :: lnt = 0, lnq = 0
+  real(dp), save :: lt0, lth, lq0, lqh
+  real(dp), allocatable, save :: lpt(:,:,:)         ! (2*nlpt, 0:lnt-1, 0:lnq-1): c1(12), c2(12)
+  real(dp), save :: eL1(nt1,nb11) = 0, eL2(nt1,nb11) = 0, sL1(2,nt1,nb11) = 0, sL2(2,nt1,nb11) = 0
   real(dp), external :: DOT, alphasPDF
 
 contains
@@ -70,7 +88,7 @@ contains
     integer :: mask, j
     Q2 = -DOT(p,5,5); eta = 2 * DOT(p,1,6) / sdis
     do j = 2, n
-       pp(j) = 2 * xfix * DOT(p,1,j) / eta     ! 2 x P.p_j
+       pp(j) = 2 * merge(xev, xfix, integ) * DOT(p,1,j) / eta     ! 2 x P.p_j
     enddo
     t = huge(1.0_dp)
     do mask = 1, 2**(n-1) - 1                 ! bit j-2 set: parton j in the jet
@@ -209,6 +227,7 @@ contains
     sdis = s
     eta = 2 * DOT(p,1,6) / s
     Q = sqrt(-DOT(p,5,5))
+    if (integ) xev = eta * Q * Q / (2 * DOT(p,1,5))      ! Born x of the event
     call EvolvePDF(eta, Q, xf)
     call mask_pdf(xf)
     as2pi = alphasPDF(Q) / (2 * pi); as2pi_save = as2pi
@@ -218,6 +237,17 @@ contains
        nborn11 = nborn11 + 1
        fbB = fb; fbB_save = fb; haveborn = .true.
        eB0 = eB0 + w * fb
+       if (integ) then
+          block
+            real(dp) :: c(2*nlpt)
+            call lp_at(xev, Q, c)
+            ! dis_tau1_lp's columns 1..9 are tc1 (1e-1 ... 1e-5)
+            do it = 1, nt1
+               eL1(it,:) = eL1(it,:) + w * as2pi * c(it) * fb
+               eL2(it,:) = eL2(it,:) + w * as2pi**2 * c(nlpt + it) * fb
+            enddo
+          end block
+       endif
        return
     endif
     if (.not. haveborn) then
@@ -235,7 +265,7 @@ contains
        ! them (and the costly soft function) when the Born is in the same bins,
        ! and for Borns at the 1+1 edge (tau_1 < t1min), where d -> 0 and the
        ! soft function's angular integrals become very slow
-       if (any(d /= 0) .and. t1 > t1min) then
+       if (.not. integ .and. any(d /= 0) .and. t1 > t1min) then
           tcs = merge(tc2 * t1, tc2, rel2)
           call cpu_time(tq0)
           call lp21_weights(p, s, weight, xf, eta, Q, as2pi, nt2, tcs, wl)
@@ -250,7 +280,7 @@ contains
        do it = 1, nt1
           if (t1 > tc1(it)) eA2(it,:) = eA2(it,:) + w * fb
        enddo
-       if (n == 4 .and. ntyp == 0) then
+       if (.not. integ .and. n == 4 .and. ntyp == 0) then
           T2 = tau2_of(4, p) / Q
           t1r = t1
           do it = 1, nt2
@@ -271,7 +301,10 @@ contains
        call acc1(sA1(:,it,:), eA1(it,:)); call acc1(sA2(:,it,:), eA2(it,:))
        call acc1(sDp(:,it,:), eA2(it,:) - eE2d)
     enddo
-    eB0 = 0; eE1 = 0; eE2d = 0; eE2s = 0; eA1 = 0; eA2 = 0; haveborn = .false.
+    do it = 1, nt1
+       call acc1(sL1(:,it,:), eL1(it,:)); call acc1(sL2(:,it,:), eL2(it,:))
+    enddo
+    eB0 = 0; eE1 = 0; eE2d = 0; eE2s = 0; eA1 = 0; eA2 = 0; eL1 = 0; eL2 = 0; haveborn = .false.
   contains
     subroutine acc1(sm, v)
       real(dp), intent(inout) :: sm(2,nb11)
@@ -279,6 +312,75 @@ contains
       sm(1,:) = sm(1,:) + v; sm(2,:) = sm(2,:) + v * v
     end subroutine acc1
   end subroutine endevent
+
+  ! DISENT cuts in integrated mode
+  subroutine int_cuts(s, xmn, xmx, q2mn, q2mx, ymn, ymx)
+    real(dp), intent(in) :: s
+    real(dp), intent(out) :: xmn, xmx, q2mn, q2mx, ymn, ymx
+    xmn = 0; xmx = 0; q2mn = q2lo; q2mx = q2hi; ymn = ylo; ymx = yhi
+  end subroutine int_cuts
+
+  ! the LP table: grid.hdr (nt t0 h nq q0 h) and table.raw lines "i j c1(12) c2(12)"
+  subroutine lp_load(dir)
+    character(*), intent(in) :: dir
+    integer :: u, i, j, ios
+    real(dp) :: c(2*nlpt)
+    open(newunit=u, file=dir//'/grid.hdr', status='old')
+    read(u,*) lnt, lt0, lth, lnq, lq0, lqh
+    close(u)
+    allocate(lpt(2*nlpt, 0:lnt-1, 0:lnq-1)); lpt = huge(1.0_dp)
+    open(newunit=u, file=dir//'/table.raw', status='old')
+    do
+       read(u,*,iostat=ios) i, j, c
+       if (ios /= 0) exit
+       lpt(:,i,j) = c
+    enddo
+    close(u)
+    if (any(lpt == huge(1.0_dp))) stop 'lp_load: incomplete LP table'
+  end subroutine lp_load
+
+  ! LP_k / Born at (x, Q): Catmull-Rom in t = ln(x/(1-x)) and ln Q
+  subroutine lp_at(x, Q, c)
+    real(dp), intent(in) :: x, Q
+    real(dp), intent(out) :: c(2*nlpt)
+    real(dp) :: ft, fq, wt(4), wq(4)
+    integer :: it, iq, a, b
+    ft = (log(x / (1 - x)) - lt0) / lth; fq = (log(Q) - lq0) / lqh
+    if (ft < 1 .or. ft > lnt - 3 .or. fq < 1 .or. fq > lnq - 3) stop 'lp_at: outside the LP table'
+    it = int(ft); iq = int(fq)
+    wt = cr(ft - it); wq = cr(fq - iq)
+    c = 0
+    do b = 1, 4
+       do a = 1, 4
+          c = c + wt(a) * wq(b) * lpt(:, it + a - 2, iq + b - 2)
+       enddo
+    enddo
+  contains
+    function cr(f) result(w)
+      real(dp), intent(in) :: f
+      real(dp) :: w(4)
+      w = [-0.5_dp*f**3 + f**2 - 0.5_dp*f, 1.5_dp*f**3 - 2.5_dp*f**2 + 1, &
+           -1.5_dp*f**3 + 2*f**2 + 0.5_dp*f, 0.5_dp*f**3 - 0.5_dp*f**2]
+    end function cr
+  end subroutine lp_at
+
+  ! integrated mode output: per bin and tau_cut, sigma [pb] at O(alpha_s^k):
+  ! A_k (above the cut, DISENT) and L_k (below, LP x Born), with sums of squares
+  subroutine report11i()
+    integer :: u, ib, it
+    open(newunit=u, file='nnlo11i.dat', status='replace')
+    write(u,*) nevt, nb11, nt1
+    write(u,*) tc1
+    write(u,*) ptedge, etaedge
+    write(u,*) sB0
+    write(u,*) sA1, sA2, sL1, sL2
+    close(u)
+    write(*,'(a,i12,a,i12)') ' events ', nevt, '  1+1 Borns ', nborn11
+    write(*,'(a)') ' bin   LO [pb]        NLO coef tau_cut=1e-3   NNLO coef tau_cut=1e-3'
+    do ib = 1, nb11
+       write(*,'(i4,3es16.6)') ib, sB0(1,ib), sA1(1,5,ib) + sL1(1,5,ib), sA2(1,5,ib) + sL2(1,5,ib)
+    enddo
+  end subroutine report11i
 
   subroutine report11()
     integer :: u, ib
@@ -358,6 +460,14 @@ program nnlo11
   measure = 1                                    ! invariant tau_2 measure for the slicing
   Ylab = 0.5_dp * log(Ep / (s / (4 * Ep)))       ! lab rapidity of the (P + k) rest frame
   if (log_val_opt('-relbins')) call relative_bins(s)
+  integ = log_val_opt('-integrated')
+  if (integ) then
+     q2lo = dble_val_opt('-Q2min', 125.0_dp); q2hi = dble_val_opt('-Q2max', 20000.0_dp)
+     ylo = dble_val_opt('-ymin', 0.2_dp); yhi = dble_val_opt('-ymax', 0.6_dp)
+     ptedge = [5.0_dp, 8.0_dp, 11.0_dp, 15.0_dp, 20.0_dp, 30.0_dp, 50.0_dp, 100.0_dp]
+     etaedge = [-1.0_dp, -0.5_dp, 0.0_dp, 0.5_dp, 1.0_dp, 1.5_dp, 2.5_dp]
+     call lp_load(trim(string_val_opt('-lptable', '.')))
+  endif
   call scet_set_colour(4.0_dp/3.0_dp, 3.0_dp, 0.5_dp)
 
   nflav = 5; NC = .true.; CC = .false.; noZ = .true.; Zonly = .false.
@@ -369,9 +479,18 @@ program nnlo11
   write(*,'(a,a,a,f8.5,a,f9.2,a,f10.1,a,f8.2,a,i10,a,i2,a,es9.2)') ' pdf ', trim(pdf), '  x ', xfix, '  Q2 ', Q2fix, &
        & '  s ', s, '  Ep ', Ep, '  nev ', nev, '  pdfmask ', pdf_mask, '  cutoff ', cutoff
 
-  call DISENTFULL(nev, s, 5, nnlo11_user, slice_cuts, seed1, seed2, npow1, npow2, &
-       & cutoff, 2, slice_muf, CF, CA, TF, .false.)
+  if (integ) then
+     call DISENTFULL(nev, s, 5, nnlo11_user, int_cuts, seed1, seed2, npow1, npow2, &
+          & cutoff, 2, slice_muf, CF, CA, TF, .false.)
+  else
+     call DISENTFULL(nev, s, 5, nnlo11_user, slice_cuts, seed1, seed2, npow1, npow2, &
+          & cutoff, 2, slice_muf, CF, CA, TF, .false.)
+  endif
   write(*,'(a,2i14)') ' soft function G: table / direct evaluations ', soft_ncalls
   write(*,'(a,2i14)') ' beam coefficients: table / direct evaluations ', beam_ncalls
-  call report11()
+  if (integ) then
+     call report11i()
+  else
+     call report11()
+  endif
 end program nnlo11

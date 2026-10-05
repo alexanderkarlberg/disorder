@@ -2207,3 +2207,45 @@ Combination (r tcut6, lo/vi/kp tcut5, b1/b2 tcut1), all τ_zQ bins:
   lepton azimuth (DISENT fixes the lepton plane and generates the hadronic
   azimuth; reals are built from their 3-parton parents). Cause not found.
 - Tie-breaker: NNLOJET NLO (R + V) production, `nnlojet_zeus/nlo`.
+
+**ZEUS NLO resolved; DISENT analysis pitfall (5 Oct, evening).**
+- AK: DISENT passes counter-events (and collinear terms) with partons that are
+  exactly soft or exactly collinear, which can upset an analysis. That was it:
+  both my kt routines checked a parton's beam distance and then its pairs, so a
+  parton exactly collinear to the beam (p_T = 0: d_iB = 0, but also d_ij =
+  min(p_T²) ΔR² = 0) was merged into a jet when it came second, unlike the
+  nearby real events (finite p_T, d_ij = p_T² ΔR² ≫ d_iB). The subtraction
+  stopped cancelling. Fix: all beam distances first (ties to the beam), pairs
+  with a zero-p_T parton skipped. The disorder analysis also had a stale
+  parton→jet map (a fourth momentum added to three-parton jets). anti-k_t
+  (nnlo11's obs11) is safe: it drops p_T = 0 partons explicitly.
+- ZEUS-like dijets, NLO coefficient [pb] (LO 103.29):
+  | | total | m12 30–45 | ptavg 15–22 | Q² 125–250 |
+  |---|---|---|---|---|
+  | NNLOJET (R 20 + V 10 seeds) | 10.49 ± 0.07 | 6.76 ± 0.06 | 5.07 ± 0.02 | 7.46 ± 0.06 |
+  | DISENT driver (fixed) | 10.23 ± 0.22 | 6.94 ± 0.15 | 5.00 ± 0.04 | 7.31 ± 0.21 |
+  | disorder −nnlo minus −nlo | 11.03 ± 0.18 | 7.17 ± 0.07 | 5.10 ± 0.04 | 7.78 ± 0.12 |
+  | slicing b1 + lo, τ_cut 1e-4 | 9.8 ± 0.5 | 6.84 | 5.11 | 7.85 |
+  NNLOJET LO (4 seeds) 103.29 ± 0.05 = sliced21 b0 103.29 ± 0.03: the earlier
+  0.1% tension came from NNLOJET's single-run error.
+- **Correction:** I first attributed disorder's +0.8 pb to its α_s (3-loop at
+  −nnlo, 2-loop at −nlo). Numerically that is only ≈0.1% of the LO (≈0.1 pb):
+  the difference stays unexplained (2.8σ, small; open).
+- Higher-statistics slicing NLO in this set-up: `runs/znlo2` (32 b1 seeds with
+  the soft table, 12× faster, agrees with direct to 5e-8; 32 lo seeds).
+
+**NLO/NNLO 1+1 for lab-frame observables against disorder (AK, 5 Oct).**
+- `nnlo11 -integrated`: DISENT over 125 < Q² < 20000, 0.2 < y < 0.6; τ₁ with
+  each event's x; pure τ₁ slicing with LP_k(τ_cut; x, Q)/Born from a table
+  (dis_tau1_lp on 237 × 57 nodes in ln(x/(1−x)), ln Q, step 0.05; interpolation
+  error ≤ 3e-4 (c1), ≤ 1e-3 (c2, at τ_cut 0.1), typically 1e-5…1e-4); absolute
+  bins (leading-jet p_T 5…100 GeV, rapidity −1…2.5). Linked with a copy of the
+  current DISENT that gives the Born to USER (sed of the commented lines).
+  Fixed-point mode bit-identical to the 2 Oct production binary.
+- Reference: `analysis/lab11_analysis.f` (obs11's definitions: lab frame,
+  proton +z, partons with E ≤ 0 or p_T = 0 dropped, anti-k_t R = 1 with
+  rapidity, p_T > 5, −1 < y < 2.5), `disorder -p2b -nlocoef / -nnlocoef`.
+- α_s: disorder's own coupling (nf = 5, 2-/3-loop from α_s(M_Z)) differs from
+  LHAPDF's by ≤ 0.08% (O(α_s)) and ≤ 0.44% (O(α_s²), at Q = 11 GeV).
+- Runs: `runs/lab11` (48 slicing seeds × 20M, DISENT cutoff 1e-10; 16 + 16
+  disorder seeds × 10M). Combination: `slicing/lab11_combine.py`.
