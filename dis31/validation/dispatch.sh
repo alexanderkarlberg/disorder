@@ -6,7 +6,8 @@
 #    load plus new jobs at most 32 (hyperthreading slows jobs beyond that);
 #  - th desktops (from ruptime): nice 19, at most half the logical cores for
 #    my jobs, and never more than the free cores (nproc - load - 1); a host
-#    with any of my processes stopped (state T, overheatd) gets no new jobs.
+#    with any of my processes stopped (state T, overheatd) or with another
+#    user logged in gets no new jobs.
 # A job directory is pending without a file 'host', running/started with it,
 # done when run.log contains 'Elapsed time'. Hosts without the NFS mount of
 # the queue directory are skipped (ssh -f returns 0 even if the cd fails).
@@ -26,8 +27,8 @@ while true; do
   hosts=$(for i in $(seq -w 5 24); do echo "thserv$i"; done; ruptime 2>/dev/null | awk '$1 ~ /^th[A-Z]/ && $2 == "up" && $1 != "thA371a" {print $1}')
   for h in $hosts; do
     [ ${#P[@]} -eq 0 ] && break
-    info=$(timeout 15 $SSH $h 'echo $(nproc) $(cut -d" " -f1 /proc/loadavg) $(ps -u akarlber -o comm= | grep -c "NNLOJET\|nlo31") $(ps -u akarlber -o stat=,comm= | grep "NNLOJET\|nlo31" | grep -c "^T") $([ -d '"$Q"' ] && echo mounted)' 2>/dev/null) || continue
-    set -- $info; nc=$1; load=${2%.*}; mine=$3; stopped=$4; mounted=$5
+    info=$(timeout 15 $SSH $h 'echo $(nproc) $(cut -d" " -f1 /proc/loadavg) $(ps -u akarlber -o comm= | grep -c "NNLOJET\|nlo31\|sliced21\|tau2_nlo") $(ps -u akarlber -o stat=,comm= | grep "NNLOJET\|nlo31\|sliced21\|tau2_nlo" | grep -c "^T") $(who | grep -vc "^akarlber ") $([ -d '"$Q"' ] && echo mounted)' 2>/dev/null) || continue
+    set -- $info; nc=$1; load=${2%.*}; mine=$3; stopped=$4; others=$5; mounted=$6
     [ -z "$nc" ] && continue
     # the job directory must be visible on the host (NFS mount of thA371a)
     [ "$mounted" != mounted ] && continue
@@ -35,6 +36,8 @@ while true; do
       nice=10; free=$((32 - load - 1)); cap=$((30 - mine))
     else
       [ "$stopped" -gt 0 ] && continue
+      # desktops only while nobody else is logged in (AK's rule)
+      [ "$others" -gt 0 ] && continue
       nice=19; free=$((nc - load - 1)); cap=$((nc/2 - mine))
     fi
     n=$(( free < cap ? free : cap ))

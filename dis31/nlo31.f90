@@ -21,10 +21,12 @@
 ! above the cut, vi + kp + r the O(alpha_s^3) part of NNLO 2+1 above it.
 !
 ! Usage: nlo31 part ncall itmx [seed [techcut [mode x Q2 [logmap|uniform [pdfmask]]]]]
-!        (part = lo, vi, kp, r; pdfmask 0 all, 1 quarks only, 2 gluon only)
+!        (part = lo, vi, kp, r; pdfmask 0 all, 1 quarks only, 2 gluon only;
+!        9th argument: uniform | logmap | psmc (slicing-adapted multichannel, dis31/psmc.f90))
 !        optional 11th: vslice k (VEGAS adapts to tcs(k) < tau_2 < tcs(k-1))
 !-----------------------------------------------------------------------
 module nlo31_mod
+  use psmc
   use born31
   use me41
   use dip41
@@ -66,6 +68,8 @@ module nlo31_mod
   ! the 2+1 limits (tau_2 ~ 1e-5 needs two small invariants at once in the
   ! 4+1 real) are sampled; VEGAS adapts on top. Off in mode 0.
   logical :: logmap = .false.
+  ! mode 1: slicing-adapted multichannel phase space (dis31/psmc.f90)
+  logical :: usepsmc = .false.
   ! incoming-parton mask (diagnostics): 0 all, 1 quarks only, 2 gluon only
   integer :: pdfmask = 0
   ! mode 1: VEGAS adapts to the slice tcs(vslice) < tau_2 < tcs(vslice-1) of
@@ -303,9 +307,16 @@ contains
     logical :: ok
     integer :: f, Q, k
     res = 0
-    call lepton(r(1:3), Q2, y, xB, eta, jac, ok)
-    if (.not. ok) return
-    call breit(3, r(4:8), Q2, y, xB, eta, Pk, dphi)
+    if (usepsmc) then
+       Q2 = Q2fix; xB = xfix; y = Q2/(xB*s)
+       call psmc_gen(3, r(1:7), Pk, eta, dphi, ok)
+       if (.not. ok) return
+       jac = y/xB
+    else
+       call lepton(r(1:3), Q2, y, xB, eta, jac, ok)
+       if (.not. ok) return
+       call breit(3, r(4:8), Q2, y, xB, eta, Pk, dphi)
+    endif
     call accept(Pk(:,1), Pk(:,2:4), 3, sqrt(Q2), acc)
     if (all(acc == 0)) return
     as = alphasPDF(sqrt(Q2))
@@ -456,9 +467,16 @@ contains
     integer :: i, j, f, Q, Q2i, ic
     logical :: ok
     res = 0
-    call lepton(r(1:3), Q2, y, xB, eta, jac, ok)
-    if (.not. ok) return
-    call breit(4, r(4:11), Q2, y, xB, eta, Pk, dphi)
+    if (usepsmc) then
+       Q2 = Q2fix; xB = xfix; y = Q2/(xB*s)
+       call psmc_gen(4, r(1:11), Pk, eta, dphi, ok)
+       if (.not. ok) return
+       jac = y/xB
+    else
+       call lepton(r(1:3), Q2, y, xB, eta, jac, ok)
+       if (.not. ok) return
+       call breit(4, r(4:11), Q2, y, xB, eta, Pk, dphi)
+    endif
     W2 = Q2*(eta/xB - 1)
     smin = huge(1.0_dp)
     do i = 1, 5
@@ -890,7 +908,7 @@ program nlo31
      call get_command_argument(8, arg); read(arg, *) Q2fix
   endif
   if (command_argument_count() > 8) then
-     call get_command_argument(9, arg); logmap = trim(arg) == 'logmap'
+     call get_command_argument(9, arg); logmap = trim(arg) == 'logmap'; usepsmc = trim(arg) == 'psmc'
   endif
   if (command_argument_count() > 9) then
      call get_command_argument(10, arg); read(arg, *) pdfmask
@@ -900,6 +918,7 @@ program nlo31
   endif
   if (mode == 1) then
      nv = ncell; iv = ntc + ntc*(nzb - 1)
+     if (usepsmc) call psmc_init(xfix, Q2fix, Q2fix/(xfix*s))
   endif
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]

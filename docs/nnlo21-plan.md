@@ -103,3 +103,20 @@ Checks of the measure:
    below-cut weight; above the cut, `nlo31` with τ₂ > τ_cut in place of
    ≥ 3 jets and a 2+1 observable.
 4. Validation: τ_cut independence; NNLOJET epLJJ dijet NNLO (photon).
+
+## Slicing-adapted phase space for the above-cut integrals (5 Oct)
+
+Cause of the small-τ_cut drift: VEGAS adaptation bias in nlo31's flat
+sequential-decay phase space (near-2+1 region of relative measure ~1e-5).
+Design (nlo31 mode 1, option `psmc`):
+- 3+1 = 2+1 Born (log η̃, isotropic two-body) × one Catani–Seymour emission:
+  FF(i,j;k), FI(i,j;a), IF(a,i;k) for all labels, 12 channels, plus the flat
+  generator; emission variables (y or 1−x, z̃ or u, φ) log/logistic down to
+  1e-10.
+- 4+1 = 3+1 (the above) × a second emission: 30 channels, plus the flat
+  4+1 generator.
+- Weight 1/Σ_c α_c g_c(Φ) with every channel density from the exact inverse
+  CS maps (CS phase-space factorisation, hep-ph/9605323 section 5).
+- Validation: phase-space volume against the flat generator; lo slice
+  against DISENT with few iterations (early iterations unbiased); r at large
+  τ_cut against the existing runs; then the τ_cut test.
