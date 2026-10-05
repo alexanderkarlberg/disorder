@@ -134,3 +134,14 @@ Design (nlo31 mode 1, option `psmc`):
    jet functions and psmc are unchanged. Validation: pointwise against
    NNLOJET's DIS with Z and DISWM/DISWP, as for the photon. VBF needs this.
 3. Then efficiency (profiling, hoppet convolutions), then P2B at N3LO.
+
+## Overnight 5→6 Oct and the cluster (AK, 5 Oct evening)
+
+1. Correlated sampling for the slicing (main work): the above-cut 3+1 event and
+   its below-cut 2+1 Born from the same phase-space point; test on the NNLO
+   1+1 P2B set-up, measure CPU × error² against disorder.
+2. ZEUS NNLO 2+1, our side (`runs/znnlo`: r 300, vi 64, kp 16, b2 48 seeds;
+   psmc edge 1e-12, technical cut 1e-9).
+3. Morning: cluster instructions for NNLOJET's ZEUS NNLO (RR, RV, VV), with
+   high-quality LO and NLO references (NNLOJET and ours), and DIS event shapes
+   from the start (shapes NNLOJET supports; the same added to our mode 2).
