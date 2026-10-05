@@ -24,6 +24,7 @@
 !        (part = lo, vi, kp, r; pdfmask 0 all, 1 quarks only, 2 gluon only;
 !        9th argument: uniform | logmap | psmc (slicing-adapted multichannel, dis31/psmc.f90))
 !        optional 11th: vslice k (VEGAS adapts to tcs(k) < tau_2 < tcs(k-1))
+!        optional 12th: psmc edge (default 1e-10): lower end of its log maps
 !
 ! Mode 2 (nnlo21 validation against NNLOJET): the above-cut part for
 ! ZEUS-like dijets (nnlo21/validation/nnlojet_epLJJ_zeus2j.run), integrated
@@ -1066,7 +1067,7 @@ program nlo31
   character(32) :: arg
   integer :: ncall, itmx, ndim, seed, nseed, i
   integer, allocatable :: sd(:)
-  real(dp) :: avg, err, chi2
+  real(dp) :: avg, err, chi2, psedge
   call get_command_argument(1, part)
   call get_command_argument(2, arg); read(arg, *) ncall
   call get_command_argument(3, arg); read(arg, *) itmx
@@ -1090,6 +1091,11 @@ program nlo31
   endif
   if (command_argument_count() > 10) then
      call get_command_argument(11, arg); read(arg, *) vslice
+  endif
+  if (command_argument_count() > 11) then
+     call get_command_argument(12, arg); read(arg, *) psedge
+     call psmc_set_edge(psedge)
+     write(*,'(a,es9.2)') ' psmc edge', psedge
   endif
   if (mode == 1) then
      nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)

@@ -2172,3 +2172,20 @@ Combination (r tcut6, lo/vi/kp tcut5, b1/b2 tcut1), all τ_zQ bins:
   ~3σ low with doubled statistics; r is Gaussian there. Next: technical cut
   1e-10 and 3e-9. Page v3: https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
   (plot `nnlo21/plot_tcut.py compare`).
+
+**psmc edge and the technical-cut tests (5 Oct, evening).**
+- **Correction:** the 10⁻¹¹ technical-cut run (`runs/tcut7`) was attributed to
+  rounding ("errors ×100, rounding-dominated"). But psmc's log maps stop at
+  10⁻¹⁰ (y, 1−x, both ends of z, u), so the region 10⁻¹¹ … 10⁻⁹ W² was mostly
+  populated only by the flat channel, with large weights. Undersampling explains
+  the errors as well as rounding does; the run cannot tell them apart. (AK's
+  question whether 10⁻¹⁰ is low enough.) The 10⁻¹⁰ half of `runs/tcut9` sits at
+  the edge as well; the 3·10⁻⁹ half is unaffected.
+- With the working cut 10⁻⁹ the edge is below what passes the cut (all pair
+  invariants ~ y, yz, y(1−z) × a hard scale must exceed 10⁻⁹ W²), and the flat
+  channel keeps the density positive everywhere, so no bias.
+- `psmc_set_edge(e)`, nlo31 12th argument (default 10⁻¹⁰, bit-identical; explicit
+  10⁻¹⁰ also identical). Volume test with edge 10⁻¹²: mix against flat within
+  1.5σ (n = 3), 1σ (n = 4).
+- `runs/tcut10`: edge 10⁻¹² with technical cut 10⁻⁹ (control), 10⁻¹⁰, 10⁻¹¹; 30
+  seeds each (801–830, as tcut6).

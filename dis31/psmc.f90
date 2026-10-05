@@ -12,7 +12,8 @@
 !   n = 4: flat, or the full n = 3 density times a second emission:
 !          12 + 6 + 12 = 30 channels.
 ! Emission variables: FF: y, z_i, phi; FI: x, z_i, phi; IF: x, u, phi; with
-! y, 1-x and both ends of z, u sampled logarithmically down to 1e-10.
+! y, 1-x and both ends of z, u sampled logarithmically down to 1e-10
+! (psmc_set_edge).
 !   FF: dPhi_n = dPhi_{n-1} (2 pij.pk)/(16 pi^2) (1 - y) dy dz dphi/(2pi)
 !   FI: deta dPhi_n(eta P) = (deta~/x) dx dPhi_{n-1}(eta~ P) (2 pij.pa)/(16 pi^2) dz dphi/(2pi)
 !   IF: deta dPhi_n(eta P) = (deta~/x) dx dPhi_{n-1}(eta~ P) (2 pk.pa)/(16 pi^2) du dphi/(2pi)
@@ -30,14 +31,22 @@ module psmc
   private
   integer, parameter :: dp = kind(1.0d0)
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884197_dp
-  real(dp), parameter :: vmin = 1e-10_dp, tz = 23.025850929940457_dp   ! ln(1e10)
+  ! lower edge of the log maps (y, 1-x) and of both ends of the logistic map
+  ! (z, u): default 1e-10; psmc_set_edge changes it (5 Oct: technical-cut tests)
+  real(dp), save :: vmin = 1e-10_dp, tz = 23.025850929940457_dp   ! ln(1e10)
   ! fraction of points from the flat generator
   real(dp), save, public :: psmc_aflat = 0.1_dp
+  public :: psmc_set_edge
   real(dp), save :: xB = 0, Q = 0, yl = 0, Lx = 0
   ! channel lists: (type 1 FF / 2 FI / 3 IF, i, j or 0, k or 0)
   integer, save :: nch(3:4) = 0, ch(4,30,3:4)
   public :: psmc_init, psmc_gen, psmc_density
 contains
+
+  subroutine psmc_set_edge(e)
+    real(dp), intent(in) :: e
+    vmin = e; tz = log(1/e)
+  end subroutine psmc_set_edge
 
   subroutine psmc_init(xB_in, Q2_in, y_in)
     real(dp), intent(in) :: xB_in, Q2_in, y_in
