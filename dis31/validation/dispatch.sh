@@ -40,7 +40,9 @@ while true; do
   # order of filling (AK): during the day (08:00-20:00) the thservs first, so
   # that nobody logs into a desktop under heavy load; at night the desktops
   # first (their CPUs are much faster than the thservs' Xeons)
-  desk=$(ruptime 2>/dev/null | awk '$1 ~ /^th[A-Z]/ && $2 == "up" && $1 != "thA371a" {print $1}')
+  # excluded: thA366a (overheatd stops my jobs within minutes: 1 and 5 Oct),
+  # thA352a (went down while my jobs ran, 1 Oct)
+  desk=$(ruptime 2>/dev/null | awk '$1 ~ /^th[A-Z]/ && $2 == "up" && $1 != "thA371a" && $1 != "thA366a" && $1 != "thA352a" {print $1}')
   serv=$(for i in $(seq -w 5 24); do echo "thserv$i"; done)
   hr=$((10#$(date +%H)))
   if [ $hr -ge 8 ] && [ $hr -lt 20 ]; then hosts="$serv $desk"; else hosts="$desk $serv"; fi
