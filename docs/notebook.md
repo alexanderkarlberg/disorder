@@ -2152,3 +2152,16 @@ Combination (r tcut6, lo/vi/kp tcut5, b1/b2 tcut1), all τ_zQ bins:
   the biased uniform r with large errors (±8–15). With psmc the NNLO
   coefficient in all bins is ≈ 8.5 pb/GeV² (NLO coefficient 16.9), and the
   values at 2e-2…5e-3 are power-correction dominated.
+- vi rerun with the fixed binary: bit-identical to tcut5 (like lo, kp). The
+  preliminary combination above is therefore final for lo, vi, kp, r (60).
+- Technical cut 1e-11 instead of 1e-9 (`runs/tcut7`, 18 of 30 seeds, the rest
+  stopped): r errors grow ~100-fold (±244 against ±2.5 at τ_cut = 1e-5); paired
+  shifts +465 ± 245 (1e-5), +274 ± 144 (3e-5), and −4 ± 2 even at 2e-2 where
+  the cut cannot matter. The region 1e-11…1e-9 is rounding-dominated (as with
+  logmap, 4 Oct); 1e-9 stays the working cut. Not decisive for the 1e-5 point.
+- r at 1e-5 over the 60 seeds is Gaussian (mean = median, halves agree,
+  bootstrap error = quoted). b2 has only 4 seeds. More statistics:
+  `runs/tcut8` (60 more r seeds, 12 b1, 12 b2).
+- Dispatcher: sizing from the 1-minute load average overfilled thserv06 twice
+  (load 38); excess jobs requeued by PID. To change (after this dispatcher
+  exits): use the instantaneous number of running processes.
