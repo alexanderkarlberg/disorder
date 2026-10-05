@@ -160,5 +160,19 @@ def lab11(src, out):
     save(fig, out)
 
 
+def zeusnnlo(src, out):
+    d = json.load(open(src)); tc = np.array(d['tau_cut'])
+    sel = [('total 0-0', 'total'), ('ptavg 8-15', 'p̄_T 8–15 (next to E_T > 8)'), ('m12 20-30', 'm₁₂ 20–30 (next to m₁₂ > 20)'),
+           ('q2 125-250', 'Q² 125–250'), ('ptavg 22-30', 'p̄_T 22–30'), ('m12 65-120', 'm₁₂ 65–120')]
+    fig, ax = plt.subplots(figsize=(6.2, 3.8))
+    for k, (b, lab) in enumerate(sel):
+        v = d['bins'][b]['NNLO']
+        ax.errorbar(tc[1:]*(1 + 0.06*(k - 2.5)), v[0][1:], v[1][1:], fmt='o-', ms=3, lw=1, color=ACC[k % 6], label=lab)
+    ax.axhline(0, color=MUTED, lw=0.8)
+    ax.set_xscale('log'); ax.set_xlabel('τ_cut'); ax.set_ylabel('NNLO coefficient [pb]')
+    ax.legend(frameon=False, fontsize=7, ncol=2)
+    save(fig, out)
+
+
 if __name__ == '__main__':
-    {'nlo-disent': nlo_disent, 'nnlo': nnlo, 'compare': compare, 'dist': dist, 'zeusnlo': zeusnlo, 'lab11': lab11}[sys.argv[1]](*sys.argv[2:])
+    {'nlo-disent': nlo_disent, 'nnlo': nnlo, 'compare': compare, 'dist': dist, 'zeusnlo': zeusnlo, 'lab11': lab11, 'zeusnnlo': zeusnnlo}[sys.argv[1]](*sys.argv[2:])
