@@ -2339,3 +2339,12 @@ The τ₁ results stand as a separate check, but they are not the requested test
   5–8). Cause: b1 and lo each grow like ln² τ_cut and are sampled
   independently. AK: after the validation, try correlated sampling (the
   above-cut 3+1 and its below-cut 2+1 Born from the same point).
+- **Full statistics (21:50; 144 b1 + 288 lo seeds; disorder 122 × 40M, cutoff
+  1e-10):** NNLO 1+1 by P2B + τ₂ slicing against disorder + DISENT, χ² over the
+  15 jet bins: 1822, 83, 28, 9.3, 15.1, 7.4, 10.2 at τ_cut 5e-3, 1e-3, 5e-4,
+  2e-4, 1e-4, 3e-5, 1e-5 (largest pulls 39, 6.8, 3.1, 1.7, 2.1, 1.6, 2.0). So
+  agreement for τ_cut ≤ 2e-4; power corrections above (mostly ≥ 2 jets and p_T
+  5–8). Errors at 1e-4 ≤ 0.22% of the jet rate per bin (disorder ≤ 0.13%).
+- Efficiency, CPU × error², ours/disorder: τ_cut 1e-4: 2–5 (p_T 8–20), 11–28
+  (≥ 1 jet, p_T 20–100, central/backward y), 52–163 (forward y, ≥ 2 jets, p_T
+  5–8); τ_cut 1e-5: 17–396. Page v11.
