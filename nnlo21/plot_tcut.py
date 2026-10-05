@@ -87,5 +87,26 @@ def nnlo(src, out, bornfile=None):
     save(fig, out)
 
 
+def compare(old, new, bornfile, out, labels='uniform r (4 Oct),psmc + tau2 fix (5 Oct)'):
+    lab = labels.split(',')
+    born = born_cells(bornfile)['0.05-0.50']
+    fig, axs = plt.subplots(2, 1, figsize=(6.2, 5.6), sharex=True, gridspec_kw={'height_ratios': [1, 1.6]})
+    for k, (src, l) in enumerate(zip((old, new), lab)):
+        d = json.load(open(src)); tc = np.array(d['tau_cut']); v = d['bins']['0.05-0.50']
+        sh = 1 + 0.06*(k - 0.5)
+        if v['nlo'] and v['disent_nlo']:
+            r, e = np.array(v['nlo'][0]), np.array(v['nlo'][1]); ref = v['disent_nlo'][0]
+            axs[0].errorbar(tc*sh, r/ref - 1, e/abs(ref), fmt='o', ms=3.5, lw=1, color=ACC[k], label=l)
+        r, e = np.array(v['nnlo'][0]), np.array(v['nnlo'][1])
+        axs[1].errorbar(tc*sh, r/born, e/born, fmt='o', ms=3.5, lw=1, color=ACC[k], label=l)
+    axs[0].axhline(0, color=MUTED, lw=0.8); axs[1].axhline(0, color=MUTED, lw=0.8)
+    axs[0].set_ylabel('NLO: (b1 + lo)/DISENT − 1'); axs[0].set_ylim(-0.7, 0.15)
+    axs[1].set_ylabel('NNLO coefficient / LO'); axs[1].set_ylim(-0.45, 0.6)
+    axs[1].set_xscale('log'); axs[1].set_xlabel('τ_cut')
+    axs[1].legend(frameon=False, fontsize=8, loc='upper left')
+    axs[1].annotate('uniform r at 1e-4, 3e-5, 1e-5: +1.3, +5.6, +18 (off scale)', (1.1e-5, -0.41), fontsize=7, color=MUTED)
+    save(fig, out)
+
+
 if __name__ == '__main__':
-    {'nlo-disent': nlo_disent, 'nnlo': nnlo}[sys.argv[1]](*sys.argv[2:])
+    {'nlo-disent': nlo_disent, 'nnlo': nnlo, 'compare': compare}[sys.argv[1]](*sys.argv[2:])

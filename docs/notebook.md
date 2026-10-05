@@ -2165,3 +2165,10 @@ Combination (r tcut6, lo/vi/kp tcut5, b1/b2 tcut1), all τ_zQ bins:
 - Dispatcher: sizing from the 1-minute load average overfilled thserv06 twice
   (load 38); excess jobs requeued by PID. To change (after this dispatcher
   exits): use the instantaneous number of running processes.
+- **Final (tcut8 added: r 120 seeds, b1/b2 16 seeds), all bins:** NNLO 10.1 ±
+  0.7, 8.6 ± 0.9, 8.1 ± 1.1, 7.95 ± 1.4, 8.1 ± 1.9, 0.9 ± 2.4 at 1e-3, 5e-4,
+  2e-4, 1e-4, 3e-5, 1e-5 (LO 61.1, so +13% of LO); NLO b1+lo 16.85 ± 0.17 …
+  17.07 ± 0.19 against DISENT 16.885. Plateau 5e-4 … 3e-5. The 1e-5 point stays
+  ~3σ low with doubled statistics; r is Gaussian there. Next: technical cut
+  1e-10 and 3e-9. Page v3: https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
+  (plot `nnlo21/plot_tcut.py compare`).
