@@ -2121,3 +2121,34 @@ destroyed and every later iteration is zero. lo, vi and kp (3+1) are clean.
   differ by 3σ in Q² 1000–2000), so several NNLOJET seeds are needed before
   reading anything into 0.1%. The selection (lab η direction, E_T definition,
   cut order) is right: a flipped η window would change bins by tens of %.
+
+**NNLO τ_cut test with psmc and the τ₂ fix (5 Oct, afternoon; preliminary).**
+`runs/tcut6`: r (60 seeds, same seeds as tcut5) with the fixed `tau2cm`; no
+blow-ups, iterations stable. The seed-815 rerun with the fix: iterations
+−2941, −3188, −3276, −3300 (before: −7.7e4 ± 7.4e4, then −2.3e150), no point
+with |weight| > 1e12. lo and kp rerun with the fixed binary: bit-identical to
+tcut5 (the bug never hit the 3+1 parts); vi rerunning.
+Combination (r tcut6, lo/vi/kp tcut5, b1/b2 tcut1), all τ_zQ bins:
+
+| τ_cut | NLO b1+lo (DISENT 16.885 ± 0.04) | NNLO b2+vi+kp+r |
+|---|---|---|
+| 2e-2 | 6.56 | −3.3 ± 0.2 |
+| 1e-2 | 7.44 | 2.7 ± 0.3 |
+| 5e-3 | 9.18 | 8.8 ± 0.5 |
+| 2e-3 | 13.12 | 11.9 ± 0.7 |
+| 1e-3 | 15.00 | 9.9 ± 0.9 |
+| 5e-4 | 15.87 | 8.2 ± 1.2 |
+| 2e-4 | 16.60 | 7.9 ± 1.5 |
+| 1e-4 | 16.88 ± 0.15 | 8.2 ± 1.7 |
+| 3e-5 | 17.14 ± 0.11 | 9.0 ± 2.3 |
+| 1e-5 | 17.12 ± 0.13 | 0.4 ± 2.9 |
+
+- The drift (81, 342, 1100 at 1e-4, 3e-5, 1e-5 with the uniform r) is gone.
+  NNLO is flat at ≈ 8.5 ± 1 from 1e-3 to 3e-5, with power corrections above
+  2e-3. The 1e-5 point is 2.8σ low; the technical cut moved r at 1e-5 in the
+  uniform runs, so `runs/tcut7` repeats r with s_min > 1e-11 W² (30 seeds).
+- **Correction:** the earlier statement "NNLO near zero and flat from 2e-2 to
+  ≈ 2e-4" (4 Oct, with the uniform r) is superseded. That plateau came from
+  the biased uniform r with large errors (±8–15). With psmc the NNLO
+  coefficient in all bins is ≈ 8.5 pb/GeV² (NLO coefficient 16.9), and the
+  values at 2e-2…5e-3 are power-correction dominated.
