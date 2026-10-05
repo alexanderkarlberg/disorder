@@ -2274,3 +2274,28 @@ Combination (r tcut6, lo/vi/kp tcut5, b1/b2 tcut1), all τ_zQ bins:
   below 1e-4 carry little information. NLO is a sharp test and passes. A sharp
   NNLO 1+1 test needs cluster statistics (or variance reduction): the same
   cost problem of pure slicing as at the fixed point (2 Oct).
+
+**The 1e-5 point: psmc's sampling edge (5 Oct, evening).** `runs/tcut9`,
+`runs/tcut10` (30 r seeds per variant, seeds of tcut6; NNLO with that r
+swapped in, all bins):
+
+| technical cut, psmc edge | 2e-4 | 1e-4 | 3e-5 | 1e-5 |
+|---|---|---|---|---|
+| 1e-9, 1e-10 (tcut6/8) | 8.1 ± 1.1 | 8.0 ± 1.4 | 8.1 ± 1.9 | 0.9 ± 2.4 |
+| 1e-9, 1e-12 | 7.6 ± 3.1 | 5.9 ± 3.4 | 9.9 ± 4.7 | 7.1 ± 5.2 |
+| 1e-10, 1e-12 | 10.5 ± 4.1 | 10.5 ± 4.1 | 11.1 ± 6.0 | 17.0 ± 8.2 |
+| 3e-9, 1e-10 | 8.0 ± 1.6 | 8.7 ± 1.9 | 6.7 ± 2.8 | −8.3 ± 3.1 |
+| 1e-10, 1e-10 | 22 ± 12 | 31 ± 19 | 49 ± 34 | 73 ± 62 |
+| 1e-11, 1e-12 | 79 ± 35 | 131 ± 57 | 257 ± 115 | 593 ± 286 |
+
+- With the log-map edge at 1e-12 the 1e-5 point is on the plateau (7.1 ± 5.2):
+  the deficit was undersampling at the edge 1e-10 (AK's question whether 1e-10
+  is low enough: it is not, for τ_cut = 1e-5). A higher technical cut (3e-9)
+  makes it worse (−8.3 ± 3.1); 1e-10 is consistent but noisier; with an edge
+  above the cut (1e-10, 1e-10) the flat channel alone covers the gap, with
+  large weights.
+- **Correction of today's correction:** at technical cut 1e-11 the results are
+  noise-dominated even with the edge at 1e-12, so for that run rounding in R −
+  dipoles was the right explanation after all (tcut7).
+- Working set-up for small τ_cut: edge 1e-12, technical cut 1e-9. The NNLO
+  τ_cut test passes from 5e-4 to 1e-5.
