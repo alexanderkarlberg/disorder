@@ -225,6 +225,10 @@ contains
        T = min(T, tpart(code, u))
     enddo
     T = max(T, 0.0_dp)
+    ! degenerate (almost zero-energy parton, invariants negative in floating
+    ! point): every partition fails; exactly T is tiny there (as dis31/nlo31
+    ! tau2cm, 5 Oct)
+    if (T /= T .or. T >= huge(1.0_dp)/2) T = 0
   contains
     subroutine decode(code, a, okp)
       integer, intent(in) :: code

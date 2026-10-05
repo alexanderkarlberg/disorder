@@ -770,6 +770,13 @@ contains
        T = min(T, tpart(code, u, .false.))
     enddo
     T = max(T, 0.0_dp)
+    ! degenerate configurations (5 Oct): a mapped Born whose emitter pair is
+    ! collinear with its FF spectator has an almost zero-energy parton; in
+    ! floating point its invariants can turn negative and a light-cone
+    ! energy u.P + |P|_u vanish, so every partition fails and T stayed at
+    ! huge, which passed every tau_cut while the real was cut (unmatched
+    ! dipoles ~1e25, then VEGAS blow-ups). Exactly, T is tiny there: 0.
+    if (T /= T .or. T >= huge(1.0_dp)/2) T = 0
   contains
     ! the partition of code (0 beam, 1, 2 jets; both jets non-empty, jet 1
     ! holds the first jet parton), or huge if not allowed

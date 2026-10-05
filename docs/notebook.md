@@ -2087,3 +2087,37 @@ destroyed and every later iteration is zero. lo, vi and kp (3+1) are clean.
   cause is found.
 - Debugging: seed 815 rerun with a dump of the first point with |weight| >
   1e12.
+- **Cause found:** the first spike of seed 815 (|weight| 1.4e12, s_min/W² =
+  1.25e-9, partons 2, 4, 5 mutually collinear, τ₂(real) = 1.9e-9, cut) comes from
+  the FF dipole (i, j; k) = (2, 5; 4), whose spectator is collinear with the
+  emitter pair. p̃₂₅ = p₂ + p₅ − y/(1−y) p₄ nearly cancels (E ≈ 2.637 − 2.636
+  GeV), so the mapped Born has an almost zero-energy parton. In floating point
+  its invariants turn negative (2p̃·p̃/W² = −1.2e-8), a light-cone energy in
+  `tau2cm` vanishes, every partition fails and T stayed at `huge`. `accept`
+  then let this dipole pass every τ_cut while the real was cut: an unmatched
+  dipole of 1e24–1e26 (the real is 1e17–1e19). VEGAS then adapts to the spike
+  and the following iterations reach 1e150.
+- This is a robustness bug of the τ₂ measure (`tau2cm`), not of psmc or the
+  dipoles. psmc only reaches such configurations; the uniform map practically
+  never did. Fix: a non-finite or `huge` T means a degenerate configuration
+  and gives T = 0 (exactly, T is tiny there). The same guard in
+  `slicing/mod_tau2_run.f90` (`tau2_jetframe`, used with DISENT's mapped
+  kinematics). Results change only at such failed points.
+- Testing: seed 815 rerun with the fix (dump of any |weight| > 1e12).
+
+**ZEUS-like dijets, first pieces (5 Oct).**
+- `nlo31` mode 2 (above the cut, ZEUS selection, 15 observable bins × 10
+  τ_cut) and `sliced21` mode 2 (below the cut, integrated over Q² and y; beam
+  tables on a grid in Q, `lp21_grid_build`/`lp21_grid_load`, Δln Q = 0.1,
+  h = 0.02 in ln(ξ/(1−ξ)), 29 nodes, ~1.4 CPU-min each). Modes 0 and 1 checked
+  bit-identical after the changes. Combination: `nnlo21/combine_zeus.py`.
+- Grid against direct evaluation: at most 3e-4 (up), 7e-4 (down), 3e-3 (gluon)
+  of the largest coefficient. A grid twice as fine in both directions changes
+  b1 by ≤ 4e-5 relative and b2 by ≤ 0.0024 pb at τ_cut = 1e-5 (b2 = 1.04e4 pb)
+  with identical random numbers: negligible.
+- LO (sliced21 b0, 8 seeds) against NNLOJET LO: total 103.29 ± 0.03 against
+  103.17 ± 0.04 pb (+0.1%, 2.5σ); bins within 0–2.5σ, ours systematically
+  ~0.1% higher. NNLOJET's single-run errors are not reliable (its two LO runs
+  differ by 3σ in Q² 1000–2000), so several NNLOJET seeds are needed before
+  reading anything into 0.1%. The selection (lab η direction, E_T definition,
+  cut order) is right: a flipped η window would change bins by tens of %.
