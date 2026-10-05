@@ -27,8 +27,12 @@ while true; do
   hosts=$(for i in $(seq -w 5 24); do echo "thserv$i"; done; ruptime 2>/dev/null | awk '$1 ~ /^th[A-Z]/ && $2 == "up" && $1 != "thA371a" {print $1}')
   for h in $hosts; do
     [ ${#P[@]} -eq 0 ] && break
-    info=$(timeout 15 $SSH $h 'echo $(nproc) $(cut -d" " -f1 /proc/loadavg) $(ps -u akarlber -o comm= | grep -c "NNLOJET\|nlo31\|sliced21\|tau2_nlo") $(ps -u akarlber -o stat=,comm= | grep "NNLOJET\|nlo31\|sliced21\|tau2_nlo" | grep -c "^T") $(who | grep -vc "^akarlber ") $([ -d '"$Q"' ] && echo mounted)' 2>/dev/null) || continue
-    set -- $info; nc=$1; load=${2%.*}; mine=$3; stopped=$4; others=$5; mounted=$6
+    info=$(timeout 15 $SSH $h 'echo $(nproc) $(cut -d" " -f1 /proc/loadavg) $(cut -d" " -f4 /proc/loadavg | cut -d/ -f1) $(ps -u akarlber -o comm= | grep -c "NNLOJET\|nlo31\|sliced21\|tau2_nlo") $(ps -u akarlber -o stat=,comm= | grep "NNLOJET\|nlo31\|sliced21\|tau2_nlo" | grep -c "^T") $(who | grep -vc "^akarlber ") $([ -d '"$Q"' ] && echo mounted)' 2>/dev/null) || continue
+    set -- $info; nc=$1; load=${2%.*}; nrun=$3; mine=$4; stopped=$5; others=$6; mounted=$7
+    # the 1-minute load average lags behind jobs started minutes ago (it
+    # overfilled thserv06 twice on 5 Oct): use the larger of it and the
+    # instantaneous number of running processes (minus this probe)
+    nrun=$((nrun - 1)); [ $nrun -gt $load ] && load=$nrun
     [ -z "$nc" ] && continue
     # the job directory must be visible on the host (NFS mount of thA371a)
     [ "$mounted" != mounted ] && continue
