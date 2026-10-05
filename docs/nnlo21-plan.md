@@ -120,3 +120,17 @@ Design (nlo31 mode 1, option `psmc`):
 - Validation: phase-space volume against the flat generator; lo slice
   against DISENT with few iterations (early iterations unbiased); r at large
   τ_cut against the existing runs; then the τ_cut test.
+
+## Order of the next steps (agreed with AK, 5 Oct)
+
+1. Photon exchange: τ_cut test with psmc (`runs/tcut5`), then the ZEUS-like
+   dijet NNLO against NNLOJET (`validation/nnlojet_epLJJ_zeus2j.run`).
+2. NC and CC (Z, γZ, W) in all new pieces, which are photon-only today: trees
+   (`me31`, `me41`, `born31`: helicity couplings, q and q̄ lines separately,
+   W flavour structures), one loop (`virt31`: plus boson-on-loop pieces for
+   Z), two-loop hard function (`hard21`: couplings on the non-singlet part;
+   Z singlet terms Σv_q and axial; Gehrmann–Tancredi 1112.1531), the 2+1 Born
+   in `sliced21` (DISENT's MATTHR has NC/CC). Dipoles, I/K/P, soft, beam,
+   jet functions and psmc are unchanged. Validation: pointwise against
+   NNLOJET's DIS with Z and DISWM/DISWP, as for the photon. VBF needs this.
+3. Then efficiency (profiling, hoppet convolutions), then P2B at N3LO.
