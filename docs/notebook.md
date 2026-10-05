@@ -2263,3 +2263,14 @@ Combination (r tcut6, lo/vi/kp tcut5, b1/b2 tcut1), all τ_zQ bins:
   ≥ 2 jets at NNLO −2.9σ at every τ_cut (both sides DISENT NLO 2+1 there:
   DISENT cutoff 1e-10 vs disorder's 1e-8, and α_s ≈ −1.4σ); disorder with
   cutoff 1e-10 running (`runs/lab11b`). Plot: `plot_tcut.py lab11`.
+- **≥ 2 jets resolved:** disorder with DISENT cutoff 1e-10 (`runs/lab11b`):
+  67.25 ± 0.23 (1e-8: 67.69 ± 0.21) against slicing 67.04 ± 0.10: −0.9σ. The
+  NNLO total moves by −0.007 (3σ of its tiny error) with the cutoff.
+- **Strength of the 1+1 NNLO test (qualifies the statement above):** the
+  slicing error on the NNLO total is ±5.7, 12, 32, 71, 190, 310 pb at τ_cut
+  3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5 (coefficient −42 pb; disorder ±0.002). So
+  at NNLO the agreement holds at the 10–30% level of the coefficient in most
+  bins (tighter in the forward bins, e.g. y 1–1.5 ±0.1 at 1e-3); the pulls
+  below 1e-4 carry little information. NLO is a sharp test and passes. A sharp
+  NNLO 1+1 test needs cluster statistics (or variance reduction): the same
+  cost problem of pure slicing as at the fixed point (2 Oct).
