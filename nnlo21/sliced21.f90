@@ -20,6 +20,9 @@
 !   sliced21 mktab i0 i1 <prefix> [dlnQ [h]]   (nodes i0..i1, in parallel;
 !                                    defaults 0.1 in ln Q, 0.02 in ln(xi/(1-xi)))
 !   sliced21 tabchkg <prefix>          (grid against direct evaluation)
+!
+! Mode 3 (P2B, as dis31/nlo31 mode 3): sliced21 part ncall itmx seed p2b <table prefix> [softtable]
+! 1+1 lab-frame jet bins with O(2+1 Born) - O(projected 1+1 Born) per event
 !-----------------------------------------------------------------------
 module sliced21_mod
   use nlo31_mod
@@ -38,6 +41,7 @@ contains
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,6), P(4,7), dphi, as, fpdf(-5:5), w, Q, tz
     real(dp) :: QQ, GQ, born(3), f0(3), c1(ntc,3), c2(ntc,3), val(ntc), mu(3)
     logical :: ok, inb(nobmax)
+    real(dp) :: dp2b(nobmax)
     integer :: b, k, c
     res = 0
     call lepton(r(1:3), Q2, y, xB, eta, jac, ok)
@@ -48,6 +52,11 @@ contains
        klep = Pk(:,5); Q2cur = Q2
        call zeus_bins(Pk(:,1), Pk(:,2:3), 2, inb)
        if (.not. inb(1)) return
+       if (trim(bpart) /= 'b0') call lp21_setq(Q)
+    elseif (mode == 3) then
+       klep = Pk(:,5); kout = Pk(:,6); Q2cur = Q2; xcur = xB
+       call p2b_diff(Pk(:,1), Pk(:,2:3), 2, dp2b)
+       if (all(dp2b == 0)) return
        if (trim(bpart) /= 'b0') call lp21_setq(Q)
     else
        tz = 1
@@ -92,7 +101,10 @@ contains
        res = 0; return
     endif
     do b = 1, nob
-       if (mode == 2) then
+       if (mode == 3) then
+          if (dp2b(b) /= 0) hcacc(1 + ntc*(b - 1):ntc*b) = hcacc(1 + ntc*(b - 1):ntc*b) + val*wgt*dp2b(b)
+          cycle
+       elseif (mode == 2) then
           if (.not. inb(b)) cycle
        elseif (tz < zlo(b) .or. tz >= zhi(b)) then
           cycle
@@ -156,8 +168,8 @@ program sliced21
   call get_command_argument(3, arg); read(arg, *) itmx
   call get_command_argument(4, arg); read(arg, *) seed
   call get_command_argument(5, arg)
-  if (trim(arg) == 'zeus') then
-     mode = 2
+  if (trim(arg) == 'zeus' .or. trim(arg) == 'p2b') then
+     mode = merge(2, 3, trim(arg) == 'zeus')
      call get_command_argument(6, gprefix)
   else
      read(arg, *) xfix
@@ -175,8 +187,8 @@ program sliced21
      call get_command_argument(9, arg); read(arg, *) pdfmask
      lpmask = pdfmask
   endif
-  if (mode == 2) then
-     nob = nobmax; nv = ntc*nob; iv = ntc
+  if (mode >= 2) then
+     nob = merge(15, 16, mode == 2); nv = ntc*nob; iv = ntc
      q2lo = gqlo**2; q2hi = gqhi**2; ylo = 0.2_dp; yhi = 0.6_dp
   else
      mode = 1; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
@@ -188,7 +200,7 @@ program sliced21
   call initPDF(0)
   call scet_set_colour(4.0_dp/3, 3.0_dp, 0.5_dp)
   if (softtab /= '') call soft_table_init(trim(softtab), 0.025_dp, 0.05_dp)
-  if (mode == 2) then
+  if (mode >= 2) then
      if (trim(bpart) /= 'b0') call lp21_grid_load(gqlo, gqhi, trim(gprefix))
   elseif (trim(bpart) /= 'b0') then
      call lp21_init(sqrt(Q2fix), xfix, hb)
@@ -213,7 +225,13 @@ program sliced21
   call vegas(5, ncall, itmx, avg, err, chi2, b21_part)
   write(*,'(a,a,a,es16.8,a,es12.4,a,f8.3)') ' RESULT ', trim(bpart), ' dsigma/dx dQ2 [pb/GeV2] (smallest tau_cut, all bins) = ', &
        & avg, ' +- ', err, '   chi2/it', chi2
-  if (mode == 2) then
+  if (mode == 3) then
+     write(*,'(a)') ' LCELLS sigma per bin [pb] below the cut, O(event) - O(Born): lab11 bin, then tau_cut columns'
+     write(*,'(a,10es16.8)') ' tau_cut     ', tcs
+     do i = 1, 16
+        write(*,'(a,i3,10es16.8)') ' LCELL ', i, hc(1 + ntc*(i - 1):ntc*i)
+     enddo
+  elseif (mode == 2) then
      write(*,'(a)') ' ZCELLS sigma per bin [pb] below the cut: observable bin, then tau_cut columns'
      write(*,'(a,10es12.3)') ' tau_cut     ', tcs
      write(*,'(a,10es16.8)') ' ZCELL total     0     0', hc(1:ntc)

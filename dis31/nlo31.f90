@@ -33,6 +33,13 @@
 ! -1 < eta_lab < 2.5 dropped, >= 2 jets, m12 > 20 GeV; jets ordered by
 ! Breit p_T). Cells: observable bin (total, Q^2, ptavg_12, m12) x tau_cut
 ! (tau_2 = T_2/Q), sigma per bin in pb. x and Q2 arguments are ignored.
+!
+! Mode 3 (P2B on the tau_2-sliced 2+1, AK 5 Oct): the same Q^2, y range;
+! 1+1 lab-frame jet observables (as analysis/lab11_analysis.f: anti-k_t R = 1
+! with rapidity, p_T > 5 GeV, -1 < y < 2.5, proton along +z) with the Born
+! projection subtracted event by event: cell (k, b) gets theta(tau_2 >
+! tcs(k)) [O_b(event) - O_b(1+1 Born at the event's x, Q^2, y)]. 16 rows:
+! total, >= 1 jet, leading-jet p_T (7), leading-jet y (6), >= 2 jets.
 !-----------------------------------------------------------------------
 module nlo31_mod
   use psmc
@@ -64,7 +71,7 @@ module nlo31_mod
   ! mode 1: fixed (x, Q^2), cells (tau_cut k, tau_zQ bin b) -> k + ntc*(b - 1)
   integer :: mode = 0
   real(dp) :: xfix = 0.01_dp, Q2fix = 400
-  integer, parameter :: ntc = 10, nzb = 6, nobmax = 15, ncell = ntc*nobmax
+  integer, parameter :: ntc = 10, nzb = 6, nobmax = 16, ncell = ntc*nobmax
   real(dp), parameter :: tcs(ntc) = [2e-2_dp, 1e-2_dp, 5e-3_dp, 2e-3_dp, 1e-3_dp, 5e-4_dp, 2e-4_dp, 1e-4_dp, &
        & 3e-5_dp, 1e-5_dp]
   real(dp), parameter :: zlo(nzb) = [0.05_dp, 0.1_dp, 0.2_dp, 0.3_dp, 0.4_dp, 0.05_dp]
@@ -80,6 +87,10 @@ module nlo31_mod
   real(dp), parameter :: zmje(0:4) = [20.0_dp, 30.0_dp, 45.0_dp, 65.0_dp, 120.0_dp]
   ! the current event's incoming lepton (Breit frame) and Q^2, for the lab frame in mode 2
   real(dp) :: klep(4), Q2cur
+  ! mode 3: the outgoing lepton and the event's x (Born projection, lab frame)
+  real(dp) :: kout(4), xcur
+  real(dp), parameter :: l11pt(0:7) = [5.0_dp, 8.0_dp, 11.0_dp, 15.0_dp, 20.0_dp, 30.0_dp, 50.0_dp, 100.0_dp]
+  real(dp), parameter :: l11y(0:6) = [-1.0_dp, -0.5_dp, 0.0_dp, 0.5_dp, 1.0_dp, 1.5_dp, 2.5_dp]
   integer :: iv = 1                ! the cell VEGAS integrates (mode 1: smallest tau_cut, all tau_zQ)
   real(dp) :: hc(ncell), hc2, hcacc(ncell)
   ! mode 1: map the mass ratios and decay cosines logistically onto
@@ -326,7 +337,7 @@ contains
     logical :: ok
     integer :: f, Q, k
     res = 0
-    if (usepsmc .and. mode == 2) then
+    if (usepsmc .and. mode >= 2) then
        call lepton2(r(1:2), Q2, y, xB, jac, ok)
        if (.not. ok) return
        call psmc_gen(3, r(3:9), Pk, eta, dphi, ok)
@@ -341,7 +352,7 @@ contains
        if (.not. ok) return
        call breit(3, r(4:8), Q2, y, xB, eta, Pk, dphi)
     endif
-    klep = Pk(:,6); Q2cur = Q2
+    klep = Pk(:,6); kout = Pk(:,7); Q2cur = Q2; xcur = xB
     call accept(Pk(:,1), Pk(:,2:4), 3, sqrt(Q2), acc)
     if (all(acc == 0)) return
     as = alphasPDF(sqrt(Q2))
@@ -492,7 +503,7 @@ contains
     integer :: i, j, f, Q, Q2i, ic
     logical :: ok
     res = 0
-    if (usepsmc .and. mode == 2) then
+    if (usepsmc .and. mode >= 2) then
        call lepton2(r(1:2), Q2, y, xB, jac, ok)
        if (.not. ok) return
        call psmc_gen(4, r(3:13), Pk, eta, dphi, ok)
@@ -515,7 +526,7 @@ contains
        enddo
     enddo
     if (smin < techcut*W2) return
-    klep = Pk(:,7); Q2cur = Q2
+    klep = Pk(:,7); kout = Pk(:,8); Q2cur = Q2; xcur = xB
     call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(Q2), F4)
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
@@ -572,7 +583,7 @@ contains
     if (vslice <= 1) then
        t = a(iv)
     else
-       k = vslice + ntc*(merge(1, nzb, mode == 2) - 1)
+       k = vslice + ntc*(merge(1, nzb, mode >= 2) - 1)
        t = a(k) - a(k - 1)
     endif
   end function vtarget
@@ -595,6 +606,10 @@ contains
        call accept_zeus(pin, p, n, Q, F)
        return
     endif
+    if (mode == 3) then
+       call accept_p2b(pin, p, n, Q, F)
+       return
+    endif
     tz = 1
     do i = 1, n
        if (p(3,i) < 0) tz = tz + 2*p(3,i)/Q
@@ -607,6 +622,122 @@ contains
        enddo
     enddo
   end subroutine accept
+
+  ! mode 3: F(k + ntc*(b-1)) = theta(tau_2 > tcs(k)) [O_b(event) - O_b(Born)]
+  subroutine accept_p2b(pin, p, n, Q, F)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: pin(4), p(4,n), Q
+    real(dp), intent(out) :: F(nv)
+    real(dp) :: d(nobmax), t2
+    integer :: k, b
+    F = 0
+    call p2b_diff(pin, p, n, d)
+    if (all(d == 0)) return
+    t2 = tau2cm(pin, p, n)/Q
+    do b = 1, nob
+       if (d(b) == 0) cycle
+       do k = 1, ntc
+          if (t2 > tcs(k)) F(k + ntc*(b - 1)) = d(b)
+       enddo
+    enddo
+  end subroutine accept_p2b
+
+  ! O(event) - O(1+1 Born at the event's x, Q^2, y) for the 16 lab-frame bins
+  subroutine p2b_diff(pin, p, n, d)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: pin(4), p(4,n)
+    real(dp), intent(out) :: d(nobmax)
+    real(dp) :: oe(nobmax), ob(nobmax), Pp(4), pb(4,1)
+    Pp = pin*(s/2)/mdot(pin, klep)
+    call lab11_obs(Pp, p, n, oe)
+    pb(:,1) = [0.0_dp, 0.0_dp, -sqrt(Q2cur), 0.0_dp] + xcur*Pp     ! q + x P
+    call lab11_obs(Pp, pb, 1, ob)
+    d = oe - ob
+  end subroutine p2b_diff
+
+  ! 1+1 lab-frame jet observables of the partons p(4,n) (Breit frame), as
+  ! analysis/lab11_analysis.f. Lab tetrad from Breit-frame vectors: t = P/(2Ep)
+  ! + k/(2Ee), z = P/(2Ep) - k/(2Ee) (proton along +z), x from the outgoing
+  ! lepton orthogonal to t and z, y = the Breit y axis (P, k, k' have no y
+  ! component). Partons with E <= 0 or p_T = 0 are dropped.
+  subroutine lab11_obs(Pp, p, n, o)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: Pp(4), p(4,n)
+    real(dp), intent(out) :: o(nobmax)
+    real(dp) :: tl(4), zl(4), xl(4), v(4), q(4,n), pt(n), yr(n), ph(n), dmin, d, ptl, yl, dph
+    logical :: alive(n), isjet(n)
+    integer :: i, j, nq, ia, ja, nj5, b
+    tl = Pp/(2*Ep) + klep/(2*Ee); zl = Pp/(2*Ep) - klep/(2*Ee)
+    v = kout - mdot(kout, tl)*tl + mdot(kout, zl)*zl
+    xl = v/sqrt(-mdot(v, v))
+    nq = 0
+    do i = 1, n
+       ! lab components (E, px, py, pz) stored as (px, py, pz, E)
+       v = [-mdot(p(:,i), xl), p(2,i), -mdot(p(:,i), zl), mdot(p(:,i), tl)]
+       if (v(4) <= 0) cycle
+       if (v(1)**2 + v(2)**2 <= (1e-12_dp*v(4))**2) cycle
+       nq = nq + 1; q(:,nq) = v
+    enddo
+    alive = .false.; alive(1:nq) = .true.; isjet = .false.
+    do while (count(alive) > 0)
+       call kin()
+       dmin = huge(1.0_dp); ia = 0; ja = 0
+       do i = 1, nq
+          if (.not. alive(i)) cycle
+          d = 1/max(pt(i), 1e-300_dp)**2
+          if (d < dmin) then
+             dmin = d; ia = i; ja = 0
+          endif
+          do j = i + 1, nq
+             if (.not. alive(j)) cycle
+             dph = abs(ph(i) - ph(j)); if (dph > pi) dph = 2*pi - dph
+             d = min(1/max(pt(i), 1e-300_dp)**2, 1/max(pt(j), 1e-300_dp)**2)*((yr(i) - yr(j))**2 + dph**2)
+             if (d < dmin) then
+                dmin = d; ia = i; ja = j
+             endif
+          enddo
+       enddo
+       if (ja == 0) then
+          alive(ia) = .false.; isjet(ia) = .true.
+       else
+          q(:,ia) = q(:,ia) + q(:,ja); alive(ja) = .false.
+       endif
+    enddo
+    alive = isjet
+    call kin()
+    nj5 = 0; ptl = -1; yl = 0
+    do i = 1, nq
+       if (.not. isjet(i)) cycle
+       if (pt(i) > 5 .and. yr(i) > -1 .and. yr(i) < 2.5_dp) then
+          nj5 = nj5 + 1
+          if (pt(i) > ptl) then
+             ptl = pt(i); yl = yr(i)
+          endif
+       endif
+    enddo
+    o = 0
+    o(1) = 1
+    if (nj5 >= 1) then
+       o(2) = 1
+       do b = 1, 7
+          if (ptl >= l11pt(b-1) .and. ptl < l11pt(b)) o(2+b) = 1
+       enddo
+       do b = 1, 6
+          if (yl >= l11y(b-1) .and. yl < l11y(b)) o(9+b) = 1
+       enddo
+    endif
+    if (nj5 >= 2) o(16) = 1
+  contains
+    subroutine kin()
+      integer :: m
+      do m = 1, nq
+         if (.not. alive(m)) cycle
+         pt(m) = sqrt(q(1,m)**2 + q(2,m)**2)
+         yr(m) = 0.5_dp*log((q(4,m) + q(3,m))/max(q(4,m) - q(3,m), 1e-300_dp))
+         ph(m) = atan2(q(2,m), q(1,m))
+      enddo
+    end subroutine kin
+  end subroutine lab11_obs
 
   ! mode 2: F(k + ntc*(b-1)) = theta(tau_2 > tcs(k)) x (the event passes the
   ! ZEUS-like selection and is in observable bin b)
@@ -1101,7 +1232,10 @@ program nlo31
      nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
      if (usepsmc) call psmc_init(xfix, Q2fix, Q2fix/(xfix*s))
   elseif (mode == 2) then
-     nob = nobmax; nv = ntc*nob; iv = ntc
+     nob = 15; nv = ntc*nob; iv = ntc
+     q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
+  elseif (mode == 3) then
+     nob = 16; nv = ntc*nob; iv = ntc
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
   endif
   call random_seed(size=nseed); allocate(sd(nseed))
@@ -1121,13 +1255,19 @@ program nlo31
   case default; stop 'part: lo, vi, kp or r'
   end select
   ! mode 2 with psmc: Q^2 and y in front of psmc's variables (3+1: 7, 4+1: 11)
-  if (mode == 2 .and. usepsmc) ndim = merge(13, 2 + ndim - 1, trim(part) == 'r')
+  if (mode >= 2 .and. usepsmc) ndim = merge(13, 2 + ndim - 1, trim(part) == 'r')
   write(*,'(a,a,a,i10,a,i4,a,i6,a,es9.2,a,i2,a,f9.6,a,f10.2)') ' nlo31 part ', trim(part), ' ncall', ncall, &
        & ' itmx', itmx, ' seed', seed, ' techcut', techcut, ' mode', mode, ' x', xfix, ' Q2', Q2fix
   call vegas(ndim, ncall, itmx, avg, err, chi2, integrand)
   write(*,'(a,a,a,es16.8,a,es12.4,a,f8.3)') ' RESULT ', trim(part), ' sigma(>=3 jets) [pb] = ', avg, ' +- ', err, &
        & '   chi2/it', chi2
-  if (mode == 2) then
+  if (mode == 3) then
+     write(*,'(a)') ' LCELLS sigma per bin [pb] above the cut, O(event) - O(Born): lab11 bin, then tau_cut columns'
+     write(*,'(a,10es12.3)') ' tau_cut     ', tcs
+     do i = 1, 16
+        write(*,'(a,i3,10es16.8)') ' LCELL ', i, hc(1 + ntc*(i - 1):ntc*i)
+     enddo
+  elseif (mode == 2) then
      write(*,'(a)') ' ZCELLS sigma per bin [pb] above the cut: observable bin, then tau_cut columns'
      write(*,'(a,10es12.3)') ' tau_cut     ', tcs
      write(*,'(a,10es16.8)') ' ZCELL total     0     0', hc(1:ntc)

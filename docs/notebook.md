@@ -2299,3 +2299,28 @@ swapped in, all bins):
   dipoles was the right explanation after all (tcut7).
 - Working set-up for small τ_cut: edge 1e-12, technical cut 1e-9. The NNLO
   τ_cut test passes from 5e-4 to 1e-5.
+
+**Correction: what the 1+1 validation was meant to be (AK, 5 Oct evening).** I
+ran pure τ₁ slicing for the (N)NLO 1+1 (`runs/lab11`). AK wanted the
+one-order-lower analogue of the N3LO plan: P2B on our own τ₂-sliced NLO 2+1.
+The τ₁ results stand as a separate check, but they are not the requested test.
+
+**NNLO 1+1 by P2B + τ₂ slicing (requested test).**
+- NNLO 1+1 (lab-frame jets, `lab11` bins) = inclusive NNLO structure function ×
+  O(Born) (disorder in inclusive mode, `-nnlocoef`, same analysis) + Σ_events w
+  [O(event) − O(1+1 Born at the event's x, Q², y)] over our NLO 2+1 = `sliced21
+  b1` (below τ₂ cut) + `nlo31 lo` (above), both in the new mode 3 (P2B, lab
+  frame from a tetrad of Breit-frame vectors; projected Born q + xP).
+  Reference: `disorder -p2b -nnlocoef` (DISENT's NLO 2+1 in place of ours).
+- First check without slicing, NLO 1+1 = disorder inclusive `-nlocoef` +
+  `sliced21 b0` mode 3 (6 seeds) against `disorder -p2b -nlocoef`: total exact;
+  13 of 16 bins within 2σ; ≥ 1 jet +2.6σ, y −1…−0.5 +2.4σ, y 1.5…2.5 −3.4σ
+  (0.4%, P2B part only). Being checked: more b0 seeds and disorder with DISENT
+  cutoff 1e-10 (`runs/lab11c`).
+- Production: `runs/p2b2` (48 b1 seeds × 3M×6 with soft table; 48 lo seeds ×
+  20M×6 with psmc edge 1e-12; 16 disorder inclusive seeds).
+- Aside (AK, after talking to K. Melnikov): concern about the efficiency of the
+  one-loop 2→4+H (our NLO 3+1, vi). Per point (thserv, one core): vi ≈ 2 ms,
+  r ≈ 1.4 ms (flat; psmc ≈ 1.6× faster); NNLOJET RV > 6 ms, RR > 3 ms (first
+  warmup iterations). A proper CPU × error² comparison is part of the
+  efficiency study.
