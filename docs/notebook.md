@@ -2424,3 +2424,10 @@ cuts (p̄_T 22–60, m12 65–120) are small and flat within errors.
   - τ_cut 1e-5: gains up to 80×, but 4 of 15 bins at 2.1–2.9σ against the
     independent result: test with equal-weight iterations (`VEGAS_EQUAL=3`,
     `runs/corrve`).
+- **Correction (1e-5 tension):** the "4 of 15 bins at 2.1–2.9σ" came from
+  comparing with the thserv subset of the independent runs only (52 of 288 lo
+  seeds, used for the timing). Against all independent seeds the balanced
+  correlated result has χ² = 12.9/15 (1e-4) and 17.0/15 (1e-5), largest pull
+  2.0σ: no sign of bias. Equal-weight iterations (`VEGAS_EQUAL=3`, `runs/corrve`):
+  also unbiased (χ² 17.2, 20.9/15) but the poorly adapted early iterations
+  inflate some errors enormously (y −1…0: ±60 instead of ±2); keep 1/s².
