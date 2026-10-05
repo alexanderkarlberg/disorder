@@ -2399,3 +2399,13 @@ cuts (p̄_T 22–60, m12 65–120) are small and flat within errors.
 - What decides it: NNLOJET's NNLO for this set-up (cluster). Meanwhile this
   points to a recoil-aware projection (or NLP corrections) for jet observables
   with cuts. To discuss with AK.
+- **Balanced VEGAS target (`C1_VBAL=1`, with stratified emissions):** VEGAS
+  adapts to √(Σ_b f_b²) of the point's combined (b1 + lo) contribution over all
+  jet bins at τ_cut = 1e-4. 12 seeds on thA371a: CPU × error² 10–40× better
+  than the independent sampling in most bins at 1e-4 (25–65× at 1e-5); p_T
+  30–100, forward y, ≥ 2 jets 1–5×. After the CPU bias still ~5–30×. Pulls
+  against the independent b1 + lo mostly fine, but +3.1 (p_T 20–30 at 1e-4) and
+  −2.3/−2.6 (y 1–1.5): possible bias from VEGAS's inverse-variance combination
+  of iterations with an adapted target, to be checked. Running: 48 seeds on
+  thserv09/15 (`runs/corrv`) for statistics and a timing on the same CPU as the
+  disorder reference.
