@@ -2372,3 +2372,22 @@ The τ₁ results stand as a separate check, but they are not the requested test
   - unadapted c1, M = 8: about break-even (0.1–2 at 1e-4; up to 7 at 1e-5 in
     ≥ 1 jet). Not the hoped one to two orders of magnitude.
   - stratified (M = −1): running.
+
+**ZEUS-like dijets at NNLO, our side (5–6 Oct night; preliminary, 405/428 jobs).**
+`runs/znnlo` (r 283, vi 59, kp 16, b2 48 seeds; psmc edge 1e-12, technical
+cut 1e-9). NNLO coefficient, total [pb]: 11.0 ± 3.1, 23.1 ± 4.9, 32.2 ± 6.4,
+48.7 ± 10.1, 67.6 ± 15.1, 84.7 ± 27.8, 86.1 ± 43.8 at τ_cut 2e-3, 1e-3, 5e-4,
+2e-4, 1e-4, 3e-5, 1e-5. **No plateau.** The rise sits in the bins next to the
+cuts (p̄_T 8–15: 5.6 → 72.9; m12 20–30: 3.6 → 54.4; low Q²); bins away from the
+cuts (p̄_T 22–60, m12 65–120) are small and flat within errors.
+- Same pattern as the NLO fiducial power corrections (√τ), but much larger; at
+  NNLO the recoil-free projection's fiducial power corrections can carry up to
+  ln³ τ, so they need not be small at 1e-5.
+- The apparent limit (≈ 90 pb, close to the LO) would be an implausibly large
+  NNLO correction for HERA dijets (NNLOJET: a few % with μ² = (Q² + p_T²)/2).
+  So neither the plateau nor the number is trusted. Possible causes: (a) huge
+  fiducial power corrections, (b) a problem in mode 2 at NNLO (vi, kp, r in mode
+  2 have not been validated against anything; mode 1 has, at the fixed point).
+- What decides it: NNLOJET's NNLO for this set-up (cluster). Meanwhile this
+  points to a recoil-aware projection (or NLP corrections) for jet observables
+  with cuts. To discuss with AK.
