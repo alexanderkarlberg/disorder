@@ -2371,7 +2371,15 @@ The τ₁ results stand as a separate check, but they are not the requested test
     points starve lo (optimal independent split ~7 lo per b1).
   - unadapted c1, M = 8: about break-even (0.1–2 at 1e-4; up to 7 at 1e-5 in
     ≥ 1 jet). Not the hoped one to two orders of magnitude.
-  - stratified (M = −1): running.
+  - stratified (M = −1, one emission per channel; correct: pulls ≤ 1.3 except
+    one 2.5 among 15): 0.1–5 at 1e-4 (most ≈ 1), 0.5–6.6 at 1e-5 (most 1–3).
+    After the ~1.5–2× CPU bias: break-even at 1e-4, up to ~3× better at 1e-5.
+- **Conclusion:** correlated sampling works and helps where the logs are
+  largest (small τ_cut), but only by a factor of a few, not orders of
+  magnitude. The remaining variance is not the Born-level fluctuation of the
+  logs; plausibly the genuine spread of hard emissions and of the P2B difference
+  O(event) − O(Born). Next candidates: VEGAS adaptation on a balanced target
+  (sum of |bins|) instead of one bin; larger τ_cut with NLP corrections.
 
 **ZEUS-like dijets at NNLO, our side (5–6 Oct night; preliminary, 405/428 jobs).**
 `runs/znnlo` (r 283, vi 59, kp 16, b2 48 seeds; psmc edge 1e-12, technical
