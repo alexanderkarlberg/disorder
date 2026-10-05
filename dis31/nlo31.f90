@@ -1041,7 +1041,11 @@ contains
     integer, parameter :: nbin = 50
     real(dp) :: xi(0:nbin,ndim), d(nbin,ndim), r(ndim), x(ndim), jac, f, f2, s1, s2, wsum, sumw, sumwi
     real(dp) :: hit(nbin), dt, rc, xin(0:nbin), est(200), var(200), xo, xn
-    integer :: ia(ndim), it, ic, j, k, i
+    integer :: ia(ndim), it, ic, j, k, i, vequal
+    character(16) :: ev
+    vequal = 0
+    call get_environment_variable('VEGAS_EQUAL', ev)
+    if (len_trim(ev) > 0) read(ev, *) vequal
     do j = 1, ndim
        xi(:,j) = [(real(i, dp)/nbin, i = 0, nbin)]
     enddo
@@ -1069,8 +1073,16 @@ contains
        s1 = s1/ncall
        s2 = max((s2/ncall - s1**2)/(ncall - 1), 1d-300)
        est(it) = s1; var(it) = s2
-       ! histograms: this iteration's estimate, weighted like the integral
-       if (it >= min(2, itmx)) then
+       ! histograms: this iteration's estimate, weighted like the integral;
+       ! with VEGAS_EQUAL = k (environment) the cells of iterations k..itmx get
+       ! equal weights instead (an adapted target's 1/s2 can correlate with the
+       ! cells; 6 Oct)
+       if (vequal > 0) then
+          if (it >= vequal) then
+             hist = hist + hacc; hist2 = hist2 + 1
+             hc = hc + hcacc; hc2 = hc2 + 1
+          endif
+       elseif (it >= min(2, itmx)) then
           hist = hist + hacc/s2; hist2 = hist2 + 1/s2
           hc = hc + hcacc/s2; hc2 = hc2 + 1/s2
        endif
