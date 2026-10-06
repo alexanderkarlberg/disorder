@@ -2528,3 +2528,30 @@ DIS. Next: NLO test in the ZEUS set-up.
   fallback does not trigger there), so the NLO result (`runs/zp2b`) and the
   vi and kp runs stand.
 - r rerun with the fixed binary: `runs/znnlop2b_r` (300 seeds, thservs).
+
+**P2B r at full statistics: second fix (6 Oct, 10:20–11:20).**
+- The 08:30 fix was incomplete. In `runs/znnlop2b_r` (300 × 1M × 6), about
+  60% of the jobs still reached 1e10 or more in some iteration (a few up to
+  1e96); the remaining jobs were killed by PID.
+- Debug runs at 1M points: the same class of numerically garbage mapped
+  dipole Borns (partons of ±5e6 GeV that cancel, dipoles up to 1e29). They
+  also occur with τ₂(real) up to ≈ 2e-8, so the real-τ cut alone does not
+  catch them. The 200k-point tests at 08:30 were too small to see them.
+- Fix: with P2B, an event is dropped (real and all its dipoles) if any mapped
+  dipole Born has no τ₂ partition (the tau2cm guard) or a negative-energy
+  parton; the drops are counted.
+- Test, 8 seeds × 1M × 3 (including the worst seeds): stable. Dropped
+  13–35 of ≈ 1.45M real events per job (≈ 1e-5).
+- r per τ_cut against plain (299 seeds), P2B / plain:
+  - 2e-2: 43 ± 5 / 20 ± 2
+  - 1e-2: 11 ± 12 / −25
+  - 1e-3: −666 ± 15 / −664
+  - 1e-4: −2995 ± 35 / −2953
+  - 1e-5: −8560 ± 44 / −8494
+  So the P2B correction in r is small, visible only at large τ_cut.
+- **Correction:** the "+160 at 1e-3, +210 at 5e-4, +140 at 1e-4" of the
+  08:30 entry came from 6 short runs (200k × 2) and are not confirmed: at
+  full statistics r agrees with plain there within ≈ 20 pb.
+- Production r: `runs/znnlop2b_r2` (300 seeds). `runs/znnlop2b_r` is
+  invalid (kept only for the record). The vi seed lost on thserv19 was
+  rerun as `znnlop2b_r/s301`.

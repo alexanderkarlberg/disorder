@@ -101,6 +101,10 @@ module nlo31_mod
   ! fiducial power corrections of the cuts. t2code: the partition that
   ! minimised T_2 in the last tau2cm call (-1: none)
   logical :: p2bslice = .false., p2bdebug = .false., dbgprint = .false.
+  ! P2B: the last tau2cm call found no partition (degenerate configuration);
+  ! dropev: drop the current real event with all its dipoles; counters
+  logical :: degen = .false., dropev = .false.
+  integer(8) :: nrealev = 0, ndropev = 0
   real(dp) :: t2last = -1
   integer :: t2code = -1
   real(dp), parameter :: l11pt(0:7) = [5.0_dp, 8.0_dp, 11.0_dp, 15.0_dp, 20.0_dp, 30.0_dp, 50.0_dp, 100.0_dp]
@@ -510,6 +514,11 @@ contains
     call dip41_list(Pk, fl, nd, P3, fl3, val)
     do id = 1, nd
        call accept(P3(:,1,id), P3(:,2:4,id), 3, sqrt(-mdot(P3(:,5,id), P3(:,5,id))), F3)
+       ! P2B: a numerically degenerate mapped Born (no tau_2 partition, or a
+       ! negative-energy parton; e.g. partons of +-5e6 GeV that cancel, next
+       ! to a real with tau_2 ~ 1e-9..1e-8) drops the whole event, as plain
+       ! slicing effectively does (there both sides fail every cut)
+       if (p2bslice .and. mode == 2 .and. (degen .or. any(P3(4,1:4,id) < 0))) dropev = .true.
        sub = sub - val(id)*F3
        if (dbgprint .and. F3(iv) /= 0) write(0,'(a,i3,a,es12.4,a,es12.4,a,f5.1,a,3es11.3)') ' DBG dip', id, ' val', val(id), &
             & ' t2', t2last, ' F(iv)', F3(iv), ' E', P3(4,2:4,id)
@@ -557,6 +566,7 @@ contains
     ! dipoles T = 0, but with P2B they enter with O - O~ /= 0. The dropped
     ! region contributes O - O~ over tau_2 < techcut: power suppressed.
     if (p2bslice .and. mode == 2 .and. t2last < techcut) return
+    dropev = .false.
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**3
@@ -591,6 +601,12 @@ contains
           sg = sg + fpdf(0)*(eq1**2*c5(:,1) + eq2**2*c5(:,2) + eq1*eq2*c5(:,3))
        enddo
     enddo
+    if (p2bslice .and. mode == 2) then
+       nrealev = nrealev + 1
+       if (dropev) then
+          ndropev = ndropev + 1; res = 0; return
+       endif
+    endif
     if (mode >= 1) then
        ! points where a matrix element is not finite (extreme configurations
        ! of the logmap sampling) are dropped, as VEGAS does for the integral
@@ -599,7 +615,7 @@ contains
        endif
        hcacc = hcacc + sg*w*wgt
        res = vtarget(sg)*w
-       if (p2bdebug .and. abs(res) > 1e7_dp) then
+       if (p2bdebug .and. abs(res) > 1e9_dp) then
           write(0,'(a,es12.4,a,es12.4,a,es12.4)') ' DBG BIG res', res, ' smin/W2', smin/W2, ' w', w
           dbgprint = .true.
           call real_evalv(Pk, [1, 1, 0, 0, 0], F4, u1)
@@ -787,7 +803,7 @@ contains
     F = 0
     call zeus_bins(pin, p, n, inb)
     if (p2bslice) then
-       t2 = tau2cm(pin, p, n)/Q; t2last = t2
+       t2 = tau2cm(pin, p, n)/Q; t2last = t2; degen = t2code < 0
        inp = .false.
        if (t2 <= tcs(1)) then
           call project21(pin, p, n, pb, okp)
@@ -1407,6 +1423,8 @@ program nlo31
   write(*,'(a,a,a,i10,a,i4,a,i6,a,es9.2,a,i2,a,f9.6,a,f10.2)') ' nlo31 part ', trim(part), ' ncall', ncall, &
        & ' itmx', itmx, ' seed', seed, ' techcut', techcut, ' mode', mode, ' x', xfix, ' Q2', Q2fix
   call vegas(ndim, ncall, itmx, avg, err, chi2, integrand)
+  if (p2bslice .and. trim(part) == 'r') write(*,'(a,i14,a,i14)') ' P2B r: events dropped (degenerate dipole)', &
+       & ndropev, ' of', nrealev
   write(*,'(a,a,a,es16.8,a,es12.4,a,f8.3)') ' RESULT ', trim(part), ' sigma(>=3 jets) [pb] = ', avg, ' +- ', err, &
        & '   chi2/it', chi2
   if (mode == 2 .and. zfix) then
