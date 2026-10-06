@@ -2467,3 +2467,37 @@ Campbell–Neumann–Vita 2408.05265, P2B-improved slicing in MCFM; Alioli et al
 drift is P2B-improved slicing: below the cut add ∫ dσ_{3+1} (O − Õ) with a
 projection to the 2+1 Born. New for us: the projection for jet final states in
 DIS. Next: NLO test in the ZEUS set-up.
+
+**P2B-improved τ₂ slicing at NLO, ZEUS-like dijets (6 Oct morning).**
+- What: CNV eq. 2.14 in `nlo31` mode 2 (env `P2BSLICE=1`): below τ_cut the
+  3+1 events contribute O(event) − O(projected 2+1 Born); b1 unchanged.
+- Projection (`project21`), new:
+  - from the τ₂-minimising partition (`tau2cm` now records it in `t2code`):
+    K = J₁ + J₂, K̃ = q + c·p_in with K̃² = K² (x, Q², y unchanged);
+  - the jets go through the CS Lorentz map K → K̃ and are made massless back
+    to back in the K̃ frame along ΛJ₁;
+  - q has no transverse component in the Breit frame, so beam recoil changes
+    K² only at O(k_T²).
+- The code is generic in the number of partons, so vi, kp and r (each real
+  and dipole configuration with its own partition) use the same treatment.
+- Regression: without `P2BSLICE` the output (lo and r) is bit-identical to
+  the 5 Oct binaries.
+- Runs: `runs/zp2b`, 32 lo seeds (3M × 6, desktops), combined with the 32 b1
+  seeds of `runs/znlo2`.
+- Result: the NLO coefficient against NNLOJET (10.49 ± 0.07 pb), as % of LO:
+  - total, plain → P2B: +2.77 → +0.58 (2e-3), +1.96 → +0.35 (1e-3),
+    +1.40 → +0.20 (5e-4), +0.91 → −0.01 (2e-4), +0.28 → +0.10 (1e-5);
+  - every bin agrees from τ_cut ≤ 5e-4 (plain needs about 3e-5).
+- Fits with the full seed covariance (τ_cut ≤ 2e-3, 7 points):
+  - plain is pure √τ (χ² 0.6/6; τ ln τ χ² 30): the 5 Oct "fiducial" reading
+    is confirmed;
+  - with P2B the √τ coefficient is 5.5× smaller (64 → 12 pb) and τ ln τ fits
+    equally well (χ² 6.6/6); the remainder is largest at low p̄_T and m₁₂.
+- **Correction:** I first reported (to AK, same morning) that P2B removed only
+  ≈ 40% and left a √τ residual. That combination had averaged the plain and
+  the P2B lo seeds ("lo 64 seeds" in the combine output). With the P2B seeds
+  only, the numbers are as above.
+- Plot `plot_tcut.py zeusp2b`; fit script `runs/zp2b/fit_pc.py`; page v17,
+  section 6a.
+- NNLO with P2B running: `runs/znnlop2b` (r 300, vi 64, kp 16 seeds,
+  statistics of `runs/znnlo`; b2 reused).

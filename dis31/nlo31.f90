@@ -95,6 +95,13 @@ module nlo31_mod
   ! division by the window, dsigma/dx dQ2 = (y/x) sigma/(dQ2 dy)
   logical :: zfix = .false.
   real(dp), parameter :: zfw = 1e-3_dp
+  ! mode 2, P2B-improved slicing (env P2BSLICE = 1, 6 Oct; Campbell, Neumann,
+  ! Vita 2408.05265 eq. 2.14): below the cut the event contributes O(event) -
+  ! O(projected 2+1 Born) (project21) instead of nothing, which removes the
+  ! fiducial power corrections of the cuts. t2code: the partition that
+  ! minimised T_2 in the last tau2cm call (-1: none)
+  logical :: p2bslice = .false.
+  integer :: t2code = -1
   real(dp), parameter :: l11pt(0:7) = [5.0_dp, 8.0_dp, 11.0_dp, 15.0_dp, 20.0_dp, 30.0_dp, 50.0_dp, 100.0_dp]
   real(dp), parameter :: l11y(0:6) = [-1.0_dp, -0.5_dp, 0.0_dp, 0.5_dp, 1.0_dp, 1.5_dp, 2.5_dp]
   integer :: iv = 1                ! the cell VEGAS integrates (mode 1: smallest tau_cut, all tau_zQ)
@@ -751,11 +758,30 @@ contains
     integer, intent(in) :: n
     real(dp), intent(in) :: pin(4), p(4,n), Q
     real(dp), intent(out) :: F(nv)
-    real(dp) :: t2
-    logical :: inb(nobmax)
+    real(dp) :: t2, pb(4,2)
+    logical :: inb(nobmax), inp(nobmax), okp
     integer :: k, b
     F = 0
     call zeus_bins(pin, p, n, inb)
+    if (p2bslice) then
+       t2 = tau2cm(pin, p, n)/Q
+       inp = .false.
+       if (t2 <= tcs(1)) then
+          call project21(pin, p, n, pb, okp)
+          if (okp) then
+             call zeus_bins(pin, pb, 2, inp)
+          else
+             inp = inb      ! no valid partition (degenerate, T = 0): O - O~ = 0
+          endif
+       endif
+       do b = 1, nob
+          do k = 1, ntc
+             F(k + ntc*(b - 1)) = merge(1.0_dp, 0.0_dp, inb(b))
+             if (t2 <= tcs(k) .and. inp(b)) F(k + ntc*(b - 1)) = F(k + ntc*(b - 1)) - 1
+          enddo
+       enddo
+       return
+    endif
     if (.not. inb(1)) return
     t2 = tau2cm(pin, p, n)/Q
     do b = 1, nob
@@ -765,6 +791,43 @@ contains
        enddo
     enddo
   end subroutine accept_zeus
+
+  ! P2B projection of n partons (Breit frame, incoming parton pin) onto a
+  ! massless 2+1 Born at the same q (x, Q^2, y unchanged), from the partition
+  ! t2code of the last tau2cm call: jets J1, J2, K = J1 + J2;
+  ! K~ = q + c pin with K~^2 = K^2; the jets transformed by the Lorentz map
+  ! K -> K~ (Catani-Seymour's initial-state one) and made massless back to
+  ! back in the K~ rest frame along Lambda J1. q has no transverse component,
+  ! so beam recoil changes K^2 only at O(k_T^2) and jet masses at O(m^2):
+  ! the projection differs from the factorisation Born by O(tau).
+  subroutine project21(pin, p, n, pb, okp)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: pin(4), p(4,n)
+    real(dp), intent(out) :: pb(4,2)
+    logical, intent(out) :: okp
+    real(dp) :: PJ(4,2), K(4), Kt(4), q(4), S(4), v(4), K2, c, w
+    integer :: a, m, i
+    okp = .false.; pb = 0
+    if (t2code < 0) return
+    PJ = 0; m = t2code; q = -pin
+    do i = 1, n
+       a = mod(m, 3); m = m/3
+       if (a > 0) PJ(:,a) = PJ(:,a) + p(:,i)
+       q = q + p(:,i)
+    enddo
+    K = PJ(:,1) + PJ(:,2); K2 = mdot(K, K)
+    c = (K2 - mdot(q, q))/(2*mdot(q, pin))
+    if (K2 <= 0 .or. c <= 0) return
+    Kt = q + c*pin
+    S = K + Kt
+    v = PJ(:,1) - 2*mdot(S, PJ(:,1))/mdot(S, S)*S + 2*mdot(K, PJ(:,1))/K2*Kt
+    v = v - mdot(v, Kt)/K2*Kt
+    w = -mdot(v, v)
+    if (.not. (w > 0)) return
+    v = v*sqrt(K2/w)/2
+    pb(:,1) = Kt/2 + v; pb(:,2) = Kt/2 - v
+    okp = .true.
+  end subroutine project21
 
   ! mode 2: the observable bins of an event (all false if it fails the selection)
   subroutine zeus_bins(pin, p, n, inb)
@@ -899,13 +962,16 @@ contains
           best = tb; u = ujets(code)
        endif
     enddo
-    T = 0
+    T = 0; t2code = -1
     if (best == huge(1.0_dp) .or. mdot(u, u) <= 0) return
     u = u/sqrt(mdot(u, u))
     ! step 2: exact minimisation in that frame
     T = huge(1.0_dp)
     do code = 0, 3**n - 1
-       T = min(T, tpart(code, u, .false.))
+       tb = tpart(code, u, .false.)
+       if (tb < T) then
+          T = tb; t2code = code
+       endif
     enddo
     T = max(T, 0.0_dp)
     ! degenerate configurations (5 Oct): a mapped Born whose emitter pair is
@@ -914,7 +980,9 @@ contains
     ! energy u.P + |P|_u vanish, so every partition fails and T stayed at
     ! huge, which passed every tau_cut while the real was cut (unmatched
     ! dipoles ~1e25, then VEGAS blow-ups). Exactly, T is tiny there: 0.
-    if (T /= T .or. T >= huge(1.0_dp)/2) T = 0
+    if (T /= T .or. T >= huge(1.0_dp)/2) then
+       T = 0; t2code = -1
+    endif
   contains
     ! the partition of code (0 beam, 1, 2 jets; both jets non-empty, jet 1
     ! holds the first jet parton), or huge if not allowed
@@ -1258,6 +1326,11 @@ program nlo31
         q2lo = Q2fix*(1 - zfw/2); q2hi = Q2fix*(1 + zfw/2)
         ylo = Q2fix/(xfix*s)*(1 - zfw/2); yhi = Q2fix/(xfix*s)*(1 + zfw/2)
         write(*,'(a,4es14.6)') ' ZFIX window Q2, y:', q2lo, q2hi, ylo, yhi
+     endif
+     call get_environment_variable('P2BSLICE', arg)
+     if (trim(arg) == '1') then
+        p2bslice = .true.
+        write(*,'(a)') ' P2BSLICE: below tau_cut O(event) - O(projected 2+1 Born)'
      endif
   elseif (mode == 3) then
      ! VEGAS target: >= 1 jet row (the total row vanishes identically in P2B)
