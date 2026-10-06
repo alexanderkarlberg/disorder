@@ -1,7 +1,7 @@
 # NNLO DIS 2+1 by τ₂ slicing: cluster production — instructions for Claude
 
-**DRAFT (written 6 Oct 2026, night, on thA371a) — to be reviewed by AK before
-use.** For the Claude session that AK starts on the cluster (Slurm, partition
+**Written 6 Oct 2026 on thA371a (draft of the night, updated in the evening
+with projected slicing and the new technical cut).** For the Claude session that AK starts on the cluster (Slurm, partition
 `alma`, 24 h wall time, at most 10k running and 30k queued jobs). Read this
 file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
@@ -10,8 +10,9 @@ https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 ## 0. First: ask AK (one message, numbered)
 
 1. Which disorder checkout: the branch `2026-10-nnlo21` was pushed on 5 Oct
-   (afternoon); later commits are local on thA371a. Push them first (only with
-   AK's OK).
+   (afternoon); everything below needs the commits of 6 Oct (local on
+   thA371a, up to at least 161ddfc: projected slicing, the r fixes, the
+   technical cut `TECHMIN`). They must be pushed first (only with AK's OK).
 2. Work/scratch directory and quota; account, if any.
 3. Modules: gfortran (≥ 9), LHAPDF 6 with the Fortran interface and the set
    `NNPDF30_nlo_as_0118`; hoppet (≥ 2.1.0, for disorder); MCFM-10.3 sources
@@ -57,20 +58,39 @@ Targets (per bin, to be confirmed with AK):
 - NLO coefficient: ≤ 0.3% of itself in the total, ≤ 1% per bin.
 - NNLO coefficient: ≤ 2% of itself in the total, a few % per bin.
 
-### B. Our side in the same set-up (τ₂ slicing)
+### B. Our side in the same set-up (τ₂ slicing, projected)
 
-- LO: `sliced21 b0 … zeus` (fast).
-- NLO coefficient: `sliced21 b1` + `nlo31 lo`, mode 2, τ_cut scan built in
-  (10 columns, 2e-2 … 1e-5). On the MPP machines: converges to NNLOJET like
-  √τ_cut (fiducial power corrections next to the cuts), all bins within 1.5σ
-  at 1e-5.
-- NNLO coefficient: `sliced21 b2` + `nlo31 vi, kp, r`, mode 2, psmc edge
-  1e-12, technical cut 1e-9. **Open issue (6 Oct):** in this set-up the NNLO
-  coefficient shows no plateau down to 1e-5 (total 11 → 86 ± 44 pb from 2e-3
-  to 1e-5), concentrated in the bins next to the cuts. Either huge fiducial
-  power corrections of the recoil-free projection or a problem in mode 2 at
-  NNLO; NNLOJET's NNLO (A) decides. Do not over-invest in (B)-NNLO statistics
-  before that is understood; a moderate set is enough to compare.
+Terminology: **projected slicing** = P2B-improved τ₂ slicing of the 2+1
+process itself (Campbell–Neumann–Vita 2408.05265, eq. 2.14): below τ_cut
+the 3+1 events contribute O(event) − O(projected 2+1 Born) instead of
+nothing (env `P2BSLICE=1` in `nlo31`, projection `project21`). It is not the
+P2B step to N3LO 1+1 (that comes later, on top of this NNLO 2+1).
+
+Mandatory settings for every `nlo31` run of parts lo, vi, kp, r in mode 2:
+- `P2BSLICE=1`;
+- `TECHMIN="1d-10 1d-8"`: technical cut s_min < min(1e-10 W², 1e-8 Q²),
+  with W² the partonic invariant mass. The old cut, 1e-9 W², biased all
+  results at τ_cut ≤ 3e-5 (notebook 6 Oct, evening);
+- psmc edge 1e-12 (12th argument), technical-cut argument `1d-9`;
+- leave `P2BDROP` at its default (1).
+`sliced21` (b0, b1, b2) is unchanged.
+
+Status on the MPP machines (6 Oct):
+- **NLO:** projected slicing agrees with NNLOJET (10.49 ± 0.07 pb) in every
+  bin from τ_cut ≤ 5e-4. Plain slicing drifts like √τ (fiducial power
+  corrections) and needs about 3e-5.
+- **NNLO:** projected slicing is flat from τ_cut = 2e-4 to 1e-5. Total
+  40.1 ± 2.7, 41.7 ± 3.4, 42.4 ± 5.0, 43.2 ± 6.1 pb at 2e-4, 1e-4, 3e-5,
+  1e-5. These used the old cut plus a measured correction; production runs
+  must use `TECHMIN` directly. Plain slicing has errors 3–8× larger. There
+  is no NNLOJET NNLO reference yet: that is the main goal of A.
+- **Remaining checks for this production:**
+  - the convergence of the technical cut at 1e-5: a residual up to
+    ≈ 6 ± 4 pb is allowed;
+  - the psmc edge, which shifts vi by about +2 ± 0.9 pb at small τ_cut.
+
+Targets (to confirm with AK): NNLO coefficient to ≈ 1 pb in the total at
+τ_cut = 1e-4 and 3e-5 (both on the plateau), a few % per bin.
 
 ### C. Event shapes (AK, 5 Oct)
 
@@ -117,23 +137,47 @@ error per point; report and size the production with AK.
 
 ### Ours (B, D)
 
-Job arrays of independent seeds; equal-weight seed averages (inverse-variance
-weights of VEGAS errors are biased for R − D). Commands (MPP timings on a
-thserv in brackets):
+Job arrays of independent seeds. Combine seeds with equal weights;
+inverse-variance weights of VEGAS errors are biased for R − D. Every `nlo31`
+job of B needs the environment
+
+    export P2BSLICE=1 TECHMIN="1d-10 1d-8"
+
+Commands, with MPP timings on a thserv in brackets:
 - `sliced21 b0 7500000 6 SEED zeus -` (~12 min)
 - `sliced21 b1 3000000 6 SEED zeus <beamgrid prefix> <softtable>` (~25 min)
 - `sliced21 b2 5000000 6 SEED zeus <beamgrid prefix> <softtable>` (~30 min)
-- `nlo31 lo 20000000 6 SEED 1d-9 2 0 0 psmc 0 0 1d-12` (~20 min)
+- `nlo31 lo 3000000 6 SEED 1d-9 2 0 0 psmc 0 0 1d-12` (~25 min)
 - `nlo31 vi 1000000 6 SEED 1d-9 2 0 0 psmc 0 0 1d-12` (~50 min)
 - `nlo31 kp 2000000 6 SEED 1d-9 2 0 0 psmc 0 0 1d-12` (~5 min)
-- `nlo31 r 1000000 6 SEED 1d-9 2 0 0 psmc 0 0 1d-12` (~40 min)
+- `nlo31 r 1000000 6 SEED 1d-9 2 0 0 psmc 0 0 1d-12` (~45 min). This part
+  dominates the error: about 300 seeds give ±3.4 pb at τ_cut 1e-4.
+- Cross-checks, smaller sets (about 50 r seeds each):
+  - r with `TECHMIN="1d-11 1d-9"` (cut convergence; must agree at 3e-5 and
+    1e-4);
+  - vi and r with psmc edge 1e-13 (edge);
+  - plain slicing, i.e. the same commands without `P2BSLICE` but with
+    `TECHMIN` (comparison).
+- The fixed-point τ_cut test (mode 1, x = 0.01, Q² = 400, `nlo31 … 1d-9 1
+  0.01 400 psmc 0 0 1d-12`, `sliced21 … 0.01 400`) redone with
+  `TECHMIN="1d-10 1d-8"`. The 5 Oct points at 3e-5 and 1e-5 were biased low.
 - D: replace `zeus` by `p2b` (sliced21) and the 6th argument `2` by `3`
-  (nlo31); disorder: `disorder -p2b -nnlocoef -cutoff 1d-10 -pdf
+  (nlo31); there `P2BSLICE` does not apply (mode 3 is already the P2B to
+  1+1). Use `TECHMIN` as well. disorder: `disorder -p2b -nnlocoef -cutoff 1d-10 -pdf
   NNPDF30_nlo_as_0118 -Q2min 125 -Q2max 20000 -ymin 0.2 -ymax 0.6 -Ehad 920
   -ncall1 20000 -ncall2 40000000 -iseed SEED -prefix c2_` (~26 min), and the
   inclusive part without `-p2b` (seconds).
-- Optional for D: correlated sampling `sliced21 c1 … p2b …` with
-  `C1_NEMIT=-1` (stratified; up to ~3× more efficient at τ_cut = 1e-5).
+- Diagnostics, if something looks off. Validate each on a known answer first
+  (see notebook 6 Oct):
+  - `TECHDIFF=1 TECHREF=…`: the difference between two technical cuts,
+    same events;
+  - `P2BEXTRA=1` with `VTARGET=1 VEGAS_EQUAL=2`: the projected-slicing term
+    alone;
+  - `P2BDEBUG=1`.
+
+Before production: check that each new binary reproduces the MPP numbers,
+e.g. ZEUS LO 103.29 pb (b0), the NLO with projected slicing, and a short r
+run against the notebook.
 
 ## 4. Comparison
 
