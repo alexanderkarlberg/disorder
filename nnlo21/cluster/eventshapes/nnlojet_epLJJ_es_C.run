@@ -1,0 +1,47 @@
+! NNLOJET v1.0.2 runcard: DIS event shape C (NNLOJET observable dis_C) at
+! O(alpha_s^3) from the dijet process epLJJ with the shape selected above 0.1
+! (AK, 6 Oct: tau_zQ 0.05-0.5, C, y23 in the inclusive DIS cuts). PREPARED, NOT RUN.
+! CAUTION (cluster session, 6 Oct): NNLOJET's DIS shapes (EvalDIS.f90) use the
+! Breit-frame current hemisphere (p_z > 0) and are normalised to the sum of
+! |p| there, e.g. dis_thrust = 1 - sum|p_z| / sum|p| (H1's tau_z type), NOT our
+! tau_zQ = 1 - 2 sum p_z / Q; no current-hemisphere energy cut. The
+! definitions (and the minima of C and y23, chosen here provisionally) must be
+! matched to our mode-2 implementation (thA371a) before production.
+! Placeholders as the ZEUS card: CHANNEL, SEED, WARMUP, PRODUCTION.
+PROCESS epLJJ
+  collider = ep    Ebeam1 = 27.5  Ebeam2 = 920
+  jet = kt[1.0]  jet_exclusive = .false.  jet_recomb = V4
+  V_NC = GAMMA
+END_PROCESS
+
+RUN es_C
+  PDF = NNPDF30_nlo_as_0118[0]
+  iseed = SEED
+  warmup = WARMUP
+  production = PRODUCTION
+END_RUN
+
+PARAMETERS
+  MASS[Z] = 91.1876
+  MASS[W] = 80.398
+  SCHEME[ALPHA] = FIX
+  alpha = 0.0072992700729927
+END_PARAMETERS
+
+SELECTORS
+  select q2            min = 125  max = 20000
+  select y             min = 0.2  max = 0.6
+  select dis_C  min = 0.1
+END_SELECTORS
+
+HISTOGRAMS
+  dis_C [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0]
+END_HISTOGRAMS
+
+SCALES
+  mur = 1.0 * q   muf = 1.0 * q
+END_SCALES
+
+CHANNELS
+  CHANNEL
+END_CHANNELS
