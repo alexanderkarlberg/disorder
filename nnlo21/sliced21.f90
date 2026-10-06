@@ -180,7 +180,7 @@ contains
     integer :: b, k, c
     res = 0
     Q = sqrt(Q2)
-    if (mode == 2) then
+    if (mode == 2 .and. .not. zfix) then
        klep = Pk(:,5); Q2cur = Q2
        call zeus_bins(Pk(:,1), Pk(:,2:3), 2, inb)
        if (.not. inb(1)) return
@@ -196,6 +196,7 @@ contains
           if (Pk(3,k) < 0) tz = tz + 2*Pk(3,k)/Q
        enddo
        if (tz < zlo(nzb) .or. tz >= zhi(nzb)) return
+       if (mode == 2 .and. trim(bpart) /= 'b0') call lp21_setq(Q)
     endif
     P = 0
     P(:,1:3) = Pk(:,1:3); P(:,5) = Pk(:,4); P(:,6) = Pk(:,5); P(:,7) = Pk(:,6)
@@ -236,7 +237,7 @@ contains
        if (mode == 3) then
           if (dp2b(b) /= 0) hcacc(1 + ntc*(b - 1):ntc*b) = hcacc(1 + ntc*(b - 1):ntc*b) + val*wgt*dp2b(b)
           cycle
-       elseif (mode == 2) then
+       elseif (mode == 2 .and. .not. zfix) then
           if (.not. inb(b)) cycle
        elseif (tz < zlo(b) .or. tz >= zhi(b)) then
           cycle
@@ -324,6 +325,14 @@ program sliced21
   if (mode >= 2) then
      nob = merge(15, 16, mode == 2); nv = ntc*nob; iv = merge(ntc, 2*ntc, mode == 2)
      q2lo = gqlo**2; q2hi = gqhi**2; ylo = 0.2_dp; yhi = 0.6_dp
+     call get_environment_variable('ZFIX', arg)
+     if (mode == 2 .and. trim(arg) == '1') then
+        ! diagnostic window around (x, Q2) = (0.01, 400) with the mode-1 observable
+        xfix = 0.01_dp; Q2fix = 400
+        zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
+        q2lo = Q2fix*(1 - zfw/2); q2hi = Q2fix*(1 + zfw/2)
+        ylo = Q2fix/(xfix*s)*(1 - zfw/2); yhi = Q2fix/(xfix*s)*(1 + zfw/2)
+     endif
   else
      mode = 1; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
   endif
@@ -389,7 +398,13 @@ program sliced21
   endif
   write(*,'(a,a,a,es16.8,a,es12.4,a,f8.3)') ' RESULT ', trim(bpart), ' dsigma/dx dQ2 [pb/GeV2] (smallest tau_cut, all bins) = ', &
        & avg, ' +- ', err, '   chi2/it', chi2
-  if (mode == 3) then
+  if (mode == 2 .and. zfix) then
+     write(*,'(a)') ' CELLS (ZFIX: sigma in the window [pb]) below the cut: tau_zQ bin, then tau_cut columns'
+     write(*,'(a,10es12.3)') ' tau_cut     ', tcs
+     do i = 1, nzb
+        write(*,'(a,2f5.2,10es16.8)') ' CELL ', zlo(i), zhi(i), hc(1 + ntc*(i - 1):ntc*i)
+     enddo
+  elseif (mode == 3) then
      write(*,'(a)') ' LCELLS sigma per bin [pb] below the cut, O(event) - O(Born): lab11 bin, then tau_cut columns'
      write(*,'(a,10es16.8)') ' tau_cut     ', tcs
      do i = 1, 16

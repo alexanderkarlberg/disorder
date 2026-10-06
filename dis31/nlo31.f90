@@ -89,6 +89,12 @@ module nlo31_mod
   real(dp) :: klep(4), Q2cur
   ! mode 3: the outgoing lepton and the event's x (Born projection, lab frame)
   real(dp) :: kout(4), xcur
+  ! mode 2 diagnostic (ZFIX = 1, 6 Oct): Q^2 and y squeezed to a window of
+  ! relative width zfw around the mode-1 point (x, Q2 arguments) and the
+  ! mode-1 observable (tau_zQ bins): each part must reproduce mode 1 after
+  ! division by the window, dsigma/dx dQ2 = (y/x) sigma/(dQ2 dy)
+  logical :: zfix = .false.
+  real(dp), parameter :: zfw = 1e-3_dp
   real(dp), parameter :: l11pt(0:7) = [5.0_dp, 8.0_dp, 11.0_dp, 15.0_dp, 20.0_dp, 30.0_dp, 50.0_dp, 100.0_dp]
   real(dp), parameter :: l11y(0:6) = [-1.0_dp, -0.5_dp, 0.0_dp, 0.5_dp, 1.0_dp, 1.5_dp, 2.5_dp]
   integer :: iv = 1                ! the cell VEGAS integrates (mode 1: smallest tau_cut, all tau_zQ)
@@ -602,7 +608,7 @@ contains
        return
     endif
     F = 0
-    if (mode == 2) then
+    if (mode == 2 .and. .not. zfix) then
        call accept_zeus(pin, p, n, Q, F)
        return
     endif
@@ -1246,6 +1252,13 @@ program nlo31
   elseif (mode == 2) then
      nob = 15; nv = ntc*nob; iv = ntc
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
+     call get_environment_variable('ZFIX', arg)
+     if (trim(arg) == '1') then
+        zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
+        q2lo = Q2fix*(1 - zfw/2); q2hi = Q2fix*(1 + zfw/2)
+        ylo = Q2fix/(xfix*s)*(1 - zfw/2); yhi = Q2fix/(xfix*s)*(1 + zfw/2)
+        write(*,'(a,4es14.6)') ' ZFIX window Q2, y:', q2lo, q2hi, ylo, yhi
+     endif
   elseif (mode == 3) then
      ! VEGAS target: >= 1 jet row (the total row vanishes identically in P2B)
      nob = 16; nv = ntc*nob; iv = 2*ntc
@@ -1274,7 +1287,13 @@ program nlo31
   call vegas(ndim, ncall, itmx, avg, err, chi2, integrand)
   write(*,'(a,a,a,es16.8,a,es12.4,a,f8.3)') ' RESULT ', trim(part), ' sigma(>=3 jets) [pb] = ', avg, ' +- ', err, &
        & '   chi2/it', chi2
-  if (mode == 3) then
+  if (mode == 2 .and. zfix) then
+     write(*,'(a)') ' CELLS (ZFIX: sigma in the window [pb]) above the cut: tau_zQ bin, then tau_cut columns'
+     write(*,'(a,10es12.3)') ' tau_cut     ', tcs
+     do i = 1, nzb
+        write(*,'(a,2f5.2,10es16.8)') ' CELL ', zlo(i), zhi(i), hc(1 + ntc*(i - 1):ntc*i)
+     enddo
+  elseif (mode == 3) then
      write(*,'(a)') ' LCELLS sigma per bin [pb] above the cut, O(event) - O(Born): lab11 bin, then tau_cut columns'
      write(*,'(a,10es12.3)') ' tau_cut     ', tcs
      do i = 1, 16

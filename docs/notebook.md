@@ -2437,3 +2437,14 @@ cuts (p̄_T 22–60, m12 65–120) are small and flat within errors.
   dimensions, balanced target over the τ_zQ bins. ~2 ms per point (vi and r).
   Test: 48 seeds × 1.8M on thserv09/15 (`runs/corr2`) against the independent
   τ_cut runs (tcut5/6/8; compare at τ_cut ≥ 3e-5, the old r used edge 1e-10).
+- **Correlated NNLO 2+1 (`c2`): does not work as implemented.** 48 seeds ×
+  1.8M (thservs): CPU × error² ~10× *worse* than the independent parts, and a
+  systematic excess: total 25.0 ± 6.9, 41 ± 10, 53 ± 12 at τ_cut 1e-3, 2e-4,
+  1e-4 against the independent 10.1 ± 0.7, 8.1 ± 1.1, 8.0 ± 1.4 (pulls +2.2 …
+  +3.8; per bin up to +4.4). Heavy positive tails (largest seeds 261, 375) but
+  the median is shifted too (17 vs 10 at 1e-3, 29 vs 8 at 1e-4): a bias, not
+  only tails. Candidates: VEGAS adaptation/iteration weighting on a heavy-tailed
+  16-dimensional integrand with the balanced target, or a bug in how c2
+  combines the parts. Next: c2 with one part at a time against the independent
+  part, and unadapted. Not to be used until understood. (The NLO-level `c1`
+  is unaffected: χ² 12.9/15 against the independent result.)
