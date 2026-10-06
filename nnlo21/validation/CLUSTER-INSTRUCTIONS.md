@@ -11,7 +11,7 @@ https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
 1. Which disorder checkout: the branch `2026-10-nnlo21` was pushed on 5 Oct
    (afternoon); everything below needs the commits of 6 Oct (local on
-   thA371a, up to at least 161ddfc: projected slicing, the r fixes, the
+   thA371a, up to at least 347c248: projected slicing, the r fixes, the
    technical cut `TECHMIN`). They must be pushed first (only with AK's OK).
 2. Work/scratch directory and quota; account, if any.
 3. Modules: gfortran (≥ 9), LHAPDF 6 with the Fortran interface and the set
