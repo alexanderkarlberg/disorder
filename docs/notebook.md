@@ -2448,3 +2448,14 @@ cuts (p̄_T 22–60, m12 65–120) are small and flat within errors.
   combines the parts. Next: c2 with one part at a time against the independent
   part, and unadapted. Not to be used until understood. (The NLO-level `c1`
   is unaffected: χ² 12.9/15 against the independent result.)
+- **Mode-2 diagnostic for the ZEUS NNLO (`ZFIX=1`, `runs/zfix`):** Q² and y
+  squeezed to a window of relative width 1e-3 around x = 0.01, Q² = 400 with
+  the mode-1 observable; σ_window / (x w² Q²) must equal mode 1. b0: 61.1
+  (= mode 1). Parts against mode 1 (tcut runs), pulls at τ_cut 2e-2, 5e-3,
+  1e-3, 1e-4: b2 +1.2, +0.9, −0.4, −1.0; kp −1.1, −0.9, +0.6, +1.0; r +0.6,
+  −0.1, +1.2, 0.0; vi −1.0, −2.3, −1.9, −2.4 (vi ~1–2% low, 3 seeds; even if
+  real it moves the NNLO total by ~2 pb). So mode 2's own code paths (Q²/y
+  integration, per-event psmc, beam grid in Q) reproduce mode 1: the ZEUS
+  no-plateau is most likely the fiducial power corrections (a), not a mode-2
+  bug (b). NNLOJET's NNLO remains the decisive check; a recoil-aware projection
+  is the likely remedy.
