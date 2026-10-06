@@ -100,7 +100,8 @@ module nlo31_mod
   ! O(projected 2+1 Born) (project21) instead of nothing, which removes the
   ! fiducial power corrections of the cuts. t2code: the partition that
   ! minimised T_2 in the last tau2cm call (-1: none)
-  logical :: p2bslice = .false.
+  logical :: p2bslice = .false., p2bdebug = .false., dbgprint = .false.
+  real(dp) :: t2last = -1
   integer :: t2code = -1
   real(dp), parameter :: l11pt(0:7) = [5.0_dp, 8.0_dp, 11.0_dp, 15.0_dp, 20.0_dp, 30.0_dp, 50.0_dp, 100.0_dp]
   real(dp), parameter :: l11y(0:6) = [-1.0_dp, -0.5_dp, 0.0_dp, 0.5_dp, 1.0_dp, 1.5_dp, 2.5_dp]
@@ -501,11 +502,19 @@ contains
        call me41_tree(Pk, fl, m4)
        sub = m4*F4
     endif
+    if (dbgprint) then
+       call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(-mdot(Pk(:,6), Pk(:,6))), F3)
+       write(0,'(a,es12.4,a,es12.4,a,f5.1,a,5es11.3)') ' DBG real m4', m4, ' t2', t2last, ' F(iv)', F4(iv), &
+            & ' E', Pk(4,2:5)
+    endif
     call dip41_list(Pk, fl, nd, P3, fl3, val)
     do id = 1, nd
        call accept(P3(:,1,id), P3(:,2:4,id), 3, sqrt(-mdot(P3(:,5,id), P3(:,5,id))), F3)
        sub = sub - val(id)*F3
+       if (dbgprint .and. F3(iv) /= 0) write(0,'(a,i3,a,es12.4,a,es12.4,a,f5.1,a,3es11.3)') ' DBG dip', id, ' val', val(id), &
+            & ' t2', t2last, ' F(iv)', F3(iv), ' E', P3(4,2:4,id)
     enddo
+    if (dbgprint) write(0,'(a,es12.4)') ' DBG sub(iv)', sub(iv)
   end subroutine real_evalv
 
   real(dp) function real_part(r, wgt) result(res)
@@ -541,6 +550,13 @@ contains
     if (smin < techcut*W2) return
     klep = Pk(:,7); kout = Pk(:,8); Q2cur = Q2; xcur = xB
     call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(Q2), F4)
+    ! P2B slicing (6 Oct): events whose real has tau_2 < techcut are dropped
+    ! with all their dipoles. There the real is double unresolved and some
+    ! mapped dipole Borns are numerically degenerate (momenta ~1e5 GeV that
+    ! cancel, dipoles ~1e28); plain slicing cuts the real and gives those
+    ! dipoles T = 0, but with P2B they enter with O - O~ /= 0. The dropped
+    ! region contributes O - O~ over tau_2 < techcut: power suppressed.
+    if (p2bslice .and. mode == 2 .and. t2last < techcut) return
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**3
@@ -583,6 +599,13 @@ contains
        endif
        hcacc = hcacc + sg*w*wgt
        res = vtarget(sg)*w
+       if (p2bdebug .and. abs(res) > 1e7_dp) then
+          write(0,'(a,es12.4,a,es12.4,a,es12.4)') ' DBG BIG res', res, ' smin/W2', smin/W2, ' w', w
+          dbgprint = .true.
+          call real_evalv(Pk, [1, 1, 0, 0, 0], F4, u1)
+          call real_evalv(Pk, [0, 1, -1, 0, 0], F4, u2)
+          dbgprint = .false.
+       endif
     else
        res = sg(1)*w
        if (res /= 0) call fill(Q2, res*wgt)
@@ -764,7 +787,7 @@ contains
     F = 0
     call zeus_bins(pin, p, n, inb)
     if (p2bslice) then
-       t2 = tau2cm(pin, p, n)/Q
+       t2 = tau2cm(pin, p, n)/Q; t2last = t2
        inp = .false.
        if (t2 <= tcs(1)) then
           call project21(pin, p, n, pb, okp)
@@ -772,6 +795,7 @@ contains
              call zeus_bins(pin, pb, 2, inp)
           else
              inp = inb      ! no valid partition (degenerate, T = 0): O - O~ = 0
+             if (p2bdebug) write(0,'(a,i2,i4,es12.4,l2)') ' P2BFAIL n t2code t2 inb1', n, t2code, t2, inb(1)
           endif
        endif
        do b = 1, nob
@@ -805,28 +829,52 @@ contains
     real(dp), intent(in) :: pin(4), p(4,n)
     real(dp), intent(out) :: pb(4,2)
     logical, intent(out) :: okp
-    real(dp) :: PJ(4,2), K(4), Kt(4), q(4), S(4), v(4), K2, c, w
-    integer :: a, m, i
+    integer :: i, i1, i2, code
+    ! the tau_2 partition; if it is missing or gives no valid projection
+    ! (mapped dipole Borns with an almost zero-energy parton, 6 Oct: there
+    ! T is set to 0 or the soft parton makes a jet degenerate), the two most
+    ! energetic partons as the jets and the rest in the beam, which is the
+    ! IR-consistent limit (a vanishing parton does not change the Born)
     okp = .false.; pb = 0
-    if (t2code < 0) return
-    PJ = 0; m = t2code; q = -pin
+    if (t2code >= 0) call proj_code(t2code)
+    if (okp) return
+    i1 = maxloc(p(4,1:n), 1)
+    i2 = 0
     do i = 1, n
-       a = mod(m, 3); m = m/3
-       if (a > 0) PJ(:,a) = PJ(:,a) + p(:,i)
-       q = q + p(:,i)
+       if (i == i1) cycle
+       if (i2 == 0) then
+          i2 = i
+       elseif (p(4,i) > p(4,i2)) then
+          i2 = i
+       endif
     enddo
-    K = PJ(:,1) + PJ(:,2); K2 = mdot(K, K)
-    c = (K2 - mdot(q, q))/(2*mdot(q, pin))
-    if (K2 <= 0 .or. c <= 0) return
-    Kt = q + c*pin
-    S = K + Kt
-    v = PJ(:,1) - 2*mdot(S, PJ(:,1))/mdot(S, S)*S + 2*mdot(K, PJ(:,1))/K2*Kt
-    v = v - mdot(v, Kt)/K2*Kt
-    w = -mdot(v, v)
-    if (.not. (w > 0)) return
-    v = v*sqrt(K2/w)/2
-    pb(:,1) = Kt/2 + v; pb(:,2) = Kt/2 - v
-    okp = .true.
+    code = 3**(min(i1, i2) - 1) + 2*3**(max(i1, i2) - 1)
+    call proj_code(code)
+    if (.not. okp .and. p2bdebug) write(0,'(a,i2,i4)') ' P2BFAIL2 n code', n, code
+  contains
+    subroutine proj_code(cd)
+      integer, intent(in) :: cd
+      real(dp) :: PJ(4,2), K(4), Kt(4), q(4), S(4), v(4), K2, c, w
+      integer :: a, m, j
+      PJ = 0; m = cd; q = -pin
+      do j = 1, n
+         a = mod(m, 3); m = m/3
+         if (a > 0) PJ(:,a) = PJ(:,a) + p(:,j)
+         q = q + p(:,j)
+      enddo
+      K = PJ(:,1) + PJ(:,2); K2 = mdot(K, K)
+      c = (K2 - mdot(q, q))/(2*mdot(q, pin))
+      if (K2 <= 0 .or. c <= 0) return
+      Kt = q + c*pin
+      S = K + Kt
+      v = PJ(:,1) - 2*mdot(S, PJ(:,1))/mdot(S, S)*S + 2*mdot(K, PJ(:,1))/K2*Kt
+      v = v - mdot(v, Kt)/K2*Kt
+      w = -mdot(v, v)
+      if (.not. (w > 0)) return
+      v = v*sqrt(K2/w)/2
+      pb(:,1) = Kt/2 + v; pb(:,2) = Kt/2 - v
+      okp = .true.
+    end subroutine proj_code
   end subroutine project21
 
   ! mode 2: the observable bins of an event (all false if it fails the selection)
@@ -1330,6 +1378,7 @@ program nlo31
      call get_environment_variable('P2BSLICE', arg)
      if (trim(arg) == '1') then
         p2bslice = .true.
+        call get_environment_variable('P2BDEBUG', arg); p2bdebug = trim(arg) == '1'
         write(*,'(a)') ' P2BSLICE: below tau_cut O(event) - O(projected 2+1 Born)'
      endif
   elseif (mode == 3) then

@@ -2501,3 +2501,30 @@ DIS. Next: NLO test in the ZEUS set-up.
   section 6a.
 - NNLO with P2B running: `runs/znnlop2b` (r 300, vi 64, kp 16 seeds,
   statistics of `runs/znnlo`; b2 reused).
+
+**P2B slicing at NNLO: r blew up, fixed (6 Oct, 08:00–08:30).**
+- First P2B NNLO run (`runs/znnlop2b`): vi and kp fine, but r reached
+  1e14…1e18 in 290 of 300 jobs. The desktop jobs died silently, most likely
+  from NaN in VEGAS after the overflow; the thserv jobs were killed by PID.
+- Diagnosis (debug env `P2BDEBUG=1`, 200k-point runs on thA371a):
+  1. `project21` failed for many mapped dipole Borns: either no partition
+     (degenerate, T set to 0) or K² ≤ 0, c ≤ 0, or a degenerate jet. Õ := O
+     there (weight 0) left the real's O − Õ unmatched.
+     Fix: fallback partition, with the two most energetic partons as jets
+     and the rest in the beam (the IR-consistent limit).
+  2. Still blowing up: dipoles of reals deep in double-unresolved regions
+     (τ₂(real) ≈ 1e-12) have numerically garbage mapped Borns (partons of
+     ±1e5 GeV that cancel, dipole values 1e17–1e28, against a real of 1e-4).
+     Plain slicing never saw them (real cut, those dipoles T = 0); with P2B
+     they enter with O − Õ ≠ 0.
+     Fix: with P2B, drop the whole event (real and its dipoles) if
+     τ₂(real) < techcut (1e-9). The dropped piece is O − Õ over a region of
+     size 1e-9, which is power suppressed.
+- After the fixes, 6 seeds × 200k: stable (−8000 ± 500). Against the plain r
+  (299 seeds): +160 at 1e-3, +210 at 5e-4, +140 at 1e-4 (P2B corrections of
+  plausible size).
+- Regression: without `P2BSLICE`, r is bit-identical to the 5 Oct binary.
+  With P2B, lo, vi and kp are bit-identical to the first P2B binary (the
+  fallback does not trigger there), so the NLO result (`runs/zp2b`) and the
+  vi and kp runs stand.
+- r rerun with the fixed binary: `runs/znnlop2b_r` (300 seeds, thservs).
