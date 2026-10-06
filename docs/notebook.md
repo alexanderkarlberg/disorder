@@ -2585,10 +2585,10 @@ DIS. Next: NLO test in the ZEUS set-up.
   lo P2B term (−7.6 vs −7.2 at 2e-2 … −0.26 vs −0.19 at 1e-5). The conclusion
   "the dropped events contribute ≈ 0" is therefore not established; it is
   re-tested.
-- **A second correction:** the NLO "P2B correction" numbers in the 07:00
-  entry's table (−3.6 at 2e-2 etc.) came from the mixed combination. The
-  true lo P2B term is twice that: −7.19 ± 0.10 at 2e-2, −1.67 at 1e-3. The
-  NLO P2B results quoted there (all-seed P2B combination) are unaffected.
+- Note: the lo P2B term (P2B minus plain lo) is −7.19 ± 0.10 pb at 2e-2,
+  −1.67 at 1e-3 and −0.19 at 1e-5. The −3.6 etc. that I looked at on the
+  morning of 6 Oct (exploratory output, not in this notebook) came from the
+  mixed combination. The NLO results in the 07:00 entry are unaffected.
 - Running:
   - P2B term of r (P2BEXTRA, 8 seeds);
   - psmc edge 1e-13 scan (`runs/zedge`: r 100, vi 16, kp 8);
