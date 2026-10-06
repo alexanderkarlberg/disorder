@@ -107,3 +107,19 @@ computed numerically and tabulated once, like "2+1 structure functions":
 Then any observable is ∫ σ_proj Õ + ∫ dσ_{N+1}(O − Õ). Proof of concept one
 order lower: NLO 2+1 = σ_proj^NLO grid + LO 3+1 (O − Õ), which needs no
 subtraction. Check against NNLOJET in the ZEUS set-up.
+
+Refinement (AK, 6 Oct, same day): not a table. Start from an ordinary
+subtraction and add/subtract R·Õ(proj Φ_R):
+σ(O) = ∫dΦ_B Õ [B + V + I + Δ(Φ_B)] + ∫dΦ_R R (O − Õ), with
+Δ(Φ_B) = ∫[R δ(Φ_B − proj Φ_R) − Σ_k D_k δ(Φ_B − Φ̃_k)].
+- R(O − Õ) needs no subtraction.
+- At NNLO, RR/RV (O − Õ) need only the NLO_{N+1} subtraction (nlo31).
+- The double-unresolved structure sits only in the Born-local,
+  observable-independent Δ^NNLO. Its counterterms need only be correct after
+  integrating the radiation at fixed Φ_B: azimuthally averaged, nonlocal, or
+  slicing at fixed Φ_B (hadronic power corrections only).
+- Born-first phase space through the inverse of the projection, so no
+  tabulation.
+- Crux: one global projection that factorises the N+2 phase space onto Φ_B in
+  all double-unresolved limits.
+- Testable at NLO first (AK). Deferred until the slicing is finished.
