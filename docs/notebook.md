@@ -2645,3 +2645,29 @@ DIS. Next: NLO test in the ZEUS set-up.
   - P: ZEUS P2B, 1e-8 Q² against 1e-9 W², 60 seeds; to add to the
     300-seed r;
   - C: ZEUS, 1e-9 Q² against 1e-8 Q²; convergence, must be ≈ 0.
+- **Plan B (cut c·Q²) failed its check.**
+  - V: −34.6 ± 3.1 at 1e-5 (expected ≈ +7.9).
+  - C (1e-9 Q² against 1e-8 Q²): +66 ± 18.
+  - For events with small partonic W² (= Q²(η/x − 1), ≲ 10 Q²) a Q² cut is
+    coarser than the production cut and removes large legitimate
+    contributions.
+  - My own setup error, caught before the results: V's comparison region
+    is not exactly the slice region, because the "W²" of the cut is the
+    partonic W², which varies per event. The right target was the sum of
+    the slices (7.9 ± 1.9), not 8.4.
+- Where the removed contributions sit (slice per Q² bin, at 1e-5):
+  - Q² 125–250: 17 ± 4 (first decade), 12 ± 4 (next), not converged;
+  - Q² ≥ 500: next decade ≈ 0, converged.
+  So low x, i.e. large W²/Q², needs a finer cut, and small W² must not get
+  a coarser one.
+- **Plan C:** cut s_min < min(cw W², cq Q²) = min(1e-10 W², 1e-8 Q²)
+  (`TECHMIN`, reference `TECHREF`, `TECHDIFF`).
+  - It is never coarser than 1e-10 W², and at most 2e-11 W² at the lowest x.
+  - Exact machinery check: TECHDIFF over [1e-10, 1e-9] W² is bit-identical
+    to the TECHSLICE run with the same seed. Default bit-identical.
+- Runs `runs/ztechm`, expectations fixed beforehand:
+  - V′: mode 1, ≈ 7.9 ± 1.9 (1e-5) and ≈ 4.0 ± 2.2 (3e-5);
+  - P′: ZEUS correction; in the Q² ≥ 500 bins ≈ the first slice;
+  - C′: min(1e-11 W², 1e-9 Q²) against the new cut, ≈ 0;
+  - D2: drop-rule bias, i.e. the plain weights of events with
+    τ_real < 1e-9 (my earlier measurement of it was flawed).

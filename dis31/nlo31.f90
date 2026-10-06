@@ -119,12 +119,14 @@ module nlo31_mod
   ! P2B r: tau_2(real) below which an event gets the plain weights (or is
   ! dropped); independent of the technical cut (env P2BTMIN)
   real(dp) :: p2btmin = 1d-9
-  ! technical cut relative to Q^2 (6 Oct, env TECHQ = c: s_min < c Q^2 instead
-  ! of techcut W^2; the mismatch window of real and dipoles at a tau_cut is
-  ! ~ s_min/Q^2). Diagnostic TECHDIFF = 1: only the difference between the
-  ! cut c Q^2 and the reference cut (TECHREFQ = c2: c2 Q^2, else techcut W^2),
-  ! weight theta(s_min >= c Q^2) - theta(s_min >= reference)
-  real(dp) :: techq = 0, techrefq = 0
+  ! technical cut s_min < min(cw W^2, cq Q^2) (6 Oct, env TECHMIN = "cw cq";
+  ! default cw = techcut, cq = huge). The removed contributions (real and a
+  ! dipole on opposite sides of a tau_cut) come from low x (large W^2/Q^2),
+  ! where techcut W^2 is too coarse; a pure Q^2 cut is too coarse for small
+  ! W^2. Diagnostic TECHDIFF = 1: only the difference to the reference cut
+  ! TECHREF = "dw dq" (default techcut, huge): weight theta(s_min >= cut)
+  ! - theta(s_min >= reference cut)
+  real(dp) :: tcw = -1, tcq = huge(1.0_dp), trw = -1, trq = huge(1.0_dp)
   logical :: techdiff = .false.
   real(dp) :: t2last = -1
   integer :: t2code = -1
@@ -579,12 +581,10 @@ contains
     enddo
     tdw = 1
     if (techdiff) then
-       tdw = merge(1, 0, smin >= techq*Q2) - merge(1, 0, smin >= merge(techrefq*Q2, techcut*W2, techrefq > 0))
+       tdw = merge(1, 0, smin >= min(tcw*W2, tcq*Q2)) - merge(1, 0, smin >= min(trw*W2, trq*Q2))
        if (tdw == 0) return
-    elseif (techq > 0) then
-       if (smin < techq*Q2) return
     else
-       if (smin < techcut*W2) return
+       if (smin < min(tcw*W2, tcq*Q2)) return
     endif
     if (techslice > 0 .and. smin >= techslice*W2) return
     klep = Pk(:,7); kout = Pk(:,8); Q2cur = Q2; xcur = xB
@@ -1453,13 +1453,14 @@ program nlo31
   endif
   ! diagnostics (6 Oct): VEGAS target cell from the environment (VTARGET = k,
   ! index into the cell vector; default unchanged)
-  call get_environment_variable('TECHQ', arg)
-  if (len_trim(arg) > 0) read(arg, *) techq
-  call get_environment_variable('TECHREFQ', arg)
-  if (len_trim(arg) > 0) read(arg, *) techrefq
+  tcw = techcut; trw = techcut
+  call get_environment_variable('TECHMIN', arg)
+  if (len_trim(arg) > 0) read(arg, *) tcw, tcq
+  call get_environment_variable('TECHREF', arg)
+  if (len_trim(arg) > 0) read(arg, *) trw, trq
   call get_environment_variable('TECHDIFF', arg); techdiff = trim(arg) == '1'
-  if (techq > 0) write(*,'(a,es10.2,a,l2,a,es10.2)') ' technical cut s_min/Q2 <', techq, '  TECHDIFF', techdiff, &
-       & '  reference (Q2 units, 0: techcut W2)', techrefq
+  if (tcw /= techcut .or. tcq < huge(1.0_dp) .or. techdiff) write(*,'(a,2es10.2,a,l2,a,2es10.2)') &
+       & ' technical cut min(cw W2, cq Q2), cw cq =', tcw, tcq, '  TECHDIFF', techdiff, '  reference', trw, trq
   call get_environment_variable('P2BTMIN', arg)
   if (len_trim(arg) > 0) read(arg, *) p2btmin
   call get_environment_variable('TECHSLICE', arg)
