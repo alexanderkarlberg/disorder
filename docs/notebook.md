@@ -2626,3 +2626,22 @@ DIS. Next: NLO test in the ZEUS set-up.
   - C: mode 1 [1e-10, 1e-9] against 8.4 ± 1.7;
   - D: everything below 1e-9 down to the sampling edge, to add to the
     production r.
+- **TECHMIS failed validation and was removed.**
+  - A gave ≈ 3e6 pb (target 30 ± 6), and ≈ 600 pb even at τ_cut 2e-2,
+    where the slice is 0; B and C were similar.
+  - The split F_R (R − ΣD) + Σ (F_R − F_i) D_i is exact, but in the
+    technical region both pieces are individually huge and opposite: several
+    dipoles are singular in the same invariant and map to different Borns.
+  - Jobs stopped by PID.
+- **Plan B (`TECHQ = c`): technical cut s_min < c·Q².** The mismatch
+  window scales with s_min/Q².
+  - Mode 1 converged once the cut reached 1e-10 W² = 1e-8 Q².
+  - Rounding sets in below ≈ 1e-11 W²; c = 1e-8 stays ≥ 2e-11 W² in ZEUS.
+  - Diagnostic `TECHDIFF = 1`: weight θ(s_min ≥ c Q²) − θ(s_min ≥ reference).
+    Default bit-identical.
+- Runs in `runs/ztechq`:
+  - V: mode 1, 9.9e-9 Q² (= 1e-10 W² there) against 1e-9 W²; must equal
+    the measured slice 8.4 ± 1.7;
+  - P: ZEUS P2B, 1e-8 Q² against 1e-9 W², 60 seeds; to add to the
+    300-seed r;
+  - C: ZEUS, 1e-9 Q² against 1e-8 Q²; convergence, must be ≈ 0.

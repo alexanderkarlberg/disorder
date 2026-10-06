@@ -119,16 +119,13 @@ module nlo31_mod
   ! P2B r: tau_2(real) below which an event gets the plain weights (or is
   ! dropped); independent of the technical cut (env P2BTMIN)
   real(dp) :: p2btmin = 1d-9
-  ! technical region (6 Oct): with TECHMIS = 1, real events with s_min <
-  ! techcut W^2 are not dropped; per cell they contribute only the mismatch
-  ! part sum_i (F_real - F_i) D_i of F_real R - sum_i F_i D_i =
-  ! F_real (R - sum_i D_i) + sum_i (F_real - F_i) D_i (the cancelling part
-  ! F_real (R - sum D) is dropped: integrable and rounding-prone; the
-  ! mismatch part, real and dipole on opposite sides of a tau_cut, is not
-  ! small when techcut W^2 is not << tau_cut Q^2). Below techfloor W^2 the
-  ! event is dropped
-  logical :: techmis = .false., techreg = .false.
-  real(dp) :: techfloor = 0
+  ! technical cut relative to Q^2 (6 Oct, env TECHQ = c: s_min < c Q^2 instead
+  ! of techcut W^2; the mismatch window of real and dipoles at a tau_cut is
+  ! ~ s_min/Q^2). Diagnostic TECHDIFF = 1: only the difference between the
+  ! cut c Q^2 and the reference cut (TECHREFQ = c2: c2 Q^2, else techcut W^2),
+  ! weight theta(s_min >= c Q^2) - theta(s_min >= reference)
+  real(dp) :: techq = 0, techrefq = 0
+  logical :: techdiff = .false.
   real(dp) :: t2last = -1
   integer :: t2code = -1
   real(dp), parameter :: l11pt(0:7) = [5.0_dp, 8.0_dp, 11.0_dp, 15.0_dp, 20.0_dp, 30.0_dp, 50.0_dp, 100.0_dp]
@@ -526,7 +523,7 @@ contains
     real(dp) :: m4, P3(4,7,dip41_max), val(dip41_max), F3(nv)
     integer :: fl3(4,dip41_max), nd, id
     sub = 0
-    if (any(F4 /= 0) .and. .not. techreg) then
+    if (any(F4 /= 0)) then
        call me41_tree(Pk, fl, m4)
        sub = m4*F4
     endif
@@ -543,11 +540,7 @@ contains
        ! to a real with tau_2 ~ 1e-9..1e-8) drops the whole event, as plain
        ! slicing effectively does (there both sides fail every cut)
        if (p2bslice .and. mode == 2 .and. (degen .or. any(P3(4,1:4,id) < 0))) dropev = .true.
-       if (techreg) then
-          sub = sub + val(id)*(F4 - F3)
-       else
-          sub = sub - val(id)*F3
-       endif
+       sub = sub - val(id)*F3
        if (dbgprint .and. F3(iv) /= 0) write(0,'(a,i3,a,es12.4,a,es12.4,a,f5.1,a,3es11.3)') ' DBG dip', id, ' val', val(id), &
             & ' t2', t2last, ' F(iv)', F3(iv), ' E', P3(4,2:4,id)
     enddo
@@ -559,7 +552,7 @@ contains
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,8), dphi, as, fpdf(-5:5), w, smin, W2
     real(dp) :: u1(nv), u2(nv), u4(nv), u6(nv), m3(nv,3), c3(nv,3), m5(nv,3), c5(nv,3), eq1, eq2, sg(nv), F4(nv)
-    integer :: i, j, f, Q, Q2i, ic
+    integer :: i, j, f, Q, Q2i, ic, tdw
     logical :: ok
     res = 0
     if (usepsmc .and. mode >= 2) then
@@ -584,9 +577,15 @@ contains
           smin = min(smin, 2*abs(mdot(Pk(:,i), Pk(:,j))))
        enddo
     enddo
-    techreg = smin < techcut*W2
-    if (techreg .and. .not. techmis) return
-    if (smin < techfloor*W2) return
+    tdw = 1
+    if (techdiff) then
+       tdw = merge(1, 0, smin >= techq*Q2) - merge(1, 0, smin >= merge(techrefq*Q2, techcut*W2, techrefq > 0))
+       if (tdw == 0) return
+    elseif (techq > 0) then
+       if (smin < techq*Q2) return
+    else
+       if (smin < techcut*W2) return
+    endif
     if (techslice > 0 .and. smin >= techslice*W2) return
     klep = Pk(:,7); kout = Pk(:,8); Q2cur = Q2; xcur = xB
     call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(Q2), F4)
@@ -601,7 +600,7 @@ contains
     dropev = p2bslice .and. mode == 2 .and. t2last < p2btmin
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
-    w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**3
+    w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**3*tdw
     call eval_sg()
     if (p2bslice .and. mode == 2) then
        nrealev = nrealev + 1
@@ -1454,11 +1453,13 @@ program nlo31
   endif
   ! diagnostics (6 Oct): VEGAS target cell from the environment (VTARGET = k,
   ! index into the cell vector; default unchanged)
-  call get_environment_variable('TECHMIS', arg); techmis = trim(arg) == '1'
-  call get_environment_variable('TECHFLOOR', arg)
-  if (len_trim(arg) > 0) read(arg, *) techfloor
-  if (techmis) write(*,'(a,es10.2,a,es10.2)') ' TECHMIS: mismatch part only for s_min/W2 <', techcut, &
-       & ', events dropped below', techfloor
+  call get_environment_variable('TECHQ', arg)
+  if (len_trim(arg) > 0) read(arg, *) techq
+  call get_environment_variable('TECHREFQ', arg)
+  if (len_trim(arg) > 0) read(arg, *) techrefq
+  call get_environment_variable('TECHDIFF', arg); techdiff = trim(arg) == '1'
+  if (techq > 0) write(*,'(a,es10.2,a,l2,a,es10.2)') ' technical cut s_min/Q2 <', techq, '  TECHDIFF', techdiff, &
+       & '  reference (Q2 units, 0: techcut W2)', techrefq
   call get_environment_variable('P2BTMIN', arg)
   if (len_trim(arg) > 0) read(arg, *) p2btmin
   call get_environment_variable('TECHSLICE', arg)
