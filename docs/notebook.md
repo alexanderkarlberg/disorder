@@ -2671,3 +2671,24 @@ DIS. Next: NLO test in the ZEUS set-up.
   - C′: min(1e-11 W², 1e-9 Q²) against the new cut, ≈ 0;
   - D2: drop-rule bias, i.e. the plain weights of events with
     τ_real < 1e-9 (my earlier measurement of it was flawed).
+- **Plan C passes all checks** (`runs/ztechm`; expectations fixed beforehand):
+  - V′ (mode 1): 8.7 ± 3.5 (1e-5), 3.9 ± 1.8 (3e-5), 2.4 ± 2.1 (1e-4),
+    against 7.9 ± 1.9, 4.0 ± 2.2, ≈ 0.
+  - P′ in the Q² ≥ 500 bins at 1e-5: 3.9 ± 0.7, 0.8 ± 0.2, 0.6 ± 0.1, 0.05,
+    against the first slice (+ next decade) ≈ 2.4, 1.4, 0.9, 0.1.
+  - C′ (min(1e-11 W², 1e-9 Q²) against the new cut): −0.1 ± 0.3 (1e-4),
+    1.0 ± 3.8 (3e-5), 6.1 ± 3.6 (1e-5). Converged at 3e-5; at 1e-5 a
+    residual up to ≈ 6 ± 4 pb is allowed.
+  - D2 (drop-rule bias, 13 seeds): −2.3 ± 2.1 at 1e-5, 0 elsewhere.
+- **Corrected ZEUS NNLO coefficient (P2B)**, = 300-seed P2B result + P′
+  (60 seeds), `runs/ztechm/nnlo_p2b_corr.json`. Total (pb): 17.9 ± 1.6
+  (2e-3), 23.9 ± 1.9, 30.9 ± 2.2, 40.1 ± 2.7 (2e-4), 41.7 ± 3.4, 42.4 ± 5.0,
+  43.2 ± 6.1 (1e-5). Flat from 2e-4; all bins flat within errors from 2e-4.
+  No NNLOJET NNLO reference yet.
+- Plot `plot_tcut.py zeusnnlop2b`; page v18, section 6b, with corrections
+  (section 2 note, invalid diagnostics, the failed technical-region ideas).
+- Small open item: psmc edge 1e-13 against 1e-12 shifts vi by +2 ± 0.9 pb
+  at small τ_cut (`runs/zedge`); r and kp unchanged.
+- Next: production with the new cut built in (cluster instructions to
+  update: TECHMIN = "1d-10 1d-8", P2BSLICE = 1), the mode-1 test redone with
+  the new cut, and plain slicing with the new cut for comparison.

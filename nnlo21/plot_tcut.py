@@ -190,5 +190,21 @@ def zeusp2b(plain, p2b, ref, out):
     save(fig, out)
 
 
+def zeusnnlop2b(plain, p2b, out):
+    """NNLO coefficient against tau_cut: plain tau_2 slicing (left) and
+    P2B-improved slicing with the corrected technical cut (right)."""
+    d0 = json.load(open(plain)); d1 = json.load(open(p2b)); tc = np.array(d1['tau_cut'])
+    sel = [('total 0-0', 'total'), ('ptavg 8-15', 'p̄_T 8–15'), ('m12 20-30', 'm₁₂ 20–30'),
+           ('q2 125-250', 'Q² 125–250'), ('ptavg 15-22', 'p̄_T 15–22'), ('m12 45-65', 'm₁₂ 45–65')]
+    fig, axs = plt.subplots(1, 2, figsize=(8.4, 3.6), sharey=True)
+    for ax, d, title in ((axs[0], d0, 'plain slicing'), (axs[1], d1, 'P2B-improved, technical cut min(1e-10 W², 1e-8 Q²)')):
+        for k, (b, lab) in enumerate(sel):
+            v = d['bins'][b]['NNLO']
+            ax.errorbar(tc[3:]*(1 + 0.06*(k - 2.5)), v[0][3:], v[1][3:], fmt='o-', ms=3, lw=1, color=ACC[k % 6], label=lab)
+        ax.axhline(0, color=MUTED, lw=0.8); ax.set_xscale('log'); ax.set_xlabel('τ_cut'); ax.set_title(title, fontsize=8)
+    axs[0].set_ylabel('NNLO coefficient [pb]'); axs[0].set_ylim(-20, 130); axs[1].legend(frameon=False, fontsize=7, ncol=2)
+    save(fig, out)
+
+
 if __name__ == '__main__':
-    {'nlo-disent': nlo_disent, 'nnlo': nnlo, 'compare': compare, 'dist': dist, 'zeusnlo': zeusnlo, 'lab11': lab11, 'zeusnnlo': zeusnnlo, 'zeusp2b': zeusp2b}[sys.argv[1]](*sys.argv[2:])
+    {'nlo-disent': nlo_disent, 'nnlo': nnlo, 'compare': compare, 'dist': dist, 'zeusnlo': zeusnlo, 'lab11': lab11, 'zeusnnlo': zeusnnlo, 'zeusp2b': zeusp2b, 'zeusnnlop2b': zeusnnlop2b}[sys.argv[1]](*sys.argv[2:])
