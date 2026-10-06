@@ -2555,3 +2555,41 @@ DIS. Next: NLO test in the ZEUS set-up.
 - Production r: `runs/znnlop2b_r2` (300 seeds). `runs/znnlop2b_r` is
   invalid (kept only for the record). The vi seed lost on thserv19 was
   rerun as `znnlop2b_r/s301`.
+
+**ZEUS NNLO with P2B: full result and the τ_cut = 1e-5 drop (6 Oct, afternoon).**
+- Combination: b2 48 + vi 64 + kp 16 + r 300 (`runs/znnlop2b_r2`, drop rule
+  P2BDROP = 0); `runs/znnlop2b_r2/nnlo_p2b.json`.
+- NNLO coefficient, total (pb), P2B / plain:
+  - 2e-2: 11.1 ± 0.9 / −0.4 ± 1.8
+  - 2e-3: 17.8 ± 1.6 / 10.7 ± 3.0
+  - 2e-4: 39.0 ± 2.7 / 48.2 ± 9.5
+  - 1e-4: 39.9 ± 3.4 / 66.5 ± 14
+  - 3e-5: 33.7 ± 4.4 / 81.9 ± 26
+  - 1e-5: 4.9 ± 5.4 / 81.7 ± 41
+  P2B errors are 3–8× smaller.
+- There is still no plateau, and the drop at 3e-5 and 1e-5 also appears in
+  bins away from the cuts (p̄_T 30–60: 0.5 → −1.0 ± 0.4; m₁₂ 45–65:
+  1.8 → −3.5 ± 1.4), where P2B and plain agree. The drop is ≈ 0.3% of b2 at
+  1e-5 in every bin: a per-mille effect at small τ_cut common to both
+  methods, made visible by the smaller P2B errors.
+- Excluded:
+  - The b2 beam grid: coarse and twice-finer grids agree to 2e-7 (5 Oct,
+    `beamgrid/gchk_b2_*`), although `tabchkg` shows a pointwise coefficient
+    deviation up to 2e-3.
+  - The P2B terms of vi and kp: they level off towards 0 at small τ_cut.
+- **Correction:** my first two diagnostics (dropped-event contribution
+  P2BDROP = 2, and the P2B term P2BEXTRA = 1) were not reliable. VEGAS
+  adapted to the 1e-5 column, where these integrands are ≈ 0, and weighted
+  iterations by 1/variance of that column. On lo the P2BEXTRA diagnostic gave
+  nonsense. With `VTARGET = 1` and `VEGAS_EQUAL = 2` it reproduces the true
+  lo P2B term (−7.6 vs −7.2 at 2e-2 … −0.26 vs −0.19 at 1e-5). The conclusion
+  "the dropped events contribute ≈ 0" is therefore not established; it is
+  re-tested.
+- **A second correction:** the NLO "P2B correction" numbers in the 07:00
+  entry's table (−3.6 at 2e-2 etc.) came from the mixed combination. The
+  true lo P2B term is twice that: −7.19 ± 0.10 at 2e-2, −1.67 at 1e-3. The
+  NLO P2B results quoted there (all-seed P2B combination) are unaffected.
+- Running:
+  - P2B term of r (P2BEXTRA, 8 seeds);
+  - psmc edge 1e-13 scan (`runs/zedge`: r 100, vi 16, kp 8);
+  - next, the techcut slice [1e-10, 1e-9]·W² (TECHSLICE, new diagnostic).

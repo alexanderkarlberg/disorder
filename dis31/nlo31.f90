@@ -105,6 +105,17 @@ module nlo31_mod
   ! dropev: drop the current real event with all its dipoles; counters
   logical :: degen = .false., dropev = .false.
   integer(8) :: nrealev = 0, ndropev = 0
+  ! P2B r, events with tau_2(real) < techcut or a degenerate dipole Born:
+  ! p2bdrop = 0 drop them, 1 (default) give them the plain-slicing weights
+  ! (real theta(T > tau_cut) O, dipoles theta(T~ > tau_cut) O~, degenerate
+  ! ones 0), 2 diagnostic: only their plain weights (all else 0)
+  integer :: p2bdrop = 1
+  ! diagnostic (env P2BEXTRA = 1): only the P2B term theta(T <= tau_cut)
+  ! (O - O~) of every configuration (P2B minus plain slicing)
+  logical :: p2bextra = .false.
+  ! diagnostic (env TECHSLICE = t > techcut): r only from events with
+  ! techcut <= smin/W2 < t, i.e. what raising the technical cut to t removes
+  real(dp) :: techslice = 0
   real(dp) :: t2last = -1
   integer :: t2code = -1
   real(dp), parameter :: l11pt(0:7) = [5.0_dp, 8.0_dp, 11.0_dp, 15.0_dp, 20.0_dp, 30.0_dp, 50.0_dp, 100.0_dp]
@@ -557,54 +568,34 @@ contains
        enddo
     enddo
     if (smin < techcut*W2) return
+    if (techslice > 0 .and. smin >= techslice*W2) return
     klep = Pk(:,7); kout = Pk(:,8); Q2cur = Q2; xcur = xB
     call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(Q2), F4)
-    ! P2B slicing (6 Oct): events whose real has tau_2 < techcut are dropped
-    ! with all their dipoles. There the real is double unresolved and some
-    ! mapped dipole Borns are numerically degenerate (momenta ~1e5 GeV that
-    ! cancel, dipoles ~1e28); plain slicing cuts the real and gives those
-    ! dipoles T = 0, but with P2B they enter with O - O~ /= 0. The dropped
-    ! region contributes O - O~ over tau_2 < techcut: power suppressed.
-    if (p2bslice .and. mode == 2 .and. t2last < techcut) return
-    dropev = .false.
+    ! P2B slicing (6 Oct): events whose real has tau_2 < techcut, or with a
+    ! numerically degenerate mapped dipole Born (set in real_evalv), get the
+    ! plain-slicing weights (p2bdrop = 1). There the real is double
+    ! unresolved and some mapped Borns are garbage (momenta ~1e6 GeV that
+    ! cancel, dipoles ~1e28) which plain slicing never accepts, but with P2B
+    ! they would enter with O - O~ /= 0. Leaving out O - O~ for these events
+    ! is power suppressed (tau_2 <~ 1e-8). Dropping them altogether
+    ! (p2bdrop = 0, first version) also loses their dipoles above the cut.
+    dropev = p2bslice .and. mode == 2 .and. t2last < techcut
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**3
-    ! unit-charge values
-    call real_evalv(Pk, [1, 1, 0, 0, 0], F4, u1); u1 = 9*u1        ! q -> q g g g
-    call real_evalv(Pk, [0, 1, -1, 0, 0], F4, u2); u2 = 9*u2       ! g -> q qbar g g
-    call real_evalv(Pk, [1, 1, 1, -1, 0], F4, u4); u4 = 9*u4       ! q -> q q qbar g
-    call real_evalv(Pk, [0, 1, -1, 1, -1], F4, u6); u6 = 9*u6      ! g -> q qbar q qbar
-    call real_evalv(Pk, [1, 1, 2, -2, 0], F4, m3(:,1)); call real_evalv(Pk, [2, 2, 1, -1, 0], F4, m3(:,2))
-    call real_evalv(Pk, [1, 1, 3, -3, 0], F4, m3(:,3))
-    call real_evalv(Pk, [0, 1, -1, 2, -2], F4, m5(:,1)); call real_evalv(Pk, [0, 2, -2, 1, -1], F4, m5(:,2))
-    call real_evalv(Pk, [0, 1, -1, 3, -3], F4, m5(:,3))
-    do ic = 1, nv
-       call solve3(m3(ic,:), c3(ic,:)); call solve3(m5(ic,:), c5(ic,:))
-    enddo
-    sg = 0
-    do f = -5, 5
-       if (f == 0) cycle
-       eq1 = ech(f)
-       sg = sg + fpdf(f)*eq1**2*(u1/6 + u4/2)
-       do Q = 1, 5
-          if (Q == abs(f)) cycle
-          eq2 = ech(Q)
-          sg = sg + fpdf(f)*(eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3))
-       enddo
-    enddo
-    do Q = 1, 5
-       eq1 = ech(Q)
-       sg = sg + fpdf(0)*eq1**2*(u2/2 + u6/4)
-       do Q2i = Q + 1, 5
-          eq2 = ech(Q2i)
-          sg = sg + fpdf(0)*(eq1**2*c5(:,1) + eq2**2*c5(:,2) + eq1*eq2*c5(:,3))
-       enddo
-    enddo
+    call eval_sg()
     if (p2bslice .and. mode == 2) then
        nrealev = nrealev + 1
-       if (dropev) then
-          ndropev = ndropev + 1; res = 0; return
+       if (dropev) ndropev = ndropev + 1
+       if (dropev .and. p2bdrop == 0) then
+          res = 0; return
+       elseif (dropev) then
+          p2bslice = .false.
+          call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(Q2), F4)
+          call eval_sg()
+          p2bslice = .true.
+       elseif (p2bdrop == 2) then
+          res = 0; return
        endif
     endif
     if (mode >= 1) then
@@ -626,6 +617,40 @@ contains
        res = sg(1)*w
        if (res /= 0) call fill(Q2, res*wgt)
     endif
+  contains
+    subroutine eval_sg()
+       ! unit-charge values
+       call real_evalv(Pk, [1, 1, 0, 0, 0], F4, u1); u1 = 9*u1        ! q -> q g g g
+       call real_evalv(Pk, [0, 1, -1, 0, 0], F4, u2); u2 = 9*u2       ! g -> q qbar g g
+       call real_evalv(Pk, [1, 1, 1, -1, 0], F4, u4); u4 = 9*u4       ! q -> q q qbar g
+       call real_evalv(Pk, [0, 1, -1, 1, -1], F4, u6); u6 = 9*u6      ! g -> q qbar q qbar
+       call real_evalv(Pk, [1, 1, 2, -2, 0], F4, m3(:,1)); call real_evalv(Pk, [2, 2, 1, -1, 0], F4, m3(:,2))
+       call real_evalv(Pk, [1, 1, 3, -3, 0], F4, m3(:,3))
+       call real_evalv(Pk, [0, 1, -1, 2, -2], F4, m5(:,1)); call real_evalv(Pk, [0, 2, -2, 1, -1], F4, m5(:,2))
+       call real_evalv(Pk, [0, 1, -1, 3, -3], F4, m5(:,3))
+       do ic = 1, nv
+          call solve3(m3(ic,:), c3(ic,:)); call solve3(m5(ic,:), c5(ic,:))
+       enddo
+       sg = 0
+       do f = -5, 5
+          if (f == 0) cycle
+          eq1 = ech(f)
+          sg = sg + fpdf(f)*eq1**2*(u1/6 + u4/2)
+          do Q = 1, 5
+             if (Q == abs(f)) cycle
+             eq2 = ech(Q)
+             sg = sg + fpdf(f)*(eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3))
+          enddo
+       enddo
+       do Q = 1, 5
+          eq1 = ech(Q)
+          sg = sg + fpdf(0)*eq1**2*(u2/2 + u6/4)
+          do Q2i = Q + 1, 5
+             eq2 = ech(Q2i)
+             sg = sg + fpdf(0)*(eq1**2*c5(:,1) + eq2**2*c5(:,2) + eq1*eq2*c5(:,3))
+          enddo
+       enddo
+    end subroutine eval_sg
   end function real_part
 
   ! the quantity VEGAS integrates in mode 1: the cell iv, or a tau_2 slice
@@ -818,6 +843,7 @@ contains
           do k = 1, ntc
              F(k + ntc*(b - 1)) = merge(1.0_dp, 0.0_dp, inb(b))
              if (t2 <= tcs(k) .and. inp(b)) F(k + ntc*(b - 1)) = F(k + ntc*(b - 1)) - 1
+             if (p2bextra .and. t2 > tcs(k)) F(k + ntc*(b - 1)) = 0
           enddo
        enddo
        return
@@ -1395,12 +1421,29 @@ program nlo31
      if (trim(arg) == '1') then
         p2bslice = .true.
         call get_environment_variable('P2BDEBUG', arg); p2bdebug = trim(arg) == '1'
+        call get_environment_variable('P2BDROP', arg)
+        if (len_trim(arg) > 0) read(arg, *) p2bdrop
+        write(*,'(a,i2)') ' P2BDROP', p2bdrop
+        call get_environment_variable('P2BEXTRA', arg); p2bextra = trim(arg) == '1'
+        if (p2bextra) write(*,'(a)') ' P2BEXTRA: only theta(T <= tau_cut) (O - O~)'
         write(*,'(a)') ' P2BSLICE: below tau_cut O(event) - O(projected 2+1 Born)'
      endif
   elseif (mode == 3) then
      ! VEGAS target: >= 1 jet row (the total row vanishes identically in P2B)
      nob = 16; nv = ntc*nob; iv = 2*ntc
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
+  endif
+  ! diagnostics (6 Oct): VEGAS target cell from the environment (VTARGET = k,
+  ! index into the cell vector; default unchanged)
+  call get_environment_variable('TECHSLICE', arg)
+  if (len_trim(arg) > 0) then
+     read(arg, *) techslice
+     write(*,'(a,es10.2)') ' TECHSLICE: only events with techcut <= smin/W2 <', techslice
+  endif
+  call get_environment_variable('VTARGET', arg)
+  if (len_trim(arg) > 0) then
+     read(arg, *) iv
+     write(*,'(a,i5)') ' VEGAS target cell', iv
   endif
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]
@@ -1423,7 +1466,7 @@ program nlo31
   write(*,'(a,a,a,i10,a,i4,a,i6,a,es9.2,a,i2,a,f9.6,a,f10.2)') ' nlo31 part ', trim(part), ' ncall', ncall, &
        & ' itmx', itmx, ' seed', seed, ' techcut', techcut, ' mode', mode, ' x', xfix, ' Q2', Q2fix
   call vegas(ndim, ncall, itmx, avg, err, chi2, integrand)
-  if (p2bslice .and. trim(part) == 'r') write(*,'(a,i14,a,i14)') ' P2B r: events dropped (degenerate dipole)', &
+  if (p2bslice .and. trim(part) == 'r') write(*,'(a,i14,a,i14)') ' P2B r: events with plain weights (tau_2 < techcut or degenerate dipole)', &
        & ndropev, ' of', nrealev
   write(*,'(a,a,a,es16.8,a,es12.4,a,f8.3)') ' RESULT ', trim(part), ' sigma(>=3 jets) [pb] = ', avg, ' +- ', err, &
        & '   chi2/it', chi2
