@@ -2692,3 +2692,5 @@ DIS. Next: NLO test in the ZEUS set-up.
 - Next: production with the new cut built in (cluster instructions to
   update: TECHMIN = "1d-10 1d-8", P2BSLICE = 1), the mode-1 test redone with
   the new cut, and plain slicing with the new cut for comparison.
+
+- Pushed `2026-10-nnlo21` with AK's OK (6 Oct, evening, up to 2697d78), for the cluster production.
