@@ -105,7 +105,7 @@ module nlo31_mod
   ! dropev: drop the current real event with all its dipoles; counters
   logical :: degen = .false., dropev = .false.
   integer(8) :: nrealev = 0, ndropev = 0
-  ! P2B r, events with tau_2(real) < techcut or a degenerate dipole Born:
+  ! P2B r, events with tau_2(real) < p2btmin or a degenerate dipole Born:
   ! p2bdrop = 0 drop them, 1 (default) give them the plain-slicing weights
   ! (real theta(T > tau_cut) O, dipoles theta(T~ > tau_cut) O~, degenerate
   ! ones 0), 2 diagnostic: only their plain weights (all else 0)
@@ -116,6 +116,19 @@ module nlo31_mod
   ! diagnostic (env TECHSLICE = t > techcut): r only from events with
   ! techcut <= smin/W2 < t, i.e. what raising the technical cut to t removes
   real(dp) :: techslice = 0
+  ! P2B r: tau_2(real) below which an event gets the plain weights (or is
+  ! dropped); independent of the technical cut (env P2BTMIN)
+  real(dp) :: p2btmin = 1d-9
+  ! technical region (6 Oct): with TECHMIS = 1, real events with s_min <
+  ! techcut W^2 are not dropped; per cell they contribute only the mismatch
+  ! part sum_i (F_real - F_i) D_i of F_real R - sum_i F_i D_i =
+  ! F_real (R - sum_i D_i) + sum_i (F_real - F_i) D_i (the cancelling part
+  ! F_real (R - sum D) is dropped: integrable and rounding-prone; the
+  ! mismatch part, real and dipole on opposite sides of a tau_cut, is not
+  ! small when techcut W^2 is not << tau_cut Q^2). Below techfloor W^2 the
+  ! event is dropped
+  logical :: techmis = .false., techreg = .false.
+  real(dp) :: techfloor = 0
   real(dp) :: t2last = -1
   integer :: t2code = -1
   real(dp), parameter :: l11pt(0:7) = [5.0_dp, 8.0_dp, 11.0_dp, 15.0_dp, 20.0_dp, 30.0_dp, 50.0_dp, 100.0_dp]
@@ -513,7 +526,7 @@ contains
     real(dp) :: m4, P3(4,7,dip41_max), val(dip41_max), F3(nv)
     integer :: fl3(4,dip41_max), nd, id
     sub = 0
-    if (any(F4 /= 0)) then
+    if (any(F4 /= 0) .and. .not. techreg) then
        call me41_tree(Pk, fl, m4)
        sub = m4*F4
     endif
@@ -530,7 +543,11 @@ contains
        ! to a real with tau_2 ~ 1e-9..1e-8) drops the whole event, as plain
        ! slicing effectively does (there both sides fail every cut)
        if (p2bslice .and. mode == 2 .and. (degen .or. any(P3(4,1:4,id) < 0))) dropev = .true.
-       sub = sub - val(id)*F3
+       if (techreg) then
+          sub = sub + val(id)*(F4 - F3)
+       else
+          sub = sub - val(id)*F3
+       endif
        if (dbgprint .and. F3(iv) /= 0) write(0,'(a,i3,a,es12.4,a,es12.4,a,f5.1,a,3es11.3)') ' DBG dip', id, ' val', val(id), &
             & ' t2', t2last, ' F(iv)', F3(iv), ' E', P3(4,2:4,id)
     enddo
@@ -567,11 +584,13 @@ contains
           smin = min(smin, 2*abs(mdot(Pk(:,i), Pk(:,j))))
        enddo
     enddo
-    if (smin < techcut*W2) return
+    techreg = smin < techcut*W2
+    if (techreg .and. .not. techmis) return
+    if (smin < techfloor*W2) return
     if (techslice > 0 .and. smin >= techslice*W2) return
     klep = Pk(:,7); kout = Pk(:,8); Q2cur = Q2; xcur = xB
     call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(Q2), F4)
-    ! P2B slicing (6 Oct): events whose real has tau_2 < techcut, or with a
+    ! P2B slicing (6 Oct): events whose real has tau_2 < p2btmin, or with a
     ! numerically degenerate mapped dipole Born (set in real_evalv), get the
     ! plain-slicing weights (p2bdrop = 1). There the real is double
     ! unresolved and some mapped Borns are garbage (momenta ~1e6 GeV that
@@ -579,7 +598,7 @@ contains
     ! they would enter with O - O~ /= 0. Leaving out O - O~ for these events
     ! is power suppressed (tau_2 <~ 1e-8). Dropping them altogether
     ! (p2bdrop = 0, first version) also loses their dipoles above the cut.
-    dropev = p2bslice .and. mode == 2 .and. t2last < techcut
+    dropev = p2bslice .and. mode == 2 .and. t2last < p2btmin
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**3
@@ -1435,6 +1454,13 @@ program nlo31
   endif
   ! diagnostics (6 Oct): VEGAS target cell from the environment (VTARGET = k,
   ! index into the cell vector; default unchanged)
+  call get_environment_variable('TECHMIS', arg); techmis = trim(arg) == '1'
+  call get_environment_variable('TECHFLOOR', arg)
+  if (len_trim(arg) > 0) read(arg, *) techfloor
+  if (techmis) write(*,'(a,es10.2,a,es10.2)') ' TECHMIS: mismatch part only for s_min/W2 <', techcut, &
+       & ', events dropped below', techfloor
+  call get_environment_variable('P2BTMIN', arg)
+  if (len_trim(arg) > 0) read(arg, *) p2btmin
   call get_environment_variable('TECHSLICE', arg)
   if (len_trim(arg) > 0) then
      read(arg, *) techslice

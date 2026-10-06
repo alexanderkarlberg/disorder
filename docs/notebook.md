@@ -2593,3 +2593,36 @@ DIS. Next: NLO test in the ZEUS set-up.
   - P2B term of r (P2BEXTRA, 8 seeds);
   - psmc edge 1e-13 scan (`runs/zedge`: r 100, vi 16, kp 8);
   - next, the techcut slice [1e-10, 1e-9]·W² (TECHSLICE, new diagnostic).
+
+**The τ_cut = 1e-5 drop is the technical cut (6 Oct, 16:00–18:00).**
+- Slice diagnostic (`TECHSLICE`; VEGAS_EQUAL = 2; validated: with the slice
+  opened to everything it reproduces production r within 1–2σ),
+  `runs/zedge`. Events with 1e-10 ≤ s_min/W² < 1e-9, removed by the
+  production cut, contribute to the NNLO total (ZEUS, P2B):
+  - < 1 pb for τ_cut ≥ 1e-4, +7.6 ± 2.7 at 3e-5, +30.3 ± 5.6 at 1e-5;
+  - positive in 18 of 20 seeds.
+  - Mode 1 (x = 0.01, Q² = 400): +4.1 ± 2.2 (3e-5), +8.4 ± 1.7 pb/GeV² (1e-5).
+- Next decade, 1e-11 … 1e-10:
+  - ZEUS: +3.6 ± 1.7 (3e-5), +16.6 ± 4.3 (1e-5), heavy-tailed seeds;
+  - mode 1: −0.5 ± 0.9, converged.
+- Mechanism: near a single-unresolved limit the real can be just above
+  τ_cut and a dipole just below. These are legitimate slicing contributions,
+  in a window Δτ ~ s_min/Q², so the cut must satisfy techcut·W² ≪
+  τ_cut·Q². With W²/Q² ≈ 1/x up to 500 in ZEUS, a cut relative to W² is too
+  coarse at low x, and lowering it runs into rounding.
+- **Correction of 5 Oct ("the NNLO τ_cut test passes from 5e-4 to 1e-5"):**
+  - at the mode-1 point the 3e-5 and 1e-5 values with techcut 1e-9 are
+    biased low (by ≈ 4 and ≈ 8 pb/GeV²);
+  - the 5 Oct run with techcut 1e-10 (11.1 ± 6.0, 17.0 ± 8.2) already hinted
+    at it within its errors;
+  - the plateau 5e-4 … 1e-4 stands.
+- Fix (`TECHMIS = 1`): in the technical region, keep per cell only the
+  mismatch part Σ_i (F_real − F_i) D_i, which involves dipoles only, so
+  nothing cancels and there is no rounding problem. Drop the cancelling part
+  F_real (R − ΣD). Default bit-identical (plain, P2B, mode 1).
+- Validation running (`runs/ztech`):
+  - A: mismatch part in [1e-10, 1e-9] against the full slice (30.3 ± 5.6);
+  - B: [1e-11, 1e-9] against the sum (46.9 ± 7);
+  - C: mode 1 [1e-10, 1e-9] against 8.4 ± 1.7;
+  - D: everything below 1e-9 down to the sampling edge, to add to the
+    production r.
