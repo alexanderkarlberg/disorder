@@ -2459,3 +2459,11 @@ cuts (p̄_T 22–60, m12 65–120) are small and flat within errors.
   no-plateau is most likely the fiducial power corrections (a), not a mode-2
   bug (b). NNLOJET's NNLO remains the decisive check; a recoil-aware projection
   is the likely remedy.
+
+**Fiducial power corrections: literature (6 Oct morning).** Notes in
+`docs/literature-fiducial-power-corrections.md` (Ebert–Tackmann 2020;
+Campbell–Neumann–Vita 2408.05265, P2B-improved slicing in MCFM; Alioli et al.
+2504.11357, GENEVA incl. Z+jet with 1-jettiness). The remedy for our ZEUS
+drift is P2B-improved slicing: below the cut add ∫ dσ_{3+1} (O − Õ) with a
+projection to the 2+1 Born. New for us: the projection for jet final states in
+DIS. Next: NLO test in the ZEUS set-up.
