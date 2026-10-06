@@ -89,3 +89,21 @@ symmetry by the cuts.
   corrections. First test at NLO (ZEUS-like dijets, where our slicing NLO
   converges like √τ to NNLOJET): with the P2B term it should be flat from
   much larger τ_cut. Then NNLO (vi, kp, r with O − Õ below the cut).
+
+## Idea (AK, 6 Oct; with K. Melnikov): numerical P2B beyond two legs
+
+P2B needs the cross section differential in the projected Born variables,
+σ_proj(Φ_B) = ∫ dσ δ(Φ_B − proj(Φ)), to the full order. For DIS 1+1 these are
+the structure functions (analytic). For 2+1 with an IR-safe projection
+(e.g. `project21`), σ_proj is itself an IR-safe observable, so it can be
+computed numerically and tabulated once, like "2+1 structure functions":
+- for photon exchange, the φ dependence (lepton plane against hadron plane)
+  is exactly 1, cos φ, cos 2φ, so a few functions of (x, Q², x_p, z_p);
+- PDFs enter through a convolution grid (APPLgrid/fastNLO style);
+- they can be filled by subtraction (DISENT, nlo31) or by slicing at fixed
+  Born points, where Õ is constant: only hadronic power corrections, so
+  τ → 0 extrapolation or NLP terms can be used.
+
+Then any observable is ∫ σ_proj Õ + ∫ dσ_{N+1}(O − Õ). Proof of concept one
+order lower: NLO 2+1 = σ_proj^NLO grid + LO 3+1 (O − Õ), which needs no
+subtraction. Check against NNLOJET in the ZEUS set-up.
