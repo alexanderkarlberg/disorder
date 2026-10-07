@@ -2694,3 +2694,25 @@ DIS. Next: NLO test in the ZEUS set-up.
   the new cut, and plain slicing with the new cut for comparison.
 
 - Pushed `2026-10-nnlo21` with AK's OK (6 Oct, evening, up to 2697d78), for the cluster production.
+
+**Fixed-point τ_cut test with the new technical cut (6 Oct, night).**
+- `runs/tcut11`: r 120 seeds with `TECHMIN="1d-10 1d-8"` (= 1e-10 W² at
+  this point, since W² ≤ 99 Q²), vi/kp/lo with psmc edge 1e-12.
+- **The direct run is contaminated:** rare numerically garbage events,
+  single seeds with r = −0 or +2108 instead of ≈ −3260 at 1e-5 (as in the
+  1e-11 run of 5 Oct). Mean −3148 ± 60 against median −3261. The combined
+  NNLO from it (14.8, 18.2, 29 ± 9, 44 ± 15 …) is not usable.
+- The difference runs (`runs/ztechm` P′, C′, V′) and the default-cut
+  productions are clean (mean ≈ median ≈ trimmed).
+  → Procedure: production with the default cut plus a separate `TECHDIFF`
+  correction (as for ZEUS). The cluster instructions said "TECHMIN
+  directly"; **corrected**, not yet pushed.
+- Fixed point, robust version (b1/b2 16 seeds, lo/vi/kp tcut11, default-cut
+  r, plus the slice correction), all bins, pb/GeV²:
+  - r tcut6/8 (edge 1e-10): 10.2 ± 0.7 (1e-3), 8.7 ± 1.0, 8.5 ± 1.2,
+    8.1 ± 1.4 (1e-4), 13.1 ± 2.9 (3e-5);
+  - r tcut10 control (edge 1e-12, 30 seeds): 6.0 ± 3.4 (1e-4),
+    14.9 ± 5.2 (3e-5), 15.5 ± 5.5 (1e-5).
+  The plateau ≈ 8.5 from 5e-4 to 1e-4 stands. At 3e-5 and 1e-5 the values
+  are 1.3–1.5σ above it: consistent, with a slight upward tendency that
+  needs the cluster statistics.

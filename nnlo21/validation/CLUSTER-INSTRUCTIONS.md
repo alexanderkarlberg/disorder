@@ -68,11 +68,24 @@ P2B step to N3LO 1+1 (that comes later, on top of this NNLO 2+1).
 
 Mandatory settings for every `nlo31` run of parts lo, vi, kp, r in mode 2:
 - `P2BSLICE=1`;
-- `TECHMIN="1d-10 1d-8"`: technical cut s_min < min(1e-10 W², 1e-8 Q²),
-  with W² the partonic invariant mass. The old cut, 1e-9 W², biased all
-  results at τ_cut ≤ 3e-5 (notebook 6 Oct, evening);
 - psmc edge 1e-12 (12th argument), technical-cut argument `1d-9`;
 - leave `P2BDROP` at its default (1).
+
+**Technical cut: run production with the default cut and add the
+correction as a separate difference run.** Do not run production with the
+lowered cut `TECHMIN` directly. The default cut, s_min < 1e-9 W² (W² the
+partonic invariant mass), biases τ_cut ≤ 3e-5 low. The correct cut,
+min(1e-10 W², 1e-8 Q²), is validated. But a direct run with it is
+contaminated by rare numerically garbage events: single seeds give r = 0 or
++2000 instead of −3260 (6 Oct, `runs/tcut11`). The difference runs below are
+clean (mean ≈ median ≈ trimmed mean), and so is the default production. So:
+- r production: default cut, no `TECHMIN`;
+- r correction: `TECHDIFF=1 TECHMIN="1d-10 1d-8" VEGAS_EQUAL=2` (same
+  arguments). This integrates only the events between the two cuts. Add its
+  seed average to r, with errors in quadrature. About 60 seeds gave ±2.9 pb
+  at 1e-5 (6 Oct).
+- For every part, check that mean, median and trimmed mean of the seeds
+  agree. If not, look for outliers before combining.
 `sliced21` (b0, b1, b2) is unchanged.
 
 Status on the MPP machines (6 Oct):
@@ -81,8 +94,8 @@ Status on the MPP machines (6 Oct):
   corrections) and needs about 3e-5.
 - **NNLO:** projected slicing is flat from τ_cut = 2e-4 to 1e-5. Total
   40.1 ± 2.7, 41.7 ± 3.4, 42.4 ± 5.0, 43.2 ± 6.1 pb at 2e-4, 1e-4, 3e-5,
-  1e-5. These used the old cut plus a measured correction; production runs
-  must use `TECHMIN` directly. Plain slicing has errors 3–8× larger. There
+  1e-5. These used the default cut plus a measured `TECHDIFF` correction:
+  the procedure to repeat. Plain slicing has errors 3–8× larger. There
   is no NNLOJET NNLO reference yet: that is the main goal of A.
 - **Remaining checks for this production:**
   - the convergence of the technical cut at 1e-5: a residual up to
@@ -141,7 +154,10 @@ Job arrays of independent seeds. Combine seeds with equal weights;
 inverse-variance weights of VEGAS errors are biased for R − D. Every `nlo31`
 job of B needs the environment
 
-    export P2BSLICE=1 TECHMIN="1d-10 1d-8"
+    export P2BSLICE=1
+
+and the r correction jobs in addition `TECHDIFF=1 TECHMIN="1d-10 1d-8"
+VEGAS_EQUAL=2` (section 1.B).
 
 Commands, with MPP timings on a thserv in brackets:
 - `sliced21 b0 7500000 6 SEED zeus -` (~12 min)
@@ -152,18 +168,22 @@ Commands, with MPP timings on a thserv in brackets:
 - `nlo31 kp 2000000 6 SEED 1d-9 2 0 0 psmc 0 0 1d-12` (~5 min)
 - `nlo31 r 1000000 6 SEED 1d-9 2 0 0 psmc 0 0 1d-12` (~45 min). This part
   dominates the error: about 300 seeds give ±3.4 pb at τ_cut 1e-4.
+- r correction (`TECHDIFF`, see above): about 100 seeds.
 - Cross-checks, smaller sets (about 50 r seeds each):
-  - r with `TECHMIN="1d-11 1d-9"` (cut convergence; must agree at 3e-5 and
-    1e-4);
+  - cut convergence: `TECHDIFF=1 TECHMIN="1d-11 1d-9" TECHREF="1d-10
+    1d-8" VEGAS_EQUAL=2`, must be ≈ 0 at 3e-5 and 1e-4 (6 Oct: 1.0 ± 3.8
+    and −0.1 ± 0.3; 6.1 ± 3.6 at 1e-5);
   - vi and r with psmc edge 1e-13 (edge);
-  - plain slicing, i.e. the same commands without `P2BSLICE` but with
-    `TECHMIN` (comparison).
+  - plain slicing, i.e. the same commands without `P2BSLICE`, with its own
+    `TECHDIFF` correction (comparison).
 - The fixed-point τ_cut test (mode 1, x = 0.01, Q² = 400, `nlo31 … 1d-9 1
-  0.01 400 psmc 0 0 1d-12`, `sliced21 … 0.01 400`) redone with
-  `TECHMIN="1d-10 1d-8"`. The 5 Oct points at 3e-5 and 1e-5 were biased low.
+  0.01 400 psmc 0 0 1d-12`, `sliced21 … 0.01 400`) with high statistics,
+  plus its `TECHDIFF` correction. MPP status (6 Oct): plateau 8.5 ± 1.2
+  pb/GeV² from 5e-4 to 1e-4; corrected 13 ± 3 at 3e-5 and 15.5 ± 5.5 at
+  1e-5, i.e. 1.3–1.5σ above the plateau. Resolving this is part of the job.
 - D: replace `zeus` by `p2b` (sliced21) and the 6th argument `2` by `3`
   (nlo31); there `P2BSLICE` does not apply (mode 3 is already the P2B to
-  1+1). Use `TECHMIN` as well. disorder: `disorder -p2b -nnlocoef -cutoff 1d-10 -pdf
+  1+1). Add a `TECHDIFF` correction run as well. disorder: `disorder -p2b -nnlocoef -cutoff 1d-10 -pdf
   NNPDF30_nlo_as_0118 -Q2min 125 -Q2max 20000 -ymin 0.2 -ymax 0.6 -Ehad 920
   -ncall1 20000 -ncall2 40000000 -iseed SEED -prefix c2_` (~26 min), and the
   inclusive part without `-p2b` (seconds).
