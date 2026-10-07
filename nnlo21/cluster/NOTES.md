@@ -425,3 +425,27 @@ warmups killed at 10:18, 32 threads × 11.7 h, not in time.log); B 5,570;
 F 1,606; Bx 1,135; D 2,556 (incl. the duplicate lodef ≈ 540 and the invalid
 locorr ≈ 100); pilots 113; r diagnosis 166. Attempts lost to the 10:18 outage
 and to node failures are not included (several hundred core-h).
+
+## 7 Oct, 21:00–: UPDATE 7 Oct evening (1a46f6a): r with equal iteration weights
+- Merged origin/2026-10-nnlo21 (b4ca068, 1682b6d, 1a46f6a; fast-forward, my
+  commits and e1884e7 included). Cause of the factor 4 (thA371a): nlo31's
+  1/σ²-weighting of iterations biases r (+49.8 ± 7.1 pb at τ_cut 1e-5, MPP).
+- New frozen binaries `$P/bin2/{sliced21,nlo31}` (1a46f6a; md5 in
+  `$P/bin2/MD5SUMS`); old `$P/bin` kept. Check: b0, lo and r (mode 2, small
+  runs) bit-identical between old and new binaries.
+- **Step 2, bias from the existing outputs** (`nnlo21/cluster/iter_bias.py`,
+  `$P/runs/iter_bias.txt`): per seed, equal-weight average of iterations
+  2–6 (target cell) minus the reported cell. Plain means are undefined (garbage
+  seeds), so DIAG statistics: B r reported − equal = +39.6 ± 24.5 pb (3,440
+  unflagged seeds; trimmed +42.4, median +16.5); edge r +46 ± 13; plain r
+  +5.8 ± 21 (trimmed +29); F r +9.45 ± 0.62 pb/GeV² (mode 1, significant).
+  Consistent with AK's +50 pb.
+- **Step 3, reruns with VEGAS_EQUAL=2 and bin2, same seeds** (paired with the
+  old runs), groups file `$P/runs/prod/groups2.txt`, feeder started 21:35
+  (48777071): B r-eq 3,500 (array 48777072), F r-eq 1,200 (48777074), Bx
+  edge-r-eq 300 (48777075), Bx plain-r-eq 300 (48777076). TECHDIFF runs
+  (rcorr, plain-rcorr, F rcorr, conv) kept as they are (already
+  VEGAS_EQUAL=2); b0/b1/b2/lo/vi/kp and NNLOJET not rerun.
+- Step 4 replays with P2BDEBUG=1 (bin2, old weighting, same settings):
+  B r seed 3197 (iteration 2 = −1.2e162, then 0) job 48777079, seed 4637
+  (iteration 4 = −9.4e102, then ≈ 0) job 48777080; `$P/runs/dbg/s*/dbg.log`.
