@@ -242,3 +242,18 @@ seeds (`$P/runs/rdiag`), total r [pb]:
 - Fixed point (F; mode 1, x = 0.01, Q² = 400): b1 64, b2 64, lo 64, vi 120,
   kp 32, r 1200, rcorr 300 (≈ 10× the MPP r statistics).
 - Every part: mean, median and trimmed mean are compared before combining.
+- 08:00: RV_3's 180 production jobs had a malformed command (no ncall: RV_3 had
+  no pilot entry in `prod_ncall.txt`, so the seed went into the ncall slot);
+  they failed in 0.04 s each. Fixed in place (ncall 430000 from the warmup's
+  6.3 ms per point); they are requeued (attempt counter 1 of 4). All other
+  NNLOJET commands checked (6 words each).
+- Interim A (07:50, ~7,000 jobs): LO 103.2810 ± 0.0005 pb; NLO coefficient
+  10.579 ± 0.006 pb (R 1318 + V 100 jobs), 1.3σ from the MPP NNLOJET 10.49 ±
+  0.07; seed scatter = NNLOJET's quoted errors (ratio 0.8–1.1) for every part.
+- `nnlo21/cluster/check_parts.py`: mean/median/trimmed check per bin. D b1
+  (sliced21 mode 3, not affected by the cut question) is flagged: rare seeds
+  with z = −100 … −630 in single bins (e.g. seed 2459, y −0.5…0, τ_cut 1e-4:
+  −7592 against a median of 422); mean vs trimmed mean up to 1.8σ. D lo (both
+  cuts) and v1/v2 r are clean.
+- Cluster saturated at 07:50 (all et nodes down*/completing, ~52 ct/gt/kt
+  nodes usable); B/F/D-lodef wait behind the NNLOJET jobs (FIFO, same nice).
