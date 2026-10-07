@@ -150,3 +150,27 @@ Work directory (raw outputs, not committed): `/ptmp/mpp/akarlber/disorder-nnlo21
   **not** our τ_zQ = 1 − 2Σp_z/Q, contrary to the instructions (section 1.C).
   `y23` aborts (SIGABRT) at the first event in epLJJ. `dis_thrust` and
   `dis_C` run (tiny LO tests). Definitions must be matched before a pilot.
+
+### 7 Oct, 02:40–07:30 (session paused ~02:45–07:30)
+- r diagnosis (`$P/runs/rdiag`, seeds 1001–1040): with TECHMIN + P2BDROP=0
+  (v1) all seeds are stable in the first iterations; the blow-ups (17 of 40
+  seeds with an iteration of 1e5–1e9 under the default P2BDROP=1) come from
+  P2BDROP=1 (plain-slicing weights for events with τ₂(real) < techcut or a
+  degenerate dipole) together with the lower TECHMIN cut. Old cut 1e-9 W² (v2,
+  v3) is stable with either drop rule. Final numbers below.
+- **A (NNLOJET) production submitted 02:40** (`$P/runs/nnlojet/prod`, list
+  `prod.list`, array name `dis-nj-prod`, first chunk array 48715220, rest by the
+  feeder): per part (seeds incl. the 20-job pilots) LO 385, R 2066, V 100,
+  VV_1–7 100 each, RV_1–7 200 each, RRb_1 700, RRb_2 700, RRb_3 2000, RRb_4 700;
+  gated on their warmups (groups-file NEEDS column): RRb_5 700 (`dis-nj-RRb5`,
+  released), RRa_1–5 500 each (`dis-nj-RRa<k>`, ncall 120k ≈ 1 h; waiting for
+  the warmups, 10M[6] at ~2.1–2.8 h per iteration on 32 threads).
+  ncall per part in `$P/runs/nnlojet/prod_ncall.txt` (~45–65 min per job).
+  Sizing (`nnlo21/cluster/size_nnlojet.py`, targets LO 1e-4, NLO 0.3 % total /
+  1 % per bin, NNLO 2 % of an assumed 40 pb / 5 % per bin): ~12k core-h
+  without RRa. RRb_3 is heavy-tailed: one pilot seed of 20 gave 99,983 ±
+  97,824 fb (others ±1–8k), so its per-job scatter (22 pb) is dominated by
+  rare huge weights; NNLOJET's own combination (dokan) trims such outliers
+  (MAD 3.5, ≤ 1 %); ours uses plain equal weights (rule), trimmed values only
+  as a diagnostic.
+- D production complete (07:07): b1 2383/2384, everything else done.

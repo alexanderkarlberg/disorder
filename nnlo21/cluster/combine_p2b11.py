@@ -2,7 +2,7 @@
 """Item D: NNLO 1+1 (lab11 jet bins) by P2B on our tau_2-sliced NLO 2+1
 against disorder -p2b -nnlocoef (DISENT). Equal-weight seed averages.
 
-  combine_p2b11.py --b1 'glob' --lo 'glob' --incl 'glob' --dis 'glob' [--lo0 'glob'] [--json f]
+  combine_p2b11.py --b1 'glob [glob...]' --lo 'glob' --incl 'glob' --dis 'glob' [--lo0 'glob'] [--json f]
 
 --b1/--lo: run.log of sliced21 b1 / nlo31 lo in mode 3 (LCELL rows);
 --incl: disorder inclusive -nnlocoef histogram files; --dis: disorder -p2b
@@ -31,6 +31,14 @@ def lcell(f):
     return (tc, np.array(r)) if len(r) == 16 else (None, None)
 
 
+def files(pats):
+    """space-separated globs; only job directories with a 'done' marker"""
+    out = []
+    for p in pats.split():
+        out += [f for f in glob.glob(p) if os.path.exists(os.path.join(os.path.dirname(f), 'done'))]
+    return sorted(set(out))
+
+
 def me(a):
     a = np.array(a)
     return a.mean(0), a.std(0, ddof=1)/np.sqrt(len(a)), len(a)
@@ -41,14 +49,14 @@ def main():
     for o in ('b1', 'lo', 'incl', 'dis', 'lo0', 'json'):
         ap.add_argument('--' + o)
     a = ap.parse_args()
-    fb1 = [lcell(f) for f in sorted(glob.glob(a.b1))]
-    flo = [lcell(f) for f in sorted(glob.glob(a.lo))]
+    fb1 = [lcell(f) for f in files(a.b1)]
+    flo = [lcell(f) for f in files(a.lo)]
     tc = [t for t, c in fb1 if t][0]
     B1 = me([c for t, c in fb1 if c is not None])
     LO3 = me([c for t, c in flo if c is not None])
-    I2 = me([load_disorder(f) for f in sorted(glob.glob(a.incl))])
-    D2 = me([load_disorder(f) for f in sorted(glob.glob(a.dis))])
-    L0 = me([load_disorder(f) for f in sorted(glob.glob(a.lo0))]) if a.lo0 else None
+    I2 = me([load_disorder(f) for f in files(a.incl)])
+    D2 = me([load_disorder(f) for f in files(a.dis)])
+    L0 = me([load_disorder(f) for f in files(a.lo0)]) if a.lo0 else None
     jr = L0[0][1] if L0 else float('nan')
     print('b1 %d, lo %d seeds; disorder incl %d, p2b %d; LO >= 1 jet %.2f pb' % (B1[2], LO3[2], I2[2], D2[2], jr))
     ours = I2[0][:, None] + B1[0] + LO3[0]

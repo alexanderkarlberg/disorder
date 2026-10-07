@@ -1,6 +1,7 @@
 #!/bin/bash -l
 # Hourly feeder for the disorder nnlo21 production: for every group in
-# $GROUPFILE (lines "NAME LIST TIME MEM [CPUS [EXCLUDE]]"; # comments) it submits the lines
+# $GROUPFILE (lines "NAME LIST TIME MEM [CPUS [EXCLUDE|- [NEEDS]]]"; # comments;
+# NEEDS = a file that must exist first, e.g. a warmup's done marker) it submits the lines
 # that are neither done nor queued (never-started lines and tasks lost to
 # NODE_FAIL/TIMEOUT), within the queue caps of submit.py. Then it schedules
 # itself again in an hour, unless every list is finished, the file
@@ -34,8 +35,10 @@ if [ -z "$(squeue -u "$USER" -h -n dis-feeder -t PD -o %i)" ]; then
         --export=ALL,GROUPFILE="$GROUPFILE",DEADLINE="$DEADLINE" \
         -o "$(dirname "$GROUPFILE")/logs-feeder/feeder.%j.out" "$S/feeder.sh"
 fi
-while read -r name list tlim mem cpus excl; do
+while read -r name list tlim mem cpus excl needs; do
     case "$name" in ''|\#*) continue;; esac
+    [ "${excl:-}" = - ] && excl=
+    if [ -n "${needs:-}" ] && [ "$needs" != - ] && [ ! -e "$needs" ]; then echo "$name: waiting for $needs"; continue; fi
     EXTRA_EXCLUDE="${excl:-}" "$S/submit.py" "$name" "$list" "$tlim" "$mem" --cpus "${cpus:-1}"
 done < "$GROUPFILE"
 } >> "$log" 2>&1
