@@ -174,3 +174,71 @@ Work directory (raw outputs, not committed): `/ptmp/mpp/akarlber/disorder-nnlo21
   (MAD 3.5, ≤ 1 %); ours uses plain equal weights (rule), trimmed values only
   as a diagnostic.
 - D production complete (07:07): b1 2383/2384, everything else done.
+
+### 7 Oct, 07:30–08:00: AK's correction of the instructions (fefa1bc) and what changed
+**The correction.** AK pushed fefa1bc (merged here as 014c275): production must
+use the DEFAULT technical cut (1e-9 W², no `TECHMIN`); the lowered cut
+min(1e-10 W², 1e-8 Q²) enters only through a separate difference run
+`TECHDIFF=1 TECHMIN="1d-10 1d-8" VEGAS_EQUAL=2` (same arguments) whose seed
+average is added with errors in quadrature. Reason (MPP, `runs/tcut11`, mode
+1): direct TECHMIN runs are contaminated by rare garbage events. Also for D
+("add a TECHDIFF correction run"). Cross-checks redefined (cut convergence via
+TECHDIFF + TECHREF; plain slicing with its own TECHDIFF; fixed-point test with
+high statistics + TECHDIFF). `P2BDROP` stays at its default.
+
+**How it relates to what I found (01:30–07:30).** Independently, my B pilot r
+with direct TECHMIN (default P2BDROP) did not reproduce: 17 of 40 seeds with
+iterations of 1e5–1e9, 10 seeds collapsed to r ≈ 0. Diagnosis on the same 40
+seeds (`$P/runs/rdiag`), total r [pb]:
+
+| variant | 2e-2 | 1e-3 | 1e-4 | 3e-5 | 1e-5 |
+|---|---|---|---|---|---|
+| pilot: TECHMIN direct, P2BDROP 1 | 29 ± 3 | −491 ± 47 | −2869 ± 763 | −5802 ± 1396 | −9855 ± 2810 |
+| v1: TECHMIN direct, P2BDROP 0 | 33 ± 2 | −657 ± 4 | −2951 ± 7 | −5336 ± 9 | −8501 ± 11 |
+| v2: default cut, P2BDROP 1 (= corrected production) | 35 ± 2 | −664 ± 5 | −2966 ± 8 | −5353 ± 10 | −8548 ± 12 |
+| v3: default cut, P2BDROP 0 (MPP r production) | 37 ± 2 | −662 ± 5 | −2966 ± 9 | −5350 ± 10 | −8545 ± 13 |
+| notebook (300 seeds, MPP) | 43 ± 5 | −666 ± 15 | −2995 ± 35 | – | −8560 ± 44 |
+
+- **Check 3 (short r run against the notebook) passes** with the default cut
+  (v2, v3); the per-seed scatter here is ~10× smaller than the MPP 300-seed
+  error suggests (the MPP set probably contained tail seeds).
+- Paired v1 − v3 (TECHMIN effect): +15.8 ± 9.6 (1e-4), +13.5 ± 12.3 (3e-5),
+  +44.7 ± 14.8 (1e-5), consistent with the MPP P′ correction (≈ +11 and ≈ +47).
+  Paired v2 − v3 (drop rule, default cut): ≤ 4.6 ± 2.1 everywhere.
+- So with P2B (mode 2) the blow-ups of direct TECHMIN come through
+  P2BDROP = 1 (plain weights for events with τ₂(real) < techcut or a
+  degenerate dipole); with P2BDROP = 0 the 40 seeds were clean. This does not
+  contradict AK's mode-1 finding (no P2B there, so a different path); the
+  corrected procedure (default cut + TECHDIFF) avoids both.
+- **Correction of my 01:40 plan** ("run B with TECHMIN and P2BDROP = 0"): dropped
+  in favour of AK's procedure. Nothing of B had been submitted.
+
+**Jobs checked against the corrected text.**
+- Nothing pending used the old settings (the pending dis-D-b1 task is sliced21,
+  unaffected). Nothing cancelled.
+- D: `dis-D-lo` (nlo31 lo mode 3, 2000 seeds incl. pilot) ran with TECHMIN
+  directly, all complete. Outlier check: max |mean − 1 %-trimmed mean| = 0.77σ
+  over all bins at τ_cut 1e-4…1e-5 (clean). **Kept as a cross-check only, not
+  as the result**; its CPU (2000 × ~16 min ≈ 540 core-h) counts as spent on the
+  superseded procedure. Retired from the groups file (copy of the old file:
+  `groups.txt.v1-0740`). sliced21 b1 and the disorder runs are unaffected.
+- B pilots lo/vi/kp/r (TECHMIN direct) are checks only; the direct-TECHMIN r
+  pilot (40 × ~1.6 h ≈ 64 core-h) is unusable. v2 (40 seeds) = the corrected
+  r production setting and is included in it. Pilot b0/b1/b2 (sliced21) are
+  included in the production.
+
+**Submitted 07:55 (corrected; feeder continues hourly), `$P/runs/prod`:**
+- D: `lodef` nlo31 lo mode 3, default cut, the same seeds as the TECHMIN set
+  (1001–1016, 2001–3984; paired comparison) — 2000; `locorr` TECHDIFF — 400.
+- B (P2BSLICE=1, default cut): b1 +168 (200 with pilot), b2 +92 (100), lo 200,
+  vi 250, kp 200, r 3460 (+40 v2 = 3500), rcorr (TECHDIFF) 400. Sizing
+  (`size_b.py`, pilot per-seed scatter, optimal split): ±1 pb on the total at
+  τ_cut 3e-5 needs b2 67, vi 193, kp 168, r 3430 ≈ 5.5k core-h (±1 pb at 1e-4:
+  ≈ 3k core-h). The instructions' "about 300 r seeds" gives ≈ ±3.4 pb; AK's
+  target is ≈ 1 pb, hence 3500.
+- B cross-checks (Bx): cut convergence TECHDIFF TECHMIN="1d-11 1d-9"
+  TECHREF="1d-10 1d-8" r 200; psmc edge 1e-13 r 300, vi 64; plain slicing
+  (no P2BSLICE) lo 64, vi 64, kp 16, r 300, rcorr 100.
+- Fixed point (F; mode 1, x = 0.01, Q² = 400): b1 64, b2 64, lo 64, vi 120,
+  kp 32, r 1200, rcorr 300 (≈ 10× the MPP r statistics).
+- Every part: mean, median and trimmed mean are compared before combining.
