@@ -353,3 +353,73 @@ seeds (`$P/runs/rdiag`), total r [pb]:
   `hcacc(ncell = 160)` at every point. In the optimised build this reads 10
   values beyond `sg` and writes only the unused cells 151–160: harmless for the
   results, but a latent bug (and it prevents bounds-checked runs in mode 2).
+
+## 7 Oct, 16:20–17:00: final state and results
+All production lists are complete except 5 B r seeds, 1 B rcorr, 8 Bx conv,
+2–3 Bx edge-r seeds that crash deterministically ("double free", the
+kt_jets bug above; ≥ 4 attempts). Feeder stopped (`groups.txt.stop`, pending
+feeder 48766335 cancelled). Combined numbers in `nnlo21/cluster/results/`
+(raw outputs stay in `$P/runs`). **Plain equal-weight means are the results
+(AK); everything marked DIAG is a diagnostic only.**
+
+### A: NNLOJET (`results/nnlojet/`, `parts.txt`)
+11,931 production jobs (+ warmups). LO 103.2810 ± 0.0005 pb; NLO coefficient
+10.5797 ± 0.0048 pb; **NNLO coefficient 11.12 ± 1.19 pb** (target 2 % not
+reached: ±1.19 is 11 %; dominated by RRa_3 ±0.80 and RRb_3 ±0.63 pb, heavy-
+tailed RR parts; RRa warmups frozen after 2–3 iterations). Seed scatter =
+NNLOJET's quoted errors for all parts (ratio 0.8–1.1).
+
+### B: ours, ZEUS, P2B slicing, default cut + TECHDIFF (`results/B_*`)
+- NLO (b1 200 + lo 200): 10.48 ± 0.08, 10.45 ± 0.09, 10.48 ± 0.10 pb at τ_cut
+  1e-4, 3e-5, 1e-5; NNLOJET 10.580 ± 0.005 (pulls −1.3, −1.4, −0.9).
+- **NNLO, plain means: not usable below τ_cut 5e-4.** r (3,495 seeds) and its
+  TECHDIFF correction rcorr (399) contain blow-up seeds: r has 41 seeds with a
+  VEGAS iteration > 1e6 (median 9e3) and seeds with −inf cells at 3e-5/1e-5;
+  rcorr has 100 seeds with an iteration > 1e4 (median 1e2), values up to 1e163.
+  Plain NNLO total: 41.8 ± 2.1 (5e-4), then 1.0e4, 4.3e5, −inf, −inf.
+  (The 40-seed tests — v2, and AK's 60-seed TECHDIFF runs — were too small to
+  show this.)
+- DIAG (r: 64 of 3495 seeds, rcorr: 100 of 399 left out for non-finite cells or
+  an iteration > 1e5 / 1e4): NNLO total 18.1 ± 0.6 (2e-3), 24.0 ± 0.8 (1e-3),
+  33.2 ± 1.7 (5e-4), 40.7 ± 1.8 (2e-4), 48.1 ± 2.0 (1e-4), 49.3 ± 5.8 (3e-5),
+  50.1 ± 6.0 (1e-5) pb.
+- **Against NNLOJET (11.1 ± 1.2 pb): a factor ~4, 6–16σ at τ_cut ≤ 5e-4**
+  (DIAG numbers; the plain ones are undefined there). Our values still rise
+  between 2e-4 and 1e-4. **This contradicts the MPP statement (6 Oct) that
+  projected slicing is flat from 2e-4 (40.1 … 43.2 pb)**, and it puts the
+  whole NNLO 2+1 result in mode 2 into question (our side or the comparison).
+  Only at τ_cut 2e-2 … 1e-2 (11.3, 11.8) is ours close to NNLOJET, which there
+  is presumably a coincidence of power corrections.
+- Cross-checks (paired seeds where possible; DIAG = blow-up seeds left out):
+  - psmc edge 1e-13 − 1e-12, r: +10.8 ± 3.4 (1e-3), +22.0 ± 6.7 (1e-4),
+    +27 ± 9 (3e-5), +44 ± 11 (1e-5) (DIAG; plain: +9.5 ± 5.1 at 1e-3, +20.9 ±
+    18.7 at 1e-4). **Contradicts the MPP finding "r unchanged with edge
+    1e-13"**; vi: +0.23 ± 0.25 (1e-4), unchanged.
+  - cut convergence (TECHDIFF 1e-11/1e-9 against 1e-10/1e-8): 111 of 192 seeds
+    blow up; DIAG rest +4 ± 5 (1e-4), +1 ± 21 (3e-5), +20 ± 30 (1e-5).
+  - plain slicing: r(plain) − r(P2B), paired, DIAG: −8.7 ± 2.7 (1e-3), −9.7 ±
+    4.5 (1e-4); plain rcorr DIAG +3.4 ± 1.5 (1e-4), +44.5 ± 4.9 (1e-5).
+
+### F: fixed point x = 0.01, Q² = 400 (`results/F_*`)
+- NLO: 16.68 ± 0.05, 16.82 ± 0.07, 16.80 ± 0.08 at 1e-4, 3e-5, 1e-5 against
+  DISENT 16.885 ± 0.04.
+- NNLO plain: 11.91 ± 0.26 (2e-3), 11.05 ± 0.34 (1e-3), 10.46 ± 0.44 (5e-4),
+  10.33 ± 0.53 (2e-4), 11.47 ± 0.75 (1e-4); −74 ± 66 (3e-5) and −2608 ± 3100
+  (1e-5) from rcorr blow-ups. DIAG (3 r, 9 rcorr seeds left out): 11.19 ± 0.74
+  (1e-4), 11.7 ± 5.5 (3e-5), 7.1 ± 6.4 (1e-5); without the correction 11.1 ±
+  0.8 (3e-5), 7.3 ± 1.0 (1e-5). The plateau 5e-4 … 1e-4 is ≈ 10.3–11.5,
+  **≈ 2 above the MPP plateau 8.5 ± 1.2** (1.5σ of the MPP error); the
+  TECHDIFF correction is too noisy to resolve 3e-5 and 1e-5.
+
+### D: NNLO 1+1 by P2B (`results/D_*`)
+b1 2400, lo 2000, disorder p2b 1600, inclusive 16. χ²/15 against disorder:
+33.0, 25.3, 22.6, 22.4 at τ_cut 2e-4, 1e-4, 3e-5, 1e-5 (largest pull 2.8σ),
+power corrections above. Inclusive total −42.1305 ± 0.0067 vs −42.1368 ±
+0.0001. Errors: ours ≤ 0.44 ‰ of the LO jet rate (1346.4 pb) per bin at 1e-4
+(0.50 ‰ at 3e-5) except y −1…−0.5 and −0.5…0 (2.5 ‰, b1 outlier seeds);
+disorder ≤ 0.61 ‰. b1 trimmed-vs-plain (DIAG) as in the 11:20 entry.
+
+### CPU (user time, approximate)
+A ≈ 16k core-h (incl. warmups ≈ 2k); B ≈ 7.5k; F ≈ 2.2k; Bx ≈ 1.4k;
+D ≈ 1.9k (incl. the duplicate lodef 0.54k and invalid locorr 0.1k); pilots and
+diagnostics ≈ 0.5k; lost to the 10:18 outage and node failures ≈ 3k.

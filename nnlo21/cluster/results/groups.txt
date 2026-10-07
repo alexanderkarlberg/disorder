@@ -1,0 +1,37 @@
+# NAME LIST TIME MEM CPUS EXCLUDE|- [NEEDS]   (fed hourly by nnlo21/cluster/feeder.sh)
+# 7 Oct 07:50: corrected instructions (fefa1bc): default cut + TECHDIFF; the TECHMIN-direct D lo list (dis-D-lo) is retired (kept as cross-check, never resubmitted)
+dis-D-b1 /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/D/b1/jobs.list 2:00:00 1000MB 1 et[07-40]
+dis-D-dis /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/D/dis/jobs.list 2:00:00 1000MB 1 et[07-40]
+dis-D-incl /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/D/incl/jobs.list 0:30:00 1000MB 1 et[07-40]
+dis-D-lo0 /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/D/lo0/jobs.list 0:30:00 1000MB 1 et[07-40]
+dis-D-lodef /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/D/lodef/jobs.list 2:00:00 1000MB 1 et[07-40]
+# retired 11:40 (TECHDIFF not implemented for lo; invalid): dis-D-locorr /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/D/locorr/jobs.list 2:00:00 1000MB 1 et[07-40]
+dis-B-b1 /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/B/b1/jobs.list 2:00:00 1000MB 1 et[07-40]
+dis-B-b2 /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/B/b2/jobs.list 3:00:00 1000MB 1 et[07-40]
+dis-B-lo /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/B/lo/jobs.list 1:00:00 1000MB 1 et[07-40]
+dis-B-vi /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/B/vi/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-B-kp /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/B/kp/jobs.list 1:00:00 1000MB 1 et[07-40]
+dis-B-r /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/B/r/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-B-rcorr /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/B/rcorr/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-F-b1 /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/F/b1/jobs.list 2:00:00 1000MB 1 et[07-40]
+dis-F-b2 /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/F/b2/jobs.list 3:00:00 1000MB 1 et[07-40]
+dis-F-lo /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/F/lo/jobs.list 1:00:00 1000MB 1 et[07-40]
+dis-F-vi /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/F/vi/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-F-kp /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/F/kp/jobs.list 1:00:00 1000MB 1 et[07-40]
+dis-F-r /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/F/r/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-F-rcorr /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/F/rcorr/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-Bx-conv /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/Bx/conv/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-Bx-edge-r /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/Bx/edge-r/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-Bx-edge-vi /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/Bx/edge-vi/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-Bx-plain-lo /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/Bx/plain-lo/jobs.list 1:00:00 1000MB 1 et[07-40]
+dis-Bx-plain-vi /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/Bx/plain-vi/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-Bx-plain-kp /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/Bx/plain-kp/jobs.list 1:00:00 1000MB 1 et[07-40]
+dis-Bx-plain-r /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/Bx/plain-r/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-Bx-plain-rcorr /ptmp/mpp/akarlber/disorder-nnlo21/runs/prod/Bx/plain-rcorr/jobs.list 6:00:00 1000MB 1 et[07-40]
+dis-nj-prod /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/prod.list 4:00:00 2000MB 1 et[07-40]
+dis-nj-RRb5 /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/prod-RRb_5.list 4:00:00 2000MB 1 et[07-40] /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/warmup/RRb_5/s1/done
+dis-nj-RRa1 /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/prod-RRa_1.list 4:00:00 2000MB 1 et[07-40] /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/warmup/RRa_1/s1/done
+dis-nj-RRa2 /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/prod-RRa_2.list 4:00:00 2000MB 1 et[07-40] /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/warmup/RRa_2/s1/done
+dis-nj-RRa3 /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/prod-RRa_3.list 4:00:00 2000MB 1 et[07-40] /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/warmup/RRa_3/s1/done
+dis-nj-RRa4 /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/prod-RRa_4.list 4:00:00 2000MB 1 et[07-40] /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/warmup/RRa_4/s1/done
+dis-nj-RRa5 /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/prod-RRa_5.list 4:00:00 2000MB 1 et[07-40] /ptmp/mpp/akarlber/disorder-nnlo21/runs/nnlojet/warmup/RRa_5/s1/done

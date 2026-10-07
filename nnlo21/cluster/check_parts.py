@@ -7,6 +7,15 @@ CELL (mode 1) rows. Prints the worst bins and the most extreme seeds.
   check_parts.py 'glob [glob...]' [...]"""
 import glob, os, sys
 import numpy as np
+import re as _re
+
+
+def ff(x):
+    """Fortran reals, including 3-digit exponents written without E (1.0-154)"""
+    try:
+        return float(x)
+    except ValueError:
+        return float(_re.sub(r"(\d)([+-]\d{3})$", r"\1E\2", x))
 
 
 def rows(f):
@@ -14,11 +23,11 @@ def rows(f):
     for l in open(f):
         w = l.split()
         if l.startswith(' ZCELL '):
-            r.append([float(x) for x in w[4:]])
+            r.append([ff(x) for x in w[4:]])
         elif l.startswith(' LCELL '):
-            r.append([float(x) for x in w[2:]])
+            r.append([ff(x) for x in w[2:]])
         elif l.startswith(' CELL '):
-            r.append([float(x) for x in w[3:]])
+            r.append([ff(x) for x in w[3:]])
     return np.array(r) if r else None
 
 
