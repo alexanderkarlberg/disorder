@@ -329,3 +329,27 @@ seeds (`$P/runs/rdiag`), total r [pb]:
   8–15 against a robust 12 pb; trimmed = plain within 1σ) and reached only
   1.34 ‰ in its worst bin with 600 seeds. Added 1,000 seeds (2593–3592,
   array 48759492, ≈ 280 core-h) → ≈ 0.8 ‰ expected.
+- **AK's decision (7 Oct ~11:50):** plain equal-weight means are the result for
+  every part (A, B, D, F); trimmed means and medians are reported only as
+  diagnostics alongside, until the comparison is ready. No seeds are dropped.
+- **Crash of B r seed 4711 (reproducible, diagnosed; not fixed during the
+  production).** Same seed reruns on gt37 and ct30 crash identically after
+  iteration 1 (−10044.6050 ± 1374.8). A `-O2 -g -fbacktrace` build
+  (`$P/builds/nlo31-g`) gives: abort in `free` returning from `kt_jets`,
+  called from `zeus_jets` ← `zeus_bins` ← `accept_zeus` ← `real_evalv`
+  (nlo31.f90:539, a mapped dipole configuration) ← `real_part`. Cause:
+  in `kt_jets`, if a momentum is NaN (numerically degenerate mapped Born),
+  every comparison with `dmin` is false, so `ii` stays 0 with `beam = .true.`
+  and `jets(:,nj) = q(:,act(0)); act(0) = act(m)` writes before the automatic
+  array `act` → heap-header corruption → "double free or corruption (out)".
+  Proposed fix (for AK, on thA371a): in `kt_jets` (and `zeus_jets`), treat
+  `ii == 0` / non-finite momenta as a failed event (pass = .false. or
+  sg = NaN, which `real_part` already drops). Corrupting the malloc header
+  aborts the program, so other jobs' results are not silently affected; the
+  seed is left out (the feeder stops after 4 attempts). Effect of losing one
+  of 3,500 r seeds: negligible.
+- Also found with a bounds-checked build (`$P/builds/nlo31-bc`): line 625
+  `hcacc = hcacc + sg*w*wgt` adds `sg(nv)` (nv = 150 in mode 2) to
+  `hcacc(ncell = 160)` at every point. In the optimised build this reads 10
+  values beyond `sg` and writes only the unused cells 151–160: harmless for the
+  results, but a latent bug (and it prevents bounds-checked runs in mode 2).
