@@ -285,3 +285,47 @@ seeds (`$P/runs/rdiag`), total r [pb]:
 - Done by 11:20: D lodef 1714/2000, locorr 348/400; B b1 165/168, b2 92, kp 200,
   lo 194/200; F lo 64, kp 31; NNLOJET RRb_5 592/700, all other A parts
   complete except RV_3 (rerunning).
+
+### 7 Oct, 11:20–12:00
+- **TECHMIN/TECHDIFF act only on nlo31 part r.** The technical cut s_min <
+  min(cw W², cq Q²) and the TECHDIFF weight live in `real_part` only
+  (`dis31/nlo31.f90` l. 576–590); lo, vi, kp ignore both. Checked: D lo with
+  the default cut (`lodef`) is bit-identical to the direct-TECHMIN D lo for
+  all 1,714 common seeds (1,698 production + 16 pilot). Consequences:
+  - **Correction of my 07:50 entry:** the TECHMIN-direct D lo set was not
+    "superseded" and no CPU was wasted on it; it *is* the default-cut result
+    and is the D result. The `lodef` set (≈ 540 core-h) is a duplicate
+    (kept, it confirms the identity).
+  - The D "TECHDIFF correction" is zero by construction (D's nlo31 part is lo
+    only). My `locorr` runs integrated the full lo integrand with equal-weight
+    iterations, not a difference: invalid. 348 finished (≈ 95 core-h wasted);
+    the remaining 52 running tasks were cancelled by job id (array 48754221),
+    and the group is retired in `groups.txt`.
+  - Likewise the B pilots lo/vi/kp with TECHMIN equal the default-cut runs;
+    only the r pilot differs (and was the unstable one).
+- Outage bookkeeping: 3,037 attempt entries of tasks killed 10:15–10:25
+  removed from the `attempts` files (copies in `attempts.outage`; list of
+  task ids in `$P/runs/outage_tasks.txt`); no line has more than 2 attempts.
+- Crash: B r seed 4711 (48754427_2711, gt37) died after iteration 1 with
+  "double free or corruption (out)" (the only one of 3,322 B r logs).
+  Rerun with the same seed on gt37 (48759484) and elsewhere (48759485),
+  `$P/tests/crash4711`.
+- **D final** (`$P/runs/D_final.txt`, `.json`): b1 2400, lo 2000, disorder p2b
+  600, inclusive 16, LO jet rate 1346.36 pb. χ²/15 against disorder: 24.2,
+  18.0, 15.8, 16.3 at τ_cut 2e-4, 1e-4, 3e-5, 1e-5 (largest pull 2.8σ, y
+  1.5–2.5 at 1e-4); above 2e-4 power corrections (χ² 287 at 1e-3). Inclusive
+  total −42.1305 ± 0.0067 against −42.1368 ± 0.0001. Errors (ours) ≤ 0.44 ‰
+  of the LO jet rate per bin at 1e-4 (0.50 ‰ at 3e-5), except the two y bins
+  −1…−0.5 and −0.5…0 (2.5 ‰), which are dominated by a few b1 outlier seeds.
+- **b1 trimmed vs plain (AK asked; diagnostic only, no seeds dropped):**
+  1 % trimmed mean (24 of 2400 seeds per side per cell) minus plain mean,
+  ‰ of the LO jet rate, at τ_cut 1e-4: y −1…−0.5 −2.80 (−1.1σ), y −0.5…0
+  +2.83 (+1.1σ), p_T 20–30 −0.21 (−0.6σ), p_T 30–50 +0.10 (+1.0σ), all other
+  bins ≤ 0.11 ‰ (≤ 0.3σ); same at 3e-5 and 1e-5. The outliers move weight
+  between the two neighbouring y bins (events whose O(event) and O(Born) fall
+  on either side of y = −0.5). With trimming the largest error drops to
+  0.32 ‰ (1e-4); χ²/15 16.9, 12.8, 13.6 at 1e-4, 3e-5, 1e-5.
+- The disorder reference is also heavy-tailed (per-seed scatter 44 pb in p_T
+  8–15 against a robust 12 pb; trimmed = plain within 1σ) and reached only
+  1.34 ‰ in its worst bin with 600 seeds. Added 1,000 seeds (2593–3592,
+  array 48759492, ≈ 280 core-h) → ≈ 0.8 ‰ expected.

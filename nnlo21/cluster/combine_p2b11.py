@@ -46,14 +46,25 @@ def me(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    for o in ('b1', 'lo', 'incl', 'dis', 'lo0', 'json'):
+    for o in ('b1', 'lo', 'locorr', 'incl', 'dis', 'lo0', 'json'):
         ap.add_argument('--' + o)
     a = ap.parse_args()
     fb1 = [lcell(f) for f in files(a.b1)]
     flo = [lcell(f) for f in files(a.lo)]
     tc = [t for t, c in fb1 if t][0]
     B1 = me([c for t, c in fb1 if c is not None])
+    if os.environ.get('TRIM_B1'):
+        # diagnostic only (AK decides): 1% trimmed mean of b1 per cell (>= 1 seed per side)
+        x = np.array([c for t, c in fb1 if c is not None]); n = len(x); k = max(1, int(round(0.01*n)))
+        s = np.sort(x, axis=0)[k:n - k]
+        print('b1 TRIMMED (diagnostic, %d of %d seeds per side removed per cell)' % (k, n))
+        B1 = (s.mean(0), s.std(0, ddof=1)/np.sqrt(len(s)), len(s))
     LO3 = me([c for t, c in flo if c is not None])
+    if a.locorr:
+        # TECHDIFF correction of lo (default cut -> min(1e-10 W2, 1e-8 Q2)), added in quadrature
+        LC = me([c for t, c in (lcell(f) for f in files(a.locorr)) if c is not None])
+        print('lo TECHDIFF correction: %d seeds; largest |corr|/err %.1f' % (LC[2], np.max(np.abs(LC[0][1:])/np.maximum(LC[1][1:], 1e-300))))
+        LO3 = (LO3[0] + LC[0], np.sqrt(LO3[1]**2 + LC[1]**2), LO3[2])
     I2 = me([load_disorder(f) for f in files(a.incl)])
     D2 = me([load_disorder(f) for f in files(a.dis)])
     L0 = me([load_disorder(f) for f in files(a.lo0)]) if a.lo0 else None
