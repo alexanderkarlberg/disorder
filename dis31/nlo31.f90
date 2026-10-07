@@ -438,7 +438,7 @@ contains
        if (res /= res) then
           res = 0; return
        endif
-       hcacc = hcacc + res*wgt*acc
+       hcacc(1:nv) = hcacc(1:nv) + res*wgt*acc
        res = res*vtarget(acc)
     elseif (res /= 0) then
        call fill(Q2, res*wgt)
@@ -622,7 +622,7 @@ contains
        if (any(sg /= sg)) then
           res = 0; return
        endif
-       hcacc = hcacc + sg*w*wgt
+       hcacc(1:nv) = hcacc(1:nv) + sg*w*wgt
        res = vtarget(sg)*w
        if (p2bdebug .and. abs(res) > 1e9_dp) then
           write(0,'(a,es12.4,a,es12.4,a,es12.4)') ' DBG BIG res', res, ' smin/W2', smin/W2, ' w', w
@@ -692,6 +692,12 @@ contains
     real(dp), intent(out) :: F(nv)
     real(dp) :: t2, tz
     integer :: k, b, i
+    ! non-finite momenta (numerically degenerate mapped configurations, 7 Oct
+    ! cluster: NaN made kt_jets write act(0), "double free or corruption"):
+    ! the configuration is not accepted; with P2B it marks a degenerate dipole
+    if (any(p /= p) .or. any(pin /= pin) .or. any(abs(p) > huge(1.0_dp)/4)) then
+       F = 0; degen = .true.; return
+    endif
     if (mode == 0) then
        F(1) = merge(1.0_dp, 0.0_dp, njets(p, n) >= njmin)
        return
@@ -1027,6 +1033,7 @@ contains
              endif
           enddo
        enddo
+       if (ii == 0) exit
        if (beam) then
           nj = nj + 1; jets(:,nj) = q(:,act(ii))
           act(ii) = act(m); m = m - 1
@@ -1177,6 +1184,7 @@ contains
              endif
           enddo
        enddo
+       if (ii == 0) exit
        if (beam) then
           if (pt2(ii) > ptmin**2) nj = nj + 1
           act(ii) = act(m); m = m - 1
@@ -1429,8 +1437,12 @@ program nlo31
      nob = 15; nv = ntc*nob; iv = ntc
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
      call get_environment_variable('ZFIX', arg)
-     if (trim(arg) == '1') then
-        zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
+     if (trim(arg) == '1' .or. trim(arg) == '2') then
+        ! ZFIX = 1: window with the mode-1 observable; 2: with the ZEUS jet
+        ! selection (7 Oct)
+        if (trim(arg) == '1') then
+           zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
+        endif
         q2lo = Q2fix*(1 - zfw/2); q2hi = Q2fix*(1 + zfw/2)
         ylo = Q2fix/(xfix*s)*(1 - zfw/2); yhi = Q2fix/(xfix*s)*(1 + zfw/2)
         write(*,'(a,4es14.6)') ' ZFIX window Q2, y:', q2lo, q2hi, ylo, yhi

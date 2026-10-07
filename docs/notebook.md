@@ -2716,3 +2716,45 @@ DIS. Next: NLO test in the ZEUS set-up.
   The plateau ≈ 8.5 from 5e-4 to 1e-4 stands. At 3e-5 and 1e-5 the values
   are 1.3–1.5σ above it: consistent, with a slight upward tendency that
   needs the cluster statistics.
+
+**Cluster results (7 Oct, `2026-10-nnlo21-cluster`, merged): our ZEUS NNLO
+disagrees with NNLOJET.**
+- NNLOJET (11,931 jobs): LO 103.2810 ± 0.0005, NLO coefficient 10.5797 ±
+  0.0048, **NNLO coefficient 11.12 ± 1.19 pb**.
+- Ours (projected slicing, default cut + TECHDIFF, ≈ 10× the MPP
+  statistics): 11.3, 11.8, 12.6, 18.1, 24.0, 33.2 ± 1.7, 40.7 ± 1.8,
+  48.1 ± 2.0, 49.3 ± 5.8, 50.1 ± 6.0 from τ_cut 2e-2 to 1e-5.
+  - The excess at 1e-4 is 18–45% of LO in every bin, also far from the
+    cuts. The NLO agrees with NNLOJET.
+- **Corrections of my statements:**
+  - "Flat from 2e-4 at ≈ 41 pb" (6 Oct, page v18) is wrong: the coefficient
+    keeps rising and is ≈ 4× NNLOJET.
+  - "psmc edge 1e-13: r unchanged" is wrong: with 300 seeds r moves by
+    +10.8 ± 3.4 (1e-3), +22 ± 7 (1e-4), +44 ± 11 (1e-5). My 100 seeds had
+    ±8 and I read "within errors" as "unchanged".
+  - The fixed-point NNLO plateau has no independent reference; it only
+    shows τ_cut independence. The cluster gets 10.3–11.5 there (5e-4…1e-4),
+    against my 8.5 ± 1.2.
+- Not affected: the NLO (P2B and plain) and the NNLO 1+1 by P2B (D:
+  χ²/15 of 22–33 at τ_cut ≤ 2e-4, inclusive total −42.1305 ± 0.0067
+  against −42.1368).
+- Bugs reported by the cluster, fixed here:
+  - `kt_jets`: NaN momenta gave ii = 0 and a write to act(0), "double
+    free". Now `accept` rejects configurations with non-finite momenta
+    (and flags them as degenerate for P2B), and `kt_jets`/`njets` exit on
+    ii = 0.
+  - `hcacc = hcacc + sg…`: shape mismatch (160 vs 150 in mode 2). Now
+    `hcacc(1:nv)`.
+  - Bit-identical on normal events (plain, P2B, mode 1, lo).
+- Reasoning towards the cause:
+  - At the fixed point the NNLO is plausible (14–18% of LO), and mode 2 in
+    a window there with the τ_zQ observable reproduced mode 1 (ZFIX, 6 Oct).
+  - The excess is everywhere in ZEUS, including Q² 125–250 next to that
+    point.
+  - Suspect: the ZEUS jet selection as observable, i.e. a non-cancellation
+    that appears only at NNLO.
+- Test running (`runs/zwin`): the same window (x = 0.01, Q² = 400) with
+  ZFIX = 1 (τ_zQ) against ZFIX = 2 (ZEUS selection, new option), all
+  parts. A window is also small enough for an NNLOJET reference.
+- Replays of the cluster's crash seed (4711) and blow-up seeds (2087, 2367)
+  running, with the old and the fixed binary.
