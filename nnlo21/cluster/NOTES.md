@@ -419,7 +419,9 @@ power corrections above. Inclusive total −42.1305 ± 0.0067 vs −42.1368 ±
 (0.50 ‰ at 3e-5) except y −1…−0.5 and −0.5…0 (2.5 ‰, b1 outlier seeds);
 disorder ≤ 0.61 ‰. b1 trimmed-vs-plain (DIAG) as in the 11:20 entry.
 
-### CPU (user time, approximate)
-A ≈ 16k core-h (incl. warmups ≈ 2k); B ≈ 7.5k; F ≈ 2.2k; Bx ≈ 1.4k;
-D ≈ 1.9k (incl. the duplicate lodef 0.54k and invalid locorr 0.1k); pilots and
-diagnostics ≈ 0.5k; lost to the 10:18 outage and node failures ≈ 3k.
+### CPU (user time from the time.log files of the last attempts)
+A: NNLOJET production 12,806 core-h, warmups 782 (+ ≈ 1,900 for the five RRa
+warmups killed at 10:18, 32 threads × 11.7 h, not in time.log); B 5,570;
+F 1,606; Bx 1,135; D 2,556 (incl. the duplicate lodef ≈ 540 and the invalid
+locorr ≈ 100); pilots 113; r diagnosis 166. Attempts lost to the 10:18 outage
+and to node failures are not included (several hundred core-h).
