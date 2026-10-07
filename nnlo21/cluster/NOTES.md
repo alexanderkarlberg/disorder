@@ -267,3 +267,21 @@ seeds (`$P/runs/rdiag`), total r [pb]:
   until it has left the queue, and writes `done` + `frozen`. Expected release:
   RRa_1/4/5 ≈ 11:30, RRa_2/3 ≈ 17:30. RRa production jobs (120k points) will
   take ~1.2–1.8 h each.
+
+### 7 Oct, 08:20–11:30 (session paused ~09:05–11:20)
+- **Cluster-wide failure 10:18–10:20:** every running job of mine was killed
+  (state FAILED, exit 1, after ~43 min for the B r tasks), and every task that
+  started in those minutes FAILED at launch with exit 0:53 (no output). Other
+  users were hit the same way (sqzhang 18,260 FAILED, jmhenn 13; proVBFH
+  hxswg136 128). Mine: B r 3,458, vi 250, rcorr 400, F 1,800+, Bx ~1,000,
+  D lodef/locorr ~340, the 5 RRa warmups. The feeder resubmitted everything
+  at its next run; all are running again.
+- The RRa warmups (48707779_8…_12) died in that event after 2–3 iterations
+  (RRa_3: 2, others 3). The hook then froze them (their grids were last
+  written at 06:11–08:20, well before the kill, so they are intact) and
+  released the RRa production (arrays 48755142, 48755244–48755247, 500 each).
+  Caveat: fewer warmup iterations than planned (4), so the RRa grids are less
+  adapted and the per-job variance is presumably larger.
+- Done by 11:20: D lodef 1714/2000, locorr 348/400; B b1 165/168, b2 92, kp 200,
+  lo 194/200; F lo 64, kp 31; NNLOJET RRb_5 592/700, all other A parts
+  complete except RV_3 (rerunning).
