@@ -257,3 +257,13 @@ seeds (`$P/runs/rdiag`), total r [pb]:
   cuts) and v1/v2 r are clean.
 - Cluster saturated at 07:50 (all et nodes down*/completing, ~52 ct/gt/kt
   nodes usable); B/F/D-lodef wait behind the NNLOJET jobs (FIFO, same nice).
+- 08:20: RRa warmups are slower than estimated: 3.2 h per 10M iteration
+  (RRa_1/4/5) and 4.8 h (RRa_2/3) on 32 threads (37–55 ms per point), so
+  6 iterations would take 19–29 h (RRa_2/3 beyond the 24 h limit, and then no
+  `done` marker, so their production would never be released). Added
+  `nnlo21/cluster/freeze_warmup.sh`, run hourly by the feeder through
+  `groups.txt.hook`: once a warmup has written 4 iterations (or its job ended
+  with ≥ 1 grid) it cancels that warmup task by id (48707779_8 … _12), waits
+  until it has left the queue, and writes `done` + `frozen`. Expected release:
+  RRa_1/4/5 ≈ 11:30, RRa_2/3 ≈ 17:30. RRa production jobs (120k points) will
+  take ~1.2–1.8 h each.

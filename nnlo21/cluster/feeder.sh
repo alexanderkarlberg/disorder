@@ -35,6 +35,8 @@ if [ -z "$(squeue -u "$USER" -h -n dis-feeder -t PD -o %i)" ]; then
         --export=ALL,GROUPFILE="$GROUPFILE",DEADLINE="$DEADLINE" \
         -o "$(dirname "$GROUPFILE")/logs-feeder/feeder.%j.out" "$S/feeder.sh"
 fi
+# optional hook (e.g. freezing warmups) before the submissions
+[ -x "$GROUPFILE.hook" ] && "$GROUPFILE.hook"
 while read -r name list tlim mem cpus excl needs; do
     case "$name" in ''|\#*) continue;; esac
     [ "${excl:-}" = - ] && excl=
