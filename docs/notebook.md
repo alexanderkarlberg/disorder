@@ -2758,3 +2758,35 @@ disagrees with NNLOJET.**
   parts. A window is also small enough for an NNLOJET reference.
 - Replays of the cluster's crash seed (4711) and blow-up seeds (2087, 2367)
   running, with the old and the fixed binary.
+
+**Cause found (7 Oct evening): inverse-variance iteration weighting biases
+r.**
+- Window test (`runs/zwin`; x = 0.01, Q² = 400, relative width 1e-3):
+  - z1 (τ_zQ) against the fixed-point runs, part by part (normalised to b0):
+    b1, b2, lo, kp agree; vi −0.9 ± 0.7; **r +4.7 ± 1.4 (5e-3), +15.2 ± 4.2
+    (2e-4), +13.4 ± 5.3 (1e-4), +27.7 ± 8.6 (1e-5)**;
+  - z2 (ZEUS selection) grows like the full ZEUS result. Statistics too
+    low to separate it from z1.
+- The cells are combined over iterations with weights 1/σ²_it of the VEGAS
+  target. For a heavy-tailed integrand like R − D that is biased. In the
+  target cell (total, 1e-5), equal-weight iteration average against the
+  weighted cell:
+  - window r: −3300 ± 13 against −3249 (+51);
+  - fixed point (1M points): −3281 ± 3 against −3277 (+4);
+  - **ZEUS P2B production r (300 seeds): −8620.4 ± 8.5 against −8570.6,
+    bias +49.8 ± 7.1 pb (7σ)**;
+  - b2, vi, kp, lo, b1: |bias| ≤ 0.5 pb.
+- The bias makes r less negative, i.e. the NNLO too large: the direction
+  and size of our excess over NNLOJET.
+  - Corrected at that one cell: P2B NNLO 43.2 → −6.6 ± 10.7 pb at 1e-5,
+    against NNLOJET 11.1 ± 1.2 (1.7σ).
+  - The other cells need reruns.
+- My earlier dismissal of the 6 Oct ZFIX "vi 1–2% low" as ≈ 2 pb was wrong
+  in size (vi is large, so 1–2% is a big fraction of the NNLO). The new
+  window data show vi consistent (−0.9 ± 0.7); the real problem was r.
+- Fix: `VEGAS_EQUAL=2` (equal-weight iterations 2…itmx) for r; the
+  TECHDIFF runs already used it.
+- Reruns (`runs/zeq`):
+  - ZEUS P2B r 300 seeds (same seeds as r2);
+  - window r for z1 and z2, 80 seeds each;
+  - fixed-point r 120.
