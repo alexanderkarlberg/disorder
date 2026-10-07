@@ -2790,3 +2790,16 @@ r.**
   - ZEUS P2B r 300 seeds (same seeds as r2);
   - window r for z1 and z2, 80 seeds each;
   - fixed-point r 120.
+- **Equal-weight reruns (`runs/zeq`, VEGAS_EQUAL = 2):**
+  - ZEUS P2B NNLO total (b2, vi, kp existing + r 291 seeds + TECHDIFF): 10.6
+    ± 1.5, 12.6 ± 1.9, 11.2 ± 2.4, 11.2 ± 2.7, 12.3 ± 3.1, 11.8 ± 4.4,
+    13.7 ± 4.2, 14.6 ± 4.7, −1.7 ± 7.5, −8.5 ± 9.2 (2e-2 … 1e-5), against
+    NNLOJET 11.12 ± 1.19.
+    - Flat and in agreement down to 1e-4.
+    - 3e-5 and 1e-5 low (1.7–2σ); r mean is ≈ 2σ below the median there
+      (outliers).
+    - Some high-p̄_T/m₁₂ bins are 2–4σ high at 2e-4…1e-4.
+  - Window z1 against the fixed point (both equal weights): agree (one
+    3σ column at 5e-3).
+- Cluster instructions updated (section "UPDATE 7 Oct evening"): rerun all
+  r with VEGAS_EQUAL = 2, outlier report, debug replays.

@@ -7,6 +7,55 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 7 Oct evening (read this first): rerun r with equal iteration weights
+
+**Cause of the ZEUS NNLO excess.** By default `nlo31` combines the histogram
+cells over iterations with weights 1/σ²_it of the VEGAS target. For the
+heavy-tailed part r (real − dipoles) this is biased upwards. In the target
+cell (total, τ_cut 1e-5), the MPP P2B production had an equal-weight
+iteration average of −8620.4 ± 8.5 against the reported −8570.6: a bias of
+**+49.8 ± 7.1 pb**. The other parts (b0, b1, b2, lo, vi, kp) have
+|bias| ≤ 0.5 pb.
+
+With r rerun on thA371a with `VEGAS_EQUAL=2` (291 seeds, otherwise the MPP
+settings), plus the existing b2, vi, kp and the TECHDIFF correction, the
+ZEUS NNLO total is 10.6 ± 1.5, 12.6, 11.2, 11.2, 12.3, 11.8 ± 4.4,
+13.7 ± 4.2, 14.6 ± 4.7 pb from τ_cut 2e-2 to 1e-4. NNLOJET: 11.12 ± 1.19.
+At 3e-5 and 1e-5: −1.7 ± 7.5 and −8.5 ± 9.2, low by 1.7–2σ. There the
+mean of r is ≈ 2σ below its median: heavy-tailed outliers, which now count
+fully. A few high-p̄_T/high-m₁₂ bins still show excesses of 2–4σ at
+2e-4…1e-4 (p̄_T 30–60: 0.8 ± 0.2 against −0.18 ± 0.04). The mode-2
+window against the fixed point now agrees within errors.
+
+What to do:
+1. `git pull` (branch `2026-10-nnlo21`, at least the commit that added
+   this section) and rebuild sliced21/nlo31. The new commits fix the
+   `kt_jets` NaN crash (non-finite momenta are rejected; seed 4711
+   completes) and the `hcacc` bounds. They also add `ZFIX=2`, the
+   diagnostic window with the ZEUS selection.
+2. First, with existing outputs: for B r, F r and plain r, compute per
+   seed the equal-weight average of iterations 2–6 (the ` iteration` lines
+   are the target cell: total at 1e-5 in mode 2, all τ_zQ bins at 1e-5 in
+   mode 1). Compare it with the reported cell. Expect ≈ +50 pb for B r.
+   Report it.
+3. Rerun every r with `VEGAS_EQUAL=2` and otherwise unchanged settings
+   (seeds may be reused):
+   - B r, P2BSLICE = 1;
+   - F r;
+   - the B cross-checks with r: psmc edge 1e-13 (the measured "edge
+     shift" may itself be a weighting artefact), plain slicing, cut
+     convergence.
+   The TECHDIFF correction runs already used `VEGAS_EQUAL=2`; keep them.
+   b0, b1, b2, lo, vi, kp and NNLOJET need no rerun.
+4. Outliers. With equal weights a garbage iteration counts fully. Per part
+   and column, report plain mean, median and 1% trimmed mean, and the seeds
+   with any iteration beyond 20× the median |iteration| of that part. The
+   plain mean stays the result (AK); list the flagged seeds. Replay one or
+   two flagged seeds with `P2BDEBUG=1` and keep the `DBG BIG` lines for us.
+5. Report: the NNLO coefficient per bin and τ_cut against NNLOJET (B), the
+   fixed-point NNLO (F), the cross-checks. Commit to `2026-10-nnlo21-cluster`.
+   Push only with AK's OK.
+
 ## 0. First: ask AK (one message, numbered)
 
 1. Which disorder checkout: the branch `2026-10-nnlo21` was pushed on 5 Oct
