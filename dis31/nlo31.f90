@@ -40,8 +40,13 @@
 ! projection subtracted event by event: cell (k, b) gets theta(tau_2 >
 ! tcs(k)) [O_b(event) - O_b(1+1 Born at the event's x, Q^2, y)]. 16 rows:
 ! total, >= 1 jet, leading-jet p_T (7), leading-jet y (6), >= 2 jets.
+!
+! Photon + Z (env EW31 = "mode lepton", as dis31/tests; 8 Oct): the flavour
+! sums from the values with ew31's basis couplings (nc_eval), lo, kp and r
+! only (the one-loop amplitudes with Z are not there yet).
 !-----------------------------------------------------------------------
 module nlo31_mod
+  use ew31
   use psmc
   use born31
   use me41
@@ -379,11 +384,33 @@ contains
     end select
   end subroutine born_eval
 
+  ! photon + Z: born_eval with ew31's basis couplings k on the line(s) of
+  ! flavour fb
+  subroutine born_basis(Pk, fl, Q2, k, fb, val)
+    real(dp), intent(in) :: Pk(4,7), Q2
+    integer, intent(in) :: fl(4), k, fb
+    real(dp), intent(out) :: val(3)
+    ew31_basis = k; ew31_bf = fb
+    call born_eval(Pk, fl, Q2, val)
+    ew31_basis = 0
+  end subroutine born_basis
+
+  ! the weights (c11^2 + c22^2, c12^2 + c21^2)/2 of the basis values (on
+  ! the line of a quark) for a line of flavour f, c = ew31_cpl(-f) (ew31)
+  function ncw(f, Q2) result(w)
+    integer, intent(in) :: f
+    real(dp), intent(in) :: Q2
+    real(dp) :: w(2), c(2,2)
+    call ew31_cpl(-f, Q2, c)
+    w = [c(1,1)**2 + c(2,2)**2, c(1,2)**2 + c(2,1)**2]/2
+  end function ncw
+
   real(dp) function born_part(r, wgt) result(res)
     real(dp), intent(in) :: r(:), wgt
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,7), dphi, as, fpdf(-5:5), w, x, fa(-5:5)
     real(dp) :: u1(3), u2(3), u4(3), m3(3,3), c3(3,3), t(3), eq1, eq2, acc(nv)
+    real(dp) :: v1(3,2), v2(3,2), v4(3,2), va(3,2), vb(3,2), wf(2)
     logical :: ok
     integer :: f, Q, k
     res = 0
@@ -409,39 +436,61 @@ contains
     call pdfs(eta, sqrt(Q2), fpdf)
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**2
     if (trim(part) /= 'lo') w = w*as/(2*pi)
-    ! unit-charge values: q g g (d), g -> q qbar g (d), identical (d)
-    call born_eval(Pk, [1, 1, 0, 0], Q2, u1); u1 = u1*9
-    call born_eval(Pk, [0, 1, -1, 0], Q2, u2); u2 = u2*9
-    call born_eval(Pk, [1, 1, 1, -1], Q2, u4); u4 = u4*9
-    ! different flavours: (e_q, e_Q) = (d,u), (u,d), (d,s)
-    call born_eval(Pk, [1, 1, 2, -2], Q2, m3(:,1))
-    call born_eval(Pk, [2, 2, 1, -1], Q2, m3(:,2))
-    call born_eval(Pk, [1, 1, 3, -3], Q2, m3(:,3))
-    do k = 1, 3
-       call solve3(m3(k,:), c3(k,:))
-    enddo
     if (trim(part) == 'kp') then
        x = eta + (1 - eta)*r(size(r))
        call pdfs(eta/x, sqrt(Q2), fa)
     endif
-    do f = -5, 5
-       if (f == 0) then
-          ! g -> q qbar g
-          do Q = 1, 5
-             res = res + bterm(0, ech(Q)**2*u2)
-          enddo
-          cycle
-       endif
-       eq1 = ech(f)
-       res = res + 0.5_dp*bterm(f, eq1**2*u1)
-       res = res + 0.5_dp*bterm(f, eq1**2*u4)
-       do Q = 1, 5
-          if (Q == abs(f)) cycle
-          eq2 = ech(Q)
-          t = eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3)
-          res = res + bterm(f, t)
+    if (ew31_mode /= 0) then
+       ! photon + Z: basis values (diagonal, off-diagonal) on the line of
+       ! flavour 1 (and 2), weighted per flavour
+       do k = 1, 2
+          call born_basis(Pk, [1, 1, 0, 0], Q2, k, 1, v1(:,k))
+          call born_basis(Pk, [0, 1, -1, 0], Q2, k, 1, v2(:,k))
+          call born_basis(Pk, [1, 1, 1, -1], Q2, k, 1, v4(:,k))
+          call born_basis(Pk, [1, 1, 2, -2], Q2, k, 1, va(:,k))
+          call born_basis(Pk, [1, 1, 2, -2], Q2, k, 2, vb(:,k))
        enddo
-    enddo
+       do f = -5, 5
+          if (f == 0) cycle
+          wf = ncw(f, Q2)
+          if (f > 0) res = res + bterm(0, matmul(v2, wf))
+          res = res + 0.5_dp*bterm(f, matmul(v1 + v4, wf))
+          do Q = 1, 5
+             if (Q == abs(f)) cycle
+             res = res + bterm(f, matmul(va, wf) + matmul(vb, ncw(sign(Q, f), Q2)))
+          enddo
+       enddo
+    else
+       ! unit-charge values: q g g (d), g -> q qbar g (d), identical (d)
+       call born_eval(Pk, [1, 1, 0, 0], Q2, u1); u1 = u1*9
+       call born_eval(Pk, [0, 1, -1, 0], Q2, u2); u2 = u2*9
+       call born_eval(Pk, [1, 1, 1, -1], Q2, u4); u4 = u4*9
+       ! different flavours: (e_q, e_Q) = (d,u), (u,d), (d,s)
+       call born_eval(Pk, [1, 1, 2, -2], Q2, m3(:,1))
+       call born_eval(Pk, [2, 2, 1, -1], Q2, m3(:,2))
+       call born_eval(Pk, [1, 1, 3, -3], Q2, m3(:,3))
+       do k = 1, 3
+          call solve3(m3(k,:), c3(k,:))
+       enddo
+       do f = -5, 5
+          if (f == 0) then
+             ! g -> q qbar g
+             do Q = 1, 5
+                res = res + bterm(0, ech(Q)**2*u2)
+             enddo
+             cycle
+          endif
+          eq1 = ech(f)
+          res = res + 0.5_dp*bterm(f, eq1**2*u1)
+          res = res + 0.5_dp*bterm(f, eq1**2*u4)
+          do Q = 1, 5
+             if (Q == abs(f)) cycle
+             eq2 = ech(Q)
+             t = eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3)
+             res = res + bterm(f, t)
+          enddo
+       enddo
+    endif
     res = res*w
     if (mode >= 1) then
        if (res /= res) then
@@ -569,6 +618,7 @@ contains
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,8), dphi, as, fpdf(-5:5), w, smin, W2
     real(dp) :: u1(nv), u2(nv), u4(nv), u6(nv), m3(nv,3), c3(nv,3), m5(nv,3), c5(nv,3), eq1, eq2, sg(nv), F4(nv)
+    real(dp) :: n1(nv,2), n2(nv,2), n4(nv,2), n6(nv,2), nqa(nv,2), nqb(nv,2), ga(nv,2), gb(nv,2), wf(2)
     integer :: i, j, f, Q, Q2i, ic, tdw
     logical :: ok
     res = 0
@@ -657,6 +707,9 @@ contains
     endif
   contains
     subroutine eval_sg()
+       if (ew31_mode /= 0) then
+          call eval_nc(); return
+       endif
        ! unit-charge values
        call real_evalv(Pk, [1, 1, 0, 0, 0], F4, u1); u1 = 9*u1        ! q -> q g g g
        call real_evalv(Pk, [0, 1, -1, 0, 0], F4, u2); u2 = 9*u2       ! g -> q qbar g g
@@ -689,6 +742,44 @@ contains
           enddo
        enddo
     end subroutine eval_sg
+    ! photon + Z: basis values on the line of flavour 1 (and 2), as born_part
+    subroutine eval_nc()
+       integer :: k
+       do k = 1, 2
+          call real_basis([1, 1, 0, 0, 0], k, 1, n1(:,k))
+          call real_basis([0, 1, -1, 0, 0], k, 1, n2(:,k))
+          call real_basis([1, 1, 1, -1, 0], k, 1, n4(:,k))
+          call real_basis([0, 1, -1, 1, -1], k, 1, n6(:,k))
+          call real_basis([1, 1, 2, -2, 0], k, 1, nqa(:,k))
+          call real_basis([1, 1, 2, -2, 0], k, 2, nqb(:,k))
+          call real_basis([0, 1, -1, 2, -2], k, 1, ga(:,k))
+          call real_basis([0, 1, -1, 2, -2], k, 2, gb(:,k))
+       enddo
+       sg = 0
+       do f = -5, 5
+          if (f == 0) cycle
+          wf = ncw(f, Q2)
+          sg = sg + fpdf(f)*matmul(n1/6 + n4/2, wf)
+          do Q = 1, 5
+             if (Q == abs(f)) cycle
+             sg = sg + fpdf(f)*(matmul(nqa, wf) + matmul(nqb, ncw(sign(Q, f), Q2)))
+          enddo
+       enddo
+       do Q = 1, 5
+          wf = ncw(Q, Q2)
+          sg = sg + fpdf(0)*matmul(n2/2 + n6/4, wf)
+          do Q2i = Q + 1, 5
+             sg = sg + fpdf(0)*(matmul(ga, wf) + matmul(gb, ncw(Q2i, Q2)))
+          enddo
+       enddo
+    end subroutine eval_nc
+    subroutine real_basis(fl, k, fb, val)
+       integer, intent(in) :: fl(5), k, fb
+       real(dp), intent(out) :: val(nv)
+       ew31_basis = k; ew31_bf = fb
+       call real_evalv(Pk, fl, F4, val)
+       ew31_basis = 0
+    end subroutine real_basis
   end function real_part
 
   ! the quantity VEGAS integrates in mode 1: the cell iv, or a tau_2 slice
@@ -1506,6 +1597,12 @@ program nlo31
   if (len_trim(arg) > 0) then
      read(arg, *) iv
      write(*,'(a,i5)') ' VEGAS target cell', iv
+  endif
+  call get_environment_variable('EW31', arg)
+  if (len_trim(arg) > 0) then
+     read(arg, *) ew31_mode, ew31_lepton
+     write(*,'(a,2i2)') ' EW31 (mode, lepton)', ew31_mode, ew31_lepton
+     if (ew31_mode /= 0 .and. trim(part) == 'vi') stop 'vi: no one-loop amplitudes with Z yet'
   endif
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]

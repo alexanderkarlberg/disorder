@@ -2879,3 +2879,34 @@ r.**
     - harness_dip41: me41/Σ dipoles − 1 = 8e-5, as the photon.
     The ν case (pure Z, maximal parity violation) checks the helicity
     conventions of every line.
+- **Stage 1c: nlo31 flavour sums with photon + Z (8 Oct).**
+  - The photon sums use unit charges and `solve3` (charge structures); with
+    Z the couplings depend on helicity, so for `EW31 = "mode lepton"`
+    (mode 1) nlo31 evaluates every channel with ew31's basis couplings
+    (`ew31_basis` 1: c = 1 on the diagonal helicity pairs, 2: off-diagonal,
+    on the line(s) of flavour `ew31_bf`, zero elsewhere) and weights per
+    flavour with (c11² + c22², c12² + c21²)/2 of `ew31_cpl(-f)`. Exact with
+    option 1 (linear in the squared couplings per line) and tree-level
+    parity. Antiquarks from the conjugated evaluations (C invariance, as
+    me31/me41 implement them).
+  - Pitfall found on the way: the basis couplings must carry ew31's
+    quark/antiquark helicity exchange. Without it the dipoles whose mapped
+    Born has the line crossed (initial-state g → q q̄) got the wrong relative
+    helicity; the bare 4+1 was fine. Real minus dipoles was off by up to 5 %
+    (gluon and antiquark channels), opposite for e⁻ and e⁺.
+  - Evaluations per point: Born 10 (photon 6), real 16 (photon 10); r costs
+    1.8× the photon. vi stops with Z (no one-loop amplitudes yet).
+  - Checks, e⁻, e⁺, ν (point by point, against the explicit sum over
+    flavour assignments with symmetry factors):
+    - `nlo31 chk`: lo and r agree to all 11 printed digits;
+    - kp (scratch test of born_part against an explicit kp_conv sum): 13
+      digits;
+    - every 4+1 channel alone (me41 and real minus dipoles) ≤ 1e-8;
+    - photon (no EW31): lo, kp, r and the mode-1 cells bit-identical to
+      d03c2a5.
+  - With MZ → 1e10 the NC sums differ from the photon at 1e-3 point by
+    point: the photon keeps the line-line interference that option 1 drops
+    (e_q e_Q for different flavours, and the identical-flavour one). It is
+    odd under pair exchange and integrates to zero, so this is not a
+    pointwise test.
+  - `build_nlo31.sh` now compiles ew31 (since d03c2a5 it did not build).
