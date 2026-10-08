@@ -3034,3 +3034,20 @@ r.**
 - NC validation started (x = 0.1, Q² = 5000, e⁻ and ν): NLO 2+1 (sliced21
   b1 + nlo31 lo) against DISENT with `-includeZ` (tau2_nlo, new flags),
   136 jobs via the dispatcher (`runs/ncz1`).
+- **NC validation of NLO 2+1 against DISENT with Z (8 Oct, evening)**,
+  x = 0.1, Q² = 5000 (y = 0.49), τ_zQ bins, `runs/ncz1`: sliced21 b1 (8
+  seeds) + nlo31 lo (20 seeds, psmc) against tau2_nlo's DISENT reference
+  (40 × 3M events), (b1 + lo)/DISENT − 1 in %:
+  - e⁻, total bin [0.05, 0.5): −0.13 ± 0.31 (τ_cut 2e-4), +0.27 ± 0.35
+    (1e-4); all six bins within ~1σ at 1–2e-4 except [0.2, 0.3) −1.7 ± 1.1
+    and [0.4, 0.5) +7.6 ± 3.0;
+  - ν (pure Z), total bin: −0.32 ± 0.29 (2e-4), +0.09 ± 0.33 (1e-4); the
+    same two bins −2.4 ± 1.1 and +5.2 ± 2.3. The two leptons share the lo
+    seeds, so these are one correlated fluctuation (or an effect of these
+    bins at x = 0.1), not two.
+  - Below 3e-5 the sums drift up by ~1 % (2σ): the lo runs used the old
+    technical cut 1e-9 W², known to bias τ_cut ≤ 3e-5 (5–6 Oct).
+  - **Correction:** the first ν reference (s097–s136) was wrong: my new
+    `-neutrino` in tau2_nlo did not set `Zonly` (set_parameters does: no
+    photon for neutrinos), so the neutrino coupled to the photon; ours/DISENT
+    came out flat at −60 % in every bin. Fixed (tau2_nlo), rerun s137–s176.
