@@ -76,6 +76,10 @@ program tau2_nlo
   ! photon + Z: the electroweak set-up of set_parameters (mod_parameters)
   noZ = .not. log_val_opt('-includeZ')
   positron = log_val_opt('-positron'); neutrino = log_val_opt('-neutrino')
+  ! a neutrino couples only to the Z (as set_parameters)
+  if (neutrino) then
+     noZ = .false.; Zonly = .true.
+  endif
   mw = 80.398_dp; mz = 91.1876_dp
   sin_thw_sq = 1 - (mw/mz)**2; sin_2thw_sq = 4*(1 - sin_thw_sq)*sin_thw_sq
   Ae = -0.5_dp
