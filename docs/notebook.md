@@ -2803,3 +2803,29 @@ r.**
     3σ column at 5e-3).
 - Cluster instructions updated (section "UPDATE 7 Oct evening"): rerun all
   r with VEGAS_EQUAL = 2, outlier report, debug replays.
+
+**Cluster report 8 Oct (merged; `nnlo21/cluster/REPORT-2026-10-08.md`).**
+- Iteration-weighting bias confirmed in the cluster outputs: B r ≈ +40 pb;
+  F r +3.9 … +9.5 pb/GeV² (2e-4 … 1e-5).
+- ZEUS with equal weights:
+  - plain means agree with NNLOJET down to 2e-3;
+  - with flagged seeds left out, all τ_cut within 2.1σ;
+  - below 1e-3 the plain means are undefined: 59 of 3500 r seeds contain
+    garbage events;
+  - high-p̄_T/m₁₂ excesses at large τ_cut (+6σ at 2e-3 in p̄_T 30–60).
+- **Correction:** with equal weights the fixed point (F) is not flat:
+  11.6, 10.1, 8.1, 6.3, 6.1 at 2e-3 … 1e-4. The "plateau ≈ 8.5" (6 Oct) and
+  "10.3–11.5" (cluster) were lifted by the weighting bias.
+- The edge shift (+22 pb) was mostly a weighting artefact (equal weights:
+  median +7.7 at 1e-4).
+- Garbage events (replays 3197, 4637): mapped dipole Borns with an
+  almost-zero-energy parton (E ≈ 6e-4 GeV), dipoles 1e61 … 1e179, against
+  ≈ 4e13 for the legitimate large terms. Finite and positive, so the
+  non-finite guard missed them.
+  - New guard: an event with |D| > 1e30 and |D| > 1e12 |R| (or a
+    non-finite D) is dropped with all its dipoles, in all modes, and counted
+    (`DIPGARB`).
+  - Bit-identical on normal runs here; the ≈ 3e-4 of events it counts were
+    already dropped as non-finite.
+- Cluster instructions: rerun r (B, F) and all TECHDIFF sets with the guard
+  and VEGAS_EQUAL = 2; report the tail statistics and F's flatness.

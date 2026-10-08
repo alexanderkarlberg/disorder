@@ -7,6 +7,42 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 8 Oct (read this first): garbage-dipole guard, then rerun r with it
+
+Thanks for the 8 Oct report. Your replays (seeds 3197, 4637) show what the
+blow-ups are. Some dipoles have a mapped Born with an almost-zero-energy
+parton (E ≈ 6e-4 GeV, finite and positive) and values of 1e61…1e179, next
+to a real of ≈ 4e13 (the legitimate large terms). New in `nlo31`: an event
+with a dipole |D| > 1e30 and |D| > 1e12 |R|, or a non-finite D, is
+dropped with all its dipoles, in every mode, and counted ("r: events
+dropped (garbage dipole) N of M" at the end of the output; thresholds via
+`DIPGARB="1d30 1d12"`). On thA371a the output is bit-identical on normal
+runs: the ≈ 3e-4 of events it counts there were already dropped as
+non-finite.
+
+1. `git pull` (at least the commit that added this section), rebuild
+   nlo31/sliced21 (`bin3`). Check that a short b0/lo/r run (mode 2) is
+   bit-identical to bin2 apart from the new count line.
+2. Rerun with bin3, `VEGAS_EQUAL=2`, same seeds and otherwise the same
+   settings:
+   - B r (3,500), F r (1,200);
+   - all TECHDIFF sets (B rcorr 400, F rcorr 300, plain rcorr, cut
+     convergence 192);
+   - the r cross-checks (edge, plain).
+   CPU ≈ the last round. Report the estimate before submitting (AK).
+3. Report, per set:
+   - the number of flagged seeds (20× rule) before (bin2) and after (bin3),
+     and the per-seed garbage counts;
+   - mean, median, trimmed mean, and robust against sample σ (your 54 vs
+     555 pb at 2e-4): does the heavy tail go away?
+   - B: the NNLO per bin and τ_cut against NNLOJET (plain mean = result);
+   - F: the NNLO against τ_cut, whether it becomes flat below 2e-4. It
+     falls from 11.6 to 6.1 between 2e-3 and 1e-4 with equal weights: power
+     corrections or something else?
+   - if any seed still blows up: replay it with `P2BDEBUG=1` and keep the
+     `DBG` lines.
+4. Commit to `2026-10-nnlo21-cluster`.
+
 ## UPDATE 7 Oct evening (read this first): rerun r with equal iteration weights
 
 **Cause of the ZEUS NNLO excess.** By default `nlo31` combines the histogram

@@ -105,6 +105,15 @@ module nlo31_mod
   ! dropev: drop the current real event with all its dipoles; counters
   logical :: degen = .false., dropev = .false.
   integer(8) :: nrealev = 0, ndropev = 0
+  ! garbage dipoles (8 Oct, cluster replays): a mapped Born with an almost
+  ! zero-energy parton (E ~ 6e-4 GeV, finite, positive) gives dipoles of
+  ! 1e61..1e179 next to a real of ~1e13 (the legitimate large terms). An
+  ! event with a dipole |D| > dgabs and |D| > dgrel |R| (or a non-finite D)
+  ! is dropped with all its dipoles, in every mode (env DIPGARB = "dgabs
+  ! dgrel"; counted)
+  logical :: garbev = .false.
+  real(dp) :: dgabs = 1d30, dgrel = 1d12
+  integer(8) :: ngarbev = 0, nrall = 0
   ! P2B r, events with tau_2(real) < p2btmin or a degenerate dipole Born:
   ! p2bdrop = 0 drop them, 1 (default) give them the plain-slicing weights
   ! (real theta(T > tau_cut) O, dipoles theta(T~ > tau_cut) O~, degenerate
@@ -535,6 +544,12 @@ contains
             & ' E', Pk(4,2:5)
     endif
     call dip41_list(Pk, fl, nd, P3, fl3, val)
+    if (any(val(1:nd) /= val(1:nd))) then
+       garbev = .true.
+    elseif (any(abs(val(1:nd)) > dgabs)) then
+       if (.not. any(F4 /= 0)) call me41_tree(Pk, fl, m4)
+       if (any(abs(val(1:nd)) > dgrel*abs(m4))) garbev = .true.
+    endif
     do id = 1, nd
        call accept(P3(:,1,id), P3(:,2:4,id), 3, sqrt(-mdot(P3(:,5,id), P3(:,5,id))), F3)
        ! P2B: a numerically degenerate mapped Born (no tau_2 partition, or a
@@ -598,10 +613,15 @@ contains
     ! is power suppressed (tau_2 <~ 1e-8). Dropping them altogether
     ! (p2bdrop = 0, first version) also loses their dipoles above the cut.
     dropev = p2bslice .and. mode == 2 .and. t2last < p2btmin
+    garbev = .false.
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**3*tdw
     call eval_sg()
+    nrall = nrall + 1
+    if (garbev) then
+       ngarbev = ngarbev + 1; res = 0; return
+    endif
     if (p2bslice .and. mode == 2) then
        nrealev = nrealev + 1
        if (dropev) ndropev = ndropev + 1
@@ -1473,6 +1493,8 @@ program nlo31
   call get_environment_variable('TECHDIFF', arg); techdiff = trim(arg) == '1'
   if (tcw /= techcut .or. tcq < huge(1.0_dp) .or. techdiff) write(*,'(a,2es10.2,a,l2,a,2es10.2)') &
        & ' technical cut min(cw W2, cq Q2), cw cq =', tcw, tcq, '  TECHDIFF', techdiff, '  reference', trw, trq
+  call get_environment_variable('DIPGARB', arg)
+  if (len_trim(arg) > 0) read(arg, *) dgabs, dgrel
   call get_environment_variable('P2BTMIN', arg)
   if (len_trim(arg) > 0) read(arg, *) p2btmin
   call get_environment_variable('TECHSLICE', arg)
@@ -1506,6 +1528,7 @@ program nlo31
   write(*,'(a,a,a,i10,a,i4,a,i6,a,es9.2,a,i2,a,f9.6,a,f10.2)') ' nlo31 part ', trim(part), ' ncall', ncall, &
        & ' itmx', itmx, ' seed', seed, ' techcut', techcut, ' mode', mode, ' x', xfix, ' Q2', Q2fix
   call vegas(ndim, ncall, itmx, avg, err, chi2, integrand)
+  if (trim(part) == 'r') write(*,'(a,i14,a,i14)') ' r: events dropped (garbage dipole)', ngarbev, ' of', nrall
   if (p2bslice .and. trim(part) == 'r') write(*,'(a,i14,a,i14)') ' P2B r: events with plain weights (tau_2 < techcut or degenerate dipole)', &
        & ndropev, ' of', nrealev
   write(*,'(a,a,a,es16.8,a,es12.4,a,f8.3)') ' RESULT ', trim(part), ' sigma(>=3 jets) [pb] = ', avg, ' +- ', err, &
