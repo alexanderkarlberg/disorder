@@ -467,3 +467,22 @@ and to node failures are not included (several hundred core-h).
   stay undefined below 1e-3 (59 r and 102 rcorr seeds with blow-ups; DBG
   replays: mapped-Born partons of ~5e-4 GeV give dipoles of 1e120–1e179).
   Feeder for groups2 stopped (`groups2.txt.stop`).
+
+## 8 Oct, ~03:30: UPDATE 8 Oct (d638917, DIPGARB) — prepared, NOT submitted (AK wants the CPU estimate first)
+- Merged origin/2026-10-nnlo21 at d638917. Built `$P/bin3/{sliced21,nlo31}`
+  (bin and bin2 kept). Check (mode 2, small runs, VEGAS_EQUAL=2 for nlo31):
+  b0 and lo bit-identical to bin2; r identical apart from the new line
+  "r: events dropped (garbage dipole) 0 of 2776".
+- Job lists (bin3, VEGAS_EQUAL=2, the same seeds and otherwise identical
+  commands; each cmd.sh compared with its predecessor: 0 differences besides
+  the binary path): `$P/runs/prod/{B/r-g 3500, F/r-g 1200, B/rcorr-g 400,
+  F/rcorr-g 300, Bx/plain-rcorr-g 100, Bx/conv-g 200, Bx/edge-r-g 300,
+  Bx/plain-r-g 300}`; groups file `$P/runs/prod/groups3.txt` (feeder not started).
+- CPU estimate from the measured per-job CPU of the same sets: B r 1.42 h/job
+  → 4,990 core-h; F r 1.09 → 1,310; B rcorr 0.50 → 200; F rcorr 0.32 → 100;
+  plain rcorr 0.35 → 35; conv 0.60 → 120; edge r 1.24 → 370; plain r 1.13 →
+  340. **Total ≈ 7,460 core-h**, 6,300 jobs (longest single job 2.2 h).
+  Wall clock: ≈ 4–5 h with the ~1,900 concurrent slots of the last round,
+  ≈ 3 h if ~4,000 slots are free (4,121 idle CPUs on alma at 03:30).
+- To start after the go-ahead:
+  `GROUPFILE=$P/runs/prod/groups3.txt nnlo21/cluster/feeder.sh`
