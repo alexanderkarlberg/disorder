@@ -42,8 +42,9 @@
 ! total, >= 1 jet, leading-jet p_T (7), leading-jet y (6), >= 2 jets.
 !
 ! Photon + Z (env EW31 = "mode lepton", as dis31/tests; 8 Oct): the flavour
-! sums from the values with ew31's basis couplings (nc_eval), lo, kp and r
-! only (the one-loop amplitudes with Z are not there yet).
+! sums from the values with ew31's basis couplings (born_basis, eval_nc). For vi the
+! basis sums keep the part of the one loop even under the reflection y ->
+! -y (the odd part breaks m2(1,1) = m2(2,2); it integrates to zero).
 !-----------------------------------------------------------------------
 module nlo31_mod
   use ew31
@@ -1600,7 +1601,6 @@ program nlo31
   if (len_trim(arg) > 0) then
      read(arg, *) ew31_mode, ew31_lepton
      write(*,'(a,2i2)') ' EW31 (mode, lepton)', ew31_mode, ew31_lepton
-     if (ew31_mode /= 0 .and. trim(part) == 'vi') stop 'vi: no one-loop amplitudes with Z yet'
   endif
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]

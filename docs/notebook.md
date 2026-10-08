@@ -2957,3 +2957,41 @@ r.**
   - Next: NLO 2+1 with Z (b1 + lo) against disorder's DISENT with
     `-includeZ` (tau2_nlo, as the photon validation of 1–3 Oct), once
     stage 2 is in, in one campaign.
+- **Stage 2: one-loop 3+1 (virt31) with photon + Z (8 Oct).**
+  - qq̄gg: each helicity term (hq, lh) of the BDK amplitudes weighted with
+    c(hq, lh)² (ew31_cpl of the line; MCFM's label convention without
+    exchange). Four quarks (`fourq_cpl`): cq(polq, 3 − polz) and
+    cQ2(polb, 3 − polz) (the leptons enter as (4,3), as in me41). The
+    mapping was fixed by a scan of the label exchanges against me31 (only
+    these two and their parity mirrors give tree = me31 in every channel).
+    Option 1 as in me31: in 2 Re(tree* loop) the cross terms of the boson on
+    the two lines are dropped, direct × exchange kept. The boson on a closed
+    quark loop stays out (vector: Furry; axial: only via the top–bottom
+    splitting, analogous to the pair-flavour terms). `virt31_keepint`
+    (diagnostic) keeps the line–line interference.
+  - `harness_virt31` (EW31 env added), photon, e⁻, e⁺, ν, ν̄: tree = me31 to
+    6e-14, double pole 6e-14, single pole (−⟨I⟩ with born31's colour
+    correlations) 1.3e-12. `harness_iop31`: V + I poles cancel to 2e-13,
+    RG and μ_F checks as before.
+  - Finite part against NNLOJET's Z functions with ewcalc couplings set to
+    ew31's (no width), e⁻ and ν, with ours keeping the line–line interference
+    (`dis31_nnlojet/harness_v31z`, outside the repository; README there):
+    with each point plus its mirror image (y → −y), and the gluon channel
+    averaged over q ↔ q̄ as NNLOJET's sB2g1Z does, K equals the photon's
+    (ν: twice), the single pole ratio is 1, and (v0 − K X0)/tree = −5.79471429
+    (qq̄gg) and −1.71982418 (four quarks) at every point, the photon's scheme
+    constants.
+  - **Open:** point by point the reflection-odd (ε-tensor) parts of the
+    one-loop interference differ between virt31 (MCFM's crossing) and
+    NNLOJET. They are neither opposite nor absent in one of the codes. They
+    exist only with Z (c_LL ≠ c_RR) and integrate to zero for observables
+    symmetric under the reflection (everything we compute). A third
+    reference would settle it.
+  - nlo31 vi with Z enabled. The basis sums assume m2(1,1) = m2(2,2), which
+    the one-loop odd part breaks, so they keep exactly the reflection-even
+    part. Checked against the explicit flavour sum (scratch test with
+    arbitrary flavour weights): equal to 9 digits for P + mirror, e⁻, e⁺, ν.
+  - Photon: nlo31 vi bit-identical to the previous commit.
+  - Still to do for full NC: the two-loop closed-loop N_F,γ term in hard21
+    with Z (stage 3), CC, and the NC validation campaign (NLO 2+1 against
+    DISENT `-includeZ`; NNLO against NNLOJET with Z).

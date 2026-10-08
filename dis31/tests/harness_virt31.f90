@@ -8,18 +8,24 @@
 !    (gamma_q = 3 CF/2, gamma_g = beta0, n_f = 5), with born31's T_i.T_k.
 ! The finite part is checked against NNLOJET outside the repository
 ! (~/cernbox/disorder-comparisons/dis31_nnlojet).
+! Couplings: photon, or with the environment EW31 = "mode lepton" those of
+! ew31 (e.g. "1 0": photon + Z, e-).
 program harness_virt31
   use me31
   use born31
   use virt31
+  use ew31
   implicit none
   integer, parameter :: dp = kind(1.0d0)
   real(dp), parameter :: CF = 4.0_dp/3, CA = 3, b0 = (11*CA - 2*5)/6
   real(dp) :: P3(4,7), r(8), v(-2:0), t, m, msq, cc(4,4), pd, ps, mu2, worst(3)
   integer :: ipt, ic, i, j, imu
+  character(32) :: arg
   integer, parameter :: nfl = 9
   integer, parameter :: fls(4,nfl) = reshape([2,2,0,0, -1,-1,0,0, 0,1,-1,0, 0,2,-2,0, 1,1,2,-2, &
        & 2,2,2,-2, -1,-1,-2,2, -2,-2,-2,2, 1,2,1,-2], [4,nfl])
+  call get_environment_variable('EW31', arg)
+  if (len_trim(arg) > 0) read(arg, *) ew31_mode, ew31_lepton
   worst = 0
   do ipt = 1, 4
      call random_number(r); call dis_point(r, P3)

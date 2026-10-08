@@ -1,5 +1,6 @@
 !-----------------------------------------------------------------------
-! DIS 3+1 one-loop matrix elements (photon exchange), from the one-loop
+! DIS 3+1 one-loop matrix elements (photon exchange; photon + Z with ew31,
+! couplings per helicity as me31), from the one-loop
 ! amplitudes of Bern, Dixon, Kosower (hep-ph/9708239: q qbar g g + V;
 ! hep-ph/9610370: q qbar Q Qbar + V) as implemented in MCFM 10.3
 ! (dis31/mcfm/loop), crossed to DIS as me31.
@@ -10,7 +11,16 @@
 !   normalisation of the I operator), as Laurent coefficients v(-2:0) (1/eps^2,
 !   1/eps, finite), in units of me31 times alpha_s/2pi; t = the tree (= me31).
 !   n_f = 5 massless flavours, no top loops; the photon couples to no closed
-!   quark loop (Furry).
+!   quark loop (Furry). Photon + Z (8 Oct 2026): each helicity amplitude
+!   with its coupling; the boson on a closed quark loop is left out (vector
+!   part zero by Furry, axial part only through the top-bottom mass
+!   splitting, as the pair-flavour terms of option 1), and in the four-quark
+!   channels the interference of the boson on different lines is dropped as
+!   in me31 (direct x exchange kept). Checked against NNLOJET's Z functions
+!   (outside the repository, dis31_nnlojet/harness_v31z): equal in the
+!   part even under the reflection y -> -y; the reflection-odd (epsilon-
+!   tensor) parts of the one-loop interference differ between the codes
+!   (open; they integrate to zero for reflection-symmetric observables).
 !   Its poles are those of -<I> (checked, tests/harness_virt31), and the
 !   finite part agrees with NNLOJET v1.0.2 for every channel up to the
 !   known constant (pi^2/12) sum_i C_i t of NNLOJET's normalisation
@@ -27,6 +37,7 @@
 !   Net: q qbar g g: v(-1) - 2 beta0 t, v(0) - CF t; four quarks: v(0) - 2 CF t.
 !-----------------------------------------------------------------------
 module virt31
+  use ew31
   implicit none
   private
   integer, parameter :: dp = kind(1.0d0)
@@ -35,11 +46,13 @@ module virt31
   real(dp), parameter :: xn = 3, nadj = xn**2 - 1
   real(dp), parameter :: cnorm = (4*pi/137.0_dp)**2*64*pi**4
   real(dp), parameter :: avg4 = 1.0_dp/(2*2*xn)
-  real(dp), parameter :: eq(5) = [-1.0_dp/3, 2.0_dp/3, -1.0_dp/3, 2.0_dp/3, -1.0_dp/3]
   public :: virt31_ren, virt31_qqgg, virt31_4q
   ! production: only the finite part (one evaluation at 1/eps = 0 instead of
   ! three); the poles are then returned as zero
   logical, public :: virt31_finite_only = .false.
+  ! diagnostic: keep the interference of the boson on different quark lines
+  ! with photon + Z (as me31_keepint; comparison with NNLOJET)
+  logical, public :: virt31_keepint = .false.
 contains
 
   subroutine virt31_ren(P, fl, mu2, v, t)
@@ -72,11 +85,12 @@ contains
     integer :: toploops
     logical :: toplight, topvector, topaxial, onlyaxial
     common /toploops/ toploops, toplight, topvector, topaxial, onlyaxial
-    real(dp) :: pm(mxpart,4), avg, ch, w(3,2), tr
+    real(dp) :: pm(mxpart,4), avg, c(2,2), w(3,2), tr, Q2
     integer :: k, i, iq, iqb, igl(2), ie
     real(dp), parameter :: evals(3) = [0.0_dp, 1.0_dp, -1.0_dp]
     v = 0; t = 0
     if (count(fl == 0) /= 2) return
+    Q2 = sum(P(1:3,5)**2) - P(4,5)**2
     ! MCFM labels (0 -> q(1) g(2) g(3) qbar(4) l(5) a(6), all outgoing)
     pm = 0
     pm(5,:) = P(:,7); pm(6,:) = -P(:,6)
@@ -88,7 +102,7 @@ contains
        if (k == 0) return
        igl = pack([2, 3, 4], [2, 3, 4] /= k)
        pm(1,:) = P(:,k); pm(4,:) = -P(:,1); pm(2,:) = P(:,igl(1)); pm(3,:) = P(:,igl(2))
-       ch = eq(abs(fl(1)))**2
+       call ew31_cpl(fl(1), Q2, c)
        avg = 1.0_dp/(2*2*xn)
     else
        iq = 0; iqb = 0
@@ -99,7 +113,7 @@ contains
        enddo
        if (iq == 0 .or. iqb == 0 .or. fl(iq) /= -fl(iqb)) return
        pm(1,:) = P(:,iq); pm(4,:) = P(:,iqb); pm(2,:) = -P(:,1); pm(3,:) = P(:,igl(2))
-       ch = eq(fl(iq))**2
+       call ew31_cpl(fl(iq), Q2, c)
        avg = 1.0_dp/(2*2*nadj)
     endif
     call spinoru(6, pm, za, zb)
@@ -111,25 +125,26 @@ contains
     w = 0
     do ie = 1, merge(1, 3, virt31_finite_only)
        epinv = evals(ie); epinv2 = epinv
-       call qqgg_photon(w(ie,:), tr)
+       call qqgg_cpl(c, w(ie,:), tr)
     enddo
-    ! w(ie,1) = interference (xzqqgg_v's colour combination, couplings
-    ! stripped), w(ie,2) unused; tr = the tree, me31 = 96 avg cnorm e_q^2 tr;
+    ! w(ie,1) = interference (xzqqgg_v's colour combination, with the
+    ! couplings), w(ie,2) unused; tr = the tree, me31 = 96 avg cnorm tr;
     ! the virtual relative to the tree: N (xzqqgg_v: fac = xn ason2pi
     ! times xzqqgg's)
-    t = 96*avg*cnorm*ch*tr
-    v(0) = 96*xn*avg*cnorm*ch*w(1,1)
-    v(-1) = 96*xn*avg*cnorm*ch*(w(2,1) - w(3,1))/2
-    v(-2) = 96*xn*avg*cnorm*ch*((w(2,1) + w(3,1))/2 - w(1,1))
+    t = 96*avg*cnorm*tr
+    v(0) = 96*xn*avg*cnorm*w(1,1)
+    v(-1) = 96*xn*avg*cnorm*(w(2,1) - w(3,1))/2
+    v(-2) = 96*xn*avg*cnorm*((w(2,1) + w(3,1))/2 - w(1,1))
     if (virt31_finite_only) v(-2:-1) = 0
   end subroutine virt31_qqgg
 
-  ! xzqqgg_v (MCFM src/Zbb) for colourchoice = 0, photon exchange, no
-  ! boson-on-loop (Furry) or top-loop pieces; w(1) = sum_hel of the
-  ! interference with the colour weights of xzqqgg_v, w(2) = the tree
-  ! sum_hel [|m1|^2 + |m2|^2 - |m1 + m2|^2/N^2] times N^2 (V N/4 per
-  ! colour... normalised below), both without couplings
-  subroutine qqgg_photon(w, tr)
+  ! xzqqgg_v (MCFM src/Zbb) for colourchoice = 0, no boson-on-loop or
+  ! top-loop pieces; w(1) = sum_hel of the interference with the colour
+  ! weights of xzqqgg_v, w(2) = the tree sum_hel [|m1|^2 + |m2|^2 - |m1 +
+  ! m2|^2/N^2] times N^2 (V N/4 per colour... normalised below), each
+  ! helicity (hq, lh) weighted with c(hq, lh)^2 (ew31_cpl of the line)
+  subroutine qqgg_cpl(c, w, tr)
+    real(dp), intent(in) :: c(2,2)
     real(dp), intent(out) :: w(2), tr
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     common /zprods/ za, zb
@@ -167,16 +182,16 @@ contains
                 else
                    ml3 = a63g1(st3(h2,h3), 1, 4, 2, 3, i5(lh), i6(lh), za, zb)
                 endif
-                w(1) = w(1) + real(conjg(m(1))*(ml1(1) - (ml1(1) + ml2(1) + ml1(2) - ml3)/xnsq &
+                w(1) = w(1) + c(hq,lh)**2*(real(conjg(m(1))*(ml1(1) - (ml1(1) + ml2(1) + ml1(2) - ml3)/xnsq &
                      & + (ml2(1) + ml2(2))/xnsq**2 + ml4(1)/xn - (ml4(1) + ml4(2))/xn**3), dp) &
                      & + real(conjg(m(2))*(ml1(2) - (ml1(2) + ml2(2) + ml1(1) - ml3)/xnsq &
-                     & + (ml2(1) + ml2(2))/xnsq**2 + ml4(2)/xn - (ml4(1) + ml4(2))/xn**3), dp)
-                tr = tr + abs(m(1))**2 + abs(m(2))**2 - abs(m(1) + m(2))**2/xnsq
+                     & + (ml2(1) + ml2(2))/xnsq**2 + ml4(2)/xn - (ml4(1) + ml4(2))/xn**3), dp))
+                tr = tr + c(hq,lh)**2*(abs(m(1))**2 + abs(m(2))**2 - abs(m(1) + m(2))**2/xnsq)
              enddo
           enddo
        enddo
     enddo
-  end subroutine qqgg_photon
+  end subroutine qqgg_cpl
 
   ! four (anti)quarks: incoming q (or qbar by charge conjugation), outgoing
   ! q of the same line, pair Q Qbar (Q = q: identical quarks). MCFM's q q ->
@@ -199,7 +214,7 @@ contains
     integer :: toploops
     logical :: toplight, topvector, topaxial, onlyaxial
     common /toploops/ toploops, toplight, topvector, topaxial, onlyaxial
-    real(dp) :: pm(mxpart,4), w(3), tr, cq, cQ2
+    real(dp) :: pm(mxpart,4), w(3), tr, cq(2,2), cQ2(2,2), Q2
     integer :: sg
     integer :: i, k, kq, kqb, nsame, ip(3), f0, ie
     logical :: ident
@@ -217,7 +232,8 @@ contains
        endif
     enddo
     if (nsame /= 2 .or. kqb == 0) return
-    cq = eq(abs(f0))
+    Q2 = sum(P(1:3,5)**2) - P(4,5)**2
+    call ew31_cpl(f0, Q2, cq)
     ident = fl(ip(1)) == f0 .and. fl(ip(2)) == f0
     if (ident) then
        if (fl(kqb) /= -f0) return
@@ -231,7 +247,7 @@ contains
           return
        endif
        if (fl(kqb) /= -fl(kq)) return
-       cQ2 = eq(abs(fl(kq)))
+       call ew31_cpl(fl(kq), Q2, cQ2)
     endif
     pm = 0
     pm(1,:) = -P(:,1); pm(5,:) = P(:,k); pm(2,:) = P(:,kqb); pm(6,:) = P(:,kq)
@@ -242,7 +258,7 @@ contains
     w = 0
     do ie = 1, merge(1, 3, virt31_finite_only)
        epinv = evals(ie); epinv2 = epinv
-       call fourq_photon(cq, cQ2, ident, w(ie), tr)
+       call fourq_cpl(cq, cQ2, ident, w(ie), tr)
     enddo
     t = avg4*cnorm*tr
     v(0) = avg4*cnorm*w(1)
@@ -251,40 +267,42 @@ contains
     if (virt31_finite_only) v(-2:-1) = 0
   end subroutine virt31_4q
 
-  ! qqb_z2jet_v's q q branch for the photon (couplings Q(j) q1 -> charges;
-  ! the lepton charge is an overall sign): w = 2 Re(tree^* loop) summed,
-  ! tr = the tree, both times MCFM's faclo/(couplings) = 4 V and xn/2 for
-  ! the loop (fac = faclo xn/2 ason2pi)
-  subroutine fourq_photon(cq, cQ2, ident, w, tr)
-    real(dp), intent(in) :: cq, cQ2
+  ! qqb_z2jet_v's q q branch: w = 2 Re(tree^* loop) summed, tr = the tree,
+  ! both times MCFM's faclo/(couplings) = 4 V and xn/2 for the loop (fac =
+  ! faclo xn/2 ason2pi). Couplings per helicity: cq(polq, 3 - polz) of the
+  ! incoming line, cQ2(polb, 3 - polz) of the pair line (ew31_cpl; the
+  ! leptons enter as (4,3), as in me41; fixed by tree = me31,
+  ! tests/harness_virt31). With photon + Z (ew31_mode /= 0)
+  ! the interference of the boson on the two lines is dropped (me31).
+  subroutine fourq_cpl(cq, cQ2, ident, w, tr)
+    real(dp), intent(in) :: cq(2,2), cQ2(2,2)
     logical, intent(in) :: ident
     real(dp), intent(out) :: w, tr
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     common /zprods/ za, zb
     complex(dp), external :: atreez, a61z, a62z
-    complex(dp) :: tamp, lamp, tamps, lamps, lampx, lampsx
+    complex(dp) :: ta(2), la(2), tsa(2), lsa(2), lampx, lampsx, tamp, tamps
+    real(dp) :: a, b
     integer :: polq, polb, polz
     w = 0; tr = 0
     do polq = 1, 2
        do polz = 1, 2
           do polb = 1, 2
-             tamp = atreez(polq,polb,polz,5,2,6,1,4,3,za,zb)*cq &
-                  & - atreez(3-polb,3-polq,polz,2,5,1,6,4,3,za,zb)*cQ2
-             lamp = a61z(polq,polb,polz,5,2,6,1,4,3,za,zb)*cq &
-                  & - a61z(3-polb,3-polq,polz,2,5,1,6,4,3,za,zb)*cQ2
-             tr = tr + abs(tamp)**2
-             w = w + xn/2*2*real(tamp*conjg(lamp), dp)
+             a = cq(polq,3-polz); b = cQ2(polb,3-polz)
+             ! the boson on the incoming line (1) and on the pair line (2)
+             ta = [atreez(polq,polb,polz,5,2,6,1,4,3,za,zb)*a, -atreez(3-polb,3-polq,polz,2,5,1,6,4,3,za,zb)*b]
+             la = [a61z(polq,polb,polz,5,2,6,1,4,3,za,zb)*a, -a61z(3-polb,3-polq,polz,2,5,1,6,4,3,za,zb)*b]
+             call add(ta, la)
+             tamp = sum(ta)
              if (ident) then
-                tamps = -(atreez(polq,polb,polz,6,2,5,1,4,3,za,zb)*cq &
-                     & - atreez(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)*cQ2)
-                lamps = -(a61z(polq,polb,polz,6,2,5,1,4,3,za,zb)*cq &
-                     & - a61z(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)*cQ2)
-                lampx = -(a62z(polq,polb,polz,6,2,5,1,4,3,za,zb)/xn*cq &
-                     & - a62z(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)/xn*cQ2)
-                lampsx = a62z(polq,polb,polz,5,2,6,1,4,3,za,zb)/xn*cq &
-                     & - a62z(3-polb,3-polq,polz,2,5,1,6,4,3,za,zb)/xn*cQ2
-                tr = tr + abs(tamps)**2
-                w = w + xn/2*2*real(tamps*conjg(lamps), dp)
+                tsa = -[atreez(polq,polb,polz,6,2,5,1,4,3,za,zb)*a, -atreez(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)*b]
+                lsa = -[a61z(polq,polb,polz,6,2,5,1,4,3,za,zb)*a, -a61z(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)*b]
+                call add(tsa, lsa)
+                tamps = sum(tsa)
+                lampx = -(a62z(polq,polb,polz,6,2,5,1,4,3,za,zb)/xn*a &
+                     & - a62z(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)/xn*b)
+                lampsx = a62z(polq,polb,polz,5,2,6,1,4,3,za,zb)/xn*a &
+                     & - a62z(3-polb,3-polq,polz,2,5,1,6,4,3,za,zb)/xn*b
                 if (polq == polb) then
                    tr = tr - 2/xn*real(tamp*conjg(tamps), dp)
                    w = w + xn/2*2*(real(tamp*conjg(lampx), dp) + real(tamps*conjg(lampsx), dp))
@@ -294,5 +312,18 @@ contains
        enddo
     enddo
     tr = 4*nadj*tr; w = 4*nadj*w
-  end subroutine fourq_photon
+  contains
+    ! |tree|^2 and 2 Re(tree^* loop) of one amplitude pair; photon + Z: the
+    ! two boson attachments without their interference
+    subroutine add(t, l)
+      complex(dp), intent(in) :: t(2), l(2)
+      if (ew31_mode == 0 .or. virt31_keepint) then
+         tr = tr + abs(sum(t))**2
+         w = w + xn/2*2*real(sum(t)*conjg(sum(l)), dp)
+      else
+         tr = tr + sum(abs(t)**2)
+         w = w + xn/2*2*real(sum(t*conjg(l)), dp)
+      endif
+    end subroutine add
+  end subroutine fourq_cpl
 end module virt31
