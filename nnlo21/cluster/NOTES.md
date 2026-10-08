@@ -486,3 +486,7 @@ and to node failures are not included (several hundred core-h).
   ≈ 3 h if ~4,000 slots are free (4,121 idle CPUs on alma at 03:30).
 - To start after the go-ahead:
   `GROUPFILE=$P/runs/prod/groups3.txt nnlo21/cluster/feeder.sh`
+- **8 Oct 08:49: submitted after AK's go-ahead** (feeder on groups3.txt,
+  48788281): B r-g 48788282, F r-g 48788350, B rcorr-g 48788351, F rcorr-g
+  48788352, plain rcorr-g 48788353, conv-g 48788354, edge r-g 48788355,
+  plain r-g 48788356 (6,300 jobs, ≈ 7,460 core-h).
