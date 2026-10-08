@@ -10,13 +10,18 @@
 !   scheme, with (4 pi)^eps/Gamma(1 - eps) factored out (the Catani-Seymour
 !   normalisation of the I operator), as Laurent coefficients v(-2:0) (1/eps^2,
 !   1/eps, finite), in units of me31 times alpha_s/2pi; t = the tree (= me31).
-!   n_f = 5 massless flavours, no top loops; the photon couples to no closed
-!   quark loop (Furry). Photon + Z (8 Oct 2026): each helicity amplitude
-!   with its coupling; the boson on a closed quark loop is left out (vector
-!   part zero by Furry, axial part only through the top-bottom mass
-!   splitting, as the pair-flavour terms of option 1), and in the four-quark
-!   channels the interference of the boson on different lines is dropped as
-!   in me31 (direct x exchange kept). Checked against NNLOJET's Z functions
+!   n_f = 5 massless flavours, no top loops. Photon + Z (8 Oct 2026): each
+!   helicity amplitude with its coupling; in the four-quark channels the
+!   interference of the boson on different lines is dropped as in me31
+!   (direct x exchange kept). The boson on a closed quark loop: q qbar g g
+!   has a vector term (BDK's A6^v, MCFM's a64v; colour (N - 4/N)/N^2,
+!   coupling sum_f v_f, photon sum e_q), included since 8 Oct (before: left
+!   out, also for the photon, with the wrong claim that Furry's theorem
+!   removes it; it does for two gluons on the loop, not three);
+!   virt31_vloop returns it separately (finite part; it is linear in the
+!   line's coupling, nlo31 weights it apart). Its axial part (top-bottom
+!   splitting) and the four-quark closed-loop terms (zero in MCFM's
+!   qqb_z2jet_v too) are left out (docs/nc-dropped-terms.md). Checked against NNLOJET's Z functions
 !   (outside the repository, dis31_nnlojet/harness_v31z): equal in the
 !   part even under the reflection y -> -y; the reflection-odd (epsilon-
 !   tensor) parts of the one-loop interference differ between the codes
@@ -53,6 +58,9 @@ module virt31
   ! diagnostic: keep the interference of the boson on different quark lines
   ! with photon + Z (as me31_keepint; comparison with NNLOJET)
   logical, public :: virt31_keepint = .false.
+  ! the closed-loop vector term (q qbar g g) of the last virt31 call,
+  ! finite part, included in v(0)
+  real(dp), public :: virt31_vloop = 0
 contains
 
   subroutine virt31_ren(P, fl, mu2, v, t)
@@ -60,6 +68,7 @@ contains
     integer, intent(in) :: fl(4)
     real(dp), intent(out) :: v(-2:0), t
     real(dp), parameter :: CF = (xn**2 - 1)/(2*xn), b0 = (11*xn - 2*5)/6
+    virt31_vloop = 0
     if (count(fl == 0) == 2) then
        call virt31_qqgg(P, fl, mu2, v, t)
        v(-1) = v(-1) - 2*b0*t
@@ -85,12 +94,13 @@ contains
     integer :: toploops
     logical :: toplight, topvector, topaxial, onlyaxial
     common /toploops/ toploops, toplight, topvector, topaxial, onlyaxial
-    real(dp) :: pm(mxpart,4), avg, c(2,2), w(3,2), tr, Q2
+    real(dp) :: pm(mxpart,4), avg, c(2,2), cv(2), w(3,2), tr, Q2
     integer :: k, i, iq, iqb, igl(2), ie
     real(dp), parameter :: evals(3) = [0.0_dp, 1.0_dp, -1.0_dp]
-    v = 0; t = 0
+    v = 0; t = 0; virt31_vloop = 0
     if (count(fl == 0) /= 2) return
     Q2 = sum(P(1:3,5)**2) - P(4,5)**2
+    call ew31_cv(Q2, cv)
     ! MCFM labels (0 -> q(1) g(2) g(3) qbar(4) l(5) a(6), all outgoing)
     pm = 0
     pm(5,:) = P(:,7); pm(6,:) = -P(:,6)
@@ -125,16 +135,18 @@ contains
     w = 0
     do ie = 1, merge(1, 3, virt31_finite_only)
        epinv = evals(ie); epinv2 = epinv
-       call qqgg_cpl(c, w(ie,:), tr)
+       call qqgg_cpl(c, cv, w(ie,:), tr)
     enddo
     ! w(ie,1) = interference (xzqqgg_v's colour combination, with the
-    ! couplings), w(ie,2) unused; tr = the tree, me31 = 96 avg cnorm tr;
-    ! the virtual relative to the tree: N (xzqqgg_v: fac = xn ason2pi
-    ! times xzqqgg's)
+    ! couplings), w(ie,2) the closed-loop vector term; tr = the tree, me31 =
+    ! 96 avg cnorm tr; the virtual relative to the tree: N (xzqqgg_v: fac =
+    ! xn ason2pi times xzqqgg's)
     t = 96*avg*cnorm*tr
+    w(:,1) = w(:,1) + w(:,2)
     v(0) = 96*xn*avg*cnorm*w(1,1)
     v(-1) = 96*xn*avg*cnorm*(w(2,1) - w(3,1))/2
     v(-2) = 96*xn*avg*cnorm*((w(2,1) + w(3,1))/2 - w(1,1))
+    virt31_vloop = 96*xn*avg*cnorm*w(1,2)
     if (virt31_finite_only) v(-2:-1) = 0
   end subroutine virt31_qqgg
 
@@ -142,15 +154,18 @@ contains
   ! top-loop pieces; w(1) = sum_hel of the interference with the colour
   ! weights of xzqqgg_v, w(2) = the tree sum_hel [|m1|^2 + |m2|^2 - |m1 +
   ! m2|^2/N^2] times N^2 (V N/4 per colour... normalised below), each
-  ! helicity (hq, lh) weighted with c(hq, lh)^2 (ew31_cpl of the line)
-  subroutine qqgg_cpl(c, w, tr)
-    real(dp), intent(in) :: c(2,2)
+  ! helicity (hq, lh) weighted with c(hq, lh)^2 (ew31_cpl of the line);
+  ! w(2) = the interference with the closed-loop vector amplitude a64v
+  ! (xzqqgg_v's mqqb_vec0, colour (N - 4/N)/N^2), weighted with c(hq, lh)
+  ! cv(lh) (qqb_z2jet_v: vcouple)
+  subroutine qqgg_cpl(c, cv, w, tr)
+    real(dp), intent(in) :: c(2,2), cv(2)
     real(dp), intent(out) :: w(2), tr
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     common /zprods/ za, zb
     include 'heldefs.f'
-    complex(dp) :: m(2), ml1(2), ml2(2), ml3, ml4(2)
-    complex(dp), external :: a6treeg1, a61g1lc, a61g1slc, a61g1nf, a63g1
+    complex(dp) :: m(2), ml1(2), ml2(2), ml3, ml4(2), mv(2)
+    complex(dp), external :: a6treeg1, a61g1lc, a61g1slc, a61g1nf, a63g1, a64v
     integer :: j, lh, h2, h3, hq, h(2:3)
     integer, parameter :: i1(2) = [1, 4], i2(2) = [2, 3], i3(2) = [3, 2], &
          & i4(2) = [4, 1], i5(2) = [6, 5], i6(2) = [5, 6]
@@ -170,11 +185,13 @@ contains
                       ml1(j) = a61g1lc(st1(3-h(i2(j)),3-h(i3(j))), i1(1), i2(j), i3(j), i4(1), i6(lh), i5(lh), zb, za)
                       ml2(j) = a61g1slc(st2(3-h(i2(j)),3-h(i3(j))), i1(1), i2(j), i3(j), i4(1), i6(lh), i5(lh), zb, za)
                       ml4(j) = a61g1nf(st1(3-h(i2(j)),3-h(i3(j))), i1(1), i2(j), i3(j), i4(1), i6(lh), i5(lh), zb, za)
+                      mv(j) = a64v(st3(3-h(i2(j)),3-h(i3(j))), i1(1), i4(1), i2(j), i3(j), i6(lh), i5(lh), zb, za)
                    else
                       m(j) = a6treeg1(st1(h(i2(j)),h(i3(j))), i1(1), i2(j), i3(j), i4(1), i5(lh), i6(lh), za, zb)
                       ml1(j) = a61g1lc(st1(h(i2(j)),h(i3(j))), i1(1), i2(j), i3(j), i4(1), i5(lh), i6(lh), za, zb)
                       ml2(j) = a61g1slc(st2(h(i2(j)),h(i3(j))), i1(1), i2(j), i3(j), i4(1), i5(lh), i6(lh), za, zb)
                       ml4(j) = a61g1nf(st1(h(i2(j)),h(i3(j))), i1(1), i2(j), i3(j), i4(1), i5(lh), i6(lh), za, zb)
+                      mv(j) = a64v(st3(h(i2(j)),h(i3(j))), i1(1), i4(1), i2(j), i3(j), i5(lh), i6(lh), za, zb)
                    endif
                 enddo
                 if (hq == 1) then
@@ -186,6 +203,7 @@ contains
                      & + (ml2(1) + ml2(2))/xnsq**2 + ml4(1)/xn - (ml4(1) + ml4(2))/xn**3), dp) &
                      & + real(conjg(m(2))*(ml1(2) - (ml1(2) + ml2(2) + ml1(1) - ml3)/xnsq &
                      & + (ml2(1) + ml2(2))/xnsq**2 + ml4(2)/xn - (ml4(1) + ml4(2))/xn**3), dp))
+                w(2) = w(2) + c(hq,lh)*cv(lh)*(xn - 4/xn)/xnsq*real(conjg(m(1))*mv(1) + conjg(m(2))*mv(2), dp)
                 tr = tr + c(hq,lh)**2*(abs(m(1))**2 + abs(m(2))**2 - abs(m(1) + m(2))**2/xnsq)
              enddo
           enddo

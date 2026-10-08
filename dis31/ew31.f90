@@ -28,6 +28,12 @@
 ! summed over the lines, E1, E2 the values with the basis couplings on the
 ! line of a quark f > 0 and c = ew31_cpl(-f): ew31_w(f, Q2, w) gives
 ! these weights w = (c11^2 + c22^2, c12^2 + c21^2)/2 (photon: e_f^2 both).
+!
+! The boson on a closed quark loop (virt31, vector coupling): ew31_cv(Q2,
+! cv), cv(l) = sum_f (c_f(1,l) + c_f(2,l))/2 over the five flavours (photon:
+! q_l sum e_f); 1 in basis mode (the term is then c(h,l) X(h,l)).
+! ew31_wl(f, Q2, w): its weights for a line of flavour f, as ew31_w with
+! c^2 -> c cv, w = (c11 cv1 + c22 cv2, c21 cv1 + c12 cv2)/2 (basis off).
 !-----------------------------------------------------------------------
 module ew31
   implicit none
@@ -38,7 +44,7 @@ module ew31
   real(dp), parameter :: eq(5) = [-1.0_dp/3, 2.0_dp/3, -1.0_dp/3, 2.0_dp/3, -1.0_dp/3]
   real(dp), parameter :: tau(5) = [-1.0_dp, 1.0_dp, -1.0_dp, 1.0_dp, -1.0_dp]
   integer, public :: ew31_mode = 0, ew31_lepton = 0, ew31_basis = 0, ew31_bf = 0
-  public :: ew31_cpl, ew31_w
+  public :: ew31_cpl, ew31_w, ew31_cv, ew31_wl
 contains
 
   subroutine ew31_cpl(f, Q2, c)
@@ -83,4 +89,28 @@ contains
     call ew31_cpl(-f, Q2, c)
     w = [c(1,1)**2 + c(2,2)**2, c(1,2)**2 + c(2,1)**2]/2
   end subroutine ew31_w
+
+  subroutine ew31_cv(Q2, cv)
+    real(dp), intent(in) :: Q2
+    real(dp), intent(out) :: cv(2)
+    real(dp) :: c(2,2)
+    integer :: f
+    cv = 1
+    if (ew31_basis > 0) return
+    cv = 0
+    do f = 1, 5
+       call ew31_cpl(f, Q2, c)
+       cv = cv + (c(1,:) + c(2,:))/2
+    enddo
+  end subroutine ew31_cv
+
+  subroutine ew31_wl(f, Q2, w)
+    integer, intent(in) :: f
+    real(dp), intent(in) :: Q2
+    real(dp), intent(out) :: w(2)
+    real(dp) :: c(2,2), cv(2)
+    call ew31_cv(Q2, cv)
+    call ew31_cpl(-f, Q2, c)
+    w = [c(1,1)*cv(1) + c(2,2)*cv(2), c(2,1)*cv(1) + c(1,2)*cv(2)]/2
+  end subroutine ew31_wl
 end module ew31

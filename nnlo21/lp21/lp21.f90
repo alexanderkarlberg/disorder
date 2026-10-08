@@ -19,7 +19,7 @@
 ! All energies and directions in the rest frame of the two jets (the
 ! Born's partonic CM frame), y_ij = n_i.n_j/2, Q_i = 2 E_i.
 !
-! lp21_born(P, xi, ntc, tcs, wk, f0, c1, c2): P(4,7) the Born in DISENT's
+! lp21_born(P, xi, ntc, tcs, wk, nfk, f0, c1, c2): P(4,7) the Born in DISENT's
 ! layout (1 incoming parton, 2 the outgoing quark, 3 the gluon for a quark
 ! Born; 2 quark, 3 antiquark for a gluon Born), xi its momentum fraction;
 ! tcs = tau_cut = T_cut/Q. Beam classes c = 1 up-type quarks, 2 up-type
@@ -27,7 +27,10 @@
 ! beam table unweighted); wk(k,c) the couplings of class c for the two
 ! helicity classes k of hard21 (photon: e_q^2 for both; gluon: summed over
 ! the produced flavour), combined with hard21's Born fractions of k (with
-! photon + Z the hard functions of the two classes differ). f0(c): the
+! photon + Z the hard functions of the two classes differ); nfk(k,c) the
+! two-loop N_F,V coupling ratio (the boson on a closed quark loop, hard21's
+! G term: photon sum_q e_q / e_q, gluon (sum e)^2/sum e^2; with Z the
+! vector couplings of the loop, sliced21), H^(2) linear in it. f0(c): the
 ! Born luminosity f(xi) (MCFM's f = xf/x) times the combined coupling;
 ! c1, c2(it,c): the O(alpha_s/2pi) and O((alpha_s/2pi)^2) coefficients of
 ! the cumulant in the same units (divide by f0 for per-Born factors).
@@ -49,7 +52,7 @@ end subroutine fdist
 module lp21
   use SCET_Jet, only: jetq, jetg
   use mod_slicing_scet, only: soft_G
-  use hard21, only: hard21_eval
+  use hard21, only: hard21_eval, hard21_nfz
   implicit none
   private
   integer, parameter :: dp = kind(1.0d0)
@@ -339,14 +342,14 @@ contains
     end function binom
   end subroutine lp21_shift
 
-  subroutine lp21_born(P, xi, ntc, tcs, wk, f0, c1, c2)
-    real(dp), intent(in) :: P(4,7), xi, tcs(:), wk(2,nbc)
+  subroutine lp21_born(P, xi, ntc, tcs, wk, nfk, f0, c1, c2)
+    real(dp), intent(in) :: P(4,7), xi, tcs(:), wk(2,nbc), nfk(2,nbc)
     integer, intent(in) :: ntc
     real(dp), intent(out) :: f0(nbc), c1(ntc,nbc), c2(ntc,nbc)
     real(dp) :: pb(4,3), y, ch, sh, Ea, E2, E3, nh(3,3), yy(3,3), Q
     real(dp) :: b(9,nbc), ba0, ba1(-1:1), ba2(-1:3), lB
     real(dp) :: Jq1(-1:1), Jq2(-1:3), Jg1(-1:1), Jg2(-1:3), Jb1(-1:1), Jb2(-1:3), Jc1(-1:1), Jc2(-1:3)
-    real(dp) :: s1(-1:1), s2(-1:3), s2n(-1:3), Iq(6), Ig(6), h(0:2), hk(0:2,2,3), tc, rk(2)
+    real(dp) :: s1(-1:1), s2(-1:3), s2n(-1:3), Iq(6), Ig(6), h(0:2), hk(0:2,2,2), hn(0:2,2), gk(2,2), hc(2), tc, rk(2)
     real(dp), external :: assemblejet
     integer :: k, it, c, ht
     Q = tQ
@@ -375,14 +378,19 @@ contains
     ! jet functions (alpha_s/4pi, logs shifted to tau/mu by MCFM)
     call jetq(2, 2*E2, Jq1, Jq2, Q)
     call jetg(2, 2*E3, Jg1, Jg2, Q)
-    ! hard functions per helicity class: up, down quark Born; gluon Born
-    ! (n_f,gamma term summed over the produced flavour: sum e^2 (sum e/e)
-    ! = (sum e)^2 -> eq = sum e^2/sum e; photon couplings also with Z)
-    call hard21_eval(P, 1, eu, h, hk(:,:,1))
-    call hard21_eval(P, 1, ed, h, hk(:,:,2))
-    call hard21_eval(P, 2, (11.0_dp/9)/(1.0_dp/3), h, hk(:,:,3))
+    ! hard functions per helicity class, quark (1) and gluon (2) Born, with
+    ! the N_F,V term off and with coupling ratio 1 (hard21: (1/3)/eq);
+    ! H^(2) of class k, beam class c: hk(2,k) + nfk(k,c) hg(k)
+    hard21_nfz = .false.
+    call hard21_eval(P, 1, 1.0_dp/3, h, hk(:,:,1))
+    call hard21_eval(P, 2, 1.0_dp/3, h, hk(:,:,2))
+    hard21_nfz = .true.
+    do ht = 1, 2
+       call hard21_eval(P, ht, 1.0_dp/3, h, hn)
+       gk(:,ht) = hn(2,:) - hk(2,:,ht)
+    enddo
     do c = 1, nbc
-       ht = merge(1, merge(2, 3, c <= 4), c <= 2)
+       ht = merge(1, 2, c <= 4)
        rk = hk(0,:,ht)/sum(hk(0,:,ht))*wk(:,c)
        f0(c) = b(1,c)*sum(rk)
        ba0 = b(1,c); ba1 = b(2:4,c); ba2 = b(5:9,c)
@@ -404,8 +412,9 @@ contains
        do it = 1, ntc
           tc = tcs(it)*Q
           do k = 1, 2
-             c1(it,c) = c1(it,c) + rk(k)*assemblejet(1, tc, ba0, 1.0_dp, ba1, Jb1, ba2, Jb2, s1, s2, Jc1, Jc2, hk(1:2,k,ht))
-             c2(it,c) = c2(it,c) + rk(k)*assemblejet(2, tc, ba0, 1.0_dp, ba1, Jb1, ba2, Jb2, s1, s2, Jc1, Jc2, hk(1:2,k,ht))
+             hc = [hk(1,k,ht), hk(2,k,ht) + nfk(k,c)*gk(k,ht)]
+             c1(it,c) = c1(it,c) + rk(k)*assemblejet(1, tc, ba0, 1.0_dp, ba1, Jb1, ba2, Jb2, s1, s2, Jc1, Jc2, hc)
+             c2(it,c) = c2(it,c) + rk(k)*assemblejet(2, tc, ba0, 1.0_dp, ba1, Jb1, ba2, Jb2, s1, s2, Jc1, Jc2, hc)
           enddo
        enddo
     enddo

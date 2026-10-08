@@ -178,7 +178,7 @@ contains
     real(dp), intent(in) :: Pk(4,6), Q2, xB, eta, jac, dphi, wgt
     real(dp), external :: alphasPDF
     real(dp) :: P(4,7), as, fpdf(-5:5), w, Q, tz
-    real(dp) :: QQ, GQ, born(nbc), f0(nbc), c1(ntc,nbc), c2(ntc,nbc), val(ntc), mu(nbc), wk(2,nbc), fc(nbc), rS
+    real(dp) :: QQ, GQ, born(nbc), f0(nbc), c1(ntc,nbc), c2(ntc,nbc), val(ntc), mu(nbc), wk(2,nbc), nfk(2,nbc), fc(nbc), rS
     logical :: inb(nobmax)
     real(dp) :: dp2b(nobmax)
     integer :: b, k, c
@@ -214,7 +214,7 @@ contains
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))
     ! couplings of the beam classes (lp21: up q, up qbar, down q, down qbar,
     ! gluon) per helicity class S, O
-    call class_weights(Q2, wk)
+    call class_weights(Q2, wk, nfk)
     mu(1:4) = QQ; mu(5) = GQ
     select case (trim(bpart))
     case ('b0')
@@ -226,7 +226,7 @@ contains
        enddo
        val = sum(born)
     case ('b1', 'b2')
-       call lp21_born(P, eta, ntc, tcs, wk, f0, c1, c2)
+       call lp21_born(P, eta, ntc, tcs, wk, nfk, f0, c1, c2)
        ! unit-charge matrix element times the cumulant coefficients (which
        ! carry the couplings and PDFs themselves; with a PDF mask a class can
        ! have f0 = 0 but c1, c2 /= 0 through the off-diagonal beam functions)
@@ -266,23 +266,46 @@ contains
 
   ! couplings wk(k, c) of lp21's beam classes c for hard21's helicity
   ! classes k (S, O): photon e_q^2; photon + Z ew31_w of a flavour of the
-  ! class; gluon summed over the produced flavour
-  subroutine class_weights(Q2, wk)
+  ! class; gluon summed over the produced flavour. nfk(k, c): the coupling
+  ! ratio of hard21's two-loop N_F,V term (boson on a closed quark loop),
+  ! sum_{(h,l) in k} c(h,l) cV(l) / sum c(h,l)^2 with c = ew31_cpl(-f) (the
+  ! convention of ew31_w) and cV(l) = sum_q (c_q(1,l) + c_q(2,l))/2 the
+  ! vector coupling of the loop (photon: sum e_q/e_q; the axial part, which
+  ! cancels in each massless isodoublet, is dropped; docs/nc-dropped-terms.md)
+  subroutine class_weights(Q2, wk, nfk)
     real(dp), intent(in) :: Q2
-    real(dp), intent(out) :: wk(2,nbc)
-    real(dp) :: w(2)
-    integer :: Q
-    if (ew31_mode == 0) then
-       wk(:,1:2) = 4.0_dp/9; wk(:,3:4) = 1.0_dp/9; wk(:,5) = 11.0_dp/9
-       return
-    endif
-    call ew31_w(2, Q2, wk(:,1)); call ew31_w(-2, Q2, wk(:,2))
-    call ew31_w(1, Q2, wk(:,3)); call ew31_w(-1, Q2, wk(:,4))
-    wk(:,5) = 0
+    real(dp), intent(out) :: wk(2,nbc), nfk(2,nbc)
+    integer, parameter :: fr(4) = [2, -2, 1, -1]
+    real(dp) :: cm(2,2), cV(2), num(2), den(2), ng(2)
+    integer :: c, Q, l
+    cV = 0
     do Q = 1, 5
-       call ew31_w(Q, Q2, w)
-       wk(:,5) = wk(:,5) + sum(w)/2
+       call ew31_cpl(Q, Q2, cm)
+       cV = cV + (cm(1,:) + cm(2,:))/2
     enddo
+    do c = 1, 4
+       call ew31_cpl(-fr(c), Q2, cm)
+       call class_sums(cm, num, den)
+       wk(:,c) = den/2; nfk(:,c) = num/den
+    enddo
+    ng = 0; wk(:,5) = 0
+    do Q = 1, 5
+       call ew31_cpl(-Q, Q2, cm)
+       call class_sums(cm, num, den)
+       ng = ng + [sum(num), sum(den)]; wk(:,5) = wk(:,5) + sum(den)/4
+    enddo
+    nfk(:,5) = ng(1)/ng(2)
+  contains
+    ! sums over the helicity classes S (h = l) and O (h /= l)
+    subroutine class_sums(a, num, den)
+      real(dp), intent(in) :: a(2,2)
+      real(dp), intent(out) :: num(2), den(2)
+      num = 0; den = 0
+      do l = 1, 2
+         num(1) = num(1) + a(l,l)*cV(l); den(1) = den(1) + a(l,l)**2
+         num(2) = num(2) + a(3-l,l)*cV(l); den(2) = den(2) + a(3-l,l)**2
+      enddo
+    end subroutine class_sums
   end subroutine class_weights
 end module sliced21_mod
 

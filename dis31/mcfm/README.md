@@ -19,6 +19,12 @@ all-incoming convention). Changes are marked with "disorder (date)":
   `lib/SpecialFunctions/ddilog.f`, `dclaus.f`; 51 files, the dependency
   closure of the routines used, found from MCFM's object files), plus
   `loop/xzqqgg_wrappers.f` (helicity wrappers from `src/Zbb/xzqqgg*.f`).
+  8 Oct 2026: `loop/fvs.f` (`src/BDK`), `loop/fvf.f` (`src/W2jet`) and
+  `a64v` (in the wrappers, from `src/Zbb/xzqqgg_v.f`), unchanged: the
+  boson on a closed quark loop with vector coupling in q qbar g g (BDK's
+  A6^v); checked against MCFM's own `xzqqgg_v` (`mqqb_vec0`) through
+  virt31 at DIS points (same normalisation as its main term, photon, e+,
+  nu, all three channels).
   Changed: `a6routine.f` and `a61g.f` stop instead of calling the exact
   top-loop routines (not ported; we use toploops = none, n_f = 5).
   Includes added: `epinv.f`, `epinv2.f` (MCFM's poles: epinv = epinv2 =

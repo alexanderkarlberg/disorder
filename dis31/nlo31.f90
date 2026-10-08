@@ -44,7 +44,9 @@
 ! Photon + Z (env EW31 = "mode lepton", as dis31/tests; 8 Oct): the flavour
 ! sums from the values with ew31's basis couplings (born_basis, eval_nc). For vi the
 ! basis sums keep the part of the one loop even under the reflection y ->
-! -y (the odd part breaks m2(1,1) = m2(2,2); it integrates to zero).
+! -y (the odd part breaks m2(1,1) = m2(2,2); it integrates to zero). The
+! closed-loop vector term of vi (virt31_vloop) is linear in the line's
+! coupling and weighted apart (photon e_q sum e; NC ew31_wl).
 !-----------------------------------------------------------------------
 module nlo31_mod
   use ew31
@@ -380,6 +382,7 @@ contains
        call virt31_ren(Pk, fl, Q2, v, t)
        call iop31_i(Pk, fl, Q2, iv)
        val(1) = v(0) + iv(0)
+       val(2) = virt31_vloop
     case ('kp')
        call iop31_kp(Pk, fl, Q2, val(1), val(2), val(3))
     end select
@@ -409,7 +412,7 @@ contains
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,7), dphi, as, fpdf(-5:5), w, x, fa(-5:5)
     real(dp) :: u1(3), u2(3), u4(3), m3(3,3), c3(3,3), t(3), eq1, eq2, acc(nv)
-    real(dp) :: v1(3,2), v2(3,2), v4(3,2), va(3,2), vb(3,2), wf(2)
+    real(dp) :: v1(3,2), v2(3,2), v4(3,2), va(3,2), vb(3,2), lv1(3), lv2(3)
     logical :: ok
     integer :: f, Q, k
     res = 0
@@ -451,12 +454,11 @@ contains
        enddo
        do f = -5, 5
           if (f == 0) cycle
-          wf = ncw(f, Q2)
-          if (f > 0) res = res + bterm(0, matmul(v2, wf))
-          res = res + 0.5_dp*bterm(f, matmul(v1 + v4, wf))
+          if (f > 0) res = res + bterm(0, ncv(v2, f))
+          res = res + 0.5_dp*bterm(f, ncv(v1 + v4, f))
           do Q = 1, 5
              if (Q == abs(f)) cycle
-             res = res + bterm(f, matmul(va, wf) + matmul(vb, ncw(sign(Q, f), Q2)))
+             res = res + bterm(f, ncv(va, f) + ncv(vb, sign(Q, f)))
           enddo
        enddo
     else
@@ -464,6 +466,13 @@ contains
        call born_eval(Pk, [1, 1, 0, 0], Q2, u1); u1 = u1*9
        call born_eval(Pk, [0, 1, -1, 0], Q2, u2); u2 = u2*9
        call born_eval(Pk, [1, 1, 1, -1], Q2, u4); u4 = u4*9
+       ! vi: the closed-loop term (val(2)) is e_q sum e, not e_q^2: for the
+       ! d values above -3 e_q times it
+       lv1 = 0; lv2 = 0
+       if (trim(part) == 'vi') then
+          lv1(1) = -u1(2)/3; u1(1) = u1(1) - u1(2); u1(2) = 0
+          lv2(1) = -u2(2)/3; u2(1) = u2(1) - u2(2); u2(2) = 0
+       endif
        ! different flavours: (e_q, e_Q) = (d,u), (u,d), (d,s)
        call born_eval(Pk, [1, 1, 2, -2], Q2, m3(:,1))
        call born_eval(Pk, [2, 2, 1, -1], Q2, m3(:,2))
@@ -475,12 +484,12 @@ contains
           if (f == 0) then
              ! g -> q qbar g
              do Q = 1, 5
-                res = res + bterm(0, ech(Q)**2*u2)
+                res = res + bterm(0, ech(Q)**2*u2 + ech(Q)*lv2)
              enddo
              cycle
           endif
           eq1 = ech(f)
-          res = res + 0.5_dp*bterm(f, eq1**2*u1)
+          res = res + 0.5_dp*bterm(f, eq1**2*u1 + eq1*lv1)
           res = res + 0.5_dp*bterm(f, eq1**2*u4)
           do Q = 1, 5
              if (Q == abs(f)) cycle
@@ -501,6 +510,19 @@ contains
        call fill(Q2, res*wgt)
     endif
   contains
+    ! photon + Z: the basis values v(:,k) of a line of flavour f weighted;
+    ! vi: the closed-loop term v(2,:) with ew31_wl
+    function ncv(v, f) result(t)
+      real(dp), intent(in) :: v(3,2)
+      integer, intent(in) :: f
+      real(dp) :: t(3), w(2), wl(2)
+      w = ncw(f, Q2)
+      t = matmul(v, w)
+      if (trim(part) == 'vi') then
+         call ew31_wl(f, Q2, wl)
+         t = [dot_product(v(1,:) - v(2,:), w) + dot_product(v(2,:), wl), 0.0_dp, 0.0_dp]
+      endif
+    end function ncv
     ! one Born flavour class with incoming fb and values val(3)
     real(dp) function bterm(fb, val)
       integer, intent(in) :: fb

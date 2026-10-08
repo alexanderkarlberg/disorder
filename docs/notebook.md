@@ -2995,3 +2995,42 @@ r.**
   - Still to do for full NC: the two-loop closed-loop N_F,γ term in hard21
     with Z (stage 3), CC, and the NC validation campaign (NLO 2+1 against
     DISENT `-includeZ`; NNLO against NNLOJET with Z).
+
+## 2026-10-08 (evening) — NC stage 3, closed-loop terms, dropped-term notes
+
+- **Correction (virt31, also photon):** virt31's comment said the photon
+  couples to no closed quark loop in q q̄ g g (Furry). Wrong: with three
+  gluons on the loop (two external, one to the quark line) the vector term
+  survives (BDK's A6^v, colour (N − 4/N), ∝ Σ e_q; MCFM's `mqqb_vec0`).
+  virt31 (ported from MCFM's colourchoice-0 path) had left it out. Now
+  included (`fvs.f`, `fvf.f`, `a64v` from MCFM, unchanged), photon and Z
+  (loop coupling Σ_f v_f, `ew31_cv`). Checked against MCFM's own
+  `xzqqgg_v` at DIS points: our closed-loop term / MCFM's c·c_V-weighted
+  `mqqb_vec0` equals our main term / MCFM's `mqqb`, at every point, all
+  three channels, photon, e⁺, ν. Finite (the pole checks of harness_virt31
+  and harness_iop31 unchanged, ≤ 4e-13). Size for the photon: −0.03 % of
+  vi in NLO 3+1, 3e-6 of vi at (0.01, 400): no visible effect on any
+  earlier result. NNLOJET's DIS process lacks it too (the photon
+  finite-part agreement of 2 Oct was therefore without this term on both
+  sides).
+- nlo31: the closed-loop term is linear in the line's coupling (c·c_V), so
+  it is weighted apart (`virt31_vloop`): photon −3 e_q times the d value;
+  NC basis values with unit loop coupling, weights `ew31_wl`. Checked
+  against the explicit flavour sum: photon point by point (11 digits), NC
+  point + mirror (11 digits). A stale `virt31_vloop` from a previous q q̄ g g
+  call leaked into four-quark channels during development (found by this
+  check, fixed before commit: reset in `virt31_ren`).
+- **Stage 3, two-loop N_F,V term (hard21's G):** linear in the coupling
+  ratio nfz per helicity amplitude; lp21 evaluates hard21 with the term off
+  and with ratio 1 and combines per class with nfk(k, c) from sliced21
+  (`class_weights`): Σ_class c(h,l) c_V(l) / Σ c(h,l)², c_V the vector
+  coupling of the loop (photon: Σ e/e_q and 1/11, as before). The axial
+  part is dropped. Photon b1, b2 at (0.01, 400) identical to before (all
+  digits); NC with MZ → 1e10 equal to the photon (e⁻, e⁺).
+- **Dropped terms:** `docs/nc-dropped-terms.md` (for the paper): every
+  term, whether it exists, kept/dropped, size. Open: the axial
+  closed-loop terms (rows 5, 10, 12) need a numerical estimate; HOPPET's
+  singlet treatment for F2/FL with Z to be documented.
+- NC validation started (x = 0.1, Q² = 5000, e⁻ and ν): NLO 2+1 (sliced21
+  b1 + nlo31 lo) against DISENT with `-includeZ` (tau2_nlo, new flags),
+  136 jobs via the dispatcher (`runs/ncz1`).

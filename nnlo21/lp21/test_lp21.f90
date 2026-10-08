@@ -16,7 +16,7 @@ program test_lp21
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884197_dp
   integer, parameter :: ntc = 4
   real(dp) :: tcs(ntc) = [1e-2_dp, 1e-3_dp, 1e-4_dp, 1e-5_dp]
-  real(dp) :: P(4,7), Q, x, xp, th, ph, r1, xi, f0(nbc), c1(ntc,nbc), c2(ntc,nbc), h(0:2), wk(2,nbc)
+  real(dp) :: P(4,7), Q, x, xp, th, ph, r1, xi, f0(nbc), c1(ntc,nbc), c2(ntc,nbc), h(0:2), wk(2,nbc), nfk(2,nbc)
   real(dp) :: c0b(-6:6), c1b(-6:6), c2b(-6:6), xf(-6:6), pb(4,3), y, ch, sh, nh(3,3), g(3,3), ls(3,3)
   real(dp) :: tq(3,3), tg(3,3), ref, lb, beam, worst(nbc), Ea, E2, E3, wsum, wbeam
   real(dp) :: e2c(-5:5)
@@ -28,6 +28,7 @@ program test_lp21
   e2c = [1, 4, 1, 4, 1, 0, 1, 4, 1, 4, 1]/9.0_dp
   ! photon couplings of the beam classes (up q, qbar, down q, qbar, gluon)
   wk(:,1:2) = 4.0_dp/9; wk(:,3:4) = 1.0_dp/9; wk(:,5) = 11.0_dp/9
+  nfk(:,1:2) = 0.5_dp; nfk(:,3:4) = -1; nfk(:,5) = 1.0_dp/11
   call ttm([CF, CF, CA], tq); call ttm([CA, CF, CF], tg)
   worst = 0
   call random_seed(put=[(4321 + 11*n, n = 1, 33)])
@@ -37,7 +38,7 @@ program test_lp21
      call random_number(r1); ph = 2*pi*r1
      call breit_born(Q, 0.5_dp, xp, th, ph, P)
      xi = x/xp
-     call lp21_born(P, xi, ntc, tcs, wk, f0, c1, c2)
+     call lp21_born(P, xi, ntc, tcs, wk, nfk, f0, c1, c2)
      ! reference pieces in the jets' frame
      y = -atanh((P(3,2) + P(3,3))/(P(4,2) + P(4,3))); ch = cosh(y); sh = sinh(y)
      do k = 1, 3
