@@ -13,13 +13,14 @@ for f in $M; do
 done
 MO=$(for f in $M; do echo -n "$f.o "; done)
 O=$(ls $B/CMakeFiles/disorder_core.dir/src/*.o | grep -v "mod_dsigma\|mod_analysis")
+gfortran -O2 -ffree-line-length-none -c $D/ew31.f90 -o ew31.o
 gfortran -O2 -ffree-line-length-none -c $D/me31.f90 -o me31.o
 gfortran -O2 -ffree-line-length-none -c $D/me41.f90 -o me41.o
 gfortran -O2 -ffree-line-length-none -c $D/born31.f90 -o born31.o
 gfortran -O2 -ffree-line-length-none -c $D/dip41.f90 -o dip41.o
 for h in harness_gluon harness_quark harness_me31 time_me31; do
   gfortran -O2 -ffree-line-length-none -I$(hoppet-config --prefix)/include/hoppet -I$B/modules -c $D/tests/$h.f90 -o $h.o
-  gfortran -O2 $h.o me31.o $MO $O \
+  gfortran -O2 $h.o me31.o ew31.o $MO $O \
     $B/CMakeFiles/disorder_core.dir/analysis/pwhg_bookhist-multi.f.o \
     $B/tests/CMakeFiles/disorder_test_support.dir/__/analysis/simple_analysis.f.o \
     $(hoppet-config --libs) $(lhapdf-config --libs) -o $h
@@ -27,7 +28,7 @@ done
 # standalone (MCFM routines only)
 for h in harness_lim41 dump_fd31 harness_born31 harness_dip41; do
   gfortran -O2 -ffree-line-length-none -c $D/tests/$h.f90 -o $h.o
-  gfortran -O2 $h.o me31.o me41.o born31.o dip41.o $MO -o $h
+  gfortran -O2 $h.o me31.o ew31.o me41.o born31.o dip41.o $MO -o $h
 done
 # one loop (BDK amplitudes from MCFM, dis31/mcfm/loop)
 L=""
@@ -37,7 +38,7 @@ for f in $D/mcfm/loop/*.f; do
 done
 gfortran -O2 -ffree-line-length-none -I$D/mcfm/Inc -c $D/virt31.f90 -o virt31.o
 gfortran -O2 -ffree-line-length-none -c $D/tests/harness_virt31.f90 -o harness_virt31.o
-gfortran -O2 harness_virt31.o me31.o born31.o virt31.o $MO $L -o harness_virt31
+gfortran -O2 harness_virt31.o me31.o ew31.o born31.o virt31.o $MO $L -o harness_virt31
 gfortran -O2 -ffree-line-length-none -c $D/iop31.f90 -o iop31.o
 gfortran -O2 -ffree-line-length-none -c $D/tests/harness_iop31.f90 -o harness_iop31.o
 gfortran -O2 harness_iop31.o born31.o virt31.o iop31.o $MO $L -o harness_iop31

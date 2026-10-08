@@ -1,6 +1,7 @@
 !-----------------------------------------------------------------------
-! DIS 3+1 tree matrix elements (photon exchange) from MCFM 10.3's Z+2 jet
-! amplitudes crossed to DIS (dis31/mcfm, crossing rules in its README).
+! DIS 3+1 tree matrix elements (photon exchange; photon + Z with ew31) from
+! MCFM 10.3's Z+2 jet amplitudes crossed to DIS (dis31/mcfm, crossing rules
+! in its README).
 !
 ! me31(P, fl, msq): P(4,7) in DISENT's layout (1 incoming parton, 2-4
 ! outgoing partons, 5 q, 6 incoming lepton, 7 outgoing lepton; components
@@ -9,9 +10,17 @@
 ! the incoming lepton and parton, summed over the final state, with
 ! alpha = 1/137 and divided by (alpha_s/2pi)^2 (DISENT's MATFOR
 ! normalisation); no symmetry factors for identical final-state partons.
-! Zero for flavour assignments that do not occur.
+! Zero for flavour assignments that do not occur. Couplings per helicity of
+! the quark and lepton lines from ew31 (8 Oct 2026); with photon + Z the
+! interference of the boson on different quark lines for different
+! flavours is dropped, as in disorder's MATFOR and the structure functions
+! (odd for vector couplings; for axial ones proportional to the sum of the
+! axial couplings of the pair flavours), also its pair flavour = incoming
+! flavour member in the identical-quark |D|^2, |E|^2; the direct-exchange
+! interference of identical quarks is kept.
 !-----------------------------------------------------------------------
 module me31
+  use ew31
   implicit none
   private
   integer, parameter :: dp = kind(1.0d0)
@@ -20,8 +29,10 @@ module me31
   real(dp), parameter :: xn = 3, V = xn**2 - 1
   ! (4 pi alpha)^2 g_s^4 / (alpha_s/2pi)^2 = (4 pi/137)^2 64 pi^4
   real(dp), parameter :: cnorm = (4*pi/137.0_dp)**2*64*pi**4
-  real(dp), parameter :: eq(5) = [-1.0_dp/3, 2.0_dp/3, -1.0_dp/3, 2.0_dp/3, -1.0_dp/3]
   integer, parameter :: swp(2) = [2, 1]
+  ! diagnostic: keep the interference of the boson on different quark lines
+  ! with photon + Z (dis31/tests/axsum31: size of the dropped terms)
+  logical, public :: me31_keepint = .false.
   public :: me31_tree
 contains
 
@@ -31,9 +42,10 @@ contains
     real(dp), intent(out) :: msq
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     common /zprods/ za, zb
-    real(dp) :: pm(mxpart,4), m2(2,2), avg, c1
+    real(dp) :: pm(mxpart,4), m2(2,2), avg, c(2,2), Q2
     integer :: nq, ng, i, iq, iqb, ig(2), iother(3), k
     msq = 0
+    Q2 = sum(P(1:3,5)**2) - P(4,5)**2
     ng = count(fl == 0)
     if (fl(1) == 0) then
        avg = 1.0_dp/(2*2*V)          ! lepton spin, gluon polarisation and colour
@@ -55,11 +67,10 @@ contains
           pm(1,:) = -P(:,1); pm(2,:) = P(:,k)
           pm(5,:) = P(:,iother(1)); pm(6,:) = P(:,iother(2))
           call spinoru(6, pm, za, zb)
-          ! for photon exchange the antiquark line has the same |M|^2
-          ! (charge conjugation of the line)
+          ! an antiquark line: the quark-helicity label exchanged (ew31)
           call z2jetsq(2, 1, 3, 4, 5, 6, za, zb, m2)
-          c1 = eq(abs(fl(1)))
-          msq = avg*cnorm*c1**2*V*xn/4*sum(m2)
+          call ew31_cpl(fl(1), Q2, c)
+          msq = avg*cnorm*V*xn/4*sum(c**2*m2)
        else
           ! g -> q qbar g: q, qbar, g among 2-4
           iq = 0; iqb = 0; ig = 0
@@ -72,8 +83,8 @@ contains
           pm(1,:) = -P(:,1); pm(2,:) = P(:,iq); pm(5,:) = P(:,iqb); pm(6,:) = P(:,ig(1))
           call spinoru(6, pm, za, zb)
           call z2jetsq(2, 5, 3, 4, 1, 6, za, zb, m2)
-          c1 = eq(fl(iq))
-          msq = avg*cnorm*c1**2*V*xn/4*sum(m2)
+          call ew31_cpl(fl(iq), Q2, c)
+          msq = avg*cnorm*V*xn/4*sum(c**2*m2)
        endif
        return
     endif
@@ -81,25 +92,29 @@ contains
     ! four (anti)quarks: incoming q (or qbar) of flavour fl(1), outgoing
     ! line partner, and a pair Q Qbar
     nq = fl(1)
-    call four_quark(P, fl, msq)
+    call four_quark(P, fl, Q2, msq)
     msq = avg*cnorm*msq
   end subroutine me31_tree
 
   ! four-quark |M|^2 without the average and normalisation: colour factor
-  ! 4 V (MCFM's faclo), photon couplings
-  subroutine four_quark(P, fl, s)
-    real(dp), intent(in) :: P(4,7)
+  ! 4 V (MCFM's faclo); A(j1,j2,j3): boson on the line (2,1), B: on (5,6),
+  ! j1, j2 their helicities, j3 the lepton's. The line (5,6) is read in
+  ! MCFM's orientation (outgoing quark in its outgoing slot), so its
+  ! couplings are ew31's with the quark-helicity label exchanged back
+  ! (cr, cQ2; fixed against disorder's NC MATFOR, harness_me31)
+  subroutine four_quark(P, fl, Q2, s)
+    real(dp), intent(in) :: P(4,7), Q2
     integer, intent(in) :: fl(4)
     real(dp), intent(out) :: s
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     common /zprods/ za, zb
-    real(dp) :: pm(mxpart,4), cq, cQ2, sg
-    complex(dp) :: A(2,2,2), B(2,2,2), Ae(2,2,2), Be(2,2,2)
+    real(dp) :: pm(mxpart,4), cq(2,2), cr(2,2), cQ2(2,2), sg
+    complex(dp) :: A(2,2,2), B(2,2,2), Ae(2,2,2), Be(2,2,2), D(2,2,2), E(2,2,2)
     integer :: i, k, kq, kqb, j1, j2, j3, f0, nsame, ip(3)
     s = 0
     f0 = fl(1)
     ! work with an incoming quark: for an incoming antiquark conjugate all
-    ! flavours (photon exchange: same |M|^2)
+    ! flavours (the helicity labels of the antiquark lines exchanged, ew31)
     sg = merge(1, -1, f0 > 0)
     ! the outgoing partons: two with the sign of the incoming parton, one
     ! with the opposite sign
@@ -114,7 +129,8 @@ contains
     if (nsame /= 2 .or. kqb == 0) return
     pm = 0
     pm(1,:) = -P(:,1); pm(3,:) = P(:,7); pm(4,:) = -P(:,6); pm(6,:) = P(:,kqb)
-    cq = eq(abs(f0))
+    call ew31_cpl(f0, Q2, cq)
+    cr = cq([2, 1],:)
     if (fl(ip(1)) == f0 .and. fl(ip(2)) == f0) then
        ! identical quarks: direct D (lines 2-1, 5-6) and exchange E (5-1, 2-6)
        ! amplitudes, interfering for opposite helicity labels j1, j2 (fixed
@@ -124,12 +140,25 @@ contains
        call spinoru(6, pm, za, zb)
        call ampqqb_qqb(2, 1, 5, 6, A, B)
        call ampqqb_qqb(5, 1, 2, 6, Ae, Be)
-       A = A - B; Ae = Ae - Be
-       s = sum(abs(A)**2) + sum(abs(Ae)**2)
+       do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
+          D(j1,j2,j3) = cq(j1,j3)*A(j1,j2,j3) - cr(j2,j3)*B(j1,j2,j3)
+          E(j1,j2,j3) = cq(j1,j3)*Ae(j1,j2,j3) - cr(j2,j3)*Be(j1,j2,j3)
+       enddo; enddo; enddo
+       if (ew31_mode == 0 .or. me31_keepint) then
+          s = sum(abs(D)**2) + sum(abs(E)**2)
+       else
+          ! photon + Z: |D|^2, |E|^2 without the interference of the boson on
+          ! the two lines (the pair flavour = q member of the dropped sum)
+          s = 0
+          do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
+             s = s + abs(cq(j1,j3)*A(j1,j2,j3))**2 + abs(cr(j2,j3)*B(j1,j2,j3))**2 &
+                  & + abs(cq(j1,j3)*Ae(j1,j2,j3))**2 + abs(cr(j2,j3)*Be(j1,j2,j3))**2
+          enddo; enddo; enddo
+       endif
        do j1 = 1, 2; do j3 = 1, 2
-          s = s + 2/xn*real(A(j1,swp(j1),j3)*conjg(Ae(j1,swp(j1),j3)), dp)
+          s = s + 2/xn*real(D(j1,swp(j1),j3)*conjg(E(j1,swp(j1),j3)), dp)
        enddo; enddo
-       s = 4*V*cq**2*s
+       s = 4*V*s
        return
     endif
     ! different flavours: one outgoing parton continues the incoming line
@@ -144,12 +173,17 @@ contains
     pm(2,:) = P(:,k); pm(5,:) = P(:,kq)
     call spinoru(6, pm, za, zb)
     call ampqqb_qqb(2, 1, 5, 6, A, B)
-    cQ2 = eq(abs(fl(kq)))
+    call ew31_cpl(fl(kq), Q2, cQ2)
+    cQ2 = cQ2([2, 1],:)
     ! the incoming line is read as (2,1), against MCFM's orientation (1,2)
     ! (qqb_z2jet): the photon on the pair line (B) has the opposite sign
     ! (charge-odd e_q e_Q term; checked against Feynman diagrams, fd31.py)
     do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
-       s = s + abs(cq*A(j1,j2,j3) - cQ2*B(j1,j2,j3))**2
+       if (ew31_mode == 0 .or. me31_keepint) then
+          s = s + abs(cq(j1,j3)*A(j1,j2,j3) - cQ2(j2,j3)*B(j1,j2,j3))**2
+       else
+          s = s + abs(cq(j1,j3)*A(j1,j2,j3))**2 + abs(cQ2(j2,j3)*B(j1,j2,j3))**2
+       endif
     enddo; enddo; enddo
     s = 4*V*s
   end subroutine four_quark

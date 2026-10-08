@@ -2829,3 +2829,34 @@ r.**
     already dropped as non-finite.
 - Cluster instructions: rerun r (B, F) and all TECHDIFF sets with the guard
   and VEGAS_EQUAL = 2; report the tail statistics and F's flatness.
+
+**NC/CC for NNLO 2+1, stage 1a: me31 with photon + Z (8 Oct, branch
+`2026-10-nnlo21-ncc`).**
+- AK: implement the NC/CC ingredients now; keep the coding style; option 1
+  for the axial pair-flavour terms (as disorder's MATFOR and HOPPET).
+  HOPPET's InitC3NNLO sets the singlet parts of C3 to zero ("no impact on
+  Z case").
+- New `dis31/ew31.f90`: helicity couplings c(hq, hl) = Q_f q_l + z_f z_l
+  Q²/(Q² + MZ²) as in MCFM's qqb_z2jet (zcouple), disorder's MZ, MW; e∓,
+  ν, ν̄ (ν: × √2 for the lepton spin average). Photon default.
+- `me31`: m2 weighted per helicity; four-quark with helicity couplings per
+  line.
+  - Fixed against disorder's NC MATFOR (`harness_me31`): the DIS crossing
+    puts the outgoing quark of the first line into MCFM's incoming-quark
+    slot (helicity label exchanged for quarks). The pair line (5,6) is in
+    MCFM's own orientation (not exchanged).
+  - With photon + Z the interference of the boson on different quark lines
+    is dropped (different flavours, and its pair = incoming flavour member
+    in the identical-quark |D|², |E|²); the direct × exchange interference
+    is kept.
+  - Result: me31/MATFOR − 1 ≤ 1.5e-13 for e⁻, e⁺, ν, ν̄ (50 points, all
+    flavours); photon ≤ 1e-13. (`-Zonly`, `-intonly` are not in ew31.)
+- Size of the dropped terms (`dis31/tests/axsum31`, full 3+1 phase space,
+  labels symmetrised, e⁻), against disorder's inclusive NC:
+  - (2.4 ± 0.5)e-4 at x = 0.01, Q² = 400 (LO 104.3, NNLO coefficient −2.18);
+  - 7.4e-8 at x = 0.1, Q² = 5000 (LO 3.3e-2);
+  - −2.4e-9 at x = 0.3, Q² = 20000 (LO 3.9e-4).
+  That is ≈ 2–6e-6 of LO and ≤ 1e-3 of the NNLO coefficient. For e⁺ the sign
+  flips at low Q² (F3-like). Negligible.
+- Next: born31 (production 3+1 Born, colour correlations), me41, dip41,
+  virt31/iop31, the nlo31 flavour sums (from charges to couplings); then CC.

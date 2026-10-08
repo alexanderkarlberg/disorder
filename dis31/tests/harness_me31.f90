@@ -1,10 +1,13 @@
 ! me31 (MCFM crossed, absolute normalisation) against DISENT's MATFOR,
-! photon exchange, all incoming partons -5..5, summed over the labellings of
-! the outgoing partons with 1/2 for identical final-state pairs: ratio 1.
+! all incoming partons -5..5, summed over the labellings of the outgoing
+! partons with 1/2 for identical final-state pairs: ratio 1. Photon
+! exchange, or photon + Z with disorder's flags (-includeZ, -positron,
+! -neutrino; ew31 set from them, 8 Oct 2026).
 program harness_me31
   use types, only: dp
   use mod_parameters
   use me31
+  use ew31
   implicit none
   integer :: SCHEME_D, NF
   double precision :: CF, CA, TR, PI_D, PISQ, HF, CUTOFF_D, EQ(-6:6), SCALE_D
@@ -13,6 +16,9 @@ program harness_me31
   integer :: perm(3,6), ip, ipt, i, f, Q
   perm = reshape([2,3,4, 2,4,3, 3,2,4, 3,4,2, 4,2,3, 4,3,2], [3,6])
   call set_parameters()
+  if (CC) stop 'harness_me31: CC not implemented in me31'
+  ew31_mode = merge(0, 1, noZ)
+  ew31_lepton = merge(1, 0, positron) + merge(2, 0, neutrino)
   CF = 4.0_dp/3.0_dp; CA = 3; TR = 0.5_dp; NF = 5
   PI_D = atan(1d0)*4; PISQ = PI_D**2; HF = 0.5_dp; CUTOFF_D = 1d-8
   SCHEME_D = 0; SCALE_D = 1
