@@ -2910,3 +2910,50 @@ r.**
     odd under pair exchange and integrates to zero, so this is not a
     pointwise test.
   - `build_nlo31.sh` now compiles ew31 (since d03c2a5 it did not build).
+- **Stage 1d: below the cut (sliced21, lp21, hard21) with photon + Z (8 Oct).**
+  - The 2+1 Born has one quark line, so nothing is dropped there (option 1
+    concerns only 3+1/4+1 and the two-loop closed quark loop, see below).
+    DISENT's MATTHR splits the quark Born into S = (p1·p6)² + (p2·p7)² and
+    O = (p1·p7)² + (p2·p6)² (C2 ± C3). In ew31 terms the quark Born is
+    QQ/(S+O) (S w1 + O w2) with w = `ew31_w(f)`, and the gluon Born is GQ
+    Σ_q (w1 + w2)/2 (the parity-odd part, odd under q ↔ q̄, dropped as in
+    MATTHR).
+  - hard21 returns the hard function per helicity class as well (optional
+    `hk`). The one-loop (and two-loop) ratios differ between S and O, so
+    with Z they need separate weights. Classes: amplitudes {1,2,5,6} = S,
+    {3,4,7,8} = O.
+  - lp21: the beam table is now unweighted in 5 classes (up q, up q̄, down
+    q, down q̄, gluon); `lp21_born` takes the couplings wk(k, c) per helicity
+    class and beam class and combines the classes with hard21's Born
+    fractions. sliced21 computes the couplings (`class_weights`; photon
+    e_q², NC from ew31) and splits b0 with S/(S+O). **The beam grids of
+    mode 2 must be rebuilt** (`sliced21 mktab`); `lp21_grid_load` refuses
+    the old 3-class files.
+  - `nnlo21/tests/harness_born21` (with disorder's flags; `build_harness.sh`)
+    against DISENT, 50 points, photon, e⁻, e⁺, ν:
+    - hard21 classes S:O = S/O to 6e-15;
+    - quark Born = MATTHR to 3e-15 for f = −5..5, gluon Born 8e-16;
+    - one loop per class: H1/H0 = hard_fact + (QQ ± QQ3)/2 over the class
+      Born (VIRTHR's C2 QQ + C3 QQ3, QQ3 from VIRT3PV) to 6e-13.
+  - On the way: hard21 has a step of ~1e-5 relative in H1 within 1.3e-3 of
+    the region boundaries s_ij = s45 (NNLOJET's displacement v → v − 1e-3
+    for 1 − v < 1e-3, inherited; DISENT is smooth there). It is negligible
+    after integration and was there before; the harness uses a fixed seed.
+  - Photon: sliced21 b0, b1, b2 at (0.01, 400) identical to HEAD to all 9
+    printed digits in all ten τ_cut cells; test_lp21 unchanged (2e-5, the
+    beam-integral tolerance).
+  - NC with MZ → 1e10 (scratch copy of ew31): b0, b1, b2 for e⁻ and e⁺ equal
+    the photon to all 9 digits (exact test of the weights, the q/q̄ classes
+    and the gluon sum).
+  - With the Z at (0.01, 400), τ_cut = 1e-5: b0 +0.7 % (e⁻), +0.3 % (e⁺)
+    against the photon; ν 0.33 pb/GeV² (pure Z).
+  - Beam table: the q̄ classes have 4e-3 deviation relative to their own
+    maximum (small sea at large ξ). The interpolation is linear in the
+    classes, so q + q̄ has exactly the old error (1e-3).
+  - Not done yet (stage 3): the two-loop N_F,γ term (boson on a closed
+    quark loop) still uses photon charges with Z. With Z its vector part is
+    Σ v_q, and its axial part is the analogue of the dropped pair-flavour
+    terms. To be decided together with the 3+1 one-loop closed-loop terms.
+  - Next: NLO 2+1 with Z (b1 + lo) against disorder's DISENT with
+    `-includeZ` (tau2_nlo, as the photon validation of 1–3 Oct), once
+    stage 2 is in, in one campaign.

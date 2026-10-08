@@ -395,14 +395,12 @@ contains
     ew31_basis = 0
   end subroutine born_basis
 
-  ! the weights (c11^2 + c22^2, c12^2 + c21^2)/2 of the basis values (on
-  ! the line of a quark) for a line of flavour f, c = ew31_cpl(-f) (ew31)
+  ! the weights of the basis values for a line of flavour f (ew31_w)
   function ncw(f, Q2) result(w)
     integer, intent(in) :: f
     real(dp), intent(in) :: Q2
-    real(dp) :: w(2), c(2,2)
-    call ew31_cpl(-f, Q2, c)
-    w = [c(1,1)**2 + c(2,2)**2, c(1,2)**2 + c(2,1)**2]/2
+    real(dp) :: w(2)
+    call ew31_w(f, Q2, w)
   end function ncw
 
   real(dp) function born_part(r, wgt) result(res)

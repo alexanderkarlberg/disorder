@@ -4,7 +4,7 @@ program diag_lp21
   use lp21
   implicit none
   integer, parameter :: dp = kind(1.0d0), n = 9
-  real(dp) :: P(4,7), tcs(n), f0(3), c1(n,3), c2(n,3), L(n), A(n,5), b(n), cf1(5), cf2(5)
+  real(dp) :: P(4,7), tcs(n), f0(nbc), c1(n,nbc), c2(n,nbc), L(n), A(n,5), b(n), cf1(5), cf2(5), wk(2,nbc)
   integer :: i
   call InitPDFsetByName('NNPDF30_nlo_as_0118'); call InitPDF(0)
   call lp21_init(20.0_dp, 0.005_dp, 0.0_dp)
@@ -17,7 +17,8 @@ program diag_lp21
   do i = 1, n
      tcs(i) = 10.0_dp**(-1 - 0.5_dp*i)
   enddo
-  call lp21_born(P, 0.4_dp, n, tcs, f0, c1, c2)
+  wk = 1
+  call lp21_born(P, 0.4_dp, n, tcs, wk, f0, c1, c2)
   L = log(tcs)
   do i = 1, 5
      A(:,i) = L**(i - 1)

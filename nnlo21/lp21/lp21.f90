@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------------
-! Leading-power tau_2 cumulant of DIS 2+1 (photon exchange) at O(alpha_s)
+! Leading-power tau_2 cumulant of DIS 2+1 (photon; photon + Z) at O(alpha_s)
 ! and O(alpha_s^2) relative to the Born, in the jets'-rest-frame
 ! geometric measure (slicing/mod_tau2_run.f90, measure 2), assembled with
 ! MCFM 10.3's 1-jettiness pieces (built by build.sh from an MCFM tree):
@@ -19,14 +19,18 @@
 ! All energies and directions in the rest frame of the two jets (the
 ! Born's partonic CM frame), y_ij = n_i.n_j/2, Q_i = 2 E_i.
 !
-! lp21_born(P, xi, ntc, tcs, f0, c1, c2): P(4,7) the Born in DISENT's
+! lp21_born(P, xi, ntc, tcs, wk, f0, c1, c2): P(4,7) the Born in DISENT's
 ! layout (1 incoming parton, 2 the outgoing quark, 3 the gluon for a quark
 ! Born; 2 quark, 3 antiquark for a gluon Born), xi its momentum fraction;
-! tcs = tau_cut = T_cut/Q. Classes k = 1 up-type quarks (q + qbar, e^2
-! weighted), 2 down-type, 3 gluon (weighted by sum e_q^2 over the produced
-! flavour). f0(k): the Born luminosity sum e^2 f(xi) (MCFM's f = xf/x);
-! c1, c2(it,k): the O(alpha_s/2pi) and O((alpha_s/2pi)^2) coefficients of the
-! cumulant in the same units (divide by f0 for per-Born factors).
+! tcs = tau_cut = T_cut/Q. Beam classes c = 1 up-type quarks, 2 up-type
+! antiquarks, 3 down-type quarks, 4 down-type antiquarks, 5 gluon (the
+! beam table unweighted); wk(k,c) the couplings of class c for the two
+! helicity classes k of hard21 (photon: e_q^2 for both; gluon: summed over
+! the produced flavour), combined with hard21's Born fractions of k (with
+! photon + Z the hard functions of the two classes differ). f0(c): the
+! Born luminosity f(xi) (MCFM's f = xf/x) times the combined coupling;
+! c1, c2(it,c): the O(alpha_s/2pi) and O((alpha_s/2pi)^2) coefficients of
+! the cumulant in the same units (divide by f0 for per-Born factors).
 !-----------------------------------------------------------------------
 subroutine fdist(ih, x, xmu, fx, ibeam)
   implicit none
@@ -50,17 +54,20 @@ module lp21
   private
   integer, parameter :: dp = kind(1.0d0)
   real(dp), parameter :: eu = 2.0_dp/3, ed = -1.0_dp/3
-  ! beam table: classes 1..3, coefficients b0, b1(-1:1), b2(-1:3) = 9 numbers
+  ! beam classes (lp21_born) and their flavours (q; qbar)
+  integer, parameter, public :: nbc = 5
+  integer, parameter :: cup(2) = [2, 4], cdn(3) = [1, 3, 5]
+  ! beam table: classes 1..nbc, coefficients b0, b1(-1:1), b2(-1:3) = 9 numbers
   integer, save :: nt = 0
   real(dp), save :: tQ = 0, t0, th
-  real(dp), allocatable, save :: tab(:,:,:)       ! (0:nt, 9, 3)
+  real(dp), allocatable, save :: tab(:,:,:)       ! (0:nt, 9, nbc)
   real(dp), save :: zx                              ! xi of the z integrand
   integer, save :: zlim = 30
   ! grid in Q (sliced21 mode 2, Q = mu varies per event): nodes ln Q =
   ! gq0 + gqh*i, i = 0..nqg-1, each a table as tab; cubic in ln Q
   integer, save :: nqg = 0
   real(dp), save :: gq0, gqh
-  real(dp), allocatable, save :: tabg(:,:,:,:)    ! (0:nt, 9, 3, 0:nqg-1)
+  real(dp), allocatable, save :: tabg(:,:,:,:)    ! (0:nt, 9, nbc, 0:nqg-1)
   public :: lp21_init, lp21_born, lp21_beam_direct, lp21_shift, beam_at
   public :: lp21_grid_build, lp21_grid_load, lp21_setq
 contains
@@ -69,7 +76,7 @@ contains
   ! for ximin <= xi < 1, nodes equally spaced in ln(xi/(1-xi)) by h
   subroutine lp21_init(Q, ximin, h)
     real(dp), intent(in) :: Q, ximin, h
-    real(dp) :: t1, t, b(9,3)
+    real(dp) :: t1, t, b(9,nbc)
     integer :: i
     call lp21_setq(Q)
     if (h <= 0) then
@@ -78,7 +85,7 @@ contains
     t0 = log(ximin/(1 - ximin)); t1 = log((1 - 1e-6_dp)/1e-6_dp); th = h
     nt = int((t1 - t0)/h) + 1
     if (allocated(tab)) deallocate(tab)
-    allocate(tab(0:nt, 9, 3))
+    allocate(tab(0:nt, 9, nbc))
     do i = 0, nt
        t = t0 + h*i
        call lp21_beam_direct(1/(1 + exp(-t)), b)
@@ -130,6 +137,7 @@ contains
     real(dp), intent(in) :: Qlo, Qhi
     character(*), intent(in) :: prefix
     integer :: i, u, n
+    integer(8) :: sz
     real(dp) :: a, b, q, q0
     character(16) :: num
     logical :: ex
@@ -145,10 +153,12 @@ contains
        write(num, '(i0)') i
        open(newunit=u, file=prefix//'_'//trim(num)//'.tab', form='unformatted', access='stream', status='old')
        read(u) n, a, b, q
+       inquire(unit=u, size=sz)
+       if (sz /= 28 + 8_8*(n + 1)*9*nbc) stop 'lp21_grid_load: not a table of nbc beam classes (old format: rebuild)'
        if (i == 0) then
           nt = n; t0 = a; th = b; q0 = q
           if (allocated(tabg)) deallocate(tabg)
-          allocate(tabg(0:nt, 9, 3, 0:nqg-1))
+          allocate(tabg(0:nt, 9, nbc, 0:nqg-1))
        elseif (n /= nt .or. a /= t0 .or. b /= th) then
           stop 'lp21_grid_load: tables differ in xi nodes'
        endif
@@ -166,30 +176,28 @@ contains
   ! beam coefficients at xi (mu = Q, Q_B = mu) by adaptive z integration
   subroutine lp21_beam_direct(xi, b)
     real(dp), intent(in) :: xi
-    real(dp), intent(out) :: b(9,3)
-    real(dp) :: fx(-5:5), r(24), e
+    real(dp), intent(out) :: b(9,nbc)
+    real(dp) :: fx(-5:5), r(8*nbc), e, w(-5:5,nbc)
+    integer :: c
     call fdist(1, xi, tQ, fx, 1)
-    b = 0
-    b(1,1) = eu**2*(fx(2) + fx(-2) + fx(4) + fx(-4))
-    b(1,2) = ed**2*(fx(1) + fx(-1) + fx(3) + fx(-3) + fx(5) + fx(-5))
-    b(1,3) = fx(0)
+    call class_masks(w)
     zx = xi
     call adapt_rec(0.0_dp, 1.0_dp, r, e, 0)
-    b(2:9,1) = r(1:8); b(2:9,2) = r(9:16); b(2:9,3) = r(17:24)
+    do c = 1, nbc
+       b(1,c) = sum(w(:,c)*fx)
+       b(2:9,c) = r(8*(c-1) + 1:8*c)
+    enddo
   end subroutine lp21_beam_direct
 
   subroutine integrand(z, f)
     real(dp), intent(in) :: z
-    real(dp), intent(out) :: f(24)
-    real(dp) :: bt1(-5:5,-1:1), bt2(-5:5,-1:3), w(-5:5,3)
+    real(dp), intent(out) :: f(8*nbc)
+    real(dp) :: bt1(-5:5,-1:1), bt2(-5:5,-1:3), w(-5:5,nbc)
     integer :: k, c
     call xbeam1bis(1, z, zx, tQ, bt1, 1)
     call xbeam2bis(1, z, zx, tQ, bt2, 1)
-    w = 0
-    w([2, -2, 4, -4], 1) = eu**2
-    w([1, -1, 3, -3, 5, -5], 2) = ed**2
-    w(0, 3) = 1
-    do c = 1, 3
+    call class_masks(w)
+    do c = 1, nbc
        do k = -1, 1
           f(8*(c-1) + k + 2) = sum(w(:,c)*bt1(:,k))
        enddo
@@ -199,9 +207,18 @@ contains
     enddo
   end subroutine integrand
 
+  ! the Born flavours of each beam class
+  subroutine class_masks(w)
+    real(dp), intent(out) :: w(-5:5,nbc)
+    w = 0
+    w(cup, 1) = 1; w(-cup, 2) = 1
+    w(cdn, 3) = 1; w(-cdn, 4) = 1
+    w(0, 5) = 1
+  end subroutine class_masks
+
   subroutine gk15(a, b, rk, rg)
     real(dp), intent(in) :: a, b
-    real(dp), intent(out) :: rk(24), rg(24)
+    real(dp), intent(out) :: rk(8*nbc), rg(8*nbc)
     real(dp), parameter :: xk(8) = [0.991455371120812639_dp, 0.949107912342758525_dp, &
          0.864864423359769073_dp, 0.741531185599394440_dp, 0.586087235467691130_dp, &
          0.405845151377397167_dp, 0.207784955007898468_dp, 0.0_dp]
@@ -210,7 +227,7 @@ contains
          0.190350578064785410_dp, 0.204432940075298892_dp, 0.209482141084727828_dp]
     real(dp), parameter :: wg(4) = [0.129484966168869693_dp, 0.279705391489276668_dp, &
          0.381830050505118945_dp, 0.417959183673469388_dp]
-    real(dp) :: c, h, fa(24), fb(24)
+    real(dp) :: c, h, fa(8*nbc), fb(8*nbc)
     integer :: jj
     c = 0.5_dp*(a + b); h = 0.5_dp*(b - a)
     call integrand(c, fa)
@@ -225,9 +242,9 @@ contains
 
   recursive subroutine adapt_rec(a, b, r, e, depth)
     real(dp), intent(in) :: a, b
-    real(dp), intent(out) :: r(24), e
+    real(dp), intent(out) :: r(8*nbc), e
     integer, intent(in) :: depth
-    real(dp) :: rk(24), rg(24), r1(24), r2(24), e1, e2, m, sc
+    real(dp) :: rk(8*nbc), rg(8*nbc), r1(8*nbc), r2(8*nbc), e1, e2, m, sc
     call gk15(a, b, rk, rg)
     sc = max(maxval(abs(rk)), 1e-300_dp)
     e = maxval(abs(rk - rg))/sc
@@ -242,7 +259,7 @@ contains
   ! beam coefficients at xi from the table (Catmull-Rom), or direct
   subroutine beam_at(xi, b)
     real(dp), intent(in) :: xi
-    real(dp), intent(out) :: b(9,3)
+    real(dp), intent(out) :: b(9,nbc)
     real(dp) :: t, x, fx, w(4)
     integer :: ix, k
     t = log(xi/(1 - xi))
@@ -266,7 +283,7 @@ contains
   ! Catmull-Rom in t = ln(xi/(1-xi)) and ln Q on the grid; direct outside it
   subroutine grid_at(t, b)
     real(dp), intent(in) :: t
-    real(dp), intent(out) :: b(9,3)
+    real(dp), intent(out) :: b(9,nbc)
     real(dp) :: x, fx, w(4), xq, fq, wq(4)
     integer :: ix, iq, k, l
     xq = (log(tQ) - gq0)/gqh
@@ -322,16 +339,16 @@ contains
     end function binom
   end subroutine lp21_shift
 
-  subroutine lp21_born(P, xi, ntc, tcs, f0, c1, c2)
-    real(dp), intent(in) :: P(4,7), xi, tcs(:)
+  subroutine lp21_born(P, xi, ntc, tcs, wk, f0, c1, c2)
+    real(dp), intent(in) :: P(4,7), xi, tcs(:), wk(2,nbc)
     integer, intent(in) :: ntc
-    real(dp), intent(out) :: f0(3), c1(ntc,3), c2(ntc,3)
+    real(dp), intent(out) :: f0(nbc), c1(ntc,nbc), c2(ntc,nbc)
     real(dp) :: pb(4,3), y, ch, sh, Ea, E2, E3, nh(3,3), yy(3,3), Q
-    real(dp) :: b(9,3), ba0, ba1(-1:1), ba2(-1:3), lB
+    real(dp) :: b(9,nbc), ba0, ba1(-1:1), ba2(-1:3), lB
     real(dp) :: Jq1(-1:1), Jq2(-1:3), Jg1(-1:1), Jg2(-1:3), Jb1(-1:1), Jb2(-1:3), Jc1(-1:1), Jc2(-1:3)
-    real(dp) :: s1(-1:1), s2(-1:3), s2n(-1:3), Iq(6), Ig(6), hard(2), h(0:2), hz(0:2), tc
+    real(dp) :: s1(-1:1), s2(-1:3), s2n(-1:3), Iq(6), Ig(6), h(0:2), hk(0:2,2,3), tc, rk(2)
     real(dp), external :: assemblejet
-    integer :: k, it, c
+    integer :: k, it, c, ht
     Q = tQ
     ! the jets' rest frame: boost along z
     y = -atanh((P(3,2) + P(3,3))/(P(4,2) + P(4,3)))
@@ -358,31 +375,38 @@ contains
     ! jet functions (alpha_s/4pi, logs shifted to tau/mu by MCFM)
     call jetq(2, 2*E2, Jq1, Jq2, Q)
     call jetg(2, 2*E3, Jg1, Jg2, Q)
-    do c = 1, 3
-       f0(c) = b(1,c)
+    ! hard functions per helicity class: up, down quark Born; gluon Born
+    ! (n_f,gamma term summed over the produced flavour: sum e^2 (sum e/e)
+    ! = (sum e)^2 -> eq = sum e^2/sum e; photon couplings also with Z)
+    call hard21_eval(P, 1, eu, h, hk(:,:,1))
+    call hard21_eval(P, 1, ed, h, hk(:,:,2))
+    call hard21_eval(P, 2, (11.0_dp/9)/(1.0_dp/3), h, hk(:,:,3))
+    do c = 1, nbc
+       ht = merge(1, merge(2, 3, c <= 4), c <= 2)
+       rk = hk(0,:,ht)/sum(hk(0,:,ht))*wk(:,c)
+       f0(c) = b(1,c)*sum(rk)
        ba0 = b(1,c); ba1 = b(2:4,c); ba2 = b(5:9,c)
        call lp21_shift(1, ba1, lB); call lp21_shift(3, ba2, lB)
-       if (c <= 2) then
+       if (c <= 4) then
           ! quark Born: jet q (2) in the beam-b slot, jet g (3) in the jet slot
           call soft_ab_qgq(2, yy(2,3), yy(3,1), yy(1,2), Iq, 1, 2, 3, 4, 5, 6, s1, s2)
           call soft_nab_qgq(2, yy(2,3), yy(3,1), yy(1,2), Iq, 1, 2, 3, 4, 5, 6, s2n)
           Jb1 = Jq1/2; Jb2 = Jq2/4; Jc1 = Jg1; Jc2 = Jg2
-          call hard21_eval(P, 1, merge(eu, ed, c == 1), h)
        else
-          ! gluon Born: jets q (2), qbar (3); n_f,gamma term summed over the
-          ! produced flavour: sum e^2 (sum e/e) = (sum e)^2 -> eq = sum e^2/sum e
+          ! gluon Born: jets q (2), qbar (3)
           call soft_ab_qag(2, yy(2,3), yy(3,1), yy(1,2), Ig, 1, 2, 3, 4, 5, 6, s1, s2)
           call soft_nab_qag(2, yy(2,3), yy(3,1), yy(1,2), Ig, 1, 2, 3, 4, 5, 6, s2n)
           call jetq(2, 2*E3, Jc1, Jc2, Q)
           Jb1 = Jq1/2; Jb2 = Jq2/4
-          call hard21_eval(P, 2, (11.0_dp/9)/(1.0_dp/3), h)
        endif
        s2 = s2 + s2n
-       hard = h(1:2)
+       c1(:,c) = 0; c2(:,c) = 0
        do it = 1, ntc
           tc = tcs(it)*Q
-          c1(it,c) = assemblejet(1, tc, ba0, 1.0_dp, ba1, Jb1, ba2, Jb2, s1, s2, Jc1, Jc2, hard)
-          c2(it,c) = assemblejet(2, tc, ba0, 1.0_dp, ba1, Jb1, ba2, Jb2, s1, s2, Jc1, Jc2, hard)
+          do k = 1, 2
+             c1(it,c) = c1(it,c) + rk(k)*assemblejet(1, tc, ba0, 1.0_dp, ba1, Jb1, ba2, Jb2, s1, s2, Jc1, Jc2, hk(1:2,k,ht))
+             c2(it,c) = c2(it,c) + rk(k)*assemblejet(2, tc, ba0, 1.0_dp, ba1, Jb1, ba2, Jb2, s1, s2, Jc1, Jc2, hk(1:2,k,ht))
+          enddo
        enddo
     enddo
   end subroutine lp21_born

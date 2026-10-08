@@ -26,7 +26,8 @@
 ! couplings of each line, and at tree level m2(1,1) = m2(2,2), m2(1,2) =
 ! m2(2,1) (parity), so |M|^2 = [E1 (c11^2 + c22^2) + E2 (c12^2 + c21^2)]/2
 ! summed over the lines, E1, E2 the values with the basis couplings on the
-! line of a quark f > 0 and c = ew31_cpl(-f).
+! line of a quark f > 0 and c = ew31_cpl(-f): ew31_w(f, Q2, w) gives
+! these weights w = (c11^2 + c22^2, c12^2 + c21^2)/2 (photon: e_f^2 both).
 !-----------------------------------------------------------------------
 module ew31
   implicit none
@@ -37,7 +38,7 @@ module ew31
   real(dp), parameter :: eq(5) = [-1.0_dp/3, 2.0_dp/3, -1.0_dp/3, 2.0_dp/3, -1.0_dp/3]
   real(dp), parameter :: tau(5) = [-1.0_dp, 1.0_dp, -1.0_dp, 1.0_dp, -1.0_dp]
   integer, public :: ew31_mode = 0, ew31_lepton = 0, ew31_basis = 0, ew31_bf = 0
-  public :: ew31_cpl
+  public :: ew31_cpl, ew31_w
 contains
 
   subroutine ew31_cpl(f, Q2, c)
@@ -73,4 +74,13 @@ contains
        enddo
     enddo
   end subroutine ew31_cpl
+
+  subroutine ew31_w(f, Q2, w)
+    integer, intent(in) :: f
+    real(dp), intent(in) :: Q2
+    real(dp), intent(out) :: w(2)
+    real(dp) :: c(2,2)
+    call ew31_cpl(-f, Q2, c)
+    w = [c(1,1)**2 + c(2,2)**2, c(1,2)**2 + c(2,1)**2]/2
+  end subroutine ew31_w
 end module ew31

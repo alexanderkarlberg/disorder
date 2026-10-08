@@ -16,9 +16,9 @@ program test_lp21
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884197_dp
   integer, parameter :: ntc = 4
   real(dp) :: tcs(ntc) = [1e-2_dp, 1e-3_dp, 1e-4_dp, 1e-5_dp]
-  real(dp) :: P(4,7), Q, x, xp, th, ph, r1, xi, f0(3), c1(ntc,3), c2(ntc,3), h(0:2)
+  real(dp) :: P(4,7), Q, x, xp, th, ph, r1, xi, f0(nbc), c1(ntc,nbc), c2(ntc,nbc), h(0:2), wk(2,nbc)
   real(dp) :: c0b(-6:6), c1b(-6:6), c2b(-6:6), xf(-6:6), pb(4,3), y, ch, sh, nh(3,3), g(3,3), ls(3,3)
-  real(dp) :: tq(3,3), tg(3,3), ref, lb, beam, worst(3), Ea, E2, E3, wsum, wbeam
+  real(dp) :: tq(3,3), tg(3,3), ref, lb, beam, worst(nbc), Ea, E2, E3, wsum, wbeam
   real(dp) :: e2c(-5:5)
   integer :: ip, it, c, k, n, i
   call scet_set_colour(4.0_dp/3, 3.0_dp, 0.5_dp)
@@ -26,6 +26,8 @@ program test_lp21
   Q = 20; x = 0.01_dp
   call lp21_init(Q, 0.5_dp*x, 0.0_dp)        ! no table: direct beam integrals
   e2c = [1, 4, 1, 4, 1, 0, 1, 4, 1, 4, 1]/9.0_dp
+  ! photon couplings of the beam classes (up q, qbar, down q, qbar, gluon)
+  wk(:,1:2) = 4.0_dp/9; wk(:,3:4) = 1.0_dp/9; wk(:,5) = 11.0_dp/9
   call ttm([CF, CF, CA], tq); call ttm([CA, CF, CF], tg)
   worst = 0
   call random_seed(put=[(4321 + 11*n, n = 1, 33)])
@@ -35,7 +37,7 @@ program test_lp21
      call random_number(r1); ph = 2*pi*r1
      call breit_born(Q, 0.5_dp, xp, th, ph, P)
      xi = x/xp
-     call lp21_born(P, xi, ntc, tcs, f0, c1, c2)
+     call lp21_born(P, xi, ntc, tcs, wk, f0, c1, c2)
      ! reference pieces in the jets' frame
      y = -atanh((P(3,2) + P(3,3))/(P(4,2) + P(4,3))); ch = cosh(y); sh = sinh(y)
      do k = 1, 3
@@ -46,9 +48,9 @@ program test_lp21
      call soft_geom(3, nh, g, ls)
      call beam_coeffs(xi, Q, c0b, c1b, c2b)
      call evolvePDF(xi, Q, xf)
-     do c = 1, 3
-        if (c <= 2) then
-           call hard21_eval(P, 1, merge(2.0_dp/3, -1.0_dp/3, c == 1), h)
+     do c = 1, nbc
+        if (c <= 4) then
+           call hard21_eval(P, 1, merge(2.0_dp/3, -1.0_dp/3, c <= 2), h)
         else
            call hard21_eval(P, 2, 11.0_dp/3, h)
         endif
@@ -56,13 +58,13 @@ program test_lp21
            lb = log(2*Ea*tcs(it)/Q)
            wsum = 0; wbeam = 0
            do i = -5, 5
-              if ((c == 1 .and. (abs(i) == 2 .or. abs(i) == 4)) .or. &
-                  (c == 2 .and. (abs(i) == 1 .or. abs(i) == 3 .or. abs(i) == 5)) .or. (c == 3 .and. i == 0)) then
-                 wsum = wsum + merge(1.0_dp, e2c(i), c == 3)*xf(i)
-                 wbeam = wbeam + merge(1.0_dp, e2c(i), c == 3)*(c0b(i) + c1b(i)*lb + c2b(i)*lb*lb)
+              if ((c <= 2 .and. (abs(i) == 2 .or. abs(i) == 4) .or. c >= 3 .and. c <= 4 .and. mod(abs(i), 2) == 1) &
+                  .and. i*merge(1, -1, mod(c, 2) == 1) > 0 .or. (c == 5 .and. i == 0)) then
+                 wsum = wsum + xf(i)
+                 wbeam = wbeam + (c0b(i) + c1b(i)*lb + c2b(i)*lb*lb)
               endif
            enddo
-           if (c <= 2) then
+           if (c <= 4) then
               ref = h(1) + jet_cum(.false., 2*E2*tcs(it)/Q) + jet_cum(.true., 2*E3*tcs(it)/Q) &
                    + soft_from_geom(3, g, ls, [CF, CF, CA], tq, tcs(it)) + wbeam/wsum
            else
@@ -75,7 +77,7 @@ program test_lp21
         enddo
      enddo
   enddo
-  print '(a,3es10.2)', 'O(alpha_s): max |lp21 - slicing| (up, down, gluon):', worst
+  print '(a,5es10.2)', 'O(alpha_s): max |lp21 - slicing| (up q, qbar, down q, qbar, gluon):', worst
 contains
   subroutine ttm(cas, tt)
     real(dp), intent(in) :: cas(3)
