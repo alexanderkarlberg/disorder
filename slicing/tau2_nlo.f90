@@ -1,7 +1,10 @@
 !----------------------------------------------------------------------
 ! NLO DIS 2+1 (O(alpha_s^2) coefficient of 2+1-jet observables) with
 ! 2-jettiness slicing, against DISENT's dipole-subtracted NLO, in one
-! DISENT run (photon exchange, fixed x and Q^2, mu_R = mu_F = Q).
+! DISENT run (photon exchange, fixed x and Q^2, mu_R = mu_F = Q). With
+! -includeZ [-positron | -neutrino] (8 Oct 2026) DISENT's events have photon
+! + Z couplings (as disorder's flags, MZ, MW defaults); only the reference
+! is then meaningful (the cumulant below the cut is the photon's).
 !
 ! For every DISENT event:
 !  - reference: all O(alpha_s^2) contributions (VIRTHR, COLFOR, MATFOR,
@@ -22,7 +25,8 @@
 !----------------------------------------------------------------------
 program tau2_nlo
   use types, only: dp
-  use mod_parameters, only: nflav, NC, CC, noZ, Zonly, intonly, neutrino, positron
+  use mod_parameters, only: nflav, NC, CC, noZ, Zonly, intonly, neutrino, positron, mz, mw, sin_thw_sq, &
+       & sin_2thw_sq, Ve, Ae, Ve2, Ae2, Ve2_Ae2, two_Ve_Ae
   use tau2_run
   use mod_slicing_scet, only: soft_tol, pdf_mask, scet_set_colour, CF, CA, TF, soft_table_init, soft_ncalls, &
        & beam_table_init, beam_ncalls
@@ -69,6 +73,19 @@ program tau2_nlo
 
   nflav = 5; NC = .true.; CC = .false.; noZ = .true.; Zonly = .false.
   intonly = .false.; neutrino = .false.; positron = .false.
+  ! photon + Z: the electroweak set-up of set_parameters (mod_parameters)
+  noZ = .not. log_val_opt('-includeZ')
+  positron = log_val_opt('-positron'); neutrino = log_val_opt('-neutrino')
+  mw = 80.398_dp; mz = 91.1876_dp
+  sin_thw_sq = 1 - (mw/mz)**2; sin_2thw_sq = 4*(1 - sin_thw_sq)*sin_thw_sq
+  Ae = -0.5_dp
+  if (positron) Ae = -Ae
+  Ve = -0.5_dp + 2*sin_thw_sq
+  if (neutrino) then
+     Ve = 0.5_dp; Ae = -Ae
+  endif
+  Ae2 = Ae**2; Ve2 = Ve**2; Ve2_Ae2 = Ve2 + Ae2; two_Ve_Ae = 2*Ve*Ae
+  if (.not. noZ) write(*,'(a,2l2)') ' photon + Z exchange; positron, neutrino', positron, neutrino
   if (softtab /= '') call soft_table_init(trim(softtab), hw, 2 * hw)
   call InitPDFsetByName(trim(pdf))
   call InitPDF(0)
