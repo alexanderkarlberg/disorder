@@ -1,0 +1,144 @@
+====================================================================================================
+Br
+  before: 3500 seeds, flagged 59 (20x rule, limit 1.79e+05)
+     flagged: s2042 s2049 s2087 s2201 s2367 s2375 s2382 s2508 s2592 s2610 s2642 s2754 s2900 s3041 s3060 s3095 s3194 s3197 s3211 s3260 s3352 s3410 s3530 s3575 s3629 s3701 s3744 s3764 s3888 s3910 s3933 s3972 s4063 s4104 s4108 s4194 s4219 s4221 s4259 s4364 ...
+     tau 2e-3  plain -352.425 ± 1.11        median -352.157   trim -352.171   robust sigma 30.57     sample sigma 65.86
+     tau 1e-3  plain -650.109 ± 18.4        median -666.895   trim -668.012   robust sigma 37.21     sample sigma 1091
+     tau 2e-4  plain -1944.81 ± 278         median -2032.06   trim -2035.36   robust sigma 55.05     sample sigma 1.643e+04
+     tau 1e-4  plain -30211.8 ± 2.34e+04    median -2991.67   trim -2993.22   robust sigma 62.3      sample sigma 1.384e+06
+     tau 3e-5  plain undefined              median -5387.17   trim -5392.95   robust sigma 79.84     sample sigma inf
+     tau 1e-5  plain undefined              median -8595.53   trim -8601.68   robust sigma 95.46     sample sigma inf
+  after : 3500 seeds, flagged 52 (20x rule, limit 1.79e+05); garbage-dipole drops per seed: mean 1677.4, median 1166, max 219432 (fraction 4.9e-04)
+     flagged: s2042 s2049 s2087 s2201 s2203 s2367 s2375 s2382 s2508 s2610 s2642 s2900 s3041 s3060 s3095 s3194 s3211 s3260 s3352 s3410 s3530 s3575 s3629 s3701 s3744 s3764 s3910 s3933 s3972 s4063 s4104 s4108 s4219 s4259 s4364 s4428 s4549 s4619 s4771 s4792 ...
+     tau 2e-3  plain -352.767 ± 1.11        median -352.224   trim -352.509   robust sigma 30.57     sample sigma 65.8
+     tau 1e-3  plain -650.239 ± 18.7        median -666.908   trim -668.352   robust sigma 37.17     sample sigma 1105
+     tau 2e-4  plain -1954.12 ± 278         median -2032.06   trim -2036      robust sigma 54.8      sample sigma 1.642e+04
+     tau 1e-4  plain -30221.9 ± 2.34e+04    median -2991.73   trim -2994.44   robust sigma 62.12     sample sigma 1.384e+06
+     tau 3e-5  plain -34452.8 ± 2.35e+04    median -5387.21   trim -5394.39   robust sigma 79.4      sample sigma 1.388e+06
+     tau 1e-5  plain 2212.26 ± 4.15e+04     median -8595.6    trim -8604.39   robust sigma 95.38     sample sigma 2.452e+06
+====================================================================================================
+Fr
+  before: 1200 seeds, flagged 3 (20x rule, limit 6.79e+04)
+     flagged: s2298 s2441 s2463
+     tau 2e-3  plain -42.932 ± 0.295        median -43.1147   trim -43.0932   robust sigma 8.173     sample sigma 10.21
+     tau 1e-3  plain -139.334 ± 0.524       median -139.775   trim -139.672   robust sigma 10.07     sample sigma 18.14
+     tau 2e-4  plain -622.864 ± 2.16        median -619.877   trim -620.968   robust sigma 17.62     sample sigma 74.75
+     tau 1e-4  plain -987.758 ± 2.11        median -984.846   trim -986.056   robust sigma 20.63     sample sigma 73.24
+     tau 3e-5  plain -2202.07 ± 259         median -1941.19   trim -1942.65   robust sigma 27.34     sample sigma 8975
+     tau 1e-5  plain -3585.13 ± 289         median -3277.83   trim -3279.59   robust sigma 35.81     sample sigma 1e+04
+  after : 1200 seeds, flagged 3 (20x rule, limit 6.79e+04); garbage-dipole drops per seed: mean 1288.0, median 1252, max 13231 (fraction 3.8e-04)
+     flagged: s2298 s2441 s2463
+     tau 2e-3  plain -42.932 ± 0.295        median -43.1147   trim -43.0932   robust sigma 8.173     sample sigma 10.21
+     tau 1e-3  plain -139.334 ± 0.524       median -139.775   trim -139.672   robust sigma 10.07     sample sigma 18.14
+     tau 2e-4  plain -622.864 ± 2.16        median -619.877   trim -620.968   robust sigma 17.62     sample sigma 74.75
+     tau 1e-4  plain -987.757 ± 2.11        median -984.846   trim -986.055   robust sigma 20.63     sample sigma 73.24
+     tau 3e-5  plain -2202.07 ± 259         median -1941.19   trim -1942.65   robust sigma 27.34     sample sigma 8975
+     tau 1e-5  plain -3585.13 ± 289         median -3277.83   trim -3279.59   robust sigma 35.81     sample sigma 1e+04
+====================================================================================================
+Brcorr
+  before: 399 seeds, flagged 102 (20x rule, limit 2.04e+03)
+     flagged: s2001 s2021 s2027 s2029 s2030 s2040 s2044 s2054 s2056 s2061 s2063 s2079 s2088 s2098 s2100 s2105 s2110 s2111 s2112 s2113 s2114 s2117 s2122 s2123 s2124 s2134 s2137 s2140 s2141 s2142 s2144 s2150 s2155 s2157 s2158 s2159 s2160 s2161 s2164 s2166 ...
+     tau 2e-3  plain -0.0272697 ± 0.0252    median -1.68853e-05 trim -0.0184185 robust sigma 0.06164   sample sigma 0.5034
+     tau 1e-3  plain -0.020048 ± 0.147      median 8.18843e-05 trim 0.0436511  robust sigma 0.1441    sample sigma 2.931
+     tau 2e-4  plain 10366.8 ± 1.04e+04     median 0.0818083  trim -7.27744   robust sigma 1.331     sample sigma 2.072e+05
+     tau 1e-4  plain 433469 ± 4.11e+05      median 1.36362    trim 792.07     robust sigma 3.038     sample sigma 8.219e+06
+     tau 3e-5  plain undefined              median 11.371     trim -105087    robust sigma 8.952     sample sigma inf
+     tau 1e-5  plain undefined              median 36.1309    trim -1.45087e+143 robust sigma 19.85     sample sigma inf
+  after : 400 seeds, flagged 96 (20x rule, limit 1.99e+03); garbage-dipole drops per seed: mean 615.5, median 443, max 6709 (fraction 6.1e-04)
+     flagged: s2021 s2027 s2029 s2030 s2040 s2044 s2054 s2056 s2061 s2063 s2079 s2088 s2098 s2100 s2105 s2110 s2111 s2112 s2113 s2114 s2117 s2122 s2123 s2124 s2134 s2137 s2140 s2141 s2142 s2144 s2150 s2155 s2157 s2158 s2159 s2160 s2161 s2164 s2166 s2176 ...
+     tau 2e-3  plain -0.0274588 ± 0.0251    median -9.75766e-06 trim -0.0186341 robust sigma 0.06107   sample sigma 0.5027
+     tau 1e-3  plain -0.0197183 ± 0.146     median 9.16542e-05 trim 0.0438251  robust sigma 0.1489    sample sigma 2.927
+     tau 2e-4  plain 10303.8 ± 1.03e+04     median 0.0919824  trim -8.38747   robust sigma 1.294     sample sigma 2.069e+05
+     tau 1e-4  plain 432113 ± 4.1e+05       median 1.3883     trim 511.58     robust sigma 3.272     sample sigma 8.209e+06
+     tau 3e-5  plain 1.10549e+06 ± 7.83e+05 median 11.3835    trim 42096.2    robust sigma 8.525     sample sigma 1.567e+07
+     tau 1e-5  plain -1.00828e+07 ± 1.26e+07 median 36.7367    trim 459996     robust sigma 18.75     sample sigma inf
+====================================================================================================
+Frcorr
+  before: 300 seeds, flagged 13 (20x rule, limit 318)
+     flagged: s2005 s2013 s2023 s2030 s2040 s2061 s2081 s2084 s2124 s2125 s2207 s2294 s2298
+     tau 2e-3  plain 0.141807 ± 0.128       median 0.000146474 trim 0.00372579 robust sigma 0.01611   sample sigma 2.213
+     tau 1e-3  plain 0.153407 ± 0.128       median 1.4776e-05 trim 0.0125856  robust sigma 0.03763   sample sigma 2.225
+     tau 2e-4  plain -0.0481156 ± 0.174     median 0.018854   trim -0.0520181 robust sigma 0.2202    sample sigma 3.007
+     tau 1e-4  plain 0.224139 ± 0.451       median 0.0765125  trim 0.241617   robust sigma 0.4939    sample sigma 7.82
+     tau 3e-5  plain -85.7214 ± 65.5        median 0.995334   trim -2.96728   robust sigma 1.583     sample sigma 1135
+     tau 1e-5  plain -2615.61 ± 3.1e+03     median 5.21587    trim -9.47637   robust sigma 3.58      sample sigma 5.363e+04
+  after : 300 seeds, flagged 13 (20x rule, limit 318); garbage-dipole drops per seed: mean 680.5, median 587, max 5916 (fraction 7.7e-04)
+     flagged: s2005 s2013 s2023 s2030 s2040 s2061 s2081 s2084 s2124 s2125 s2207 s2294 s2298
+     tau 2e-3  plain 0.141806 ± 0.128       median 0.000146474 trim 0.00372569 robust sigma 0.01611   sample sigma 2.213
+     tau 1e-3  plain 0.153407 ± 0.128       median 1.4776e-05 trim 0.0125855  robust sigma 0.03763   sample sigma 2.225
+     tau 2e-4  plain -0.0481157 ± 0.174     median 0.018854   trim -0.0520182 robust sigma 0.2202    sample sigma 3.007
+     tau 1e-4  plain 0.224177 ± 0.451       median 0.0765125  trim 0.241656   robust sigma 0.4939    sample sigma 7.82
+     tau 3e-5  plain -86.0702 ± 65.5        median 0.995334   trim -3.32317   robust sigma 1.583     sample sigma 1135
+     tau 1e-5  plain -2630.19 ± 3.11e+03    median 5.21587    trim -9.47637   robust sigma 3.58      sample sigma 5.388e+04
+====================================================================================================
+edge
+  before: 300 seeds, flagged 6 (20x rule, limit 1.8e+05)
+     flagged: s2002 s2019 s2120 s2150 s2213 s2217
+     tau 2e-3  plain -347.739 ± 3.31        median -347.841   trim -348.226   robust sigma 31.57     sample sigma 57.42
+     tau 1e-3  plain -658.027 ± 5.06        median -661.699   trim -661.002   robust sigma 40.86     sample sigma 87.57
+     tau 2e-4  plain -2023.09 ± 8.64        median -2028.14   trim -2028.69   robust sigma 63.01     sample sigma 149.6
+     tau 1e-4  plain -13947.6 ± 1.1e+04     median -2982.26   trim -2994.96   robust sigma 73.61     sample sigma 1.899e+05
+     tau 3e-5  plain -17940.8 ± 1.11e+04    median -5373.81   trim -5386.36   robust sigma 96.56     sample sigma 1.918e+05
+     tau 1e-5  plain undefined              median -8580.96   trim -10484.9   robust sigma 108.3     sample sigma inf
+  after : 300 seeds, flagged 5 (20x rule, limit 1.8e+05); garbage-dipole drops per seed: mean 2164.3, median 1864, max 43542 (fraction 6.8e-04)
+     flagged: s2019 s2120 s2150 s2213 s2217
+     tau 2e-3  plain -347.907 ± 3.31        median -347.914   trim -348.398   robust sigma 31.29     sample sigma 57.37
+     tau 1e-3  plain -658.387 ± 5.05        median -661.969   trim -661.366   robust sigma 40.42     sample sigma 87.4
+     tau 2e-4  plain -2023.52 ± 8.6         median -2028.14   trim -2029.1    robust sigma 63.01     sample sigma 149
+     tau 1e-4  plain -13948.1 ± 1.1e+04     median -2982.26   trim -2995.52   robust sigma 73.61     sample sigma 1.899e+05
+     tau 3e-5  plain -17942.3 ± 1.11e+04    median -5373.81   trim -5387.86   robust sigma 96.56     sample sigma 1.918e+05
+     tau 1e-5  plain -618020 ± 6.34e+05     median -8579.14   trim -8852.31   robust sigma 107.1     sample sigma 1.097e+07
+====================================================================================================
+plainr
+  before: 300 seeds, flagged 2 (20x rule, limit 1.79e+05)
+     flagged: s2183 s2201
+     tau 2e-3  plain -370.459 ± 7.24        median -362.73    trim -365.596   robust sigma 28.75     sample sigma 125.4
+     tau 1e-3  plain -680.918 ± 8.83        median -676.977   trim -676.182   robust sigma 40.96     sample sigma 152.9
+     tau 2e-4  plain -2042.31 ± 11.5        median -2032.37   trim -2039.25   robust sigma 53.92     sample sigma 199.8
+     tau 1e-4  plain -3015.57 ± 14.7        median -2997.69   trim -3010.07   robust sigma 61.49     sample sigma 254.9
+     tau 3e-5  plain -5396.58 ± 19.4        median -5397.37   trim -5401.96   robust sigma 82.37     sample sigma 335.3
+     tau 1e-5  plain undefined              median -8604.74   trim -8609.01   robust sigma 103.7     sample sigma inf
+  after : 300 seeds, flagged 1 (20x rule, limit 1.79e+05); garbage-dipole drops per seed: mean 1201.2, median 1170, max 3868 (fraction 3.5e-04)
+     flagged: s2201
+     tau 2e-3  plain -371.528 ± 7.18        median -363.01    trim -366.095   robust sigma 28.49     sample sigma 124.4
+     tau 1e-3  plain -682.787 ± 8.65        median -677.46    trim -677.218   robust sigma 41.07     sample sigma 149.9
+     tau 2e-4  plain -2048 ± 10.1           median -2033.93   trim -2040.29   robust sigma 53.09     sample sigma 175.3
+     tau 1e-4  plain -3024.05 ± 12.2        median -2998.29   trim -3011.04   robust sigma 62.03     sample sigma 212
+     tau 3e-5  plain -5411.76 ± 12.9        median -5397.69   trim -5404.92   robust sigma 82.55     sample sigma 222.8
+     tau 1e-5  plain -8575.24 ± 29.1        median -8605.27   trim -8607.38   robust sigma 103.7     sample sigma 503.9
+====================================================================================================
+plainrcorr
+  before: 100 seeds, flagged 20 (20x rule, limit 1.87e+03)
+     flagged: s2001 s2018 s2027 s2029 s2032 s2034 s2038 s2044 s2053 s2054 s2056 s2058 s2061 s2063 s2065 s2073 s2075 s2079 s2091 s2093
+     tau 2e-3  plain -0.0368469 ± 0.0304    median -0.00788702 trim -0.0322073 robust sigma 0.06303   sample sigma 0.304
+     tau 1e-3  plain -0.00948913 ± 0.0551   median -0.0173134 trim 0.00395753 robust sigma 0.1462    sample sigma 0.5515
+     tau 2e-4  plain -113.554 ± 115         median 0.324339   trim -0.490828  robust sigma 1.701     sample sigma 1146
+     tau 1e-4  plain 3.73238e+06 ± 3.73e+06 median 1.65045    trim 3949.24    robust sigma 2.291     sample sigma 3.728e+07
+     tau 3e-5  plain 5.59478e+06 ± 3.94e+06 median 11.7103    trim 1.94399e+06 robust sigma 7.309     sample sigma 3.943e+07
+     tau 1e-5  plain undefined              median 38.198     trim -5.90233e+153 robust sigma 17.35     sample sigma inf
+  after : 100 seeds, flagged 18 (20x rule, limit 1.87e+03); garbage-dipole drops per seed: mean 586.9, median 462, max 2679 (fraction 5.9e-04)
+     flagged: s2018 s2027 s2029 s2032 s2034 s2038 s2044 s2053 s2054 s2056 s2058 s2061 s2063 s2065 s2075 s2079 s2091 s2093
+     tau 2e-3  plain -0.0365824 ± 0.0304    median -0.00788702 trim -0.0319373 robust sigma 0.06303   sample sigma 0.3041
+     tau 1e-3  plain -0.00912728 ± 0.0551   median -0.0173134 trim 0.00432677 robust sigma 0.1462    sample sigma 0.5514
+     tau 2e-4  plain -118.035 ± 115         median 0.375324   trim -5.06231   robust sigma 1.725     sample sigma 1147
+     tau 1e-4  plain 3757.42 ± 2.73e+03     median 1.60992    trim 1755.54    robust sigma 2.343     sample sigma 2.734e+04
+     tau 3e-5  plain 2.03529e+06 ± 1.35e+06 median 11.4044    trim 1.1359e+06 robust sigma 7.351     sample sigma 1.347e+07
+     tau 1e-5  plain 2.08353e+06 ± 1.51e+06 median 38.198     trim 1.09653e+06 robust sigma 16.78     sample sigma 1.506e+07
+====================================================================================================
+conv
+  before: 192 seeds, flagged 67 (20x rule, limit 6.94e+06)
+     flagged: s2003 s2004 s2005 s2007 s2012 s2014 s2015 s2017 s2021 s2022 s2023 s2024 s2028 s2031 s2034 s2035 s2036 s2039 s2044 s2045 s2046 s2059 s2060 s2061 s2062 s2064 s2065 s2072 s2076 s2080 s2084 s2086 s2089 s2100 s2102 s2109 s2110 s2112 s2113 s2114 ...
+     tau 2e-3  plain 0.0128282 ± 0.0489     median -3.43354e-09 trim -0.000726137 robust sigma 0.008305  sample sigma 0.678
+     tau 1e-3  plain -0.442868 ± 0.458      median 8.66746e-06 trim 0.00701018 robust sigma 0.01276   sample sigma 6.341
+     tau 2e-4  plain -0.582347 ± 0.493      median 0.000124466 trim -0.0431128 robust sigma 0.1244    sample sigma 6.831
+     tau 1e-4  plain 19250 ± 1.93e+04       median 0.0108701  trim 1.91325    robust sigma 0.3971    sample sigma 2.668e+05
+     tau 3e-5  plain undefined              median 0.693033   trim 2.73251e+06 robust sigma 58.07     sample sigma inf
+     tau 1e-5  plain undefined              median 9.58585    trim -1.20167e+142 robust sigma 8.391e+04 sample sigma inf
+  after : 200 seeds, flagged 66 (20x rule, limit 9.39e+06); garbage-dipole drops per seed: mean 1036.3, median 822, max 7333 (fraction 9.2e-04)
+     flagged: s2003 s2004 s2005 s2007 s2012 s2014 s2015 s2017 s2022 s2023 s2024 s2028 s2031 s2034 s2035 s2038 s2039 s2044 s2045 s2059 s2060 s2062 s2063 s2064 s2065 s2072 s2076 s2080 s2084 s2086 s2089 s2100 s2102 s2107 s2109 s2110 s2112 s2113 s2114 s2118 ...
+     tau 2e-3  plain 0.0117044 ± 0.047      median -7.47574e-08 trim -0.00131971 robust sigma 0.008495  sample sigma 0.6643
+     tau 1e-3  plain -0.425725 ± 0.439      median 1.43374e-06 trim 0.00614073 robust sigma 0.01356   sample sigma 6.213
+     tau 2e-4  plain -0.558826 ± 0.473      median 4.78976e-05 trim -0.0411222 robust sigma 0.123     sample sigma 6.694
+     tau 1e-4  plain 18480 ± 1.85e+04       median 0.0189426  trim 1.82222    robust sigma 0.3857    sample sigma 2.614e+05
+     tau 3e-5  plain 7.46522e+06 ± 4.87e+06 median 0.597421   trim 2.7634e+06 robust sigma 160.7     sample sigma 6.887e+07
+     tau 1e-5  plain undefined              median 9.46962    trim 1.29511e+07 robust sigma 8.988e+04 sample sigma inf

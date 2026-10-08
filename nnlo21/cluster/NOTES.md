@@ -490,3 +490,22 @@ and to node failures are not included (several hundred core-h).
   48788281): B r-g 48788282, F r-g 48788350, B rcorr-g 48788351, F rcorr-g
   48788352, plain rcorr-g 48788353, conv-g 48788354, edge r-g 48788355,
   plain r-g 48788356 (6,300 jobs, ≈ 7,460 core-h).
+
+## 8 Oct, 14:40-20:30: results of the DIPGARB reruns (bin3, VEGAS_EQUAL=2) -- `REPORT-2026-10-08b.md`
+- All 8 groups complete (B r-g 3500, F r-g 1200, B rcorr-g 400, F rcorr-g 300, plain rcorr-g 100,
+  conv-g 200, edge r-g 300, plain r-g 300), no failed seeds. Feeder 48799109 cancelled (nothing left).
+- Tools: `garb_report.py` (before=bin2 dirs, after=bin3 dirs; `results/garb_report_8b.txt`), `combine_b.py`
+  (`results/{B,F}_g_{plain,diag,trim}.*`; DIAG limits r 1.79e5, rcorr 1.99e3 (B), 6.79e4/318 (F)).
+- Seeds with an iteration > 1e30: B r 9 -> 0, B rcorr 7 -> 0 (F: 0). Garbage-dipole drops ~5e-4 of events (B r mean
+  1677/seed). 20x-rule flagged: B r 59 -> 52, B rcorr 102 -> 96, F r 3 -> 3, F rcorr 13 -> 13. 35 of 3500 B r seeds
+  change their max iteration at all.
+- **Contradicts the expectation in the 8 Oct instructions** that the heavy tail would go away: the guard removes the
+  1e60-1e179 garbage but the 1e5-1e6 tail (r) and the rcorr tail remain; plain means below 1e-3 are still
+  dominated by single seeds (B 1e-4: 4e5 +- 4e5; 1e-5: -1e7 +- 1.3e7). Robust/sample sigma essentially unchanged.
+- Replays with bin3, P2BDEBUG=1, VEGAS_EQUAL=2 (seeds 2042, 2049; reproduce the same iterations 3 / 2; stopped
+  after the DBG lines were in; `results/dbg/g*`): the big iterations come from events with real m4 and t2 ~ 1e-8..1e-11
+  GeV^2 (smin/W2 ~ 1e-9) where real and a dipole are 1e13-1e18 with residual 1e10-1e12 after subtraction (incomplete
+  cancellation, dipole values far below the 1e30 guard). Not garbage dipoles; a guard on |D|>1e30 cannot catch them.
+- Tables: see REPORT-2026-10-08b.md. B plain pulls vs NNLOJET +0.4..+1.8 down to 5e-4; DIAG within 2.0 sigma everywhere.
+  F unchanged from the bin2 equal-weight result (DIAG 11.6 -> 6.2 between 2e-3 and 1e-4, not flat).
+- Note: b1/b2 now taken from the 168/92 done prod seeds (previous tables: 200/100); NLO row shifts by 0.01.
