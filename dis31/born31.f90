@@ -1,7 +1,8 @@
 !-----------------------------------------------------------------------
 ! Colour- and spin-correlated DIS 3+1 Born matrix elements (photon
-! exchange) for Catani-Seymour dipoles, from MCFM 10.3's colour-ordered
-! amplitudes crossed to DIS (as me31; dis31/mcfm/README.md).
+! exchange; photon + Z with ew31, couplings and conventions as me31) for
+! Catani-Seymour dipoles, from MCFM 10.3's colour-ordered amplitudes
+! crossed to DIS (as me31; dis31/mcfm/README.md).
 !
 ! DIS layout and normalisation as me31 (P(4,7): 1 incoming parton, 2-4
 ! outgoing partons, 5 q, 6, 7 leptons; fl(1:4); averaged over the incoming
@@ -22,6 +23,7 @@
 ! (all partons outgoing: an incoming quark is an outgoing antiquark).
 !-----------------------------------------------------------------------
 module born31
+  use ew31
   implicit none
   private
   integer, parameter :: dp = kind(1.0d0)
@@ -29,7 +31,6 @@ module born31
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884197_dp
   real(dp), parameter :: xn = 3, V = xn**2 - 1
   real(dp), parameter :: cnorm = (4*pi/137.0_dp)**2*64*pi**4
-  real(dp), parameter :: eq(5) = [-1.0_dp/3, 2.0_dp/3, -1.0_dp/3, 2.0_dp/3, -1.0_dp/3]
   integer, parameter :: swp(2) = [2, 1]
   ! q qbar g g: roles 1 = q, 2 = qbar, 3 = A, 4 = B; cqg(:,:,r1,r2) for r1 < r2
   real(dp) :: cqg(2,2,4,4), gqg(2,2)
@@ -94,10 +95,11 @@ contains
     real(dp), intent(out) :: msq, cc(4,4)
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     common /zprods/ za, zb
-    real(dp) :: pm(mxpart,4), avg, ch, q(4,4)
+    real(dp) :: pm(mxpart,4), avg, c(2,2), q(4,4), Q2
     integer :: ng, i, k, iq, iqb, igl(2), role(4), sg, nsame, ip(3), kqb, kq, f0, ms(4)
     if (.not. init) call setup()
     msq = 0; cc = 0
+    Q2 = sum(P(1:3,5)**2) - P(4,5)**2
     ng = count(fl == 0)
     avg = merge(1.0_dp/(2*2*V), 1.0_dp/(2*2*xn), fl(1) == 0)
     pm = 0
@@ -121,7 +123,7 @@ contains
           role = 0; role(k) = 1; role(1) = 2
           role(igl(1)) = 3; role(igl(2)) = 4
           ms = [2, 1, 5, 6]
-          ch = eq(abs(fl(1)))**2
+          call ew31_cpl(fl(1), Q2, c)
        else
           ! g -> q qbar g: MCFM i1 = q, i2 = qbar, gluons A = incoming (slot 1),
           ! B = outgoing
@@ -136,14 +138,14 @@ contains
           pm(1,:) = -P(:,1); pm(2,:) = P(:,iq); pm(5,:) = P(:,iqb); pm(6,:) = P(:,igl(2))
           role = 0; role(iq) = 1; role(iqb) = 2; role(1) = 3; role(igl(2)) = 4
           ms = [2, 5, 1, 6]
-          ch = eq(fl(iq))**2
+          call ew31_cpl(fl(iq), Q2, c)
        endif
        call spinoru(6, pm, za, zb)
-       call qqgg_forms(pm, ms, ig, igl, n, q)
-       msq = avg*cnorm*ch*q(1,1)
+       call qqgg_forms(pm, ms, ig, igl, n, c, q)
+       msq = avg*cnorm*q(1,1)
        do i = 1, 4
           do k = 1, 4
-             if (i /= k) cc(i,k) = avg*cnorm*ch*q(role(i), role(k))
+             if (i /= k) cc(i,k) = avg*cnorm*q(role(i), role(k))
           enddo
        enddo
        return
@@ -164,7 +166,7 @@ contains
     if (fl(ip(1)) == f0 .and. fl(ip(2)) == f0) then
        if (fl(kqb) /= -f0) return
        k = ip(1); kq = ip(2)
-       call fourq_forms(P, k, kq, kqb, eq(abs(f0)), eq(abs(f0)), .true., q)
+       call fourq_forms(P, k, kq, kqb, f0, f0, Q2, .true., q)
     else
        if (fl(ip(1)) == f0) then
           k = ip(1); kq = ip(2)
@@ -174,7 +176,7 @@ contains
           return
        endif
        if (fl(kqb) /= -fl(kq)) return
-       call fourq_forms(P, k, kq, kqb, eq(abs(f0)), eq(abs(fl(kq))), .false., q)
+       call fourq_forms(P, k, kq, kqb, f0, fl(kq), Q2, .false., q)
     endif
     ! roles: quark case q1 = k, qb2 = 1, q3 = kq, qb4 = kqb; antiquark case
     ! (all partons outgoing) q1 = 1, qb2 = k, q3 = kqb, qb4 = kq
@@ -194,9 +196,10 @@ contains
   ! q qbar g g: quadratic colour forms sum_hel A^+ C^{rs} A for all role
   ! pairs r /= s, and the metric (q(1,1) = sum A^+ G A); ig > 0: gluon ig
   ! (DIS slot) contracted with n. pm, za, zb set; ms = the MCFM slots of
-  ! (q, qbar, A, B); igl = the DIS slots of (A, B).
-  subroutine qqgg_forms(pm, ms, ig, igl, n, q)
-    real(dp), intent(in) :: pm(mxpart,4), n(4)
+  ! (q, qbar, A, B); igl = the DIS slots of (A, B); c = the couplings of the
+  ! quark line (ew31_cpl), weighting each helicity amplitude.
+  subroutine qqgg_forms(pm, ms, ig, igl, n, c, q)
+    real(dp), intent(in) :: pm(mxpart,4), n(4), c(2,2)
     integer, intent(in) :: ms(4), ig, igl(2)
     real(dp), intent(out) :: q(4,4)
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
@@ -205,11 +208,11 @@ contains
     complex(dp) :: ab(2,2,2), ba(2,2,2), A(2,16)
     integer, parameter :: pol(2) = [-1, 1]
     integer :: nh, j, k, l, r, s, pg, pq, pl, ia, ib
-    real(dp) :: nDp, fac
+    real(dp) :: nDp, wt(16)
     nh = 0
     if (ig == 0) then
        ! subqcd: LL (leptons 3, 4) and LR (4, 3); the right-handed quark line
-       ! by parity (factor 2)
+       ! by parity (both helicities flipped: weight c(1,l)^2 + c(2,l')^2)
        do l = 1, 2
           if (l == 1) then
              call subqcd(ms(1), ms(2), 3, 4, ms(3), ms(4), za, zb, q1)
@@ -222,10 +225,10 @@ contains
              do k = 1, 2
                 nh = nh + 1
                 A(1,nh) = q1(pol(j),pol(k)); A(2,nh) = q2(pol(k),pol(j))
+                wt(nh) = c(1,l)**2 + c(2,swp(l))**2
              enddo
           enddo
        enddo
-       fac = 2
     else
        ! subqcdn: its second gluon (ib) contracted with n, the first (ia)
        ! summed; qcdab corresponds to the colour ordering (ib, ia) of
@@ -248,12 +251,12 @@ contains
                 else
                    A(1,nh) = ab(pg,pq,pl); A(2,nh) = ba(pg,pq,pl)
                 endif
+                ! MCFM's contraction with n is normalised such that n = e1,
+                ! e2 (orthonormal, transverse) sum to half the polarisation sum
+                wt(nh) = 2*c(pq,pl)**2
              enddo
           enddo
        enddo
-       ! MCFM's contraction with n is normalised such that n = e1, e2
-       ! (orthonormal, transverse) sum to half the polarisation sum
-       fac = 2
     endif
     if (born31_swapc) then
        do j = 1, nh
@@ -264,51 +267,70 @@ contains
     q = 0
     do r = 1, 4
        do s = r + 1, 4
-          q(r,s) = fac*form(cqg(:,:,r,s)); q(s,r) = q(r,s)
+          q(r,s) = form(cqg(:,:,r,s)); q(s,r) = q(r,s)
        enddo
     enddo
-    q(1,1) = fac*form(gqg)
+    q(1,1) = form(gqg)
   contains
     real(dp) function form(c)
       real(dp), intent(in) :: c(2,2)
       integer :: h
       form = 0
       do h = 1, nh
-         form = form + c(1,1)*abs(A(1,h))**2 + c(2,2)*abs(A(2,h))**2 &
-              & + 2*c(1,2)*real(A(1,h)*conjg(A(2,h)), dp)
+         form = form + wt(h)*(c(1,1)*abs(A(1,h))**2 + c(2,2)*abs(A(2,h))**2 &
+              & + 2*c(1,2)*real(A(1,h)*conjg(A(2,h)), dp))
       enddo
     end function form
   end subroutine qqgg_forms
 
   ! four quarks: the forms for the direct (D) and, for identical quarks,
-  ! exchange (E) colour structures, sum_hel; q(1,1) = metric
-  subroutine fourq_forms(P, k, kq, kqb, cq, cQ2, ident, q)
-    real(dp), intent(in) :: P(4,7), cq, cQ2
-    integer, intent(in) :: k, kq, kqb
+  ! exchange (E) colour structures, sum_hel; q(1,1) = metric. Couplings as
+  ! me31's four_quark (f0: flavour of the line (k,1), fQ: of (kq,kqb), read
+  ! in MCFM's orientation); with photon + Z without the interference of the
+  ! boson on different lines.
+  subroutine fourq_forms(P, k, kq, kqb, f0, fQ, Q2, ident, q)
+    real(dp), intent(in) :: P(4,7), Q2
+    integer, intent(in) :: k, kq, kqb, f0, fQ
     logical, intent(in) :: ident
     real(dp), intent(out) :: q(4,4)
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     common /zprods/ za, zb
-    real(dp) :: pm(mxpart,4), sDD, sEE, sDE
-    complex(dp) :: A(2,2,2), B(2,2,2), Ae(2,2,2), Be(2,2,2)
-    integer :: j1, j3, r, s
+    real(dp) :: pm(mxpart,4), sDD, sEE, sDE, cq(2,2), cQ2(2,2)
+    complex(dp) :: A(2,2,2), B(2,2,2), Ae(2,2,2), Be(2,2,2), D(2,2,2), E(2,2,2)
+    integer :: j1, j2, j3, r, s
     pm = 0
     pm(1,:) = -P(:,1); pm(2,:) = P(:,k); pm(3,:) = P(:,7); pm(4,:) = -P(:,6)
     pm(5,:) = P(:,kq); pm(6,:) = P(:,kqb)
     call spinoru(6, pm, za, zb)
     call ampqqb_qqb(2, 1, 5, 6, A, B)
+    call ew31_cpl(f0, Q2, cq)
+    call ew31_cpl(fQ, Q2, cQ2)
+    cQ2 = cQ2([2, 1],:)
+    sDD = 0; sEE = 0; sDE = 0
     if (.not. ident) then
-       ! e_q A - e_Q B (me31), one colour structure D
-       sDD = sum(abs(cq*A - cQ2*B)**2)
-       sEE = 0; sDE = 0
+       ! c_q A - c_Q B (me31), one colour structure D
+       do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
+          if (ew31_mode == 0) then
+             sDD = sDD + abs(cq(j1,j3)*A(j1,j2,j3) - cQ2(j2,j3)*B(j1,j2,j3))**2
+          else
+             sDD = sDD + abs(cq(j1,j3)*A(j1,j2,j3))**2 + abs(cQ2(j2,j3)*B(j1,j2,j3))**2
+          endif
+       enddo; enddo; enddo
     else
        call ampqqb_qqb(5, 1, 2, 6, Ae, Be)
-       A = cq*(A - B); Ae = cq*(Ae - Be)
-       sDD = sum(abs(A)**2); sEE = sum(abs(Ae)**2)
+       do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
+          D(j1,j2,j3) = cq(j1,j3)*A(j1,j2,j3) - cQ2(j2,j3)*B(j1,j2,j3)
+          E(j1,j2,j3) = cq(j1,j3)*Ae(j1,j2,j3) - cQ2(j2,j3)*Be(j1,j2,j3)
+          if (ew31_mode == 0) then
+             sDD = sDD + abs(D(j1,j2,j3))**2; sEE = sEE + abs(E(j1,j2,j3))**2
+          else
+             sDD = sDD + abs(cq(j1,j3)*A(j1,j2,j3))**2 + abs(cQ2(j2,j3)*B(j1,j2,j3))**2
+             sEE = sEE + abs(cq(j1,j3)*Ae(j1,j2,j3))**2 + abs(cQ2(j2,j3)*Be(j1,j2,j3))**2
+          endif
+       enddo; enddo; enddo
        ! E' = -E in the colour basis (me31's interference sign)
-       sDE = 0
        do j1 = 1, 2; do j3 = 1, 2
-          sDE = sDE - real(A(j1,swp(j1),j3)*conjg(Ae(j1,swp(j1),j3)), dp)
+          sDE = sDE - real(D(j1,swp(j1),j3)*conjg(E(j1,swp(j1),j3)), dp)
        enddo; enddo
     endif
     ! |M|^2 = 16 [C11 sDD + C22 sEE + 2 C12 sDE] (4V = 16 G11)

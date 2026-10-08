@@ -18,16 +18,22 @@
 !     at y (u) = 1e-8 and 1e-10 (three azimuths each), the criterion on the
 !     smaller one (smaller values lose digits to round-off in double
 !     precision; wrong spin correlations give O(1) deviations).
+! Couplings: photon, or with the environment EW31 = "mode lepton" those of
+! ew31 (e.g. "1 0": photon + Z, e-).
 program harness_born31
   use me31
   use me41
   use born31
+  use ew31
   implicit none
   integer, parameter :: dp = kind(1.0d0)
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884197_dp
   real(dp), parameter :: CF = 4.0_dp/3, CA = 3, TR = 0.5_dp
   real(dp) :: P3(4,7), r(8), worst(5)
   integer :: ipt
+  character(32) :: arg
+  call get_environment_variable('EW31', arg)
+  if (len_trim(arg) > 0) read(arg, *) ew31_mode, ew31_lepton
   call seed_rng()
   worst = 0
   do ipt = 1, 4

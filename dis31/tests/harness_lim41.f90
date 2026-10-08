@@ -1,5 +1,6 @@
 ! me41 (4+1 trees) against me31 (3+1 trees, validated against DISENT's
-! MATFOR) in single collinear limits, photon exchange:
+! MATFOR) in single collinear limits; photon exchange, or with the
+! environment EW31 = "mode lepton" the couplings of ew31 (e.g. "1 0"):
 !  - final state i || j (spectator k, CS FF map with y -> 0):
 !      me41 -> 16 pi^2/s_ij P(z) me31,
 !    P = CF (1+z^2)/(1-z) (q -> q(z) g), 2 CA [z/(1-z) + (1-z)/z + z(1-z)]
@@ -16,12 +17,16 @@
 program harness_lim41
   use me31
   use me41
+  use ew31
   implicit none
   integer, parameter :: dp = kind(1.0d0)
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884197_dp
   real(dp), parameter :: CF = 4.0_dp/3, CA = 3, TR = 0.5_dp
   real(dp) :: P3(4,7), r(8), worst
   integer :: ipt
+  character(32) :: arg
+  call get_environment_variable('EW31', arg)
+  if (len_trim(arg) > 0) read(arg, *) ew31_mode, ew31_lepton
   call seed_rng()
   worst = 0
   do ipt = 1, 3

@@ -41,5 +41,5 @@ gfortran -O2 -ffree-line-length-none -c $D/tests/harness_virt31.f90 -o harness_v
 gfortran -O2 harness_virt31.o me31.o ew31.o born31.o virt31.o $MO $L -o harness_virt31
 gfortran -O2 -ffree-line-length-none -c $D/iop31.f90 -o iop31.o
 gfortran -O2 -ffree-line-length-none -c $D/tests/harness_iop31.f90 -o harness_iop31.o
-gfortran -O2 harness_iop31.o born31.o virt31.o iop31.o $MO $L -o harness_iop31
+gfortran -O2 harness_iop31.o ew31.o born31.o virt31.o iop31.o $MO $L -o harness_iop31
 cp $D/tests/fd31.py .

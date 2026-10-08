@@ -13,14 +13,20 @@
 ! Born still contains the limit pair, and in a 3+1 calculation the jet
 ! function of the mapped Born removes them (as test_subtraction does for
 ! DISENT).
+! Couplings: photon, or with the environment EW31 = "mode lepton" those of
+! ew31 (e.g. "1 0": photon + Z, e-).
 program harness_dip41
   use me41
   use dip41
+  use ew31
   implicit none
   integer, parameter :: dp = kind(1.0d0)
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884197_dp
   real(dp) :: P3(4,7), r(8), worst
   integer :: ipt
+  character(32) :: ewarg
+  call get_environment_variable('EW31', ewarg)
+  if (len_trim(ewarg) > 0) read(ewarg, *) ew31_mode, ew31_lepton
   call seed_rng()
   worst = 0
   do ipt = 1, 3

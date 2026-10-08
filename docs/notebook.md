@@ -2860,3 +2860,22 @@ r.**
   flips at low Q² (F3-like). Negligible.
 - Next: born31 (production 3+1 Born, colour correlations), me41, dip41,
   virt31/iop31, the nlo31 flavour sums (from charges to couplings); then CC.
+- **Stage 1b: born31, me41, the dipoles with photon + Z (8 Oct).**
+  - born31: q g g / g q q̄ g with per-helicity weights; the parity-derived
+    right-handed quark line weighted c(1,l)² + c(2,l')²; in the
+    spin-correlated case 2 c(pq,pl)²; four quarks as me31.
+  - me41: xzqqggg weighted as me31. `msq_gqqQQg`/`makemb_photon` (our
+    photon version of MCFM's msq_ZqqQQg) take per-helicity couplings and a
+    flag `nll`: the line-line interference within a pairing class is
+    dropped (terms A, D, F, G from the boson on each line alone); the
+    direct-exchange terms B, C, E are kept, as in me31. The leptons enter as
+    (4,3): lepton label exchanged.
+  - Tests with EW31 = "1 0", "1 1", "1 2" (e⁻, e⁺, ν):
+    - harness_born31: msq = me31 4e-16, colour conservation 1e-15,
+      polarisation sum 4e-14, soft and spin-correlated collinear limits as
+      the photon;
+    - harness_lim41: every me41 channel in its collinear limits against
+      me31, 1.7e-4 at the smallest y, as the photon;
+    - harness_dip41: me41/Σ dipoles − 1 = 8e-5, as the photon.
+    The ν case (pure Z, maximal parity violation) checks the helicity
+    conventions of every line.
