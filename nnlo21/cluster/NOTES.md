@@ -449,3 +449,9 @@ and to node failures are not included (several hundred core-h).
 - Step 4 replays with P2BDEBUG=1 (bin2, old weighting, same settings):
   B r seed 3197 (iteration 2 = −1.2e162, then 0) job 48777079, seed 4637
   (iteration 4 = −9.4e102, then ≈ 0) job 48777080; `$P/runs/dbg/s*/dbg.log`.
+- 8 Oct 02:30: reruns complete (B r-eq 3500/3500, F r-eq 1199/1200, edge-r-eq
+  300, plain-r-eq 300); seed 4711 completed with bin2 (kt_jets fix). Early
+  look (662 seeds, 22:56): with equal weights the same seeds still blow up
+  (2042, 2382, 2592, 2754, 3197: iterations up to 1e162), so the plain r mean
+  stays undefined at 3e-5/1e-5; median/trimmed shift as expected (−42/−60 pb at
+  1e-5 against the old runs).

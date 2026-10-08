@@ -1,0 +1,8 @@
+Br         DIAG: median(eq - rep) -16.46; 1%-trimmed mean -42.43; mean over 3440 unflagged seeds (all |it| <= 20 x median max|it| = 1.79e+05): -39.63 +- 24.48 (eq -8595.36, rep -8555.73)
+Br          3495 seeds: equal-weight it2-6 -2.55929e+159 +- inf | reported -inf +- nan | eq - rep inf +- nan | medians -8595.67 / -8566.2 | finite-only diff 9.233e+108 +- 9.23e+108 (3491)
+Fr         DIAG: median(eq - rep) -4.66; 1%-trimmed mean -8.70; mean over 1197 unflagged seeds (all |it| <= 20 x median max|it| = 6.79e+04): -9.45 +- 0.62 (eq -3280.06, rep -3270.61)
+Fr          1200 seeds: equal-weight it2-6 -3585.13 +- 289 | reported -3270.28 +- 1 | eq - rep -314.8 +- 289 | medians -3277.83 / -3269.85 | finite-only diff -314.8 +- 289 (1200)
+plainr     DIAG: median(eq - rep) -16.25; 1%-trimmed mean -29.36; mean over 298 unflagged seeds (all |it| <= 20 x median max|it| = 1.79e+05): -5.83 +- 21.19 (eq -8572.18, rep -8566.34)
+plainr       300 seeds: equal-weight it2-6 -1.13653e+160 +- inf | reported -inf +- nan | eq - rep inf +- nan | medians -8604.74 / -8572.72 | finite-only diff -13.96 +- 22.6 (299)
+edger      DIAG: median(eq - rep) -22.98; 1%-trimmed mean -58.08; mean over 292 unflagged seeds (all |it| <= 20 x median max|it| = 1.8e+05): -46.42 +- 12.83 (eq -8579.84, rep -8533.42)
+edger        297 seeds: equal-weight it2-6 -1.10968e+156 +- inf | reported -inf +- nan | eq - rep inf +- nan | medians -8582.02 / -8540.91 | finite-only diff -6.175e+05 +- 6.42e+05 (296)
