@@ -3052,7 +3052,7 @@ r.**
     photon for neutrinos), so the neutrino coupled to the photon; ours/DISENT
     came out flat at −60 % in every bin. Fixed (tau2_nlo), rerun s137–s176.
 
-## 2026-10-09 (night) — cluster DIPGARB reruns merged; axial estimate; HOPPET with Z
+## 2026-10-08 (late evening) — cluster DIPGARB reruns merged; axial estimate; HOPPET with Z
 
 - Cluster (`origin/2026-10-nnlo21-cluster`, REPORT-2026-10-08b, merged into
   2026-10-nnlo21 by fast-forward and into -ncc): the garbage-dipole guard
