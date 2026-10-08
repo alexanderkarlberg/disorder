@@ -455,3 +455,15 @@ and to node failures are not included (several hundred core-h).
   (2042, 2382, 2592, 2754, 3197: iterations up to 1e162), so the plain r mean
   stays undefined at 3e-5/1e-5; median/trimmed shift as expected (−42/−60 pb at
   1e-5 against the old runs).
+- 8 Oct 03:00: results of the equal-weight reruns in `REPORT-2026-10-08.md`
+  and `results/` (B_eq_*, F_eq_*, B_eq_bins.txt, outliers_r.txt,
+  iter_bias.txt, dbg/). Summary: with VEGAS_EQUAL=2 the ZEUS factor 4 is gone
+  (plain NNLO 11.8–14.5 pb from τ_cut 2e-2 to 2e-3 against NNLOJET 11.1 ± 1.2;
+  DIAG within 2.1σ down to 1e-5, errors 3–25 pb below 5e-4 because of the r
+  tail). **Correction of my 7 Oct statements:** the factor 4, the "edge
+  shift" (+22 pb, now median +8) and the fixed-point plateau (10.3–11.5) were
+  artefacts of the 1/σ² iteration weighting; with equal weights the fixed
+  point falls from 10.1 (1e-3) to 6.1 (1e-4) pb/GeV² (DIAG). Plain B means
+  stay undefined below 1e-3 (59 r and 102 rcorr seeds with blow-ups; DBG
+  replays: mapped-Born partons of ~5e-4 GeV give dipoles of 1e120–1e179).
+  Feeder for groups2 stopped (`groups2.txt.stop`).
