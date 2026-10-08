@@ -59,11 +59,16 @@ O(α_s²) and O(α_s³)); our rows 1 (vector, zero after integration) and 11
 - Rows 5, 10, 12 (axial closed-loop terms): NNLOJET contains the one- and
   two-loop V → q q̄ g pure-singlet amplitudes with vector and axial
   couplings (`src/process/Z/B1gNZax.f`, based on arXiv:2211.13596 and
-  2306.10170; and the one-loop Z + 2 parton axial pieces `*Zax*`), but its
-  DIS process does not call them. Plan: evaluate the one-loop 2+1 axial term
-  (row 10, the lowest order one) relative to the Born at the fixed point
-  (0.1, 5000), integrated over the 2+1 phase space with the τ_zQ bins, as
-  the size of the dropped term in the NLO 2+1 coefficient.
+  2306.10170, with the top mass through ln(m_t²/s); and the one-loop Z + 2
+  parton axial pieces `*Zax*`), but its DIS process does not call them,
+  and its pure-singlet coefficients (`helcoeffPS`) exist only for the four
+  timelike regions (s45 > 0; DIS kinematics stops with "kinematical region
+  not implemented"). An estimate in DIS kinematics therefore needs the
+  analytic continuation of those coefficients to the spacelike regions (as
+  hard21 has for the main coefficients) — a separate piece of work. For row
+  5 (one loop 3+1) MCFM's BDK axial amplitudes (`a64ax`, `a65ax`, `fax`,
+  `faxsl`; analytic continuation through lnrat, valid in any region) could
+  be evaluated in DIS kinematics directly.
 - Row 6 at one loop (axial part): could be computed as axsum31 with virt31
   (`virt31_keepint`), if needed.
 - Row 8: a third reference (or an analytic check of the crossing of the
