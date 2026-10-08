@@ -1,0 +1,4 @@
+Br seeds >1e30 before/after 9 0   >1e10 9 0  >1e6 45 34  identical max-iter 3465 of 3500
+Brcorr seeds >1e30 before/after 7 0   >1e10 11 4  >1e6 67 62  identical max-iter 384 of 400
+Fr seeds >1e30 before/after 0 0   >1e10 0 0  >1e6 1 1  identical max-iter 1199 of 1200
+Frcorr seeds >1e30 before/after 0 0   >1e10 0 0  >1e6 3 3  identical max-iter 300 of 300
