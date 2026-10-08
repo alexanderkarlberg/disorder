@@ -3051,3 +3051,25 @@ r.**
     `-neutrino` in tau2_nlo did not set `Zonly` (set_parameters does: no
     photon for neutrinos), so the neutrino coupled to the photon; ours/DISENT
     came out flat at −60 % in every bin. Fixed (tau2_nlo), rerun s137–s176.
+
+## 2026-10-09 (night) — cluster DIPGARB reruns merged; axial estimate; HOPPET with Z
+
+- Cluster (`origin/2026-10-nnlo21-cluster`, REPORT-2026-10-08b, merged into
+  2026-10-nnlo21 by fast-forward and into -ncc): the garbage-dipole guard
+  removes the 1e60–1e179 values but the 1e5–1e6 tail of r stays (52 of
+  3500 B seeds flagged). Replays: real events deep in collinear/soft
+  corners (s_min/W² ~ 1e-9, at the technical cut) whose dipole is orders
+  of magnitude larger and has its mapped Born above τ_cut — not garbage.
+  ZEUS NNLO plain means agree with NNLOJET to 2e-3 (11.8, 12.0, 12.4, 14.1
+  ± 1.1–1.3 pb against 11.12 ± 1.19), undefined below 1e-3; DIAG within
+  ≤ 2σ down to 1e-5. Fixed point still not flat (10.1 → 6.2 from 1e-3 to
+  1e-4). Advice to AK: no more cluster jobs until the tail has a method fix.
+- Axial closed loop of the one-loop 3+1 (row 5 of nc-dropped-terms):
+  0.0041 ± 0.0002 pb = 2.7e-4 of vi (qq̄gg channels) in the HERA 3-jet
+  set-up, e⁻, MCFM's BDK axial amplitudes (heavy-top approximation);
+  m_t-independent (173 vs 500 GeV).
+- HOPPET with Z (section 2 of nc-dropped-terms): option-1 flavour weights at
+  all orders; C3 singlet zero at NNLO (consistent); at N3LO the fl11 terms
+  of F2/FL carry MVV's photon normalisation 3⟨e⟩ but get the Z weights
+  v² + a² — not the closed-loop coupling Σ v_f our 2+1 side uses. To be
+  resolved before an N3LO 1+1 with Z by P2B.

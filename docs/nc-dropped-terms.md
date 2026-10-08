@@ -32,7 +32,7 @@ zero).
 | 2 | Same, parts with an axial coupling on a line | α_s² | yes | dropped | does not vanish after integration because Σ_Q a_Q ≠ 0 over the pair flavours (no top). Computed: ≈ 2–6·10⁻⁶ of LO for dσ/dx dQ² at (0.01, 400), (0.1, 5000), (0.3, 20000) (`dis31/tests/axsum31`); ≤ 10⁻³ of the NNLO coefficient. e⁺: sign flips at low Q². |
 | 3 | Identical quarks: the boson on the "pair" line in the same pairing class (|D|², |E|² of me31) | α_s² | yes | dropped (the Q = q member of rows 1–2) | included in the axsum31 numbers above. The direct × exchange interference (D·E*) is kept: there the couplings combine to c_q² (not a different line). |
 | 4 | One loop 3+1 (q q̄ g g + V): boson on a closed quark loop, vector part (BDK's A6^v; loop with V and three gluons, colour d^abc, (N − 4/N)) | α_s³ (NNLO 2+1) | **yes**, ∝ Σ_f v_f (photon Σ e_q = 1/3) | **kept** since 8 Oct (before: left out, also for the photon, with the wrong claim that Furry's theorem removes it — it does for two gluons on the loop, not three). Validated against MCFM's `xzqqgg_v` | photon: −0.03 % of vi in NLO 3+1 (HERA 3-jet set-up), 3·10⁻⁶ of vi at (0.01, 400); NNLOJET's DIS process does not contain it either |
-| 5 | Same, axial part (triangle anomaly) | α_s³ | yes, but ∝ Σ_f a_f over the loop flavours: cancels in each massless isodoublet, survives through the top–bottom mass splitting (in MCFM: `toploops`) | dropped (we have n_f = 5 massless flavours and no top) | estimate pending (section 3). Same status as in MCFM's Z + 2 jets without top loops and in NNLOJET's DIS process. |
+| 5 | Same, axial part (triangle anomaly) | α_s³ | yes, but ∝ Σ_f a_f over the loop flavours: cancels in each massless isodoublet, survives through the top–bottom mass splitting (in MCFM: `toploops`) | dropped (we have n_f = 5 massless flavours and no top) | **computed (9 Oct):** MCFM's BDK axial amplitudes (a64ax, a65ax; top in the heavy-mass approximation) with e⁻ couplings in nlo31's HERA 3-jet set-up: 0.0041 ± 0.0002 pb = 2.7·10⁻⁴ of vi (q q̄ g g channels, 15.1 pb) ≈ 4·10⁻⁵ of LO (93.6 pb); independent of m_t (173 vs 500 GeV: 4.05 vs 4.27·10⁻³ pb), as expected for this non-decoupling term. Same status as in MCFM's Z + 2 jets without top loops and in NNLOJET's DIS process. |
 | 6 | One loop four quarks (q q̄ Q Q̄ + V): interference of the boson on the two open lines | α_s³ | yes | dropped (as row 1–2 at one loop) | vector part odd under pair exchange (zero after integration); axial part same order of size as row 2 relative to its order: expected ~10⁻⁶ of the α_s³ coefficient. |
 | 7 | One loop four quarks, boson on a closed loop (loop with V and two gluons) | α_s³ | vector: no (Furry, two gluons); axial: as row 5 | dropped (MCFM's qqb_z2jet_v sets a63z to zero too) | as row 5 |
 | 8 | One-loop interference, reflection-odd part (ε-tensor × absorptive part) | α_s³ | yes, with Z only (needs c_LL ≠ c_RR); zero for the photon | kept in virt31 point by point; nlo31's flavour sums keep only the reflection-even part | zero after integration for observables symmetric under the reflection of the hadronic final state through the lepton plane (y → −y), i.e. all unpolarised, azimuthally symmetric observables we compute. **Open:** virt31 (MCFM's crossing) and NNLOJET differ in this part point by point (8 Oct). |
@@ -45,16 +45,47 @@ zero).
 ## 2. Consistency with the structure functions (P2B, N3LO 1+1)
 
 The N3LO 1+1 result built from NNLO 2+1 (P2B or slicing) needs the 2+1 piece
-and the inclusive structure functions to contain the same terms. HOPPET's NC
-coefficient functions with Z: the C3 pure-singlet parts are set to zero
-(`InitC3NNLO`), i.e. the axial "boson on a different line/loop" terms are
-absent there too. To be documented precisely for the paper: which singlet
-terms HOPPET keeps for F2/FL with Z couplings (vector Σ v_q terms, the
-analogues of rows 1 and 11) and at which order (the "fl11"-type terms at
-O(α_s²) and O(α_s³)); our rows 1 (vector, zero after integration) and 11
-(kept) must match them. Open item.
+and the inclusive structure functions to contain the same terms. HOPPET
+(local checkout `~/work/hoppet`, d891044; `src/structure_functions.f90`,
+`structure_function_general_full`; `src/coefficient_functions_holder.f90`;
+MVV parametrisations in `src/param-coefs/`), read 9 Oct:
+
+- **Flavour weights.** For every order F2 and FL are built as
+  Σ_q (q + q̄) C ⊗ ... with the per-flavour weights e_q² (photon),
+  v_q² + a_q² (Z) and e_q v_q (γZ); F3 as Σ_q (q − q̄) C3 with a_q v_q and
+  e_q a_q. These are boson-on-the-incoming-line weights, i.e. option 1.
+- **O(α_s²) (NNLO 1+1).** C2, CL: non-singlet, pure-singlet and gluon
+  pieces, no fl11 terms (they start at O(α_s³)). C3: the singlet parts are
+  set to zero (`InitC3NNLO`: "singlet piece should have no impact on Z
+  case"). So the axial boson-on-another-line terms (our rows 2, 3) are
+  absent, and the vector ones (row 1) integrate to zero anyway: consistent.
+- **O(α_s³) (N3LO 1+1).** C2 and CL have the fl11 terms (`C2N3LO_fl11`,
+  `CLN3LO_fl11`: MVV's terms with the boson on a closed quark loop / on
+  another line, d^abc-like). Their normalisation is MVV's photon one,
+  `FL(nf)` = 3⟨e⟩ (nf = 5: 0.2, so FL11·nf = 3 Σ_q e_q = 1), and
+  `structure_function_general_full` then weights them like every other
+  term, with v_q² + a_q² for Z and e_q v_q for γZ. For photon exchange this
+  is MVV's prescription. For Z exchange it is not the Z's closed-loop
+  coupling: the term is ∝ c_q × Σ_f c_V,f (boson on the open line × vector
+  coupling of the loop), which is what our 2+1 side now uses (rows 4 and
+  11). **So at N3LO 1+1 with Z, HOPPET's fl11 and our NNLO 2+1 closed-loop
+  terms are normalised differently.** One of the two has to change for a
+  consistent P2B/slicing N3LO with Z (to be discussed with the HOPPET
+  authors; the effect is small: the fl11 terms are a small part of the
+  N3LO coefficient, and the Z part of them is further suppressed at
+  HERA Q²). C3 at O(α_s³) contains the fl02 (d^abc d_abc) term with
+  FL02 = 1 for a vector boson (`xc3ns3p.f`).
+- Photon exchange: our rows 1, 4, 11 are e_q Σ_f e_f per flavour. HOPPET
+  weights the fl11 coefficient with e_q² × 3⟨e⟩ (FL11), which is the
+  per-flavour e_q Σ e only after averaging over flavours. Whether this is
+  MVV's exact prescription or a flavour-averaged approximation is to be
+  checked against MVV (hep-ph/0504242) — open.
 
 ## 3. Estimates still to do
+
+Done: row 5 (above). The program is a scratch harness (MCFM 10.3's
+`xzqqgg_v`, `fax`, `faxsl` with virt31's crossing and nlo31's phase space;
+outside the repository).
 
 - Rows 5, 10, 12 (axial closed-loop terms): NNLOJET contains the one- and
   two-loop V → q q̄ g pure-singlet amplitudes with vector and axial
@@ -86,6 +117,8 @@ after integration over flavour-blind final states (odd under the exchange
 of the quark and antiquark of a pair); their axial parts survive
 only because the five-flavour theory has no top partner for the b quark
 (Σ a_q ≠ 0). The tree-level ones are 2–6·10⁻⁶ of the LO cross section at
-HERA kinematics; the loop ones are [to be filled]. The same terms are absent
+HERA kinematics; the one-loop axial closed-loop term of the 3+1 virtual is
+3·10⁻⁴ of the virtual (4·10⁻⁵ of LO) in a HERA 3-jet set-up; the 2+1 ones
+(one and two loop) are not yet computed in DIS kinematics. The same terms are absent
 from the inclusive coefficient functions we combine with (HOPPET) and from
 DISENT and NNLOJET's DIS processes.
