@@ -3155,3 +3155,12 @@ r.**
   Q² = 400); variable flavour number finite, n_f = 3 (Σe = 0) left at zero.
   Second patch `hoppet-initcoefholder-optional.patch` for the optional-
   argument bug.
+- fl02 (F3, both bosons on the closed loop): HOPPET's couplings for Z and
+  γZ are the loop sums, exactly (`fl02z.f90`, equal to 7 digits); no patch
+  needed.
+- HOPPET ctest: pristine 18/18; patched 17/18, `structure_functions_example`
+  differs exactly in F1/F2 Z and γZ at N3LO (N3LO coefficient of F2^Z up to
+  3%, F2^γZ up to 22% where it is small, F1 ≤ 1%), nothing else. With the
+  regenerated reference (`hoppet-fl11-Z-reference-output.patch`) 18/18.
+  `structure_functions_example_flavour` cannot see it (flavour-decomposed
+  SFs stop at NLO).

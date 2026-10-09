@@ -111,9 +111,14 @@ MVV parametrisations in `src/param-coefs/`), read 8 Oct:
   on a closed loop and is C-odd, so it multiplies the total valence). For
   the record: a 9 Oct version of this paragraph claimed C3 has no fl02 term
   at all; that was wrong (a missed line), the 8 Oct statement was right.
-  Not checked: whether the Z/γZ couplings of the fl02 term come out right
-  (the per-flavour weights 2 v_q a_q times a flavour-blind valence term
-  look like the loop sum, but the normalisation is not verified).
+  **Couplings of fl02 with Z and γZ: correct (checked 9 Oct).** fl02 has
+  both bosons on the closed loop (MVV 0812.4168, Fig. 1), so its coupling
+  is the flavour trace over the loop, Σ_f 2 g_V,f g_A,f (Z), Σ_f 2 e_f g_A,f
+  (γZ), (n_f/2) per W charge, times the flavour-blind total valence.
+  HOPPET adds the valence piece equally to every flavour column, so its
+  per-flavour weights 2 v_q a_q, 2 e_q a_q sum to exactly that loop sum:
+  numerically equal to 7 digits (`fl02z.f90`, x = 0.01/0.1/0.3). Only fl11
+  needs the patch.
 
 ## 3. Estimates still to do
 
