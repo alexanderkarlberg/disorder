@@ -3115,3 +3115,31 @@ r.**
 - An exact local replay of the cluster blow-ups is not possible: the d638917
   build matches the cluster's iteration 1 bit for bit but drifts from
   iteration 2 (−8520.976 vs −8520.246), so VEGAS adapts differently.
+
+## 2026-10-09 (afternoon) — HOPPET's N3LO fl11 terms with Z
+
+- **Photon: exact.** MVV's fl11 decomposition (non-singlet e_q² · 3⟨e⟩,
+  pure singlet ⟨e⟩²/⟨e²⟩ − 3⟨e⟩, gluon ⟨e⟩²/⟨e²⟩) reproduces the diagram
+  coupling e_q Σe per flavour because 3e_q² − e_q = 2/3 for both charges
+  (exact rational check nf = 3, 4, 5). Numerically (program
+  `~/work/disorder-comparisons/hoppet-fl11/fl11z.f90`, outside the repo):
+  HOPPET's photon fl11 = exact couplings to 1e-9. Closes the open photon
+  question of 8 Oct.
+- **Z, γZ: approximate.** HOPPET weights the fl11 sum with v_q² + a_q² and
+  2 e_q v_q; the diagram couplings are g_V,q Σ g_V (Z), e_q Σ g_V + g_V,q Σ e
+  (γZ), and (Σ g_V)², 2 Σe Σg_V for the gluon. For γZ even the sign of the
+  fl11 term differs (x = 0.01, Q² = 400: −0.37 vs +1.66, rest of the N3LO
+  coefficient −159). Size: ≲ 3·10⁻⁵ of F2^γZ, ≲ 10⁻⁵ of F2^Z (FL smaller),
+  i.e. 1–2% of the N3LO coefficient of F2^γZ, ≲ 0.3% for F2^Z; below 1e-6
+  in the e±p cross section at HERA. Table in `docs/nc-dropped-terms.md`
+  section 2. For a consistent N3LO 1+1 with Z by P2B the fix belongs in
+  HOPPET (weight the fl11 pieces with the diagram couplings).
+- **Correction:** HOPPET's C3 at N3LO does *not* contain MVV's fl02 term
+  (`InitC3N3LO` uses the `V = 0` functions; the valence version with fl02
+  exists but is unused). The 8 Oct text in nc-dropped-terms said the
+  opposite. Whether W exchange should use it is for the HOPPET authors.
+- HOPPET bug found on the way: `InitCoefHolder` tests the optional
+  argument `use_exact_cf` directly (`coefficient_functions_holder.f90`
+  line 123) instead of its local copy `use_exact`, so a call without it
+  segfaults (`structure_functions` always passes it, so HOPPET's own use is
+  fine).

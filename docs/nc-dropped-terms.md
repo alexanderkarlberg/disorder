@@ -61,25 +61,58 @@ MVV parametrisations in `src/param-coefs/`), read 8 Oct:
   absent, and the vector ones (row 1) integrate to zero anyway: consistent.
 - **O(α_s³) (N3LO 1+1).** C2 and CL have the fl11 terms (`C2N3LO_fl11`,
   `CLN3LO_fl11`: MVV's terms with the boson on a closed quark loop / on
-  another line, d^abc-like). Their normalisation is MVV's photon one,
-  `FL(nf)` = 3⟨e⟩ (nf = 5: 0.2, so FL11·nf = 3 Σ_q e_q = 1), and
-  `structure_function_general_full` then weights them like every other
-  term, with v_q² + a_q² for Z and e_q v_q for γZ. For photon exchange this
-  is MVV's prescription. For Z exchange it is not the Z's closed-loop
-  coupling: the term is ∝ c_q × Σ_f c_V,f (boson on the open line × vector
-  coupling of the loop), which is what our 2+1 side now uses (rows 4 and
-  11). **So at N3LO 1+1 with Z, HOPPET's fl11 and our NNLO 2+1 closed-loop
-  terms are normalised differently.** One of the two has to change for a
-  consistent P2B/slicing N3LO with Z (to be discussed with the HOPPET
-  authors; the effect is small: the fl11 terms are a small part of the
-  N3LO coefficient, and the Z part of them is further suppressed at
-  HERA Q²). C3 at O(α_s³) contains the fl02 (d^abc d_abc) term with
-  FL02 = 1 for a vector boson (`xc3ns3p.f`).
-- Photon exchange: our rows 1, 4, 11 are e_q Σ_f e_f per flavour. HOPPET
-  weights the fl11 coefficient with e_q² × 3⟨e⟩ (FL11), which is the
-  per-flavour e_q Σ e only after averaging over flavours. Whether this is
-  MVV's exact prescription or a flavour-averaged approximation is to be
-  checked against MVV (hep-ph/0504242) — open.
+  another line, d^abc-like). MVV write them for photon exchange as a
+  non-singlet piece with the per-flavour weight e_q² × `FL` = e_q² · 3⟨e⟩
+  (nf = 5: 0.2), a pure-singlet piece with ⟨e⟩²/⟨e²⟩ − 3⟨e⟩ (`FLS` − `FL`)
+  and a gluon piece with ⟨e⟩²/⟨e²⟩ (`FLG`), all with the same functions
+  (`xc2ns3p.f`, `xc2sg3p.f`, `xclns3p.f`, `xclsg3p.f`).
+  `structure_function_general_full` then weights the sum like every other
+  term: e_q² (photon), v_q² + a_q² (Z), 2 e_q v_q (γZ), and leaves it out for
+  W.
+- **Photon: exact (checked 9 Oct).** The diagram coupling is e_q Σ_f e_f
+  (quarks) and (Σ_f e_f)² (gluon). MVV's decomposition reproduces it for
+  every flavour, because 3e_q² − e_q = 2/3 for both up- and down-type
+  charges, so the non-singlet mismatch is flavour-independent and the
+  pure-singlet piece absorbs it (exact rational check for nf = 3, 4, 5;
+  numerically, HOPPET's photon fl11 equals the exact couplings to 1e-9).
+  Our rows 1, 4, 11 (e_q Σ e_f per flavour) are therefore consistent with
+  HOPPET for the photon.
+- **Z and γZ: approximate.** The diagram couplings for F2 and FL are
+  g_V,q Σ_f g_V,f (Z) and e_q Σ_f g_V,f + g_V,q Σ_f e_f (γZ) for quarks,
+  (Σ g_V)² and 2 Σe Σg_V for the gluon (the loop couples through its
+  vector part; the axial part of the open line times the vector loop is
+  parity-odd and goes into F3, the axial loop is the anomaly term of rows
+  5, 10, 12). v_q² + a_q² is not linear in g_V,q, so no identity like the
+  photon's helps: HOPPET's Z and γZ fl11 terms are not the diagram
+  couplings, and for γZ they even have the opposite sign. Size (program
+  `~/work/disorder-comparisons/hoppet-fl11/fl11z.f90`, outside the
+  repository; NNPDF30_nlo_as_0118, sin²θ_W = 1 − M_W²/M_Z², μ = Q):
+
+  | x, Q² | F2^γZ fl11 coefficient HOPPET / exact | difference × (α_s/2π)³ / LO | F2^Z, same | FL: γZ, Z |
+  |---|---|---|---|---|
+  | 0.01, 400 | −0.37 / +1.66 (rest of N3LO: −159) | −3.2·10⁻⁵ | 7.0·10⁻⁶ | −1.1·10⁻⁵, 2.8·10⁻⁶ |
+  | 0.1, 5000 | −0.15 / +0.80 (−2.7) | −2.0·10⁻⁵ | 1.2·10⁻⁶ | −6.8·10⁻⁶, 3.6·10⁻⁷ |
+  | 0.3, 20000 | −0.04 / +0.28 (−14.5) | −1.4·10⁻⁵ | −1.2·10⁻⁶ | −4.3·10⁻⁶, −4.5·10⁻⁷ |
+  | 0.01, 10000 | −0.46 / +1.98 (−132) | −1.3·10⁻⁵ | 3.3·10⁻⁶ | −4.7·10⁻⁶, 1.3·10⁻⁶ |
+
+  I.e. ≲ 3·10⁻⁵ of the γZ structure function, ≲ 10⁻⁵ of the Z one; ≈ 1–2%
+  of the N3LO coefficient of F2^γZ, ≲ 0.3% for F2^Z. In the e±p cross
+  section F2^γZ comes with g_V^e (≈ −0.05) and the propagator factor, so the
+  effect there is below 10⁻⁶. Negligible, but a real inconsistency: for a
+  P2B/slicing N3LO 1+1 with Z, our NNLO 2+1 closed-loop terms (rows 4, 11,
+  diagram couplings) and HOPPET's fl11 must use the same couplings. The
+  clean fix is in HOPPET (weight the non-singlet fl11 piece with the
+  diagram coupling instead of e_q² · 3⟨e⟩, and the gluon piece with the
+  loop couplings); to be raised with the HOPPET authors.
+- F3 at O(α_s³): HOPPET's C3 uses MVV's non-singlet minus function with
+  `V = 0` (`InitC3N3LO` → `cfN3LO_F3NS_plus/minus`), which switches MVV's
+  fl02 (d^abc d_abc) term off; the valence version with fl02
+  (`cfN3LO_F3NS_val`, `V = 1`) exists but is not used. **Correction (9 Oct)
+  of the 8 Oct text here, which said C3 contains the fl02 term.** For Z and
+  γZ the analogous term (axial coupling of the line × vector loop) has, as
+  far as we know, not been computed; it is of the same small size as above.
+  Whether HOPPET should use the fl02 term for W exchange (CC at N3LO) is a
+  question for the HOPPET authors, outside the scope of these notes.
 
 ## 3. Estimates still to do
 
@@ -121,4 +154,9 @@ HERA kinematics; the one-loop axial closed-loop term of the 3+1 virtual is
 3·10⁻⁴ of the virtual (4·10⁻⁵ of LO) in a HERA 3-jet set-up; the 2+1 ones
 (one and two loop) are not yet computed in DIS kinematics. The same terms are absent
 from the inclusive coefficient functions we combine with (HOPPET) and from
-DISENT and NNLOJET's DIS processes.
+DISENT and NNLOJET's DIS processes. One mismatch remains for an N3LO 1+1
+with Z: HOPPET's inclusive fl11 terms (MVV's photon closed-loop/other-line
+terms) carry the ordinary Z and γZ flavour weights instead of the diagram
+couplings, which is exact for the photon but not for Z; the difference is
+≲ 3·10⁻⁵ of the γZ structure function and below 10⁻⁶ in the e±p cross
+section at HERA (section 2).
