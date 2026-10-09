@@ -7,7 +7,47 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
-## UPDATE 8 Oct (read this first): garbage-dipole guard, then rerun r with it
+## UPDATE 9 Oct (read this first): psmc fix, rerun the B set (AK: go)
+
+Thanks for the 8 Oct (8b) report. Its replays (seeds 2042, 2049) found the
+cause of the 1e5–1e6 tail, but it is not "incomplete cancellation in deep
+corners": in all 81 DBG BIG events the real is cut away (τ₂ ≈ 4e-9…3e-8)
+and an accepted dipole has a mapped Born with a **negative-energy parton**
+(e.g. E = 183, 173.7, −31.8 GeV in the DBG `dip` lines). psmc built the
+second emission with m²/E² up to 1e-6, so tiny p_i·p_j came out negative,
+y > 1 in the dipole mapping, and the P2B fallback to plain weights accepted
+the garbage dipole above τ_cut. Fixed in `dis31/psmc.f90` (emission in quad
+precision; commit "psmc: emission in quad precision …"). On the thservs,
+3 seeds × 3M points of B r: such accepted dipoles 453/568/809 per job before,
+0 after. Details: notebook, 9 Oct.
+
+The fixed point (F) had none of these (0 before and after); the fix does
+not explain its non-flatness, which we study at MPP first. **Do not rerun F.**
+
+1. `git pull`, rebuild nlo31/sliced21 as `bin4` (new directory; leave bin3).
+   Checks before submitting:
+   - sliced21 (b0, b1, b2) does not use the changed routines: a short run
+     must be bit-identical to bin3;
+   - nlo31 (lo, vi, kp, r) changes point by point (the transverse basis is
+     rotated): a short lo run must agree with bin3 statistically. The
+     existing lo, vi and kp results stay valid (no dipoles, no rerun).
+2. Rerun with bin4, `VEGAS_EQUAL=2`, the same seeds and otherwise the same
+   settings as the bin3 round:
+   - B r (3,500), B rcorr (400);
+   - Bx: conv (200), edge r (300), plain r (300), plain rcorr (100).
+   From your bin3 timings ≈ 6,050 core-h; submit without asking again if
+   the estimate is within 20% of that, otherwise report first.
+3. Report, as for bin3 (same tables, so that bin3 and bin4 sit side by side):
+   - flagged seeds (20× rule), the garbage-dipole counts, the "plain
+     weights" counts per seed;
+   - mean, median, trimmed mean, robust against sample σ: is the tail gone?
+   - B NNLO per bin and τ_cut against NNLOJET (plain mean = result), down to
+     1e-5;
+   - if any seed still blows up: replay it with `P2BDEBUG=1`, keep the `DBG`
+     lines, and check the energies in the `dip` lines.
+4. Commit to `2026-10-nnlo21-cluster`.
+
+## UPDATE 8 Oct: garbage-dipole guard, then rerun r with it
 
 Thanks for the 8 Oct report. Your replays (seeds 3197, 4637) show what the
 blow-ups are. Some dipoles have a mapped Born with an almost-zero-energy
