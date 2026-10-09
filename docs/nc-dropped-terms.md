@@ -103,7 +103,15 @@ MVV parametrisations in `src/param-coefs/`), read 8 Oct:
   diagram couplings) and HOPPET's fl11 must use the same couplings. The
   clean fix is in HOPPET (weight the non-singlet fl11 piece with the
   diagram coupling instead of e_q² · 3⟨e⟩, and the gluon piece with the
-  loop couplings); to be raised with the HOPPET authors.
+  loop couplings); to be raised with the HOPPET authors. APFEL++ (checked
+  9 Oct, github vbertone/apfelxx 27deaec) does the same: its NC builders
+  switch the fl11 pieces on (`C23nsp{nf}` etc., off for CC) and weight
+  everything with one per-flavour effective charge, `ElectroWeakCharges` =
+  e_q² − 2 e_q v_q v_e P_Z + (v_e² + a_e²)(v_q² + a_q²) P_Z². So the
+  HOPPET–APFEL++ agreement does not test this. HOPPET's weighting dates from
+  2016 (1c110a8, unchanged since); the 2023 fixes after V. Bertone's
+  comparison (1058001, 8c4ac2a: δ(1−x) and fl11 parts of the coefficient
+  functions themselves) are unrelated.
 - F3 at O(α_s³): HOPPET's C3 uses MVV's non-singlet plus/minus functions
   without the fl02 (d^abc d_abc) term for the NS± combinations and the
   valence function with it (`C%NS_V = cfN3LO_F3NS_val`, `V = 1`) for the

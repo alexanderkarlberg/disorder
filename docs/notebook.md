@@ -3164,3 +3164,11 @@ r.**
   regenerated reference (`hoppet-fl11-Z-reference-output.patch`) 18/18.
   `structure_functions_example_flavour` cannot see it (flavour-decomposed
   SFs stop at NLO).
+- History/APFEL++: HOPPET's NC weighting of fl11 is from 1c110a8 (2016) and
+  unchanged; the Feb 2023 fixes from the comparison with V. Bertone (1058001,
+  8c4ac2a) changed the coefficient functions (δ(1−x) pieces, fl11 parts of
+  C2S3C, NC/CC difference pieces), not the couplings. The comparison plots
+  (now `benchmarking/apfelpp-checks`) are EM only. APFEL++ has the same
+  per-flavour effective-charge weighting of fl11 for Z and γZ
+  (`ElectroWeakCharges`, `DISNCBasis`), so it shares the issue. HOPPET's
+  GitHub issues (7) contain nothing on this.
