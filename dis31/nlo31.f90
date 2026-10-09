@@ -100,7 +100,8 @@ module nlo31_mod
   ! mode 2 diagnostic (ZFIX = 1, 6 Oct): Q^2 and y squeezed to a window of
   ! relative width zfw around the mode-1 point (x, Q2 arguments) and the
   ! mode-1 observable (tau_zQ bins): each part must reproduce mode 1 after
-  ! division by the window, dsigma/dx dQ2 = (y/x) sigma/(dQ2 dy)
+  ! division by the window, dsigma/dx dQ2 = (y/x) sigma/(dQ2 dy); ZFIX = 3:
+  ! the same observable in the full inclusive cuts
   logical :: zfix = .false.
   real(dp), parameter :: zfw = 1e-3_dp
   ! mode 2, P2B-improved slicing (env P2BSLICE = 1, 6 Oct; Campbell, Neumann,
@@ -626,7 +627,7 @@ contains
        ! negative-energy parton; e.g. partons of +-5e6 GeV that cancel, next
        ! to a real with tau_2 ~ 1e-9..1e-8) drops the whole event, as plain
        ! slicing effectively does (there both sides fail every cut)
-       if (p2bslice .and. mode == 2 .and. (degen .or. any(P3(4,1:4,id) < 0))) dropev = .true.
+       if (p2bslice .and. mode <= 2 .and. (degen .or. any(P3(4,1:4,id) < 0))) dropev = .true.
        sub = sub - val(id)*F3
        if (dbgprint .and. F3(iv) /= 0) write(0,'(a,i3,a,es12.4,a,es12.4,a,f5.1,a,3es11.3)') ' DBG dip', id, ' val', val(id), &
             & ' t2', t2last, ' F(iv)', F3(iv), ' E', P3(4,2:4,id)
@@ -683,7 +684,7 @@ contains
     ! they would enter with O - O~ /= 0. Leaving out O - O~ for these events
     ! is power suppressed (tau_2 <~ 1e-8). Dropping them altogether
     ! (p2bdrop = 0, first version) also loses their dipoles above the cut.
-    dropev = p2bslice .and. mode == 2 .and. t2last < p2btmin
+    dropev = p2bslice .and. mode <= 2 .and. t2last < p2btmin
     garbev = .false.
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
@@ -693,7 +694,7 @@ contains
     if (garbev) then
        ngarbev = ngarbev + 1; res = 0; return
     endif
-    if (p2bslice .and. mode == 2) then
+    if (p2bslice .and. mode <= 2) then
        nrealev = nrealev + 1
        if (dropev) ndropev = ndropev + 1
        if (dropev .and. p2bdrop == 0) then
@@ -822,8 +823,9 @@ contains
     integer, intent(in) :: n
     real(dp), intent(in) :: pin(4), p(4,n), Q
     real(dp), intent(out) :: F(nv)
-    real(dp) :: t2, tz
-    integer :: k, b, i
+    real(dp) :: t2, pb(4,2)
+    logical :: inb(nobmax), inp(nobmax), okp
+    integer :: k, b
     ! non-finite momenta (numerically degenerate mapped configurations, 7 Oct
     ! cluster: NaN made kt_jets write act(0), "double free or corruption"):
     ! the configuration is not accepted; with P2B it marks a degenerate dipole
@@ -843,18 +845,53 @@ contains
        call accept_p2b(pin, p, n, Q, F)
        return
     endif
-    tz = 1
-    do i = 1, n
-       if (p(3,i) < 0) tz = tz + 2*p(3,i)/Q
-    enddo
     t2 = tau2cm(pin, p, n)/Q
+    call zq_bins(p, n, Q, inb)
+    if (p2bslice) then
+       ! P2B (9 Oct, as accept_zeus): below tau_cut O(event) - O(projected 2+1 Born)
+       t2last = t2; degen = t2code < 0
+       inp = .false.
+       if (t2 <= tcs(1)) then
+          call project21(pin, p, n, pb, okp)
+          if (okp) then
+             call zq_bins(pb, 2, Q, inp)
+          else
+             inp = inb
+          endif
+       endif
+       do b = 1, nzb
+          do k = 1, ntc
+             F(k + ntc*(b - 1)) = merge(1.0_dp, 0.0_dp, inb(b))
+             if (t2 <= tcs(k) .and. inp(b)) F(k + ntc*(b - 1)) = F(k + ntc*(b - 1)) - 1
+             if (p2bextra .and. t2 > tcs(k)) F(k + ntc*(b - 1)) = 0
+          enddo
+       enddo
+       return
+    endif
     do b = 1, nzb
-       if (tz < zlo(b) .or. tz >= zhi(b)) cycle
+       if (.not. inb(b)) cycle
        do k = 1, ntc
           if (t2 > tcs(k)) F(k + ntc*(b - 1)) = 1
        enddo
     enddo
   end subroutine accept
+
+  ! tau_zQ bins of n partons (Breit frame)
+  subroutine zq_bins(p, n, Q, inb)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: p(4,n), Q
+    logical, intent(out) :: inb(nobmax)
+    real(dp) :: tz
+    integer :: i, b
+    tz = 1
+    do i = 1, n
+       if (p(3,i) < 0) tz = tz + 2*p(3,i)/Q
+    enddo
+    inb = .false.
+    do b = 1, nzb
+       inb(b) = tz >= zlo(b) .and. tz < zhi(b)
+    enddo
+  end subroutine zq_bins
 
   ! mode 3: F(k + ntc*(b-1)) = theta(tau_2 > tcs(k)) [O_b(event) - O_b(Born)]
   subroutine accept_p2b(pin, p, n, Q, F)
@@ -1569,7 +1606,11 @@ program nlo31
      nob = 15; nv = ntc*nob; iv = ntc
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
      call get_environment_variable('ZFIX', arg)
-     if (trim(arg) == '1' .or. trim(arg) == '2') then
+     if (trim(arg) == '3') then
+        ! ZFIX = 3 (9 Oct): the mode-1 observable (tau_zQ bins) in the
+        ! inclusive cuts, no window (event shape, against NNLOJET dis_tauzq)
+        zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
+     elseif (trim(arg) == '1' .or. trim(arg) == '2') then
         ! ZFIX = 1: window with the mode-1 observable; 2: with the ZEUS jet
         ! selection (7 Oct)
         if (trim(arg) == '1') then
@@ -1579,6 +1620,12 @@ program nlo31
         ylo = Q2fix/(xfix*s)*(1 - zfw/2); yhi = Q2fix/(xfix*s)*(1 + zfw/2)
         write(*,'(a,4es14.6)') ' ZFIX window Q2, y:', q2lo, q2hi, ylo, yhi
      endif
+  elseif (mode == 3) then
+     ! VEGAS target: >= 1 jet row (the total row vanishes identically in P2B)
+     nob = 16; nv = ntc*nob; iv = 2*ntc
+     q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
+  endif
+  if (mode == 1 .or. mode == 2) then
      call get_environment_variable('P2BSLICE', arg)
      if (trim(arg) == '1') then
         p2bslice = .true.
@@ -1590,10 +1637,6 @@ program nlo31
         if (p2bextra) write(*,'(a)') ' P2BEXTRA: only theta(T <= tau_cut) (O - O~)'
         write(*,'(a)') ' P2BSLICE: below tau_cut O(event) - O(projected 2+1 Born)'
      endif
-  elseif (mode == 3) then
-     ! VEGAS target: >= 1 jet row (the total row vanishes identically in P2B)
-     nob = 16; nv = ntc*nob; iv = 2*ntc
-     q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
   endif
   ! diagnostics (6 Oct): VEGAS target cell from the environment (VTARGET = k,
   ! index into the cell vector; default unchanged)

@@ -3181,3 +3181,47 @@ r.**
 - Bug-report pages for AK to pass on: APFEL++ (V. Bertone)
   https://claude.ai/artifact/76tsS1d8vZt4vWiwNpdmkS, yadism
   https://claude.ai/artifact/UaaDjNhibLSKLns1EXjHkC.
+
+## 2026-10-09 (evening) — fixed-point non-flatness; 5-class beam grid; event-shape set-up
+
+AK (Fri afternoon): free rein for the weekend up to (not including) the
+clean-up: (1) fixed-point non-flatness, (2) 5-class beam tables, then CC,
+NNLO-with-Z validation prep, the rest.
+
+**Beam grid (5 classes, ZEUS/inclusive Q range).** `sliced21 mktab` for the
+29 nodes with the NC-branch build (46b1e4b), thA371a:
+`~/work/disorder-comparisons/nnlo21/beamgrid5/zeus5_*.tab`. `tabchkg`: max
+deviation / max coefficient 1.1e-3, 5.3e-3, 4.0e-4, 6.7e-3, 3.3e-3 (up q,
+q̄, down q, q̄, gluon).
+
+**Fixed point (x = 0.01, Q² = 400): where the drift is.** From the cluster's
+DIAG combination (F_g_diag): the NNLO falls 10.1 → 6.2 between τ_cut = 1e-3
+and 1e-4 only in the two lowest τ_zQ bins (0.05–0.1: 3.31 → 0.43; 0.1–0.2:
+3.24 → 2.22); the bins 0.2–0.5 are flat within errors. The same two bins
+carry the NLO power corrections (0.05–0.1: 2.75, 4.03, 4.16 at 1e-3, 1e-4,
+1e-5); NLO total 14.99 (1e-3) vs 16.68 (1e-4), 16.82 (3e-5), DISENT 16.885.
+- P2B for mode 1 (new: nlo31 accept with `P2BSLICE=1` in mode 1, τ_zQ bins
+  of the projected 2+1 Born; without P2BSLICE bit-identical, lo and r):
+  - NLO, P2B − plain (`P2BEXTRA=1`, 12 seeds lo): 0.20 ± 0.10 at 1e-3,
+    0.09 ± 0.06 at 1e-4. P2B does **not** remove the fixed-point drift
+    (NLO P2B 15.19 at 1e-3): the drift is the ordinary leading-power
+    slicing correction (O(τ_cut log^k)), not a recoil/fiducial effect.
+  - NNLO, P2B − plain (vi 24, kp 16, r 96 seeds): −3.1 ± 1.6 (1e-3),
+    −1.4 ± 0.6 (1e-4), −0.2 ± 0.6 (3e-5), −0.15 ± 0.58 (1e-5). NNLO with P2B:
+    6.9, 4.7 ± 0.7 (1e-4), 8.4 ± 3.6, 3.7 ± 0.7 (1e-5); plain 6.2 ± 0.8
+    (1e-4), 3.8 ± 1.2 (1e-5).
+- Conclusion so far: the 1e-3 → 1e-4 drift is power corrections in the
+  bins next to the 2-jet edge (consistent with the NLO); below 1e-4 the NNLO
+  is ≈ 4–6 within errors, with no independent reference. The "plateau 8.5"
+  of 6 Oct and the cluster's 10.3–11.5 are both superseded.
+- A narrow-window NNLOJET reference is not feasible (NNLOJET samples the
+  whole lepton phase space; Q²/y are only selectors). Instead: the same
+  observable as an **event shape in the inclusive cuts** (AK's plan C):
+  - our side: new `ZFIX=3` (mode 2, τ_zQ bins, 125 < Q² < 20000,
+    0.2 < y < 0.6, no window); LO 969.46 ± 0.93 pb in 0.05 < τ_zQ < 0.5;
+  - NNLOJET: `dis_thrust` is NOT our τ_zQ (normalised to Σ|p| in the current
+    hemisphere, no energy cut: infrared-unsafe for 2+1 Borns with an empty
+    current hemisphere). Added locally `dis_tauzq` = 1 − 2 Σ_{p_z>0} p_z/Q
+    (`driver/core/EvalDIS.f90`, `Observables.f90`, originals kept as
+    `.orig`; separate build `build-tauzq`); runcard
+    `~/work/disorder-comparisons/nnlo21/nnlojet_tauzq/template.run`.

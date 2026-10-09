@@ -380,7 +380,10 @@ program sliced21
      nob = merge(15, 16, mode == 2); nv = ntc*nob; iv = merge(ntc, 2*ntc, mode == 2)
      q2lo = gqlo**2; q2hi = gqhi**2; ylo = 0.2_dp; yhi = 0.6_dp
      call get_environment_variable('ZFIX', arg)
-     if (mode == 2 .and. (trim(arg) == '1' .or. trim(arg) == '2')) then
+     if (mode == 2 .and. trim(arg) == '3') then
+        ! ZFIX = 3 (9 Oct): tau_zQ bins in the inclusive cuts, no window
+        zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
+     elseif (mode == 2 .and. (trim(arg) == '1' .or. trim(arg) == '2')) then
         ! diagnostic window around (x, Q2) = (0.01, 400): ZFIX = 1 with the
         ! mode-1 observable, ZFIX = 2 with the ZEUS jet selection (7 Oct)
         xfix = 0.01_dp; Q2fix = 400
