@@ -3073,3 +3073,45 @@ r.**
   of F2/FL carry MVV's photon normalisation 3⟨e⟩ but get the Z weights
   v² + a² — not the closed-loop coupling Σ v_f our 2+1 side uses. To be
   resolved before an N3LO 1+1 with Z by P2B.
+
+## 2026-10-09 — the heavy tail of r: non-massless psmc momenta (fixed)
+
+- **Correction of the 8 Oct conclusion** ("real events deep in collinear/soft
+  corners … not garbage", cluster REPORT-2026-10-08b, and my reading of it):
+  all 81 large events of the cluster replays (seeds 2042, 2049) have the real
+  cut away (τ₂ ≈ 4e-9 … 3e-8) and an accepted dipole whose mapped Born has a
+  **negative-energy parton** (e.g. E = 183, 173.7, −31.8 GeV; dipole 2e17).
+  Real and dipole do not cancel at all there.
+- Cause: psmc's emission (`emit`) built momenta with m²/E² up to 1e-6 (a
+  few per mille of 4-parton events with m²/E² > 1e-12; scratch harness, x =
+  0.01, Q² = 400, edge 1e-12). Two sources:
+  - `tbasis` projected a unit vector off the two light-like momenta, losing
+    ~1/θ² in the orthogonality when the emitter–spectator pair is itself
+    nearly collinear (second emission);
+  - even with an exact basis, one transverse direction then has components
+    ~1/θ, so the new momenta are differences of large numbers.
+  The tiny invariants then come out negative (the technical cut uses |p_i·p_j|,
+  so such points pass), y > 1 in the FF mapping, negative energies in the
+  mapped Born. With P2B such an event gets the plain-slicing weights (the
+  6 Oct fallback), which accept the garbage dipole above τ_cut.
+- Fix (`dis31/psmc.f90`): e1 from ε(a, b, axis) like e2, and `emit`/`tbasis`/
+  `eps` in quad precision (`qp`), the result rounded. Largest m²/E² of
+  4-parton events now 1e-9 (one in 1e6), negative-energy mapped Borns 485 → 143
+  per 583k events; the rest are genuine near-zero-energy Borns (both partons
+  collinear to the incoming one). No measurable cost in run time.
+  The new basis is rotated with respect to the old one, so points differ; the
+  phase-space volume agrees (300k points: 2.437 ± 0.031 vs 2.453 ± 0.030 for
+  3 partons, 69.2 ± 1.3 vs 71.6 ± 1.3 for 4).
+- Counting test (instrumented scratch copy of nlo31, 3 seeds × 3M points
+  each, thserv05): dipoles with a negative-energy Born that are accepted while
+  the real is cut, ZEUS P2B (mode 2): **453, 568, 809 (up to 8e30) → 0, 0, 0**;
+  fixed point (mode 1): 0 → 0. All negative-energy Borns: 3.3–5.2k → 0.5–0.8k
+  (mode 2), 1.9–2.6k → 0.35–0.48k (mode 1).
+- Fixed point r, 48 seeds old vs new psmc (thservs/desktops): agree at every
+  τ_cut (new − old = −0.9 ± 1.2, …, −9.7 ± 10.3 (1e-4), −15.6 ± 15.2 (3e-5),
+  3.1 ± 18.6 (1e-5)), no outliers in either. So the fix does **not** explain
+  the fixed point's non-flatness (it had no accepted garbage dipoles); that
+  stays open.
+- An exact local replay of the cluster blow-ups is not possible: the d638917
+  build matches the cluster's iteration 1 bit for bit but drifts from
+  iteration 2 (−8520.976 vs −8520.246), so VEGAS adapts differently.
