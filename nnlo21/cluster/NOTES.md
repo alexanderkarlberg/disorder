@@ -509,3 +509,19 @@ and to node failures are not included (several hundred core-h).
 - Tables: see REPORT-2026-10-08b.md. B plain pulls vs NNLOJET +0.4..+1.8 down to 5e-4; DIAG within 2.0 sigma everywhere.
   F unchanged from the bin2 equal-weight result (DIAG 11.6 -> 6.2 between 2e-3 and 1e-4, not flat).
 - Note: b1/b2 now taken from the 168/92 done prod seeds (previous tables: 200/100); NLO row shifts by 0.01.
+
+## 9 Oct, 14:00-14:30: UPDATE 9 Oct (f29517e, psmc quad precision) -- bin4 built, checks, submitted
+- Merged origin/2026-10-nnlo21 (f29517e) into 2026-10-nnlo21-cluster (fast-forward). Built on a compute node
+  (job 48804374, `nnlo21/build_sliced21.sh`, same as bin3) in `$P/builds/sliced21-f29517e`; frozen
+  `$P/bin4/{sliced21,nlo31}` (md5 in `$P/bin4/MD5SUMS`); bin, bin2, bin3 untouched.
+- Checks (`$P/runs/chk4`, 30k points, 3 iterations, seed 7, VEGAS_EQUAL=2): sliced21 b0, b1, b2 outputs bit-identical
+  bin3 vs bin4 (cmp). nlo31 lo (300k points x 6, seed 7): bin3 1644.22 +- 4.33 pb, bin4 1642.37 +- 4.31 pb
+  (difference 1.9 pb = 0.3 sigma; the files differ point by point as expected: rotated transverse basis).
+- Job lists (bin4, VEGAS_EQUAL=2, same seeds): `$P/runs/prod/{B/r-4 3500, B/rcorr-4 400, Bx/conv-4 200,
+  Bx/edge-r-4 300, Bx/plain-r-4 300, Bx/plain-rcorr-4 100}`, made by copying the bin3 *-g cmd.sh with
+  bin3 -> bin4; diff of every cmd.sh against its bin3 predecessor: exactly one changed line (the binary path), 0 others.
+  No F runs. Groups file `$P/runs/prod/groups4.txt`.
+- CPU estimate from bin3 per-job CPU: 3500x1.42 + 400x0.50 + 200x0.60 + 300x1.24 + 300x1.13 + 100x0.35
+  = 4,970+200+120+372+339+35 = 6,036 core-h (target 6,050; within 20%, pre-approved).
+- Submitted 14:28 (feeder 48804389 on groups4.txt): B r-4 48804390, B rcorr-4 48804488, Bx conv-4 48804489,
+  edge r-4 48804490, plain r-4 48804491, plain rcorr-4 48804492 (4,800 jobs).
