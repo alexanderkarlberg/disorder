@@ -3225,3 +3225,54 @@ carry the NLO power corrections (0.05–0.1: 2.75, 4.03, 4.16 at 1e-3, 1e-4,
     (`driver/core/EvalDIS.f90`, `Observables.f90`, originals kept as
     `.orig`; separate build `build-tauzq`); runcard
     `~/work/disorder-comparisons/nnlo21/nnlojet_tauzq/template.run`.
+
+**W exchange (CC) for the NNLO 2+1 pieces (9 Oct, evening; local 80e28ab).**
+- ew31: `ew31_mode = 2`: c(L,L) = Q²/(Q² + M_W²)/(2 sin²θ_W) (labels and
+  lepton cases as for Z), unit CKM in (u,d), (c,s), no coupling for b (as
+  disorder's CC, HOPPET and NNLOJET's default identity CKM);
+  `ew31_out(f)`: the outgoing flavour of the boson line.
+- me31/me41/born31/virt31: the boson line identified with ew31_out; four
+  quarks with couplings per assignment of the outgoing quarks (W on the
+  incoming line or on the pair), the two assignments interfering
+  (four_quark_cc; me41 via msq_gqqQQg with the exchanged pairing's couplings,
+  a backwards-compatible generalisation; gluon-initiated g → q q̄ Q Q̄ with
+  the W on one pair).
+- **Checks (all four leptons):**
+  - me31 = DISENT's CC MATFOR to 1e-12 for every incoming parton (with
+    `ew31_ccmatfor`, see below);
+  - me41 against me31 in all single collinear limits (harness_lim41),
+    born31 (= me31, colour conservation, polarisation sums, soft and spin
+    limits), the sum of dipoles against me41 in all limits (harness_dip41):
+    as for photon/Z (≤ 1e-4 at the smallest parameter);
+  - virt31: tree = me31, poles = −⟨I⟩ (≤ 5e-13), incl. EXX, EXY and the
+    W-on-the-pair identical-quark channel; the finite part has no
+    independent W check yet (NNLOJET's DISW four-quark functions: not done);
+  - nlo31's sums from representative channels (generation 1, multiplicities
+    per incoming flavour) = brute-force sums over all final-state flavours
+    (harness_ccsum, 3+1 and 4+1, 5e-16);
+  - sliced21's 2+1 Born and one loop per helicity class = MATTHR/VIRTHR CC
+    (harness_born21 -noNC -CC, 1e-15 / 6e-13);
+  - photon and photon + Z bit-identical to the build before (lo, r).
+- **DISENT's CC MATFOR omits a physical term:** for incoming flavours the W
+  cannot hit directly (d, s, ū, c̄ for W⁻) the identical-quark
+  interference of the two W-on-the-pair assignments (e.g. d → d d ū). Up
+  to 10% of those (small) channels pointwise. NC MATFOR keeps the analogous
+  term (D·E*). Our code keeps it (default); `ew31_ccmatfor` drops it for
+  comparisons. Affects disorder's CC P2B at NNLO (differential only). To
+  report to AK.
+- sliced21/lp21: W classes (up q, down q̄ for W⁻; b out of the down
+  classes via `lp21_nodn`, separate beam tables with a flag word; gluon class
+  with the two W pairs; no closed loop). W beam grid
+  `beamgrid5w/zeus5w_*.tab` (tabchkg ≤ 7.7e-3).
+- LO in the ZEUS set-up against NNLOJET epNJJ (W⁻, identity CKM): total
+  3.7554 ± 0.0011 vs 3.7508 ± 0.0028 pb (1.5σ); per Q² bin within 0.1%
+  except 500–1000 GeV² +0.38% (2.5σ, 4 NNLOJET seeds). The photon shows the
+  same pattern (one bin +0.42%, 2.5σ; total 103.286 ± 0.016 vs 103.281):
+  NNLOJET's single-run bin errors are somewhat optimistic.
+- LO with photon + Z (ZEUS) against NNLOJET V_NC = Z+GAMMA: Z/γ per Q² bin
+  within NNLOJET's errors (−0.24 … +0.17%, up to 2σ; Z/γ = 1.36 in the top
+  bin).
+- Event shape τ_zQ (ZFIX = 3) against NNLOJET (local dis_tauzq): LO 969.46 ±
+  0.93 vs 968.87 ± 0.55 pb; our NLO (b1 + lo, 16 seeds): 249–252 pb at
+  τ_cut ≤ 1e-4, power corrections of −30 pb at 1e-3 (lowest bin), P2B flatter
+  from 5e-4. NNLOJET NLO (V, R) and our W NLO against DISENT running.

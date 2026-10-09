@@ -1,0 +1,44 @@
+! NNLOJET v1.0.2 with the local observable dis_tauzq (apply nnlojet-v1.0.2-dis_tauzq.patch; 9 Oct 2026) runcard
+! for the validation of the tau_2-sliced NNLO DIS 2+1 (nnlo21) with an event
+! shape: tau_zQ = 1 - 2 sum_CH p_z/Q (Breit frame, w.r.t. the boson axis) in
+! 0.05 ... 0.5, inclusive DIS cuts 125 < Q2 < 20000, 0.2 < y < 0.6; our side:
+! nlo31/sliced21 mode 2 with ZFIX=3. Photon exchange, alpha = 1/137, mu = Q.
+! No jet requirement: the shape minimum regulates the 2+1 Born (as NNLOJET's
+! NNLO DIS event shapes). Placeholders: CHANNEL, SEED, WARMUP, PRODUCTION.
+PROCESS epLJJ
+  collider = ep    Ebeam1 = 27.5  Ebeam2 = 920
+  jet = kt[1.0]  jet_exclusive = .false.  jet_recomb = V4
+  V_NC = GAMMA
+END_PROCESS
+
+RUN es_tauzq
+  PDF = NNPDF30_nlo_as_0118[0]
+  iseed = SEED
+  warmup = WARMUP
+  production = PRODUCTION
+END_RUN
+
+PARAMETERS
+  MASS[Z] = 91.1876
+  MASS[W] = 80.398
+  SCHEME[ALPHA] = FIX
+  alpha = 0.0072992700729927
+END_PARAMETERS
+
+SELECTORS
+  select q2            min = 125  max = 20000
+  select y             min = 0.2  max = 0.6
+  select dis_tauzq     min = 0.05 max = 0.5
+END_SELECTORS
+
+HISTOGRAMS
+  dis_tauzq [0.05,0.1,0.2,0.3,0.4,0.5]
+END_HISTOGRAMS
+
+SCALES
+  mur = 1.0 * q   muf = 1.0 * q
+END_SCALES
+
+CHANNELS
+  CHANNEL
+END_CHANNELS
