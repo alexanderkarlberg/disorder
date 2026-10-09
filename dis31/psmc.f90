@@ -29,7 +29,7 @@
 module psmc
   implicit none
   private
-  integer, parameter :: dp = kind(1.0d0)
+  integer, parameter :: dp = kind(1.0d0), qp = selected_real_kind(30)
   real(dp), parameter :: pi = 3.141592653589793238462643383279502884197_dp
   ! lower edge of the log maps (y, 1-x) and of both ends of the logistic map
   ! (z, u): default 1e-10; psmc_set_edge changes it (5 Oct: technical-cut tests)
@@ -230,7 +230,11 @@ contains
     real(dp), intent(out) :: P(4,n+4)
     logical, intent(out) :: ok
     integer :: slot(5), lab, m, i, j, k
-    real(dp) :: pt(4), pk(4), pa(4), a, z, x, u, yv, kt(4), e1(4), e2(4), phi, ktn, eta
+    real(dp) :: a, eta
+    ! in quad precision (9 Oct): a second emission off a nearly collinear
+    ! pair (pt, pk) has transverse vectors with components ~ 1/theta, so in
+    ! double precision the new momenta had m^2/E^2 up to 1e-7
+    real(qp) :: pt(4), pk(4), pa(4), b1(4), z, x, u, yv, kt(4), e1(4), e2(4), phi, ktn
     ok = .false.
     i = c(2); j = c(3); k = c(4)
     ! Born slots 2..n hold the labels {2..n+1} minus j (FF, FI) or minus i (IF), ascending
@@ -248,7 +252,7 @@ contains
        pt = B(:, bslot(i)); pk = B(:, bslot(k))
        yv = lmap(v(1), vmin, 1.0_dp); z = zmap(v(2))
        call tbasis(pt, pk, e1, e2)
-       ktn = sqrt(2*mdot(pt, pk)*yv*z*(1 - z))
+       ktn = sqrt(2*qdot(pt, pk)*yv*z*(1 - z))
        kt = ktn*(cos(phi)*e1 + sin(phi)*e2)
        P(:,i) = z*pt + (1 - z)*yv*pk + kt
        P(:,j) = (1 - z)*pt + z*yv*pk - kt
@@ -258,27 +262,27 @@ contains
        a = 1 - eta                          ! 1 - x <= 1 - eta~
        if (a <= vmin) return
        x = 1 - lmap(v(1), vmin, a); z = zmap(v(2))
-       call frame(n, eta/x, P)
+       call frame(n, real(eta/x, dp), P)
        call copy_others()
-       pt = B(:, bslot(i)); pa = P(:,1)
+       pt = B(:, bslot(i)); b1 = B(:,1); pa = b1/x
        call tbasis(pt, pa, e1, e2)
-       ktn = sqrt(2*mdot(pt, B(:,1))*(1 - x)/x*z*(1 - z))
+       ktn = sqrt(2*qdot(pt, b1)*(1 - x)/x*z*(1 - z))
        kt = ktn*(cos(phi)*e1 + sin(phi)*e2)
-       P(:,i) = z*pt + (1 - z)*(1 - x)/x*B(:,1) + kt
-       P(:,j) = (1 - z)*pt + z*(1 - x)/x*B(:,1) - kt
+       P(:,i) = z*pt + (1 - z)*(1 - x)/x*b1 + kt
+       P(:,j) = (1 - z)*pt + z*(1 - x)/x*b1 - kt
     case (3)   ! IF: pa = pa~/x
        eta = eta_of(B)
        a = 1 - eta
        if (a <= vmin) return
        x = 1 - lmap(v(1), vmin, a); u = zmap(v(2))
-       call frame(n, eta/x, P)
+       call frame(n, real(eta/x, dp), P)
        call copy_others()
-       pk = B(:, bslot(k)); pa = P(:,1)
+       pk = B(:, bslot(k)); b1 = B(:,1); pa = b1/x
        call tbasis(pk, pa, e1, e2)
-       ktn = sqrt(2*mdot(pk, B(:,1))*(1 - x)/x*u*(1 - u))
+       ktn = sqrt(2*qdot(pk, b1)*(1 - x)/x*u*(1 - u))
        kt = ktn*(cos(phi)*e1 + sin(phi)*e2)
-       P(:,i) = u*pk + (1 - u)*(1 - x)/x*B(:,1) + kt
-       P(:,k) = (1 - u)*pk + u*(1 - x)/x*B(:,1) - kt
+       P(:,i) = u*pk + (1 - u)*(1 - x)/x*b1 + kt
+       P(:,k) = (1 - u)*pk + u*(1 - x)/x*b1 - kt
     end select
     ok = .true.
   contains
@@ -461,28 +465,34 @@ contains
   end function hz
 
   ! unit spacelike e1, e2 orthogonal to the light-like a, b (and to each other)
+  ! (9 Oct: e1 from eps as e2, the largest of the three axes; the projection
+  ! rr - (rr.b) a/ab - (rr.a) b/ab lost ~1/theta_ab^2 in the orthogonality,
+  ! so that a second emission off a nearly collinear pair had m^2/E^2 up to
+  ! 1e-6, negative p_i.p_j and negative-energy mapped dipole Borns)
   subroutine tbasis(a, b, e1, e2)
-    real(dp), intent(in) :: a(4), b(4)
-    real(dp), intent(out) :: e1(4), e2(4)
-    real(dp) :: ab, rr(4), n2
+    real(qp), intent(in) :: a(4), b(4)
+    real(qp), intent(out) :: e1(4), e2(4)
+    real(qp) :: rr(4), et(4), n2, nt
     integer :: t
-    ab = mdot(a, b)
+    n2 = -1
     do t = 1, 3
        rr = 0; rr(t) = 1
-       e1 = rr - mdot(rr, b)/ab*a - mdot(rr, a)/ab*b
-       n2 = -mdot(e1, e1)
-       if (n2 > 1e-3_dp) exit
+       et = eps(a, b, rr)
+       nt = -qdot(et, et)
+       if (nt > n2) then
+          e1 = et; n2 = nt
+       endif
     enddo
     e1 = e1/sqrt(n2)
     e2 = eps(a, b, e1)
-    e2 = e2/sqrt(-mdot(e2, e2))
+    e2 = e2/sqrt(-qdot(e2, e2))
   end subroutine tbasis
 
   ! e^mu = eps^{mu nu rho sigma} a_nu b_rho c_sigma with lowered a, b, c
   ! (components (x, y, z, t), metric diag(-1,-1,-1,1)): orthogonal to a, b, c
   function eps(a, b, c) result(e)
-    real(dp), intent(in) :: a(4), b(4), c(4)
-    real(dp) :: e(4), al(4), bl(4), cl(4), s
+    real(qp), intent(in) :: a(4), b(4), c(4)
+    real(qp) :: e(4), al(4), bl(4), cl(4), s
     integer :: mu, nu, ro, si
     al = [-a(1:3), a(4)]; bl = [-b(1:3), b(4)]; cl = [-c(1:3), c(4)]
     e = 0
@@ -532,4 +542,8 @@ contains
     real(dp), intent(in) :: a(4), b(4)
     mdot = a(4)*b(4) - a(1)*b(1) - a(2)*b(2) - a(3)*b(3)
   end function mdot
+  pure real(qp) function qdot(a, b)
+    real(qp), intent(in) :: a(4), b(4)
+    qdot = a(4)*b(4) - a(1)*b(1) - a(2)*b(2) - a(3)*b(3)
+  end function qdot
 end module psmc
