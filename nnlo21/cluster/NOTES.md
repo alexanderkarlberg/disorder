@@ -525,3 +525,16 @@ and to node failures are not included (several hundred core-h).
   = 4,970+200+120+372+339+35 = 6,036 core-h (target 6,050; within 20%, pre-approved).
 - Submitted 14:28 (feeder 48804389 on groups4.txt): B r-4 48804390, B rcorr-4 48804488, Bx conv-4 48804489,
   edge r-4 48804490, plain r-4 48804491, plain rcorr-4 48804492 (4,800 jobs).
+
+## 9-10 Oct: results of the bin4 (f29517e) reruns -- `REPORT-2026-10-09.md`
+- Done: B r 3500, rcorr 400, conv 200, edge r 300, plain r 300, plain rcorr 100. 104 B r tasks of the first array never
+  started (feeder resubmitted them 17:28); task 48811454_1664 hung RUNNING 3 h without starting the script (kt08), cancelled
+  by id, s3624 rerun (48812664). An accidental duplicate submission 48812536 was cancelled by id. Feeder 48804389 chain
+  stopped (stop file, feeder 48812262 cancelled).
+- **Correction of the 8 Oct (8b) reading: the 1e5-1e6 tail was not incomplete cancellation in deep corners but accepted
+  dipoles with negative-energy mapped-Born partons (psmc precision), see notebook 9 Oct.** bin4 confirms this: flagged B r
+  seeds 52 -> 0, max |iteration| 1e6 -> 2.2e4, sample sigma at 1e-5 2.5e6 -> 173 pb (robust 95); rcorr 96 -> 4 flagged,
+  conv 66 -> 2; plain-weights counts per seed 4724 -> 615 (B r); B NNLO plain mean now finite and within 1.7 sigma of
+  NNLOJET at all tau_cut down to 1e-5 (error 5.9 pb there).
+- Replays s5368 (r), s2077 (rcorr) with P2BDEBUG=1: no DBG BIG events at these iteration sizes (8e3-2e4), `results/dbg/h*.log`.
+- Tools: garb_report.py (plain-weights counts added), combine_b4.sh.

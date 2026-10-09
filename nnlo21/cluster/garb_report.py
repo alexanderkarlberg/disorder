@@ -23,7 +23,7 @@ def load(d):
     for f in sorted(glob.glob(d + '/s*/run.log')):
         if not os.path.exists(os.path.dirname(f) + '/done'):
             continue
-        it, tot, drop = [], None, None
+        it, tot, drop, pw = [], None, None, None
         for l in open(f):
             w = l.split()
             if len(w) >= 3 and w[0] == 'iteration':
@@ -34,8 +34,10 @@ def load(d):
                 tot = [ff(x) for x in w[3:]]
             elif 'events dropped (garbage dipole)' in l:
                 drop = (int(w[-3]), int(w[-1]))
+            elif 'events with plain weights' in l:
+                pw = (int(w[-3]), int(w[-1]))
         if tot is not None and it:
-            out.append((os.path.basename(os.path.dirname(f)), np.array(it), np.array(tot), drop))
+            out.append((os.path.basename(os.path.dirname(f)), np.array(it), np.array(tot), drop, pw))
     return out
 
 
@@ -70,6 +72,10 @@ for arg in sys.argv[1:]:
             dtxt = '; garbage-dipole drops per seed: mean %.1f, median %.0f, max %d (fraction %.1e)' % (
                 c.mean(), np.median(c), c.max(), c.sum()/tot.sum())
         print('  %s: %d seeds, flagged %d (20x rule, limit %.3g)%s' % (name, n, len(flag), lim, dtxt))
+        pr = [x[4] for x in D if x[4]]
+        if pr:
+            c = np.array([a for a, b in pr]); tt = np.array([b for a, b in pr])
+            print('     plain weights per seed (last iteration line): mean %.1f, median %.0f, max %d (fraction %.1e)' % (c.mean(), np.median(c), c.max(), c.sum()/tt.sum()))
         if flag:
             print('     flagged: ' + ' '.join(flag[:40]) + (' ...' if len(flag) > 40 else ''))
         for t, mean, err, md, tr, mad, ss in rows:
