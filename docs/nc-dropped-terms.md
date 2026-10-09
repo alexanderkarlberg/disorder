@@ -112,6 +112,13 @@ MVV parametrisations in `src/param-coefs/`), read 8 Oct:
   2016 (1c110a8, unchanged since); the 2023 fixes after V. Bertone's
   comparison (1058001, 8c4ac2a: δ(1−x) and fl11 parts of the coefficient
   functions themselves) are unrelated.
+  yadism (NNPDF, 0.13.11 = github 8bbfdc8; EKO only evolves) has a dedicated
+  fl11 coupling, ⟨Q_b⟩ Q_b′ (loop average × line), which is the right
+  structure, but `partonic_coupling_fl11` takes photon/Z from the mode, not
+  from the position: the γZ orderings come out as ⟨Z⟩Z_q and ⟨γ⟩γ_q, and ZZ
+  adds ⟨a⟩a_q (axial loop with the vector-loop function). Checked by running
+  yadism's own routine; error up to ≈ 6·10⁻⁵ of F2^γZ. Its F3 fl02 weights
+  are the loop sums (correct), as are APFEL++'s (valence channel × ΣCh).
 - F3 at O(α_s³): HOPPET's C3 uses MVV's non-singlet plus/minus functions
   without the fl02 (d^abc d_abc) term for the NS± combinations and the
   valence function with it (`C%NS_V = cfN3LO_F3NS_val`, `V = 1`) for the

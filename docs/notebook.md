@@ -3172,3 +3172,12 @@ r.**
   per-flavour effective-charge weighting of fl11 for Z and γZ
   (`ElectroWeakCharges`, `DISNCBasis`), so it shares the issue. HOPPET's
   GitHub issues (7) contain nothing on this.
+- yadism (0.13.11 / 8bbfdc8): fl11 coupling routine has the right structure
+  (⟨Q_b⟩Q_b′) but a mode bug: γZ orderings give ⟨Z⟩Z_q + ⟨γ⟩γ_q instead of
+  ⟨γ⟩Z_q + ⟨Z⟩γ_q (d quark: 0.0734 vs 0.0198), and ZZ includes ⟨a⟩a_q.
+  Confirmed with yadism's own `partonic_coupling_fl11` in a scratch venv; fix
+  tested (`~/work/disorder-comparisons/hoppet-fl11/yfix.py`). Size ≤ 6·10⁻⁵ of
+  F2^γZ. fl02 in F3: correct in yadism and APFEL++.
+- Bug-report pages for AK to pass on: APFEL++ (V. Bertone)
+  https://claude.ai/artifact/76tsS1d8vZt4vWiwNpdmkS, yadism
+  https://claude.ai/artifact/UaaDjNhibLSKLns1EXjHkC.
