@@ -3331,3 +3331,10 @@ carry the NLO power corrections (0.05–0.1: 2.75, 4.03, 4.16 at 1e-3, 1e-4,
   outside the repository (`disorder-comparisons/axial21`). The tree/virtual
   normalisation relies on the leading-colour double pole of A51; it was not
   checked numerically (an order-of-magnitude estimate).
+- **Resolved (10 Oct, 00:30):** the 16 new b1 seeds (609–624) alone give
+  [0.4, 0.5) −1.1 ± 1.9 % and [0.2, 0.3) −1.0 ± 1.0 % at τ_cut 2e-4. With
+  all 24 b1 and 40 lo seeds: every bin within 1.6σ of DISENT, total bin
+  −0.40 ± 0.24 % (2e-4) and +0.04 ± 0.27 % (1e-4). The old deviations were
+  an upward fluctuation of b1 seeds 601–608 in [0.4, 0.5). The Z check
+  (ncz1) used the same seeds, so its +7.6 ± 3.0 % there is the same
+  fluctuation. Lesson: use distinct seeds per validation run.

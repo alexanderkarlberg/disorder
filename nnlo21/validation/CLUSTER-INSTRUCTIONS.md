@@ -18,7 +18,7 @@ P2B for mode 1). Notebook 8–10 Oct for the local checks.
 | set | NNLOJET | ours | local checks |
 |---|---|---|---|
 | **Z**: ZEUS dijets with photon + Z (e⁻) | `nnlojet_epLJJ_zeus2jZ.run` (V_NC = Z+GAMMA), existing build | `EW31="1 0"`, B commands, 5-class tables | LO per Q² bin within NNLOJET's errors; NLO 2+1 with Z = DISENT (fixed point) |
-| **W**: ZEUS dijets with W⁻ (e⁻ p → ν) | `nnlojet_epNJJ_zeus2jW.run` (DISWm, identity CKM), existing build | `EW31="2 0"`, B commands, W tables | LO total 3.7554 ± 0.0011 vs 3.7508 ± 0.0028 pb; NLO 2+1 with W vs DISENT (x = 0.1, Q² = 5000, τ_zQ bins): total bin e⁻ −0.25 ± 0.31 %, ν −0.46 ± 0.27 % at τ_cut 2e-4 (same per-bin pattern as the Z check) |
+| **W**: ZEUS dijets with W⁻ (e⁻ p → ν) | `nnlojet_epNJJ_zeus2jW.run` (DISWm, identity CKM), existing build | `EW31="2 0"`, B commands, W tables | LO total 3.7554 ± 0.0011 vs 3.7508 ± 0.0028 pb; NLO 2+1 with W vs DISENT (x = 0.1, Q² = 5000, τ_zQ bins): total bin e⁻ −0.40 ± 0.24 % (24 b1 + 40 lo seeds), ν −0.46 ± 0.27 % at τ_cut 2e-4, every bin within 1.6σ; one-loop four-quark W functions = NNLOJET's pointwise |
 | **E**: event shape τ_zQ in the inclusive cuts | `nnlojet_epLJJ_tauzq.run`, **patched build** (local observable `dis_tauzq`) | photon, `ZFIX=3`, plain slicing (+ P2B-extra runs) | LO 969.46 ± 0.93 vs 968.87 ± 0.55 pb; NLO vs NNLOJET (V + R, 8 + 24 seeds): total 248.9 ± 2.0 (ours, plain, τ_cut 1e-4) vs 249.7 ± 1.1 pb, every bin within 1.1σ |
 
 1. `git fetch`; build `bin5` from `origin/2026-10-nnlo21-ncc` (new
