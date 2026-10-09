@@ -24,8 +24,9 @@
 !   qqb_z2jet_v too) are left out (docs/nc-dropped-terms.md). Checked against NNLOJET's Z functions
 !   (outside the repository, dis31_nnlojet/harness_v31z): equal in the
 !   part even under the reflection y -> -y; the reflection-odd (epsilon-
-!   tensor) parts of the one-loop interference differ between the codes
-!   (open; they integrate to zero for reflection-symmetric observables).
+!   tensor) parts of the one-loop interference have the opposite sign
+!   (NNLOJET = ours with all helicities flipped, 9 Oct; which is physical
+!   is open; they integrate to zero for reflection-symmetric observables).
 !   Its poles are those of -<I> (checked, tests/harness_virt31), and the
 !   finite part agrees with NNLOJET v1.0.2 for every channel up to the
 !   known constant (pi^2/12) sum_i C_i t of NNLOJET's normalisation
@@ -43,7 +44,8 @@
 ! W exchange (9 Oct): lines as me31 (ew31_out), four quarks with the
 ! couplings per assignment (fourq_cpl); no closed loop. Tree = me31 and
 ! the poles = -<I> (tests/harness_virt31, EW31 = "2 l"); the finite part
-! is not checked against an independent W code.
+! = NNLOJET's DISWm four-quark functions (point + mirror; NNLOJET's
+! reflection-odd parts have the opposite sign, as with Z).
 !-----------------------------------------------------------------------
 module virt31
   use ew31

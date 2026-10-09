@@ -7,7 +7,56 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
-## UPDATE 9 Oct (read this first): psmc fix, rerun the B set (AK: go)
+## UPDATE 10 Oct (after the 9 Oct B round): three NNLO validations against NNLOJET
+
+AK gave free rein over the weekend (9 Oct). When the bin4 B round of
+UPDATE 9 Oct is complete and reported, prepare and run these three sets. All
+the code is on `origin/2026-10-nnlo21-ncc` (it contains this branch, the
+psmc fix, photon + Z, W exchange, the τ_zQ event-shape option `ZFIX=3` and
+P2B for mode 1). Notebook 8–10 Oct for the local checks.
+
+| set | NNLOJET | ours | local checks |
+|---|---|---|---|
+| **Z**: ZEUS dijets with photon + Z (e⁻) | `nnlojet_epLJJ_zeus2jZ.run` (V_NC = Z+GAMMA), existing build | `EW31="1 0"`, B commands, 5-class tables | LO per Q² bin within NNLOJET's errors; NLO 2+1 with Z = DISENT (fixed point) |
+| **W**: ZEUS dijets with W⁻ (e⁻ p → ν) | `nnlojet_epNJJ_zeus2jW.run` (DISWm, identity CKM), existing build | `EW31="2 0"`, B commands, W tables | LO total 3.7554 ± 0.0011 vs 3.7508 ± 0.0028 pb; NLO 2+1 with W vs DISENT (x = 0.1, Q² = 5000, τ_zQ bins): total bin e⁻ −0.25 ± 0.31 %, ν −0.46 ± 0.27 % at τ_cut 2e-4 (same per-bin pattern as the Z check) |
+| **E**: event shape τ_zQ in the inclusive cuts | `nnlojet_epLJJ_tauzq.run`, **patched build** (local observable `dis_tauzq`) | photon, `ZFIX=3`, plain slicing (+ P2B-extra runs) | LO 969.46 ± 0.93 vs 968.87 ± 0.55 pb; NLO vs NNLOJET (V + R, 8 + 24 seeds): total 248.9 ± 2.0 (ours, plain, τ_cut 1e-4) vs 249.7 ± 1.1 pb, every bin within 1.1σ |
+
+1. `git fetch`; build `bin5` from `origin/2026-10-nnlo21-ncc` (new
+   directory; `nnlo21/build_sliced21.sh`): sliced21, nlo31. Check: photon
+   b0 and lo (mode 2, short runs) bit-identical to bin4.
+2. Beam tables (5 classes; the old 3-class ones are refused):
+   - photon/Z: `sliced21 mktab i i $P/tables/zeus5` for i = 0 … 28;
+   - W: `EW31="2 0" sliced21 mktab i i $P/tables/zeus5w` (b is not in the
+     down-type classes for W; these tables carry a flag word, and a W run
+     refuses photon/Z tables and vice versa);
+   - `sliced21 tabchkg <prefix>` (with `EW31="2 0"` for zeus5w): largest
+     deviation ≲ 1e-2 of the largest coefficient (thA371a: ≤ 7.7e-3).
+3. NNLOJET: Z and W with the existing build; E with a patched copy: in a
+   copy of the NNLOJET v1.0.2 source `patch -p1 <
+   nnlo21/validation/nnlojet-v1.0.2-dis_tauzq.patch`, its own build and
+   install directory (do not touch the production build; hard21 links
+   `libnnlojet_core.so`). Workflow and sizing as the photon ZEUS production
+   (warmups per channel, LO R V RR RV VV). E has no jet requirement (only
+   τ_zQ ≥ 0.05): check the warmups converge before sizing.
+4. Our side with bin5, the B commands and seeds (ncall, itmx,
+   `VEGAS_EQUAL=2` for r, the TECHDIFF rcorr set):
+   - Z: `EW31="1 0"`, `zeus` with `$P/tables/zeus5`, `P2BSLICE=1` for
+     lo/vi/kp/r;
+   - W: `EW31="2 0"`, `zeus` with `$P/tables/zeus5w`, `P2BSLICE=1`;
+   - E: `ZFIX=3`, `zeus` with `$P/tables/zeus5` (the Q², y cuts only; τ_zQ
+     bins replace the ZEUS selection), photon, **plain** slicing for b0 … r;
+     in addition lo/vi/kp/r with `P2BSLICE=1 P2BEXTRA=1` (the P2B − plain
+     term alone) on about a quarter of the seeds.
+   The matrix elements with Z and W are ≈ 1.6× slower than the photon's
+   (more channels per point); E costs about the B set.
+5. Pilots first, then the CPU estimate per set in NOTES. Budget for all
+   three (NNLOJET and ours): ≈ 70k core-h. Submit if the estimate is
+   within +30% of that; otherwise report first. Order: E, Z, W.
+6. Report, as for B: per observable bin and τ_cut against NNLOJET (Z, W:
+   total, Q², p̄_T, m12; E: the five τ_zQ bins and their sum, plain and
+   P2B), plain means, flagged seeds, tail statistics.
+
+## UPDATE 9 Oct: psmc fix, rerun the B set (AK: go)
 
 Thanks for the 8 Oct (8b) report. Its replays (seeds 2042, 2049) found the
 cause of the 1e5–1e6 tail, but it is not "incomplete cancellation in deep

@@ -3276,3 +3276,58 @@ carry the NLO power corrections (0.05–0.1: 2.75, 4.03, 4.16 at 1e-3, 1e-4,
   0.93 vs 968.87 ± 0.55 pb; our NLO (b1 + lo, 16 seeds): 249–252 pb at
   τ_cut ≤ 1e-4, power corrections of −30 pb at 1e-3 (lowest bin), P2B flatter
   from 5e-4. NNLOJET NLO (V, R) and our W NLO against DISENT running.
+- **W: NLO 2+1 against DISENT -CC (9 Oct, evening)**, x = 0.1, Q² = 5000,
+  τ_zQ bins, `runs/ccw1` (as ncz1: sliced21 b1 8 seeds + nlo31 lo 20 seeds
+  against tau2_nlo -noNC -CC, 40 × 3M events), (b1 + lo)/DISENT − 1 in %:
+  - e⁻ (W⁻), total bin [0.05, 0.5): −0.25 ± 0.31 (τ_cut 2e-4), +0.26 ± 0.35
+    (1e-4); ν (W⁺): −0.46 ± 0.27, −0.06 ± 0.31.
+  - Per bin the same pattern as the Z check (ncz1): [0.2, 0.3) −2.1 ± 1.1
+    (e⁻), [0.4, 0.5) +8.0 ± 2.4 (e⁻, rising with smaller τ_cut; ν −0.4 ±
+    2.8). The Z runs show +7.6 ± 3.0 in the same bin with the same seeds,
+    so this is the correlated fluctuation noted there (or a property of the
+    bin at x = 0.1), not something W-specific. The DISENT reference does
+    not include the B–B identical-quark interference that MATFOR CC drops,
+    but it enters only at 4+1 (NNLO), not here.
+- **W one loop against NNLOJET, pointwise (9 Oct, evening)**:
+  `harness_v31w` (outside the repository, dis31_nnlojet): virt31 with W⁻
+  (e⁻) against NNLOJET DISWm's four-quark RV functions (C-type per
+  assignment, D0g1Wa/b-type interferences), ten channel types including
+  the B–B identical-quark one (d → d d ū). Point + mirror: one K for all
+  channels, pole ratio 1, finite constant −1.71982418 (the four-quark
+  scheme constant of the photon check) everywhere. The W finite part is
+  now independently checked.
+- **Correction (reflection-odd one-loop parts, open since 8 Oct):** I wrote
+  "neither opposite nor absent". That was wrong. NNLOJET's one-loop
+  functions equal ours with all helicities flipped. For W the odd part is
+  exactly −ours in all channels. For Z it is exactly −ours unswapped and
+  exactly ours with the quark and lepton helicities both swapped (scratch
+  ew31), for q q̄ g g and four quarks, e⁻ and ν. The 8 Oct q q̄ g g
+  comparison is now contaminated by our closed-loop vector term, which
+  NNLOJET's DIS lacks; it is removed for this check. A global flip only
+  changes the sign of the ε-tensor (absorptive) term. NNLOJET's
+  `D0g1Wab.f` comments: "Fill only the LLL amplitudes. These correspond
+  to our RRR amplitudes because ? But it works...". Which sign is physical
+  is not settled; it cancels for reflection-symmetric observables (all of
+  ours).
+- **Event shape τ_zQ at NLO against NNLOJET (9 Oct, night)**, photon,
+  inclusive cuts (ZFIX = 3), patched NNLOJET (`dis_tauzq`), V + R from 8 +
+  24 seeds (`runs/esnnlojet`) against our b1 + lo (16 seeds, `runs/esnlo`),
+  pb, τ_cut 1e-4 (plain): [0.05, 0.1) 49.3 ± 1.4 vs 49.3 ± 1.0; [0.1, 0.2)
+  85.5 ± 0.9 vs 84.9 ± 0.2; [0.2, 0.3) 52.3 ± 0.7 vs 52.7 ± 0.1; [0.3, 0.4)
+  36.1 ± 0.6 vs 36.3 ± 0.1; [0.4, 0.5) 25.8 ± 0.6 vs 26.4 ± 0.1; total 248.9
+  ± 2.0 vs 249.7 ± 1.1. Same at 3e-5. P2B agrees as well (from 5e-4).
+- **W NLO, the [0.2, 0.3) and [0.4, 0.5) deviations:** 20 new lo seeds
+  (521–540, `runs/ccw1x`) give the same deviations (+5.6 ± 2.4 % in [0.4,
+  0.5) at 2e-4). The error is dominated by b1 (sliced21, 8 seeds, ≈2 % of
+  the bin against 0.5 % from lo), and Z and W used the **same b1 seeds**
+  (601–608). So the shared piece is b1, not lo as I wrote above. 16 new b1
+  seeds (609–624) are running.
+- **Axial closed loop of the 2+1 one loop (row 10 of nc-dropped-terms, 10
+  Oct, night):** MCFM's Z + jet anomaly term (`A53`, large-m_t expansion)
+  crossed to DIS e⁻ p and PDF-weighted over the 2+1 Born phase space,
+  τ_zQ ∈ [0.05, 0.5): axial/Born = (α_s/2π)·c with c = −5·10⁻⁵ (0.01, 400),
+  −3·10⁻⁴ (0.05, 1000), −4·10⁻³ (0.1, 5000), −7·10⁻³ (0.2, 10⁴); at most
+  ~1.4·10⁻⁴ of the 2+1 Born, ~10⁻³ of the NLO correction. Scratch program
+  outside the repository (`disorder-comparisons/axial21`). The tree/virtual
+  normalisation relies on the leading-colour double pole of A51; it was not
+  checked numerically (an order-of-magnitude estimate).

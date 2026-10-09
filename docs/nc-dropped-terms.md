@@ -35,9 +35,9 @@ zero).
 | 5 | Same, axial part (triangle anomaly) | α_s³ | yes, but ∝ Σ_f a_f over the loop flavours: cancels in each massless isodoublet, survives through the top–bottom mass splitting (in MCFM: `toploops`) | dropped (we have n_f = 5 massless flavours and no top) | **computed (8 Oct):** MCFM's BDK axial amplitudes (a64ax, a65ax; top in the heavy-mass approximation) with e⁻ couplings in nlo31's HERA 3-jet set-up: 0.0041 ± 0.0002 pb = 2.7·10⁻⁴ of vi (q q̄ g g channels, 15.1 pb) ≈ 4·10⁻⁵ of LO (93.6 pb); independent of m_t (173 vs 500 GeV: 4.05 vs 4.27·10⁻³ pb), as expected for this non-decoupling term. Same status as in MCFM's Z + 2 jets without top loops and in NNLOJET's DIS process. |
 | 6 | One loop four quarks (q q̄ Q Q̄ + V): interference of the boson on the two open lines | α_s³ | yes | dropped (as row 1–2 at one loop) | vector part odd under pair exchange (zero after integration); axial part same order of size as row 2 relative to its order: expected ~10⁻⁶ of the α_s³ coefficient. |
 | 7 | One loop four quarks, boson on a closed loop (loop with V and two gluons) | α_s³ | vector: no (Furry, two gluons); axial: as row 5 | dropped (MCFM's qqb_z2jet_v sets a63z to zero too) | as row 5 |
-| 8 | One-loop interference, reflection-odd part (ε-tensor × absorptive part) | α_s³ | yes, with Z only (needs c_LL ≠ c_RR); zero for the photon | kept in virt31 point by point; nlo31's flavour sums keep only the reflection-even part | zero after integration for observables symmetric under the reflection of the hadronic final state through the lepton plane (y → −y), i.e. all unpolarised, azimuthally symmetric observables we compute. **Open:** virt31 (MCFM's crossing) and NNLOJET differ in this part point by point (8 Oct). |
+| 8 | One-loop interference, reflection-odd part (ε-tensor × absorptive part) | α_s³ | yes, with Z only (needs c_LL ≠ c_RR); zero for the photon | kept in virt31 point by point; nlo31's flavour sums keep only the reflection-even part | zero after integration for observables symmetric under the reflection of the hadronic final state through the lepton plane (y → −y), i.e. all unpolarised, azimuthally symmetric observables we compute. virt31 (MCFM's crossing) and NNLOJET have it with opposite signs point by point: NNLOJET's one-loop Z and W functions equal ours with all helicities flipped (9 Oct; the 8 Oct "differ" was an incomplete comparison). Which sign is physical is not settled. |
 | 9 | 2+1 Born, gluon channel: parity-odd part | α_s (Born) | yes, point by point | DISENT's MATTHR and sliced21 drop it | odd under q ↔ q̄ exchange: zero after integration for flavour-blind observables. Not an approximation for us. |
-| 10 | 2+1 one-loop hard function: boson on a closed loop (V + q q̄ g, loop with V and two gluons) | α_s² (NLO 2+1) | vector: no (Furry); axial: yes, anomaly, ∝ Σ_f a_f (top–bottom) | dropped | estimate pending (section 3). Also absent from DISENT's NC VIRTHR (validated reference for NLO 2+1) and from NNLOJET's DIS process. |
+| 10 | 2+1 one-loop hard function: boson on a closed loop (V + q q̄ g, loop with V and two gluons) | α_s² (NLO 2+1) | vector: no (Furry); axial: yes, anomaly, ∝ Σ_f a_f (top–bottom) | dropped | (α_s/2π)·c × the 2+1 Born with c = −5·10⁻⁵ (x = 0.01, Q² = 400), −3·10⁻⁴ (0.05, 1000), −4·10⁻³ (0.1, 5000), −7·10⁻³ (0.2, 10⁴), e⁻, τ_zQ ∈ [0.05, 0.5) (section 3): ≤ 1.4·10⁻⁴ of the 2+1 Born. Also absent from DISENT's NC VIRTHR (validated reference for NLO 2+1) and from NNLOJET's DIS process. |
 | 11 | 2+1 two-loop hard function: N_F,V term (boson on a closed loop, d^abc-type; hard21's G with N_F,γ = Σ e_q/e_q) | α_s³ (NNLO 2+1) | yes, vector part ∝ Σ_f v_f | **kept** (8 Oct, stage 3): vector couplings of the loop, effective ratio per helicity class (`sliced21` `class_weights`) | — |
 | 12 | Same, axial part | α_s³ | yes, ∝ Σ_f a_f (top–bottom) | dropped | as row 10 at one order higher; estimate pending |
 | 13 | Top-quark loops in general (gluon self-energies etc.) | α_s³ | yes | dropped (n_f = 5, decoupled top), standard | standard; consistent with the PDFs and α_s |
@@ -137,7 +137,16 @@ MVV parametrisations in `src/param-coefs/`), read 8 Oct:
 
 ## 3. Estimates still to do
 
-Done: row 5 (above). The program is a scratch harness (MCFM 10.3's
+Done: row 5 (above) and row 10 (10 Oct): MCFM 10.3's Z + jet axial
+amplitude (`A53` in `virt5`/`A5NLO`, large-m_t expansion as for row 5, with
+qqb_z1jet_v's couplings), crossed to DIS (all-outgoing momenta, lnrat
+continuation), against the 2+1 Born from the same amplitudes (MCFM's
+virtual and tree normalisations related through the leading-colour double
+pole), PDF-weighted over the Born phase space at fixed (x, Q²) in τ_zQ ∈
+[0.05, 0.5) (`disorder-comparisons/axial21/axsum21.f90`). Coefficients of
+α_s/2π relative to the Born: see row 10; growing with Q² (top term ∝
+Q²/m_t² and the Z propagator). Row 12 (the same at two loops) is expected
+to have the same relative size one order higher: negligible. The program is a scratch harness (MCFM 10.3's
 `xzqqgg_v`, `fax`, `faxsl` with virt31's crossing and nlo31's phase space;
 outside the repository).
 
