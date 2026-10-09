@@ -104,15 +104,16 @@ MVV parametrisations in `src/param-coefs/`), read 8 Oct:
   clean fix is in HOPPET (weight the non-singlet fl11 piece with the
   diagram coupling instead of e_q² · 3⟨e⟩, and the gluon piece with the
   loop couplings); to be raised with the HOPPET authors.
-- F3 at O(α_s³): HOPPET's C3 uses MVV's non-singlet minus function with
-  `V = 0` (`InitC3N3LO` → `cfN3LO_F3NS_plus/minus`), which switches MVV's
-  fl02 (d^abc d_abc) term off; the valence version with fl02
-  (`cfN3LO_F3NS_val`, `V = 1`) exists but is not used. **Correction (9 Oct)
-  of the 8 Oct text here, which said C3 contains the fl02 term.** For Z and
-  γZ the analogous term (axial coupling of the line × vector loop) has, as
-  far as we know, not been computed; it is of the same small size as above.
-  Whether HOPPET should use the fl02 term for W exchange (CC at N3LO) is a
-  question for the HOPPET authors, outside the scope of these notes.
+- F3 at O(α_s³): HOPPET's C3 uses MVV's non-singlet plus/minus functions
+  without the fl02 (d^abc d_abc) term for the NS± combinations and the
+  valence function with it (`C%NS_V = cfN3LO_F3NS_val`, `V = 1`) for the
+  total valence Σ(q − q̄), as MVV prescribe (the fl02 term has both bosons
+  on a closed loop and is C-odd, so it multiplies the total valence). For
+  the record: a 9 Oct version of this paragraph claimed C3 has no fl02 term
+  at all; that was wrong (a missed line), the 8 Oct statement was right.
+  Not checked: whether the Z/γZ couplings of the fl02 term come out right
+  (the per-flavour weights 2 v_q a_q times a flavour-blind valence term
+  look like the loop sum, but the normalisation is not verified).
 
 ## 3. Estimates still to do
 

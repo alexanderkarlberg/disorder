@@ -3134,12 +3134,24 @@ r.**
   in the e±p cross section at HERA. Table in `docs/nc-dropped-terms.md`
   section 2. For a consistent N3LO 1+1 with Z by P2B the fix belongs in
   HOPPET (weight the fl11 pieces with the diagram couplings).
-- **Correction:** HOPPET's C3 at N3LO does *not* contain MVV's fl02 term
-  (`InitC3N3LO` uses the `V = 0` functions; the valence version with fl02
-  exists but is unused). The 8 Oct text in nc-dropped-terms said the
-  opposite. Whether W exchange should use it is for the HOPPET authors.
+- F3: HOPPET's C3 at N3LO has MVV's fl02 term through the valence
+  function (`C%NS_V = cfN3LO_F3NS_val`). **Correction (same afternoon):**
+  this entry first said C3 had no fl02 term at all (a grep missed the NS_V
+  line) and asked whether W should use it; that was wrong, the 8 Oct text
+  was right, the question is void.
 - HOPPET bug found on the way: `InitCoefHolder` tests the optional
   argument `use_exact_cf` directly (`coefficient_functions_holder.f90`
   line 123) instead of its local copy `use_exact`, so a call without it
   segfaults (`structure_functions` always passes it, so HOPPET's own use is
   fine).
+- Patch for HOPPET (for AK to port; outside the repo,
+  `~/work/disorder-comparisons/hoppet-fl11/hoppet-fl11-Z-couplings.patch`,
+  against d891044 = 2.3.0-272): the fl11 terms of the Z and γZ structure
+  functions get the diagram couplings (new `fl11_split`, internal `fl11_Z`,
+  `fl11_gZ`); photon, F3 and W unchanged. Tests, pristine vs patched build
+  of the same commit (`sfcmp.f90`, `sfvfn.f90`): EM, F3^Z, F2^W+ at N3LO
+  bit-identical; ΔF2^γZ, ΔF2^Z, ΔFL equal (exact − HOPPET) × (α_s/2π)³ of
+  `fl11z.f90` to 4 digits (e.g. 2.952e-5 vs 2.0284 × 1.455e-5 at x = 0.01,
+  Q² = 400); variable flavour number finite, n_f = 3 (Σe = 0) left at zero.
+  Second patch `hoppet-initcoefholder-optional.patch` for the optional-
+  argument bug.
