@@ -18,6 +18,11 @@
 ! axial couplings of the pair flavours), also its pair flavour = incoming
 ! flavour member in the identical-quark |D|^2, |E|^2; the direct-exchange
 ! interference of identical quarks is kept.
+! W exchange (ew31_mode = 2, 9 Oct): the boson line changes flavour
+! (ew31_out); four quarks: four_quark_cc (W on the incoming line or on the
+! pair, the two assignments interfering; = disorder's CC MATFOR with
+! ew31_ccmatfor, which drops the W-on-the-pair identical-quark
+! interference, tests/harness_me31 -noNC -CC).
 !-----------------------------------------------------------------------
 module me31
   use ew31
@@ -60,9 +65,9 @@ contains
           ! the outgoing (anti)quark of the incoming line: same flavour
           k = 0
           do i = 2, 4
-             if (fl(i) == fl(1)) k = i
+             if (fl(i) == ew31_out(fl(1))) k = i
           enddo
-          if (k == 0) return
+          if (k == 0 .or. ew31_out(fl(1)) == 0) return
           call others(k, iother)
           pm(1,:) = -P(:,1); pm(2,:) = P(:,k)
           pm(5,:) = P(:,iother(1)); pm(6,:) = P(:,iother(2))
@@ -79,7 +84,7 @@ contains
              if (fl(i) < 0) iqb = i
              if (fl(i) == 0) ig(1) = i
           enddo
-          if (iq == 0 .or. iqb == 0 .or. fl(iq) /= -fl(iqb)) return
+          if (iq == 0 .or. iqb == 0 .or. fl(iq) /= ew31_out(-fl(iqb))) return
           pm(1,:) = -P(:,1); pm(2,:) = P(:,iq); pm(5,:) = P(:,iqb); pm(6,:) = P(:,ig(1))
           call spinoru(6, pm, za, zb)
           call z2jetsq(2, 5, 3, 4, 1, 6, za, zb, m2)
@@ -92,7 +97,11 @@ contains
     ! four (anti)quarks: incoming q (or qbar) of flavour fl(1), outgoing
     ! line partner, and a pair Q Qbar
     nq = fl(1)
-    call four_quark(P, fl, Q2, msq)
+    if (ew31_mode == 2) then
+       call four_quark_cc(P, fl, Q2, msq)
+    else
+       call four_quark(P, fl, Q2, msq)
+    endif
     msq = avg*cnorm*msq
   end subroutine me31_tree
 
@@ -187,6 +196,68 @@ contains
     enddo; enddo; enddo
     s = 4*V*s
   end subroutine four_quark
+
+  ! W exchange (9 Oct): the two same-sign outgoing quarks ip(1), ip(2) and
+  ! the antiquark kqb; assignment ia puts ip(ia) on the incoming line. The W
+  ! sits on the incoming line if that quark is ew31_out of the incoming one
+  ! (A), or on the pair line if the incoming quark continues and the pair
+  ! couples to the W (B). The two assignments interfere as the identical-
+  ! quark D, E of four_quark: W on the incoming line in both (EXX of
+  ! disorder's MATFOR, identical quarks), on the line in one and on the pair
+  ! in the other (EXY), or on the pair in both (identical quarks; not in
+  ! MATFOR: dropped with ew31_ccmatfor).
+  subroutine four_quark_cc(P, fl, Q2, s)
+    real(dp), intent(in) :: P(4,7), Q2
+    integer, intent(in) :: fl(4)
+    real(dp), intent(out) :: s
+    complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
+    common /zprods/ za, zb
+    real(dp) :: pm(mxpart,4), cq(2,2), cl(2,2,2), cp(2,2,2), sg
+    complex(dp) :: A(2,2,2), B(2,2,2), Ae(2,2,2), Be(2,2,2), M(2,2,2,2)
+    integer :: i, f0, nsame, ip(3), kqb, ia, k, kq, j1, j2, j3
+    logical :: on(2), bb
+    s = 0
+    f0 = fl(1)
+    sg = merge(1, -1, f0 > 0)
+    nsame = 0; kqb = 0
+    do i = 2, 4
+       if (sg*fl(i) > 0) then
+          nsame = nsame + 1; ip(nsame) = i
+       elseif (sg*fl(i) < 0) then
+          kqb = i
+       endif
+    enddo
+    if (nsame /= 2 .or. kqb == 0) return
+    call ew31_cpl(f0, Q2, cq)
+    cl = 0; cp = 0; on = .false.; bb = .true.
+    do ia = 1, 2
+       k = ip(ia); kq = ip(3 - ia)
+       if (ew31_out(f0) /= 0 .and. fl(k) == ew31_out(f0) .and. fl(kqb) == -fl(kq)) then
+          cl(:,:,ia) = cq; on(ia) = .true.; bb = .false.
+       elseif (fl(k) == f0 .and. ew31_out(-fl(kqb)) == fl(kq) .and. fl(kq) /= 0) then
+          call ew31_cpl(fl(kq), Q2, cp(:,:,ia))
+          cp(:,:,ia) = cp([2, 1],:,ia); on(ia) = .true.
+       endif
+    enddo
+    if (.not. any(on)) return
+    pm = 0
+    pm(1,:) = -P(:,1); pm(3,:) = P(:,7); pm(4,:) = -P(:,6); pm(6,:) = P(:,kqb)
+    pm(2,:) = P(:,ip(1)); pm(5,:) = P(:,ip(2))
+    call spinoru(6, pm, za, zb)
+    call ampqqb_qqb(2, 1, 5, 6, A, B)
+    call ampqqb_qqb(5, 1, 2, 6, Ae, Be)
+    do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
+       M(j1,j2,j3,1) = cl(j1,j3,1)*A(j1,j2,j3) - cp(j2,j3,1)*B(j1,j2,j3)
+       M(j1,j2,j3,2) = cl(j1,j3,2)*Ae(j1,j2,j3) - cp(j2,j3,2)*Be(j1,j2,j3)
+    enddo; enddo; enddo
+    s = sum(abs(M)**2)
+    if (all(on) .and. .not. (bb .and. ew31_ccmatfor)) then
+       do j1 = 1, 2; do j3 = 1, 2
+          s = s + 2/xn*real(M(j1,swp(j1),j3,1)*conjg(M(j1,swp(j1),j3,2)), dp)
+       enddo; enddo
+    endif
+    s = 4*V*s
+  end subroutine four_quark_cc
 
   subroutine others(k, o)
     integer, intent(in) :: k

@@ -25,6 +25,12 @@
 !                                    defaults 0.1 in ln Q, 0.02 in ln(xi/(1-xi)))
 !   sliced21 tabchkg <prefix>          (grid against direct evaluation)
 !
+! W exchange (EW31 = "2 lepton", 9 Oct): only the beam classes the W couples
+! to, b out of the down-type classes (lp21_nodn: separate beam tables), the
+! gluon class with the two W pairs, no closed loop; 2+1 Born and one loop =
+! MATTHR/VIRTHR (tests/harness_born21 -noNC -CC). ZFIX = 3 (mode 2): tau_zQ
+! bins in the inclusive cuts (event shape, against NNLOJET).
+!
 ! Mode 3 (P2B, as dis31/nlo31 mode 3): sliced21 part ncall itmx seed p2b <table prefix> [softtable]
 ! 1+1 lab-frame jet bins with O(2+1 Born) - O(projected 1+1 Born) per event
 !-----------------------------------------------------------------------
@@ -221,6 +227,7 @@ contains
        rS = (dd(1,6)**2 + dd(2,7)**2)/(dd(1,6)**2 + dd(1,7)**2 + dd(2,7)**2 + dd(2,6)**2)
        fc = [fpdf(2) + fpdf(4), fpdf(-2) + fpdf(-4), fpdf(1) + fpdf(3) + fpdf(5), &
             & fpdf(-1) + fpdf(-3) + fpdf(-5), fpdf(0)]
+       if (lp21_nodn) fc(3:4) = fc(3:4) - [fpdf(5), fpdf(-5)]
        do c = 1, nbc
           born(c) = mu(c)*fc(c)*merge(rS*wk(1,c) + (1 - rS)*wk(2,c), wk(1,c), c <= 4)
        enddo
@@ -279,15 +286,27 @@ contains
     real(dp) :: cm(2,2), cV(2), num(2), den(2), ng(2)
     integer :: c, Q, l
     cV = 0
-    do Q = 1, 5
-       call ew31_cpl(Q, Q2, cm)
-       cV = cV + (cm(1,:) + cm(2,:))/2
-    enddo
+    if (ew31_mode /= 2) then
+       do Q = 1, 5
+          call ew31_cpl(Q, Q2, cm)
+          cV = cV + (cm(1,:) + cm(2,:))/2
+       enddo
+    endif
     do c = 1, 4
        call ew31_cpl(-fr(c), Q2, cm)
        call class_sums(cm, num, den)
        wk(:,c) = den/2; nfk(:,c) = num/den
+       ! W: only the classes the W couples to (no closed loop)
+       if (ew31_mode == 2 .and. ew31_out(fr(c)) == 0) wk(:,c) = 0
+       if (ew31_mode == 2) nfk(:,c) = 0
     enddo
+    if (ew31_mode == 2) then
+       ! g -> q qbar': the two W pairs of (u,d), (c,s)
+       call ew31_cpl(-1, Q2, cm)
+       call class_sums(cm, num, den)
+       wk(:,5) = 2*sum(den)/4; nfk(:,5) = 0
+       return
+    endif
     ng = 0; wk(:,5) = 0
     do Q = 1, 5
        call ew31_cpl(-Q, Q2, cm)
@@ -321,6 +340,14 @@ program sliced21
   real(dp) :: avg, err, chi2, hb, bt(9,nbc), bd(9,nbc), xi, rr, em(nbc)
   integer :: k
   call get_command_argument(1, bpart)
+  call get_environment_variable('EW31', arg)
+  if (len_trim(arg) > 0) then
+     read(arg, *) ew31_mode, ew31_lepton
+     write(*,'(a,2i2)') ' EW31 (mode, lepton)', ew31_mode, ew31_lepton
+  endif
+  ! W exchange: b has no coupling, not in the down-type beam classes (the
+  ! tables differ)
+  lp21_nodn = ew31_mode == 2
   if (trim(bpart) == 'mktab' .or. trim(bpart) == 'tabchkg') then
      call initPDFSetByName('NNPDF30_nlo_as_0118')
      call initPDF(0)
@@ -395,11 +422,6 @@ program sliced21
      endif
   else
      mode = 1; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
-  endif
-  call get_environment_variable('EW31', arg)
-  if (len_trim(arg) > 0) then
-     read(arg, *) ew31_mode, ew31_lepton
-     write(*,'(a,2i2)') ' EW31 (mode, lepton)', ew31_mode, ew31_lepton
   endif
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]

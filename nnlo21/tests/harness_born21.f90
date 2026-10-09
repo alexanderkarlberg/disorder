@@ -1,7 +1,7 @@
 !-----------------------------------------------------------------------
 ! The 2+1 Born of nnlo21 with photon + Z (8 Oct 2026) against DISENT's
 ! MATTHR, at random Born points, with disorder's flags (-includeZ,
-! -positron, -neutrino; ew31 set from them):
+! -positron, -neutrino; ew31 set from them; W exchange with -noNC -CC):
 !  1. hard21's helicity classes: hk(0,1) : hk(0,2) = S : O, with S =
 !     (p1.p6)^2 + (p2.p7)^2, O = (p1.p7)^2 + (p2.p6)^2 (DISENT labels);
 !  2. quark Born: MATTHR's M(f) = QQ/(S + O) (S w1 + O w2), w = ew31_w(f)
@@ -33,8 +33,9 @@ program harness_born21
   real(dp) :: worst(4)
   integer :: ip, f, i
   call set_parameters()
-  if (CC) stop 'harness_born21: CC not implemented'
   ew31_mode = merge(0, 1, noZ)
+  ! W exchange (-noNC -CC, 9 Oct): weights zero where the W does not couple
+  if (CC) ew31_mode = 2
   ew31_lepton = merge(1, 0, positron) + merge(2, 0, neutrino)
   CF = 4.0_dp/3; CA = 3; TR = 0.5_dp; NF = 5; PI_D = pi; PISQ = pi**2; HF = 0.5_dp
   CUTOFF_D = 1d-8; SCHEME_D = 0; SCALE_D = 1
@@ -60,6 +61,7 @@ program harness_born21
      do f = -5, 5
         if (f == 0) cycle
         call ew31_w(f, Q2, w)
+        if (ew31_out(f) == 0) w = 0
         if (f > 0) wg = wg + (w(1) + w(2))/2
         ref = QQ/(S + O)*(S*w(1) + O*w(2))
         worst(2) = max(worst(2), abs(M(f)/ref - 1))

@@ -21,6 +21,8 @@
 ! tests/colour.py): q qbar g g: c1 = (T^A T^B)_{q qbar}, c2 = (T^B T^A);
 ! four quarks: D = T^a_{q1 qb2} T^a_{q3 qb4}, E = T^a_{q3 qb2} T^a_{q1 qb4}
 ! (all partons outgoing: an incoming quark is an outgoing antiquark).
+! W exchange (9 Oct): as me31; four quarks with per-assignment couplings
+! (fourq_forms_cc); tests/harness_born31, harness_dip41 with EW31 = "2 l".
 !-----------------------------------------------------------------------
 module born31
   use ew31
@@ -110,9 +112,9 @@ contains
           ! A, B in MCFM slots 5, 6
           k = 0
           do i = 2, 4
-             if (fl(i) == fl(1)) k = i
+             if (fl(i) == ew31_out(fl(1))) k = i
           enddo
-          if (k == 0) return
+          if (k == 0 .or. ew31_out(fl(1)) == 0) return
           igl = pack([2, 3, 4], [2, 3, 4] /= k)
           pm(1,:) = -P(:,1); pm(2,:) = P(:,k); pm(5,:) = P(:,igl(1)); pm(6,:) = P(:,igl(2))
           ! colour roles of the slots (q, qbar, A, B) for the colour-ordered
@@ -133,7 +135,7 @@ contains
              if (fl(i) < 0) iqb = i
              if (fl(i) == 0) igl(2) = i
           enddo
-          if (iq == 0 .or. iqb == 0 .or. fl(iq) /= -fl(iqb)) return
+          if (iq == 0 .or. iqb == 0 .or. fl(iq) /= ew31_out(-fl(iqb))) return
           igl(1) = 1
           pm(1,:) = -P(:,1); pm(2,:) = P(:,iq); pm(5,:) = P(:,iqb); pm(6,:) = P(:,igl(2))
           role = 0; role(iq) = 1; role(iqb) = 2; role(1) = 3; role(igl(2)) = 4
@@ -163,7 +165,10 @@ contains
        endif
     enddo
     if (nsame /= 2 .or. kqb == 0) return
-    if (fl(ip(1)) == f0 .and. fl(ip(2)) == f0) then
+    if (ew31_mode == 2) then
+       call fourq_cc(k, kq)
+       if (k == 0) return
+    elseif (fl(ip(1)) == f0 .and. fl(ip(2)) == f0) then
        if (fl(kqb) /= -f0) return
        k = ip(1); kq = ip(2)
        call fourq_forms(P, k, kq, kqb, f0, f0, Q2, .true., q)
@@ -191,7 +196,73 @@ contains
           if (i /= k) cc(i,k) = avg*cnorm*q(role(i), role(k))
        enddo
     enddo
+  contains
+    ! W exchange (9 Oct): the assignments of me31's four_quark_cc; k, kq the
+    ! line and pair quark of assignment 1 (k = 0: no W coupling)
+    subroutine fourq_cc(k, kq)
+      integer, intent(out) :: k, kq
+      real(dp) :: cl(2,2,2), cp(2,2,2), cq(2,2)
+      integer :: ia, j, jq
+      logical :: on(2), bb
+      call ew31_cpl(f0, Q2, cq)
+      cl = 0; cp = 0; on = .false.; bb = .true.
+      do ia = 1, 2
+         j = ip(ia); jq = ip(3 - ia)
+         if (ew31_out(f0) /= 0 .and. fl(j) == ew31_out(f0) .and. fl(kqb) == -fl(jq)) then
+            cl(:,:,ia) = cq; on(ia) = .true.; bb = .false.
+         elseif (fl(j) == f0 .and. ew31_out(-fl(kqb)) == fl(jq) .and. fl(jq) /= 0) then
+            call ew31_cpl(fl(jq), Q2, cp(:,:,ia)); cp(:,:,ia) = cp([2, 1],:,ia); on(ia) = .true.
+         endif
+      enddo
+      k = 0; kq = 0
+      if (.not. any(on)) return
+      if (.not. on(1)) then
+         ip(1:2) = ip([2, 1]); cl = cl(:,:,[2, 1]); cp = cp(:,:,[2, 1]); on = on([2, 1])
+      endif
+      k = ip(1); kq = ip(2)
+      call fourq_forms_cc(P, k, kq, kqb, cl, cp, on(2), bb .and. ew31_ccmatfor, q)
+    end subroutine fourq_cc
   end subroutine born31_any
+
+  ! W exchange: as fourq_forms with the couplings per assignment (cl: W on
+  ! the line, cp: on the pair; assignment 1 = D, 2 = E, me31's
+  ! four_quark_cc); both: the two assignments interfere (unless dropint)
+  subroutine fourq_forms_cc(P, k, kq, kqb, cl, cp, both, dropint, q)
+    real(dp), intent(in) :: P(4,7), cl(2,2,2), cp(2,2,2)
+    integer, intent(in) :: k, kq, kqb
+    logical, intent(in) :: both, dropint
+    real(dp), intent(out) :: q(4,4)
+    complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
+    common /zprods/ za, zb
+    real(dp) :: pm(mxpart,4), sDD, sEE, sDE
+    complex(dp) :: A(2,2,2), B(2,2,2), Ae(2,2,2), Be(2,2,2), D(2,2,2), E(2,2,2)
+    integer :: j1, j2, j3, r, s
+    pm = 0
+    pm(1,:) = -P(:,1); pm(2,:) = P(:,k); pm(3,:) = P(:,7); pm(4,:) = -P(:,6)
+    pm(5,:) = P(:,kq); pm(6,:) = P(:,kqb)
+    call spinoru(6, pm, za, zb)
+    call ampqqb_qqb(2, 1, 5, 6, A, B)
+    call ampqqb_qqb(5, 1, 2, 6, Ae, Be)
+    sDD = 0; sEE = 0; sDE = 0
+    do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
+       D(j1,j2,j3) = cl(j1,j3,1)*A(j1,j2,j3) - cp(j2,j3,1)*B(j1,j2,j3)
+       E(j1,j2,j3) = cl(j1,j3,2)*Ae(j1,j2,j3) - cp(j2,j3,2)*Be(j1,j2,j3)
+       sDD = sDD + abs(D(j1,j2,j3))**2; sEE = sEE + abs(E(j1,j2,j3))**2
+    enddo; enddo; enddo
+    if (both .and. .not. dropint) then
+       do j1 = 1, 2; do j3 = 1, 2
+          sDE = sDE - real(D(j1,swp(j1),j3)*conjg(E(j1,swp(j1),j3)), dp)
+       enddo; enddo
+    endif
+    q = 0
+    do r = 1, 4
+       do s = r + 1, 4
+          q(r,s) = 16*(c4q(1,1,r,s)*sDD + c4q(2,2,r,s)*sEE + 2*c4q(1,2,r,s)*sDE)
+          q(s,r) = q(r,s)
+       enddo
+    enddo
+    q(1,1) = 16*(g4q(1,1)*sDD + g4q(2,2)*sEE + 2*g4q(1,2)*sDE)
+  end subroutine fourq_forms_cc
 
   ! q qbar g g: quadratic colour forms sum_hel A^+ C^{rs} A for all role
   ! pairs r /= s, and the metric (q(1,1) = sum A^+ G A); ig > 0: gluon ig

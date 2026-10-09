@@ -4,7 +4,9 @@
 ! DISENT run (photon exchange, fixed x and Q^2, mu_R = mu_F = Q). With
 ! -includeZ [-positron | -neutrino] (8 Oct 2026) DISENT's events have photon
 ! + Z couplings (as disorder's flags, MZ, MW defaults); only the reference
-! is then meaningful (the cumulant below the cut is the photon's).
+! is then meaningful (the cumulant below the cut is the photon's). -CC
+! (9 Oct): W exchange only (disorder's CC couplings), with -positron,
+! -neutrino as for disorder.
 !
 ! For every DISENT event:
 !  - reference: all O(alpha_s^2) contributions (VIRTHR, COLFOR, MATFOR,
@@ -80,6 +82,9 @@ program tau2_nlo
   if (neutrino) then
      noZ = .false.; Zonly = .true.
   endif
+  if (log_val_opt('-CC')) then
+     NC = .false.; CC = .true.
+  endif
   mw = 80.398_dp; mz = 91.1876_dp
   sin_thw_sq = 1 - (mw/mz)**2; sin_2thw_sq = 4*(1 - sin_thw_sq)*sin_thw_sq
   Ae = -0.5_dp
@@ -89,7 +94,8 @@ program tau2_nlo
      Ve = 0.5_dp; Ae = -Ae
   endif
   Ae2 = Ae**2; Ve2 = Ve**2; Ve2_Ae2 = Ve2 + Ae2; two_Ve_Ae = 2*Ve*Ae
-  if (.not. noZ) write(*,'(a,2l2)') ' photon + Z exchange; positron, neutrino', positron, neutrino
+  if (.not. noZ .and. NC) write(*,'(a,2l2)') ' photon + Z exchange; positron, neutrino', positron, neutrino
+  if (CC) write(*,'(a,2l2)') ' W exchange; positron, neutrino', positron, neutrino
   if (softtab /= '') call soft_table_init(trim(softtab), hw, 2 * hw)
   call InitPDFsetByName(trim(pdf))
   call InitPDF(0)

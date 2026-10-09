@@ -14,9 +14,17 @@
 !   MZ, MW and sin^2(theta_W) = 1 - MW^2/MZ^2 as disorder's defaults.
 !   For the photon (ew31_mode = 0) c = Q_f q_l for all helicities.
 !
-! ew31_mode: 0 photon, 1 photon + Z. ew31_lepton: 0 e-, 1 e+ (hl
-! exchanged), 2 neutrino, 3 antineutrino (one helicity: couplings times
-! sqrt(2) against the lepton spin average 1/2 of the matrix elements).
+! ew31_mode: 0 photon, 1 photon + Z, 2 W (CC, 9 Oct). ew31_lepton: 0 e-, 1
+! e+ (hl exchanged), 2 neutrino, 3 antineutrino (one helicity: couplings
+! times sqrt(2) against the lepton spin average 1/2 of the matrix elements).
+!
+! W exchange (ew31_mode = 2): c(L,L) = Q^2/(Q^2 + MW^2)/(2 sin^2 theta_W)
+! (left-handed quark and lepton lines, labels as for Z), W- for e- and
+! nubar, W+ for e+ and nu; unit CKM within the complete generations (u,d),
+! (c,s), no coupling for b (as disorder's CC and HOPPET). The line changes
+! flavour: ew31_out(f) is the outgoing flavour of the boson line for an
+! incoming parton f (f itself for photon/Z; W-: u -> d, c -> s, dbar ->
+! ubar, sbar -> cbar; W+ the reverse), 0 if the W does not couple to f.
 !
 ! Basis couplings for the flavour sums (nlo31, ew31_mode = 1): ew31_basis
 ! = 1 (2) gives c = 1 on the diagonal (off-diagonal) helicity pairs for the
@@ -44,7 +52,10 @@ module ew31
   real(dp), parameter :: eq(5) = [-1.0_dp/3, 2.0_dp/3, -1.0_dp/3, 2.0_dp/3, -1.0_dp/3]
   real(dp), parameter :: tau(5) = [-1.0_dp, 1.0_dp, -1.0_dp, 1.0_dp, -1.0_dp]
   integer, public :: ew31_mode = 0, ew31_lepton = 0, ew31_basis = 0, ew31_bf = 0
-  public :: ew31_cpl, ew31_w, ew31_cv, ew31_wl
+  ! W exchange: drop the interference of the two W-on-the-pair assignments
+  ! of identical quarks (me31, me41), as disorder's MATFOR (harness checks)
+  logical, public :: ew31_ccmatfor = .false.
+  public :: ew31_cpl, ew31_w, ew31_cv, ew31_wl, ew31_out
 contains
 
   subroutine ew31_cpl(f, Q2, c)
@@ -63,6 +74,22 @@ contains
           c(1,2) = 1; c(2,1) = 1
        endif
        if (f > 0) c = c([2, 1],:)
+       return
+    endif
+    if (ew31_mode == 2) then
+       ! W: left-handed lines only, labels as for Z
+       c = 0
+       if (a > 4) return
+       zq = [1.0_dp, 0.0_dp]; zl = [1.0_dp, 0.0_dp]
+       if (ew31_lepton >= 2) zl = zl*sqrt(2.0_dp)
+       if (mod(ew31_lepton, 2) == 1) zl = zl([2, 1])
+       if (f > 0) zq = zq([2, 1])
+       prop = Q2/(Q2 + mw**2)/(2*xw)
+       do hq = 1, 2
+          do hl = 1, 2
+             c(hq,hl) = zq(hq)*zl(hl)*prop
+          enddo
+       enddo
        return
     endif
     if (ew31_lepton <= 1) then
@@ -98,6 +125,8 @@ contains
     cv = 1
     if (ew31_basis > 0) return
     cv = 0
+    ! W: no closed loop (a single W vertex changes the loop's flavour)
+    if (ew31_mode == 2) return
     do f = 1, 5
        call ew31_cpl(f, Q2, c)
        cv = cv + (c(1,:) + c(2,:))/2
@@ -113,4 +142,24 @@ contains
     call ew31_cpl(-f, Q2, c)
     w = [c(1,1)*cv(1) + c(2,2)*cv(2), c(2,1)*cv(1) + c(1,2)*cv(2)]/2
   end subroutine ew31_wl
+
+  ! the outgoing flavour of the boson line for an incoming parton f (0: no
+  ! coupling); f for photon/Z
+  integer function ew31_out(f)
+    integer, intent(in) :: f
+    logical :: wm
+    ew31_out = f
+    if (ew31_mode /= 2) return
+    ew31_out = 0
+    if (f == 0 .or. abs(f) > 4) return
+    wm = ew31_lepton == 0 .or. ew31_lepton == 3
+    if (wm) then
+       ! W- absorbed: up-type quark -> down-type, down-type antiquark -> up-type
+       if (f > 0 .and. mod(f, 2) == 0) ew31_out = f - 1
+       if (f < 0 .and. mod(-f, 2) == 1) ew31_out = f - 1
+    else
+       if (f > 0 .and. mod(f, 2) == 1) ew31_out = f + 1
+       if (f < 0 .and. mod(-f, 2) == 0) ew31_out = f + 1
+    endif
+  end function ew31_out
 end module ew31

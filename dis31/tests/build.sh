@@ -3,7 +3,7 @@
 # (objects of disorder_core and the test support), e.g.
 #   dis31/tests/build.sh /path/to/build [workdir]
 # run with: ./harness_gluon -toyQ0 2 ; ./harness_quark -toyQ0 2 ;
-#   ./harness_me31 -toyQ0 2 ; ./harness_lim41 ; ./harness_born31 ; ./harness_dip41 ; ./harness_virt31 ; ./harness_iop31 ; ./dump_fd31 && python3 fd31.py
+#   ./harness_me31 -toyQ0 2 ; ./harness_lim41 ; ./harness_ccsum ; ./harness_born31 ; ./harness_dip41 ; ./harness_virt31 ; ./harness_iop31 ; ./dump_fd31 && python3 fd31.py
 set -e
 B=$(cd "$1" && pwd); D=$(cd "$(dirname "$0")/.." && pwd); W=${2:-$PWD}
 cd "$W"
@@ -26,7 +26,7 @@ for h in harness_gluon harness_quark harness_me31 time_me31; do
     $(hoppet-config --libs) $(lhapdf-config --libs) -o $h
 done
 # standalone (MCFM routines only)
-for h in harness_lim41 dump_fd31 harness_born31 harness_dip41; do
+for h in harness_lim41 dump_fd31 harness_born31 harness_dip41 harness_ccsum; do
   gfortran -O2 -ffree-line-length-none -c $D/tests/$h.f90 -o $h.o
   gfortran -O2 $h.o me31.o ew31.o me41.o born31.o dip41.o $MO -o $h
 done

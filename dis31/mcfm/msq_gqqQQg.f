@@ -3,7 +3,7 @@
 !  Copyright (C) 2019-2022, respective authors of MCFM.
 !
 
-      subroutine msq_gqqQQg(i1,i2,i3,i4,i5,i6,i7,ea,eb,nll,MN,MI)
+      subroutine msq_gqqQQg(i1,i2,i3,i4,i5,i6,i7,ea,eb,ec,ed,nll,MN,MI)
       implicit none
       include 'types.f'
 c***********************************************************************
@@ -23,12 +23,16 @@ c two lines within a pairing class (the terms A, D, F, G: they are taken
 c as the sum of those with the boson on line i1-i2 only and on i3-i4
 c only), keeping the direct-exchange interference of identical quarks
 c (B, C, E), as dis31/me31 for photon + Z.
+c disorder (2026-10-09): ec, ed the couplings of the lines i3-i2 and i1-i4
+c of the exchanged pairing (photon, Z: ec = eb, ed = ea; W exchange: per
+c assignment of the outgoing quarks, dis31/me41).
       include 'constants.f'
       integer:: Qh,hq,hg,lh,f1,f3,i1,i2,i3,i4,i5,i6,i7,j
       logical:: nll
       real(dp):: A(2,2,2),B(2,2,2),C(2,2,2),D(2,2,2),E(2,2,2),
      & F(2,2,2),G(2,2,2)
-      real(dp):: MI,MN,ea(2,2),eb(2,2),M0(2,2,2),Mx(2,2,2),My(2,2,2),
+      real(dp):: MI,MN,ea(2,2),eb(2,2),ec(2,2),ed(2,2),
+     & M0(2,2,2),Mx(2,2,2),My(2,2,2),
      & Mz(2,2,2),Mxx(2,2,2),Mxy(2,2,2),e0(2,2)
       real(dp):: x,y,z
       parameter(x=xn/cf,y=half/cf,z=0.25_dp*(xn**2-two)/xn/cf**2)
@@ -59,13 +63,13 @@ c---set everything to zero
 c---mb1_1234 etc, has 6 indices each with possible values 1 or 2
 c---corresponding to f1,f3,hq,Qh,hg,lh
       if (nll) then
-        call makemb(ea,e0)
+        call makemb(ea,e0,e0,ed)
         call same()
-        call makemb(e0,eb)
+        call makemb(e0,eb,ec,e0)
         call same()
-        call makemb(ea,eb)
+        call makemb(ea,eb,ec,ed)
       else
-        call makemb(ea,eb)
+        call makemb(ea,eb,ec,ed)
         call same()
       endif
 
@@ -115,13 +119,14 @@ c---corresponding to f1,f3,hq,Qh,hg,lh
 
       contains
 
-c---the four pairings with couplings ca (line i1-i2), cb (line i3-i4)
-      subroutine makemb(ca,cb)
-      real(dp):: ca(2,2),cb(2,2)
+c---the four pairings with couplings ca (line i1-i2), cb (line i3-i4), cc
+c   (line i3-i2), cd (line i1-i4)
+      subroutine makemb(ca,cb,cc,cd)
+      real(dp):: ca(2,2),cb(2,2),cc(2,2),cd(2,2)
       call makemb_photon(i1,i2,i3,i4,i5,i6,i7,ca,cb,mb1_1234,mb2_1234)
-      call makemb_photon(i3,i2,i1,i4,i5,i6,i7,cb,ca,mb1_3214,mb2_3214)
+      call makemb_photon(i3,i2,i1,i4,i5,i6,i7,cc,cd,mb1_3214,mb2_3214)
       call makemb_photon(i3,i4,i1,i2,i5,i6,i7,cb,ca,mb1_3412,mb2_3412)
-      call makemb_photon(i1,i4,i3,i2,i5,i6,i7,ca,cb,mb1_1432,mb2_1432)
+      call makemb_photon(i1,i4,i3,i2,i5,i6,i7,cd,cc,mb1_1432,mb2_1432)
       end subroutine makemb
 
 c---the terms within a pairing class: A, D, F, G

@@ -46,6 +46,26 @@ program harness_born31
      enddo
      write(*,'(a,i2)') ' point', ipt
      call check_flavours(P3)
+     if (ew31_mode == 2) then
+        ! W exchange (EW31 = "2 0", 9 Oct): line u -> d, pair (d, ubar)
+        call soft('W q;qgg ', P3, wf([2,1,0,0]), 3, 4)
+        call soft('W q;qgg ', P3, wf([2,1,0,0]), 2, 3)
+        call soft('W qb;qbgg', P3, wf([-1,-2,0,0]), 4, 2)
+        call soft('W g;qqbg', P3, wf([0,1,-2,0]), 2, 4)
+        call soft('W g;qqbg', P3, wf([0,1,-2,0]), 3, 2)
+        call soft('W q;qQQb', P3, wf([2,1,3,-3]), 3, 4)
+        call soft('W q;qqqb', P3, wf([2,1,1,-1]), 2, 4)
+        call soft('W q;duub', P3, wf([2,1,2,-2]), 2, 4)
+        call soft('W d;ddub', P3, wf([1,1,1,-2]), 3, 4)
+        call soft('W qb;QQb', P3, wf([-1,-2,3,-3]), 3, 2)
+        call ffspin('W q;qgg g>gg', P3, wf([2,1,0,0]), 3, 2, wf([2,1,0,0,0]), 'ggg', 0.3_dp)
+        call ffspin('W g;qqbg g>gg', P3, wf([0,1,-2,0]), 4, 3, wf([0,1,-2,0,0]), 'ggg', 0.6_dp)
+        call ffspin('W q;qgg g>qqb', P3, wf([2,1,0,0]), 4, 3, wf([2,1,0,2,-2]), 'gqq', 0.35_dp)
+        call ffspin('W g;qqbg g>qqb', P3, wf([0,1,-2,0]), 4, 2, wf([0,1,-2,1,-1]), 'gqq', 0.5_dp)
+        call fispin('W q;g IS q>g', P3, wf([0,1,-2,0]), 2, wf([2,1,-2,0,2]), 'qg', 0.6_dp)
+        call fispin('W g;g IS g>g', P3, wf([0,1,-2,0]), 4, wf([0,1,-2,0,0]), 'gg', 0.55_dp)
+        cycle
+     endif
      call soft('q;qgg ', P3, [2,2,0,0], 3, 4)
      call soft('q;qgg ', P3, [2,2,0,0], 2, 3)
      call soft('qb;qbgg', P3, [-1,-1,0,0], 4, 2)
@@ -100,10 +120,15 @@ contains
 
   subroutine check_flavours(P3)
     real(dp), intent(in) :: P3(4,7)
-    integer :: f, Q, fl(4), i, ig, list(4,200), nl, j
+    integer :: f, Q, fl(4), i, ig, list(4,1000), nl, j
     real(dp) :: m, msq, cc(4,4), Ci, e1(4), e2(4), mv1, mv2, cv1(4,4), cv2(4,4)
     nl = 0
     do f = -5, 5
+       if (ew31_mode == 2) then
+          ! W exchange: every flavour multiset (zero ones skipped below)
+          call cc_list(f, list, nl)
+          cycle
+       endif
        if (f == 0) then
           do Q = 1, 5
              nl = nl + 1; list(:,nl) = [0, Q, -Q, 0]
@@ -119,6 +144,7 @@ contains
        fl = list(:,j)
        call me31_tree(P3, fl, m)
        call born31_cc(P3, fl, msq, cc)
+       if (m == 0 .and. msq == 0) cycle
        worst(1) = max(worst(1), abs(msq/m - 1))
        do i = 1, 4
           Ci = merge(CA, CF, fl(i) == 0)
@@ -133,6 +159,30 @@ contains
        enddo
     enddo
   end subroutine check_flavours
+
+  ! W exchange: every flavour multiset of the incoming parton f
+  subroutine cc_list(f, list, nl)
+    integer, intent(in) :: f
+    integer, intent(inout) :: list(:,:), nl
+    integer :: a, b, c, sg
+    if (f == 0) then
+       do a = 1, 5
+          do b = 1, 5
+             nl = nl + 1; list(:,nl) = [0, a, -b, 0]
+          enddo
+       enddo
+       return
+    endif
+    sg = sign(1, f)
+    do a = 1, 5
+       nl = nl + 1; list(:,nl) = [f, sg*a, 0, 0]
+       do b = a, 5
+          do c = 1, 5
+             nl = nl + 1; list(:,nl) = [f, sg*a, sg*b, -sg*c]
+          enddo
+       enddo
+    enddo
+  end subroutine cc_list
 
   subroutine soft(name, P3, fl3, i, k)
     character(*), intent(in) :: name
@@ -322,4 +372,16 @@ contains
     q = p
     q(3) = g*(p(3) + beta*p(4)); q(4) = g*(p(4) + beta*p(3))
   end function boostz
+  ! W+ (e+, nu): the W- channel lists with up and down exchanged (u <-> d,
+  ! c <-> s), 9 Oct
+  function wf(f) result(g)
+    integer, intent(in) :: f(:)
+    integer :: g(size(f)), i
+    integer, parameter :: sw(0:5) = [0, 2, 1, 4, 3, 5]
+    g = f
+    if (ew31_lepton /= 1 .and. ew31_lepton /= 2) return
+    do i = 1, size(f)
+       g(i) = sign(sw(abs(f(i))), f(i))
+    enddo
+  end function wf
 end program harness_born31

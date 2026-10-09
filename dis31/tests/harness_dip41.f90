@@ -38,6 +38,37 @@ program harness_dip41
         if (resolved3(P3, 0.02_dp)) exit
      enddo
      write(*,'(a,i2)') ' point', ipt
+     if (ew31_mode == 2) then
+        ! W exchange (EW31 = "2 0", 9 Oct): line u -> d, pair (d, ubar)
+        call ffc('W q;qggg   q||g ', P3, 2, 3, wf([2,1,0,0,0]), 0.3_dp, 0.0_dp)
+        call ffc('W q;qggg   g||g ', P3, 3, 4, wf([2,1,0,0,0]), 0.4_dp, 0.0_dp)
+        call ffc('W qb;qbggg qb||g', P3, 2, 1, wf([-1,-2,0,0,0]), 0.6_dp, 0.0_dp)
+        call ffc('W g;qqbgg  q||g ', P3, 2, 4, wf([0,1,-2,0,0]), 0.35_dp, 0.0_dp)
+        call ffc('W g;qqbgg  g||g ', P3, 4, 1, wf([0,1,-2,0,0]), 0.55_dp, 0.0_dp)
+        call ffc('W q;qgQQb  Q||Qb', P3, 4, 2, wf([2,1,0,3,-3]), 0.45_dp, 1.0_dp)
+        call ffc('W q;qQQbg  q||g ', P3, 2, 4, wf([2,1,3,-3,0]), 0.4_dp, 0.0_dp)
+        call ffc('W q;duubg  q||g ', P3, 2, 4, wf([2,1,2,-2,0]), 0.4_dp, 0.0_dp)
+        call ffc('W q;qqqbg  q||g ', P3, 3, 2, wf([2,1,1,-1,0]), 0.4_dp, 0.0_dp)
+        call ffc('W d;ddubg  q||g ', P3, 2, 4, wf([1,1,1,-2,0]), 0.4_dp, 0.0_dp)
+        call ffc('W g;qqbQQb Q||Qb', P3, 4, 2, wf([0,1,-2,3,-3]), 0.4_dp, 1.0_dp)
+        call ffc('W g;dubddb q||qb', P3, 4, 3, wf([0,1,-2,1,-1]), 0.6_dp, 1.0_dp)
+        call ifc('W q;qggg   IS q>q', P3, 2, wf([2,1,0,0,0]), 0.7_dp)
+        call ifc('W q;qQQbg  IS q>q', P3, 3, wf([2,1,3,-3,0]), 0.5_dp)
+        call ifc('W q;qqbgq  IS q>g', P3, 2, wf([2,1,-2,0,2]), 0.6_dp)
+        call ifc('W qb;..    IS qb>g', P3, 4, wf([-1,1,-2,0,-1]), 0.45_dp)
+        call ifc('W g;qqbgg  IS g>q', P3, 3, wf([0,1,0,0,-2]), 0.6_dp)
+        call ifc('W g;qQQbqb IS g>q', P3, 2, wf([0,1,3,-3,-2]), 0.5_dp)
+        call ifc('W g;qqbgg  IS g>g', P3, 4, wf([0,1,-2,0,0]), 0.55_dp)
+        call softg('W q;qggg  ', P3, wf([2,1,0,0]), 3, 4)
+        call softg('W q;qggg  ', P3, wf([2,1,0,0]), 2, 3)
+        call softg('W qb;qbggg', P3, wf([-1,-2,0,0]), 4, 2)
+        call softg('W g;qqbgg ', P3, wf([0,1,-2,0]), 2, 4)
+        call softg('W q;qQQbg ', P3, wf([2,1,3,-3]), 3, 4)
+        call softg('W q;qqqbg ', P3, wf([2,1,1,-1]), 2, 4)
+        call softg('W q;duubg ', P3, wf([2,1,2,-2]), 2, 4)
+        call softg('W d;ddubg ', P3, wf([1,1,1,-2]), 3, 4)
+        cycle
+     endif
      ! final-state collinear: Born slot i split into i and 5, spectator k
      call ffc('q;qggg   q||g ', P3, 2, 3, [2,2,0,0,0], 0.3_dp, 0.0_dp)
      call ffc('q;qggg   g||g ', P3, 3, 4, [2,2,0,0,0], 0.4_dp, 0.0_dp)
@@ -286,4 +317,16 @@ contains
     q = p
     q(3) = g*(p(3) + beta*p(4)); q(4) = g*(p(4) + beta*p(3))
   end function boostz
+  ! W+ (e+, nu): the W- channel lists with up and down exchanged (u <-> d,
+  ! c <-> s), 9 Oct
+  function wf(f) result(g)
+    integer, intent(in) :: f(:)
+    integer :: g(size(f)), i
+    integer, parameter :: sw(0:5) = [0, 2, 1, 4, 3, 5]
+    g = f
+    if (ew31_lepton /= 1 .and. ew31_lepton /= 2) return
+    do i = 1, size(f)
+       g(i) = sign(sw(abs(f(i))), f(i))
+    enddo
+  end function wf
 end program harness_dip41

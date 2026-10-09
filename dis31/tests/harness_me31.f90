@@ -14,10 +14,18 @@ program harness_me31
   common /COLFAC/ CF, CA, TR, PI_D, PISQ, HF, CUTOFF_D, EQ, SCALE_D, SCHEME_D, NF
   real(dp) :: P(4,7), PP(4,7), M4(-6:6), r(8), d(-5:5), m(-5:5), x, worst
   integer :: perm(3,6), ip, ipt, i, f, Q
+  character(8) :: arg
   perm = reshape([2,3,4, 2,4,3, 3,2,4, 3,4,2, 4,2,3, 4,3,2], [3,6])
   call set_parameters()
-  if (CC) stop 'harness_me31: CC not implemented in me31'
   ew31_mode = merge(0, 1, noZ)
+  if (CC) then
+     ! W exchange (9 Oct): MATFOR has no interference of the two
+     ! W-on-the-pair assignments (identical quarks); dropped here too
+     ew31_mode = 2; ew31_ccmatfor = .true.
+     ! CCBB=1: keep it (the ratio then shows its size)
+     call get_environment_variable('CCBB', arg)
+     if (trim(arg) == '1') ew31_ccmatfor = .false.
+  endif
   ew31_lepton = merge(1, 0, positron) + merge(2, 0, neutrino)
   CF = 4.0_dp/3.0_dp; CA = 3; TR = 0.5_dp; NF = 5
   PI_D = atan(1d0)*4; PISQ = PI_D**2; HF = 0.5_dp; CUTOFF_D = 1d-8
@@ -38,6 +46,10 @@ program harness_me31
         call MATFOR(PP, M4)
         d = d + M4(-5:5)
         do f = -5, 5
+           if (CC) then
+              call cc_sum(f)
+              cycle
+           endif
            if (f == 0) then
               do Q = 1, 5
                  call me31_tree(PP, [0, Q, -Q, 0], x); m(f) = m(f) + x
@@ -111,4 +123,28 @@ contains
     q = p
     q(3) = g*(p(3) + beta*p(4)); q(4) = g*(p(4) + beta*p(3))
   end function boostz
+  ! W exchange: every final-state flavour multiset once (me31 is zero where
+  ! the W does not couple), 1/2 for identical partons
+  subroutine cc_sum(f)
+    integer, intent(in) :: f
+    integer :: a, b, c, sg
+    if (f == 0) then
+       do a = 1, 5
+          do b = 1, 5
+             call me31_tree(PP, [0, a, -b, 0], x); m(f) = m(f) + x
+          enddo
+       enddo
+       return
+    endif
+    sg = sign(1, f)
+    do a = 1, 5
+       call me31_tree(PP, [f, sg*a, 0, 0], x); m(f) = m(f) + 0.5_dp*x
+       do b = a, 5
+          do c = 1, 5
+             call me31_tree(PP, [f, sg*a, sg*b, -sg*c], x)
+             m(f) = m(f) + merge(0.5_dp, 1.0_dp, a == b)*x
+          enddo
+       enddo
+    enddo
+  end subroutine cc_sum
 end program harness_me31

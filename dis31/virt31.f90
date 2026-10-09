@@ -40,6 +40,10 @@
 !     q qbar g g: UV counterterm - 2 beta0/eps t and the DRED -> MS-bar
 !       coupling for alpha_s^2, + N/3 t (as MCFM's qqb_z2jet_v, subuv).
 !   Net: q qbar g g: v(-1) - 2 beta0 t, v(0) - CF t; four quarks: v(0) - 2 CF t.
+! W exchange (9 Oct): lines as me31 (ew31_out), four quarks with the
+! couplings per assignment (fourq_cpl); no closed loop. Tree = me31 and
+! the poles = -<I> (tests/harness_virt31, EW31 = "2 l"); the finite part
+! is not checked against an independent W code.
 !-----------------------------------------------------------------------
 module virt31
   use ew31
@@ -107,9 +111,9 @@ contains
     if (fl(1) /= 0) then
        k = 0
        do i = 2, 4
-          if (fl(i) == fl(1)) k = i
+          if (fl(i) == ew31_out(fl(1))) k = i
        enddo
-       if (k == 0) return
+       if (k == 0 .or. ew31_out(fl(1)) == 0) return
        igl = pack([2, 3, 4], [2, 3, 4] /= k)
        pm(1,:) = P(:,k); pm(4,:) = -P(:,1); pm(2,:) = P(:,igl(1)); pm(3,:) = P(:,igl(2))
        call ew31_cpl(fl(1), Q2, c)
@@ -121,7 +125,7 @@ contains
           if (fl(i) < 0) iqb = i
           if (fl(i) == 0) igl(2) = i
        enddo
-       if (iq == 0 .or. iqb == 0 .or. fl(iq) /= -fl(iqb)) return
+       if (iq == 0 .or. iqb == 0 .or. fl(iq) /= ew31_out(-fl(iqb))) return
        pm(1,:) = P(:,iq); pm(4,:) = P(:,iqb); pm(2,:) = -P(:,1); pm(3,:) = P(:,igl(2))
        call ew31_cpl(fl(iq), Q2, c)
        avg = 1.0_dp/(2*2*nadj)
@@ -232,10 +236,10 @@ contains
     integer :: toploops
     logical :: toplight, topvector, topaxial, onlyaxial
     common /toploops/ toploops, toplight, topvector, topaxial, onlyaxial
-    real(dp) :: pm(mxpart,4), w(3), tr, cq(2,2), cQ2(2,2), Q2
+    real(dp) :: pm(mxpart,4), w(3), tr, cq(2,2), cQ2(2,2), Q2, cl(2,2,2), cp(2,2,2)
     integer :: sg
-    integer :: i, k, kq, kqb, nsame, ip(3), f0, ie
-    logical :: ident
+    integer :: i, k, kq, kqb, nsame, ip(3), f0, ie, ia
+    logical :: ident, on(2), bb
     real(dp), parameter :: evals(3) = [0.0_dp, 1.0_dp, -1.0_dp]
     v = 0; t = 0
     if (count(fl == 0) /= 0 .or. fl(1) == 0) return
@@ -253,7 +257,26 @@ contains
     Q2 = sum(P(1:3,5)**2) - P(4,5)**2
     call ew31_cpl(f0, Q2, cq)
     ident = fl(ip(1)) == f0 .and. fl(ip(2)) == f0
-    if (ident) then
+    cl = 0; cp = 0; on = .false.; bb = .false.
+    if (ew31_mode == 2) then
+       ! W exchange (9 Oct): the assignments of me31's four_quark_cc; the
+       ! exchanged one (5 <-> 6) with its own couplings
+       bb = .true.
+       do ia = 1, 2
+          k = ip(ia); kq = ip(3 - ia)
+          if (ew31_out(f0) /= 0 .and. fl(k) == ew31_out(f0) .and. fl(kqb) == -fl(kq)) then
+             cl(:,:,ia) = cq; on(ia) = .true.; bb = .false.
+          elseif (fl(k) == f0 .and. ew31_out(-fl(kqb)) == fl(kq) .and. fl(kq) /= 0) then
+             call ew31_cpl(fl(kq), Q2, cp(:,:,ia)); on(ia) = .true.
+          endif
+       enddo
+       if (.not. any(on)) return
+       if (.not. on(1)) then
+          ip(1:2) = ip([2, 1]); cl = cl(:,:,[2, 1]); cp = cp(:,:,[2, 1]); on = on([2, 1])
+       endif
+       k = ip(1); kq = ip(2); ident = on(2)
+       bb = bb .and. ew31_ccmatfor
+    elseif (ident) then
        if (fl(kqb) /= -f0) return
        k = ip(1); kq = ip(2); cQ2 = cq
     else
@@ -267,6 +290,9 @@ contains
        if (fl(kqb) /= -fl(kq)) return
        call ew31_cpl(fl(kq), Q2, cQ2)
     endif
+    if (ew31_mode /= 2) then
+       cl(:,:,1) = cq; cl(:,:,2) = cq; cp(:,:,1) = cQ2; cp(:,:,2) = cQ2
+    endif
     pm = 0
     pm(1,:) = -P(:,1); pm(5,:) = P(:,k); pm(2,:) = P(:,kqb); pm(6,:) = P(:,kq)
     pm(3,:) = P(:,7); pm(4,:) = -P(:,6)
@@ -276,7 +302,7 @@ contains
     w = 0
     do ie = 1, merge(1, 3, virt31_finite_only)
        epinv = evals(ie); epinv2 = epinv
-       call fourq_cpl(cq, cQ2, ident, w(ie), tr)
+       call fourq_cpl(cl(:,:,1), cp(:,:,1), cl(:,:,2), cp(:,:,2), ident, bb, w(ie), tr)
     enddo
     t = avg4*cnorm*tr
     v(0) = avg4*cnorm*w(1)
@@ -292,36 +318,40 @@ contains
   ! leptons enter as (4,3), as in me41; fixed by tree = me31,
   ! tests/harness_virt31). With photon + Z (ew31_mode /= 0)
   ! the interference of the boson on the two lines is dropped (me31).
-  subroutine fourq_cpl(cq, cQ2, ident, w, tr)
-    real(dp), intent(in) :: cq(2,2), cQ2(2,2)
-    logical, intent(in) :: ident
+  ! cqx, cQ2x: the couplings of the exchanged assignment (5 <-> 6; photon,
+  ! Z: = cq, cQ2; W: per assignment, 9 Oct); dropx: without the interference
+  ! of the two assignments (W on the pair in both, ew31_ccmatfor).
+  subroutine fourq_cpl(cq, cQ2, cqx, cQ2x, ident, dropx, w, tr)
+    real(dp), intent(in) :: cq(2,2), cQ2(2,2), cqx(2,2), cQ2x(2,2)
+    logical, intent(in) :: ident, dropx
     real(dp), intent(out) :: w, tr
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     common /zprods/ za, zb
     complex(dp), external :: atreez, a61z, a62z
     complex(dp) :: ta(2), la(2), tsa(2), lsa(2), lampx, lampsx, tamp, tamps
-    real(dp) :: a, b
+    real(dp) :: a, b, ax, bx
     integer :: polq, polb, polz
     w = 0; tr = 0
     do polq = 1, 2
        do polz = 1, 2
           do polb = 1, 2
              a = cq(polq,3-polz); b = cQ2(polb,3-polz)
+             ax = cqx(polq,3-polz); bx = cQ2x(polb,3-polz)
              ! the boson on the incoming line (1) and on the pair line (2)
              ta = [atreez(polq,polb,polz,5,2,6,1,4,3,za,zb)*a, -atreez(3-polb,3-polq,polz,2,5,1,6,4,3,za,zb)*b]
              la = [a61z(polq,polb,polz,5,2,6,1,4,3,za,zb)*a, -a61z(3-polb,3-polq,polz,2,5,1,6,4,3,za,zb)*b]
              call add(ta, la)
              tamp = sum(ta)
              if (ident) then
-                tsa = -[atreez(polq,polb,polz,6,2,5,1,4,3,za,zb)*a, -atreez(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)*b]
-                lsa = -[a61z(polq,polb,polz,6,2,5,1,4,3,za,zb)*a, -a61z(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)*b]
+                tsa = -[atreez(polq,polb,polz,6,2,5,1,4,3,za,zb)*ax, -atreez(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)*bx]
+                lsa = -[a61z(polq,polb,polz,6,2,5,1,4,3,za,zb)*ax, -a61z(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)*bx]
                 call add(tsa, lsa)
                 tamps = sum(tsa)
-                lampx = -(a62z(polq,polb,polz,6,2,5,1,4,3,za,zb)/xn*a &
-                     & - a62z(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)/xn*b)
+                lampx = -(a62z(polq,polb,polz,6,2,5,1,4,3,za,zb)/xn*ax &
+                     & - a62z(3-polb,3-polq,polz,2,6,1,5,4,3,za,zb)/xn*bx)
                 lampsx = a62z(polq,polb,polz,5,2,6,1,4,3,za,zb)/xn*a &
                      & - a62z(3-polb,3-polq,polz,2,5,1,6,4,3,za,zb)/xn*b
-                if (polq == polb) then
+                if (polq == polb .and. .not. dropx) then
                    tr = tr - 2/xn*real(tamp*conjg(tamps), dp)
                    w = w + xn/2*2*(real(tamp*conjg(lampx), dp) + real(tamps*conjg(lampsx), dp))
                 endif

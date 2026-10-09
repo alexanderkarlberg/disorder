@@ -38,6 +38,10 @@ program harness_lim41
         if (resolved3(P3, 0.02_dp)) exit
      enddo
      write(*,'(a,i2)') ' point', ipt
+     if (ew31_mode == 2) then
+        call cc_channels()
+        cycle
+     endif
      ! q g g -> q g g g: final q || g, g || g; initial q -> q g
      call ff('q;qgg   q||g  ', P3, [2,2,0,0], 2, 3, [2,2,0,0,0], 'qqg', 0.3_dp)
      call ff('q;qgg   g||g  ', P3, [2,2,0,0], 3, 2, [2,2,0,0,0], 'ggg', 0.4_dp)
@@ -69,6 +73,39 @@ program harness_lim41
   if (worst > 3d-3) stop 1   ! g -> Q Qbar limits averaged over two azimuths converge like sqrt(y)
 
 contains
+  ! W exchange (EW31 = "2 0": W-, e-), 9 Oct: the line u -> d, the pair (d, ubar)
+  subroutine cc_channels()
+    ! q g g g, g -> q qbar g g
+    call ff('W q;qgg    q||g ', P3, wf([2,1,0,0]), 2, 3, wf([2,1,0,0,0]), 'qqg', 0.3_dp)
+    call ff('W q;qgg    g||g ', P3, wf([2,1,0,0]), 3, 2, wf([2,1,0,0,0]), 'ggg', 0.4_dp)
+    call ff('W qb;qbgg  q||g ', P3, wf([-1,-2,0,0]), 2, 4, wf([-1,-2,0,0,0]), 'qqg', 0.6_dp)
+    call fi('W q;qgg    IS q>q', P3, wf([2,1,0,0]), 2, wf([2,1,0,0,0]), 'qq', 0.7_dp)
+    call ff('W g;qqbg   q||g ', P3, wf([0,1,-2,0]), 2, 3, wf([0,1,-2,0,0]), 'qqg', 0.35_dp)
+    call ff('W g;qqbg   g||g ', P3, wf([0,1,-2,0]), 4, 2, wf([0,1,-2,0,0]), 'ggg', 0.55_dp)
+    call fi('W g;gqqb   IS g>q', P3, wf([2,1,0,0]), 3, wf([0,1,0,0,-2]), 'gq', 0.6_dp)
+    ! W on the line, other pair
+    call ff('W q;qQQb   q||g ', P3, wf([2,1,3,-3]), 2, 4, wf([2,1,3,-3,0]), 'qqg', 0.4_dp)
+    call ff('W q;qgg>qQQb   ', P3, wf([2,1,0,0]), 3, 2, wf([2,1,3,0,-3]), 'gqq', 0.45_dp)
+    call fi('W q;qQQb   IS q>q', P3, wf([2,1,3,-3]), 2, wf([2,1,3,-3,0]), 'qq', 0.5_dp)
+    ! EXX (d d dbar), EXY (d u ubar)
+    call ff('W q;qqqb   q||g ', P3, wf([2,1,1,-1]), 3, 2, wf([2,1,1,-1,0]), 'qqg', 0.4_dp)
+    call ff('W q;qgg>qqqb   ', P3, wf([2,1,0,0]), 3, 2, wf([2,1,1,0,-1]), 'gqq', 0.5_dp)
+    call ff('W q;duub   q||g ', P3, wf([2,1,2,-2]), 2, 4, wf([2,1,2,-2,0]), 'qqg', 0.4_dp)
+    call ff('W q;duub   ub||g', P3, wf([2,1,2,-2]), 4, 3, wf([2,1,2,-2,0]), 'qqg', 0.6_dp)
+    call ff('W q;qgg>duub   ', P3, wf([2,1,0,0]), 3, 2, wf([2,1,2,0,-2]), 'gqq', 0.5_dp)
+    call fi('W q;duub   IS q>q', P3, wf([2,1,2,-2]), 3, wf([2,1,2,-2,0]), 'qq', 0.4_dp)
+    ! W on the pair only (d d ubar: identical d; d s cbar)
+    call ff('W d;ddub   q||g ', P3, wf([1,1,1,-2]), 2, 4, wf([1,1,1,-2,0]), 'qqg', 0.4_dp)
+    call ff('W d;ddub   ub||g', P3, wf([1,1,1,-2]), 4, 2, wf([1,1,1,-2,0]), 'qqg', 0.6_dp)
+    call fi('W d;ddub   IS q>q', P3, wf([1,1,1,-2]), 3, wf([1,1,1,-2,0]), 'qq', 0.5_dp)
+    call ff('W d;dscb   q||g ', P3, wf([1,1,3,-4]), 2, 3, wf([1,1,3,-4,0]), 'qqg', 0.3_dp)
+    ! g -> q qbar Q Qbar
+    call fi('W g;qQQb   IS g>q', P3, wf([2,1,3,-3]), 2, wf([0,1,3,-3,-2]), 'gq', 0.5_dp)
+    call ff('W g;dub>QQb    ', P3, wf([0,1,-2,0]), 4, 2, wf([0,1,-2,3,-3]), 'gqq', 0.4_dp)
+    call ff('W g;dub>ddb    ', P3, wf([0,1,-2,0]), 4, 3, wf([0,1,-2,1,-1]), 'gqq', 0.6_dp)
+    call ff('W g;dub>uub    ', P3, wf([0,1,-2,0]), 4, 2, wf([0,1,-2,2,-2]), 'gqq', 0.45_dp)
+    call fi('W g;duub   IS g>q', P3, wf([2,1,2,-2]), 4, wf([0,1,2,-2,-2]), 'gq', 0.3_dp)
+  end subroutine cc_channels
 
   logical function resolved3(P3, frac)
     real(dp), intent(in) :: P3(4,7), frac
@@ -250,4 +287,16 @@ contains
     q = p
     q(3) = g*(p(3) + beta*p(4)); q(4) = g*(p(4) + beta*p(3))
   end function boostz
+  ! W+ (e+, nu): the W- channel lists with up and down exchanged (u <-> d,
+  ! c <-> s), 9 Oct
+  function wf(f) result(g)
+    integer, intent(in) :: f(:)
+    integer :: g(size(f)), i
+    integer, parameter :: sw(0:5) = [0, 2, 1, 4, 3, 5]
+    g = f
+    if (ew31_lepton /= 1 .and. ew31_lepton /= 2) return
+    do i = 1, size(f)
+       g(i) = sign(sw(abs(f(i))), f(i))
+    enddo
+  end function wf
 end program harness_lim41

@@ -13,7 +13,9 @@
 ! final state, with alpha = 1/137 and divided by (alpha_s/2pi)^3 (as me31
 ! and DISENT's MATFOR, one power of alpha_s/2pi more); no symmetry factors
 ! for identical final-state partons. Zero for flavour assignments that do
-! not occur.
+! not occur. W exchange (9 Oct): as me31 (four_quark_cc, gluon_cc;
+! msq_gqqQQg with the couplings of the exchanged pairing); checked in all
+! single-unresolved limits against me31 (tests/harness_lim41, EW31 = "2 l").
 !-----------------------------------------------------------------------
 module me41
   use ew31
@@ -61,9 +63,9 @@ contains
           ! the quark-helicity label exchanged, ew31)
           k = 0
           do i = 2, 5
-             if (fl(i) == fl(1)) k = i
+             if (fl(i) == ew31_out(fl(1))) k = i
           enddo
-          if (k == 0) return
+          if (k == 0 .or. ew31_out(fl(1)) == 0) return
           n = 0
           do i = 2, 5
              if (i /= k) then
@@ -85,7 +87,7 @@ contains
                 n = n + 1; ig(n) = i
              endif
           enddo
-          if (iq == 0 .or. iqb == 0 .or. fl(iq) /= -fl(iqb)) return
+          if (iq == 0 .or. iqb == 0 .or. fl(iq) /= ew31_out(-fl(iqb))) return
           pm(1,:) = -P(:,1); pm(2,:) = P(:,iq); pm(5,:) = P(:,iqb)
           pm(6,:) = P(:,ig(1)); pm(7,:) = P(:,ig(2))
           call spinoru(7, pm, za, zb)
@@ -114,11 +116,13 @@ contains
        if (nsame /= 2 .or. n /= 1) return
        pm(1,:) = -P(:,1); pm(6,:) = P(:,kqb(1)); pm(7,:) = P(:,kg)
        call ew31_cpl(fl(1), Q2, c); c = c(:,[2, 1])
-       if (fl(ip(1)) == fl(1) .and. fl(ip(2)) == fl(1)) then
+       if (ew31_mode == 2) then
+          call four_quark_cc()
+       elseif (fl(ip(1)) == fl(1) .and. fl(ip(2)) == fl(1)) then
           if (fl(kqb(1)) /= -fl(1)) return
           pm(2,:) = P(:,ip(1)); pm(5,:) = P(:,ip(2))
           call spinoru(7, pm, za, zb)
-          call msq_gqqQQg(2, 1, 5, 6, 7, 4, 3, c, c, ew31_mode /= 0, MN, MI)
+          call msq_gqqQQg(2, 1, 5, 6, 7, 4, 3, c, c, c, c, ew31_mode /= 0, MN, MI)
           msq = MI
        else
           if (fl(ip(1)) == fl(1)) then
@@ -132,7 +136,7 @@ contains
           pm(2,:) = P(:,k); pm(5,:) = P(:,iq)
           call spinoru(7, pm, za, zb)
           call ew31_cpl(fl(iq), Q2, cb); cb = cb(:,[2, 1])
-          call msq_gqqQQg(2, 1, 5, 6, 7, 4, 3, c, cb, ew31_mode /= 0, MN, MI)
+          call msq_gqqQQg(2, 1, 5, 6, 7, 4, 3, c, cb, cb, c, ew31_mode /= 0, MN, MI)
           msq = MN
        endif
     else
@@ -146,6 +150,11 @@ contains
           endif
        enddo
        if (nsame /= 2 .or. n /= 2) return
+       if (ew31_mode == 2) then
+          call gluon_cc()
+          msq = avg*cnorm*32*msq
+          return
+       endif
        ! pair each quark with the antiquark of its flavour
        if (fl(ineg(1)) /= -fl(ipos(1))) ineg = ineg([2, 1])
        if (fl(ineg(1)) /= -fl(ipos(1)) .or. fl(ineg(2)) /= -fl(ipos(2))) return
@@ -155,10 +164,82 @@ contains
        call spinoru(7, pm, za, zb)
        call ew31_cpl(fl(ipos(1)), Q2, c); c = c(:,[2, 1])
        call ew31_cpl(fl(ipos(2)), Q2, cb); cb = cb(:,[2, 1])
-       call msq_gqqQQg(2, 5, 6, 7, 1, 4, 3, c, cb, ew31_mode /= 0, MN, MI)
+       call msq_gqqQQg(2, 5, 6, 7, 1, 4, 3, c, cb, cb, c, ew31_mode /= 0, MN, MI)
        msq = merge(MI, MN, fl(ipos(1)) == fl(ipos(2)))
     endif
     ! MCFM's four-quark normalisation (qqb_z2jet_g): 4 g^6 e^4 8 MN
     msq = avg*cnorm*32*msq
+  contains
+    ! W exchange (9 Oct), as me31's four_quark_cc: assignment ia puts ip(ia)
+    ! on the incoming line; the W on the line (cl) if that quark is
+    ! ew31_out of the incoming one, on the pair (cp) if the incoming quark
+    ! continues; both assignments: MI with the exchanged pairing's
+    ! couplings (cl, cp of assignment 2 on the lines 5-1, 2-6)
+    subroutine four_quark_cc()
+      real(dp) :: cl(2,2,2), cp(2,2,2), M1, M2
+      integer :: ia, kq
+      logical :: on(2), bb
+      cl = 0; cp = 0; on = .false.; bb = .true.
+      do ia = 1, 2
+         k = ip(ia); kq = ip(3 - ia)
+         if (ew31_out(fl(1)) /= 0 .and. fl(k) == ew31_out(fl(1)) .and. fl(kqb(1)) == -fl(kq)) then
+            cl(:,:,ia) = c; on(ia) = .true.; bb = .false.
+         elseif (fl(k) == fl(1) .and. ew31_out(-fl(kqb(1))) == fl(kq) .and. fl(kq) /= 0) then
+            call ew31_cpl(fl(kq), Q2, cp(:,:,ia)); cp(:,:,ia) = cp(:,[2, 1],ia); on(ia) = .true.
+         endif
+      enddo
+      if (.not. any(on)) return
+      if (.not. on(1)) then
+         ip(1:2) = ip([2, 1]); cl = cl(:,:,[2, 1]); cp = cp(:,:,[2, 1]); on = on([2, 1])
+      endif
+      pm(2,:) = P(:,ip(1)); pm(5,:) = P(:,ip(2))
+      call spinoru(7, pm, za, zb)
+      call msq_gqqQQg(2, 1, 5, 6, 7, 4, 3, cl(:,:,1), cp(:,:,1), cl(:,:,2), cp(:,:,2), .false., MN, MI)
+      if (.not. on(2)) then
+         msq = MN
+      elseif (bb .and. ew31_ccmatfor) then
+         ! the two W-on-the-pair assignments without their interference
+         M1 = MN
+         call msq_gqqQQg(5, 1, 2, 6, 7, 4, 3, cl(:,:,2), cp(:,:,2), cl(:,:,1), cp(:,:,1), .false., M2, MI)
+         msq = M1 + M2
+      else
+         msq = MI
+      endif
+    end subroutine four_quark_cc
+    ! W exchange: g -> q qbar Q Qbar with the W on one pair, the other
+    ! neutral; pairings (q1 qb1, q2 qb2) and (q2 qb1, q1 qb2)
+    subroutine gluon_cc()
+      real(dp) :: ce(2,2,4)
+      integer :: kk
+      logical :: on(2)
+      ce = 0; on = .false.
+      ! line couplings in msq_gqqQQg's order: q1-qb1, q2-qb2, q2-qb1, q1-qb2
+      call wpair(ipos(1), ineg(1), ipos(2), ineg(2), ce(:,:,1))
+      call wpair(ipos(2), ineg(2), ipos(1), ineg(1), ce(:,:,2))
+      call wpair(ipos(2), ineg(1), ipos(1), ineg(2), ce(:,:,3))
+      call wpair(ipos(1), ineg(2), ipos(2), ineg(1), ce(:,:,4))
+      on(1) = any(ce(:,:,1:2) /= 0); on(2) = any(ce(:,:,3:4) /= 0)
+      if (.not. any(on)) return
+      if (.not. on(1)) then
+         ineg = ineg([2, 1]); ce = ce(:,:,[4, 3, 2, 1]); on = on([2, 1])
+      endif
+      pm(1,:) = -P(:,1)
+      pm(2,:) = P(:,ipos(1)); pm(5,:) = P(:,ineg(1))
+      pm(6,:) = P(:,ipos(2)); pm(7,:) = P(:,ineg(2))
+      call spinoru(7, pm, za, zb)
+      call msq_gqqQQg(2, 5, 6, 7, 1, 4, 3, ce(:,:,1), ce(:,:,2), ce(:,:,3), ce(:,:,4), .false., MN, MI)
+      kk = count(on)
+      msq = merge(MI, MN, kk == 2)
+    end subroutine gluon_cc
+    ! the coupling of the W on the line (iq, iqb) if (jq, jqb) is a neutral
+    ! pair, else zero
+    subroutine wpair(iq, iqb, jq, jqb, cw)
+      integer, intent(in) :: iq, iqb, jq, jqb
+      real(dp), intent(out) :: cw(2,2)
+      cw = 0
+      if (fl(jqb) /= -fl(jq)) return
+      if (ew31_out(-fl(iqb)) /= fl(iq)) return
+      call ew31_cpl(fl(iq), Q2, cw); cw = cw(:,[2, 1])
+    end subroutine wpair
   end subroutine me41_tree
 end module me41

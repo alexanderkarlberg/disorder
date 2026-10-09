@@ -47,6 +47,10 @@
 ! -y (the odd part breaks m2(1,1) = m2(2,2); it integrates to zero). The
 ! closed-loop vector term of vi (virt31_vloop) is linear in the line's
 ! coupling and weighted apart (photon e_q sum e; NC ew31_wl).
+! W exchange (EW31 = "2 lepton", 9 Oct): representative channels of
+! generation 1 weighted per incoming flavour (cc_reps, cc_w; unit CKM in
+! (u,d), (c,s), no coupling for b; tests/harness_ccsum: = the sum over all
+! final-state flavours).
 !-----------------------------------------------------------------------
 module nlo31_mod
   use ew31
@@ -413,9 +417,9 @@ contains
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,7), dphi, as, fpdf(-5:5), w, x, fa(-5:5)
     real(dp) :: u1(3), u2(3), u4(3), m3(3,3), c3(3,3), t(3), eq1, eq2, acc(nv)
-    real(dp) :: v1(3,2), v2(3,2), v4(3,2), va(3,2), vb(3,2), lv1(3), lv2(3)
+    real(dp) :: v1(3,2), v2(3,2), v4(3,2), va(3,2), vb(3,2), lv1(3), lv2(3), w1(3,6), w2(3,6)
     logical :: ok
-    integer :: f, Q, k
+    integer :: f, Q, k, j1, j1o, j2, j2o
     res = 0
     if (usepsmc .and. mode >= 2) then
        call lepton2(r(1:2), Q2, y, xB, jac, ok)
@@ -443,7 +447,23 @@ contains
        x = eta + (1 - eta)*r(size(r))
        call pdfs(eta/x, sqrt(Q2), fa)
     endif
-    if (ew31_mode /= 0) then
+    if (ew31_mode == 2) then
+       ! W exchange (9 Oct): representative channels, weighted per incoming
+       ! flavour (cc_w; tests/harness_ccsum)
+       call cc_reps(j1, j1o, j2, j2o)
+       call born_eval(Pk, [j1, j1o, 0, 0], Q2, w1(:,1)); call born_eval(Pk, [j1, j1o, 5, -5], Q2, w1(:,2))
+       call born_eval(Pk, [j1, j1o, j1o, -j1o], Q2, w1(:,3)); call born_eval(Pk, [j1, j1o, j1, -j1], Q2, w1(:,4))
+       call born_eval(Pk, [j1, j1, j2o, -j2], Q2, w1(:,5)); call born_eval(Pk, [j1o, j1o, j1o, -j1], Q2, w1(:,6))
+       call born_eval(Pk, [-j1o, -j1, 0, 0], Q2, w2(:,1)); call born_eval(Pk, [-j1o, -j1, -5, 5], Q2, w2(:,2))
+       call born_eval(Pk, [-j1o, -j1, -j1, j1], Q2, w2(:,3)); call born_eval(Pk, [-j1o, -j1, -j1o, j1o], Q2, w2(:,4))
+       call born_eval(Pk, [-j1o, -j1o, -j2, j2o], Q2, w2(:,5)); call born_eval(Pk, [-j1, -j1, -j1, j1o], Q2, w2(:,6))
+       call born_eval(Pk, [0, j1o, -j1, 0], Q2, t)
+       res = bterm(0, 2*t)
+       do f = -5, 5
+          if (f == 0) cycle
+          res = res + bterm(f, matmul(merge(w1, w2, f > 0), cc_w(f, j1, j1o, j2, j2o, 0.5_dp)))
+       enddo
+    elseif (ew31_mode /= 0) then
        ! photon + Z: basis values (diagonal, off-diagonal) on the line of
        ! flavour 1 (and 2), weighted per flavour
        do k = 1, 2
@@ -729,7 +749,9 @@ contains
     endif
   contains
     subroutine eval_sg()
-       if (ew31_mode /= 0) then
+       if (ew31_mode == 2) then
+          call eval_cc(); return
+       elseif (ew31_mode /= 0) then
           call eval_nc(); return
        endif
        ! unit-charge values
@@ -795,6 +817,27 @@ contains
           enddo
        enddo
     end subroutine eval_nc
+    ! W exchange: representative channels as born_part (gluon: g -> q qbar
+    ! g g, and with a neutral pair: different, identical quarks, identical
+    ! antiquarks)
+    subroutine eval_cc()
+       real(dp) :: r1(nv,6), r2(nv,6), rg(nv,4)
+       integer :: j1, j1o, j2, j2o
+       call cc_reps(j1, j1o, j2, j2o)
+       call real_evalv(Pk, [j1, j1o, 0, 0, 0], F4, r1(:,1)); call real_evalv(Pk, [j1, j1o, 5, -5, 0], F4, r1(:,2))
+       call real_evalv(Pk, [j1, j1o, j1o, -j1o, 0], F4, r1(:,3)); call real_evalv(Pk, [j1, j1o, j1, -j1, 0], F4, r1(:,4))
+       call real_evalv(Pk, [j1, j1, j2o, -j2, 0], F4, r1(:,5)); call real_evalv(Pk, [j1o, j1o, j1o, -j1, 0], F4, r1(:,6))
+       call real_evalv(Pk, [-j1o, -j1, 0, 0, 0], F4, r2(:,1)); call real_evalv(Pk, [-j1o, -j1, -5, 5, 0], F4, r2(:,2))
+       call real_evalv(Pk, [-j1o, -j1, -j1, j1, 0], F4, r2(:,3)); call real_evalv(Pk, [-j1o, -j1, -j1o, j1o, 0], F4, r2(:,4))
+       call real_evalv(Pk, [-j1o, -j1o, -j2, j2o, 0], F4, r2(:,5)); call real_evalv(Pk, [-j1, -j1, -j1, j1o, 0], F4, r2(:,6))
+       call real_evalv(Pk, [0, j1o, -j1, 0, 0], F4, rg(:,1)); call real_evalv(Pk, [0, j1o, -j1, 5, -5], F4, rg(:,2))
+       call real_evalv(Pk, [0, j1o, -j1, j1o, -j1o], F4, rg(:,3)); call real_evalv(Pk, [0, j1o, -j1, j1, -j1], F4, rg(:,4))
+       sg = fpdf(0)*2*matmul(rg, [0.5_dp, 3.0_dp, 0.5_dp, 0.5_dp])
+       do f = -5, 5
+          if (f == 0) cycle
+          sg = sg + fpdf(f)*matmul(merge(r1, r2, f > 0), cc_w(f, j1, j1o, j2, j2o, 1.0_dp/6))
+       enddo
+    end subroutine eval_cc
     subroutine real_basis(fl, k, fb, val)
        integer, intent(in) :: fl(5), k, fb
        real(dp), intent(out) :: val(nv)
@@ -1561,6 +1604,36 @@ contains
     real(dp), external :: alphasPDF
     alphasPDF_ = alphasPDF(q)
   end function alphasPDF_
+
+  ! W exchange: the representative flavours (generation 1: line j1 -> j1o;
+  ! generation 2: j2 -> j2o); W- (e-, nubar): u -> d, W+: d -> u
+  subroutine cc_reps(j1, j1o, j2, j2o)
+    integer, intent(out) :: j1, j1o, j2, j2o
+    j1 = merge(2, 1, ew31_lepton == 0 .or. ew31_lepton == 3)
+    j1o = ew31_out(j1); j2 = j1 + 2; j2o = j1o + 2
+  end subroutine cc_reps
+
+  ! the multiplicities of the representative channels for an incoming
+  ! (anti)quark f (unit CKM in (u,d), (c,s), b without coupling):
+  ! (line + gluons, line + neutral pair (s, c or b), identical quarks on the
+  ! line and pair, line + pair of its partner, the other generation's W
+  ! pair, the W pair with an identical quark); fg = the symmetry factor of
+  ! the gluons (1/2 for 3+1, 1/6 for 4+1); tests/harness_ccsum
+  function cc_w(f, j1, j1o, j2, j2o, fg) result(w)
+    integer, intent(in) :: f, j1, j1o, j2, j2o
+    real(dp), intent(in) :: fg
+    real(dp) :: w(6)
+    integer :: a
+    a = abs(f)
+    w = 0
+    if ((f > 0 .and. (a == j1 .or. a == j2)) .or. (f < 0 .and. (a == j1o .or. a == j2o))) then
+       w = [fg, 3.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 0.0_dp]
+    elseif (a == 5) then
+       w(5) = 2
+    else
+       w(5) = 1; w(6) = 0.5_dp
+    endif
+  end function cc_w
 end module nlo31_mod
 
 program nlo31

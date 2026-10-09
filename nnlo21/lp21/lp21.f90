@@ -73,6 +73,10 @@ module lp21
   real(dp), allocatable, save :: tabg(:,:,:,:)    ! (0:nt, 9, nbc, 0:nqg-1)
   public :: lp21_init, lp21_born, lp21_beam_direct, lp21_shift, beam_at
   public :: lp21_grid_build, lp21_grid_load, lp21_setq
+  ! W exchange (9 Oct): b without coupling, so not in the down-type classes;
+  ! set before lp21_init/grid_build/grid_load. Grid tables built with it
+  ! carry an extra flag word (the loader refuses a mismatch)
+  logical, public :: lp21_nodn = .false.
 contains
 
   ! MCFM's common blocks at mu = mu_F = Q; table of the beam coefficients
@@ -130,6 +134,7 @@ contains
        open(newunit=u, file=prefix//'_'//trim(num)//'.tab', form='unformatted', access='stream', status='replace')
        write(u) nt, t0, th, tQ
        write(u) tab
+       if (lp21_nodn) write(u) 1
        close(u)
     enddo
   end subroutine lp21_grid_build
@@ -157,7 +162,8 @@ contains
        open(newunit=u, file=prefix//'_'//trim(num)//'.tab', form='unformatted', access='stream', status='old')
        read(u) n, a, b, q
        inquire(unit=u, size=sz)
-       if (sz /= 28 + 8_8*(n + 1)*9*nbc) stop 'lp21_grid_load: not a table of nbc beam classes (old format: rebuild)'
+       if (sz /= 28 + 8_8*(n + 1)*9*nbc + merge(4, 0, lp21_nodn)) &
+            & stop 'lp21_grid_load: not a table of nbc beam classes for this boson (old format, or b in the down classes: rebuild)'
        if (i == 0) then
           nt = n; t0 = a; th = b; q0 = q
           if (allocated(tabg)) deallocate(tabg)
@@ -216,6 +222,9 @@ contains
     w = 0
     w(cup, 1) = 1; w(-cup, 2) = 1
     w(cdn, 3) = 1; w(-cdn, 4) = 1
+    if (lp21_nodn) then
+       w(5, 3) = 0; w(-5, 4) = 0
+    endif
     w(0, 5) = 1
   end subroutine class_masks
 
