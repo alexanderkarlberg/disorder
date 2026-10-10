@@ -1,0 +1,58 @@
+# NNLOJET v1.0.2 (GPL-3.0-or-later): local observable dis_tauzq = 1 - 2 sum_{p_z>0} p_z/Q
+# (Breit frame, current hemisphere, w.r.t. the boson axis; = nnlo21's tau_zQ),
+# for the event-shape validation of nnlo21 (9 Oct 2026). Apply in the NNLOJET
+# source tree with: patch -p1 < nnlojet-v1.0.2-dis_tauzq.patch
+--- a/driver/core/EvalDIS.f90	2026-10-09 19:04:58.390385109 +0200
++++ b/driver/core/EvalDIS.f90	2026-10-09 19:04:58.405662971 +0200
+@@ -534,6 +534,22 @@
+     end if
+   end function eval_dis_thrust
+ 
++  !> tau_zQ = 1 - 2 sum_{current hemisphere} p_z / Q (Breit frame, w.r.t. the
++  !> boson axis, normalised to Q: infrared safe without an energy cut).
++  !> Added locally (9 Oct 2026) for the cross-check with disorder's nnlo21.
++  real(kind=wp) function eval_dis_tauzq(npar)
++    integer, intent(in) :: npar
++    real(kind=wp) :: top
++    integer :: i
++
++    top = 0._wp
++    do i = 4, npar
++      ! Select only particles in the current hemisphere (pz > 0)
++      if (kin(npar)%p(3, i) > 0._wp) top = top + kin(npar)%p(3, i)
++    end do
++    eval_dis_tauzq = 1._wp - 2._wp*top/value_q_dis
++  end function eval_dis_tauzq
++
+   real(kind=wp) function eval_dis_JB(npar)
+     integer, intent(in) :: npar
+     real(kind=wp) :: top, bot, absp
+--- a/driver/core/Observables.f90	2026-10-09 19:04:58.391488626 +0200
++++ b/driver/core/Observables.f90	2026-10-09 19:04:58.406499853 +0200
+@@ -2172,6 +2172,8 @@
+                     EvalObs_t(eval=eval_dis_xi2, min_njets=2))
+       call bind_obs("dis_thrust", "Thrust in DIS w.r.t. boson axis (tau=1-T)", &
+                     EvalObs_t(eval=eval_dis_thrust))
++      call bind_obs("dis_tauzq", "tau_zQ = 1 - 2 sum_CH p_z/Q (local addition)", &
++                    EvalObs_t(eval=eval_dis_tauzq))
+       call bind_obs("dis_thrust_c", "Thrust tau w.r.t. thrust axis in DIS", &
+                     EvalObs_t(eval_mem=eval_DIS_Taxis, imem=1))
+       call bind_obs("dis_JB", "Jet Broadening w.r.t. boson axis in DIS", &
+@@ -2313,6 +2315,8 @@
+                     EvalObs_t(eval=eval_dis_xi2, min_njets=2))
+       call bind_obs("dis_thrust", "Thrust in DIS w.r.t. boson axis (tau=1-T)", &
+                     EvalObs_t(eval=eval_dis_thrust))
++      call bind_obs("dis_tauzq", "tau_zQ = 1 - 2 sum_CH p_z/Q (local addition)", &
++                    EvalObs_t(eval=eval_dis_tauzq))
+       call bind_obs("dis_thrust_c", "Thrust tau w.r.t. thrust axis in DIS", &
+                     EvalObs_t(eval_mem=eval_DIS_Taxis, imem=1))
+       call bind_obs("dis_JB", "Jet Broadening w.r.t. boson axis in DIS", &
+@@ -2450,6 +2454,8 @@
+                     EvalObs_t(eval=eval_dis_xi2, min_njets=2))
+       call bind_obs("dis_thrust", "Thrust in DIS w.r.t. boson axis (tau=1-T)", &
+                     EvalObs_t(eval=eval_dis_thrust))
++      call bind_obs("dis_tauzq", "tau_zQ = 1 - 2 sum_CH p_z/Q (local addition)", &
++                    EvalObs_t(eval=eval_dis_tauzq))
+       call bind_obs("dis_thrust_c", "Thrust tau w.r.t. thrust axis in DIS", &
+                     EvalObs_t(eval_mem=eval_DIS_Taxis, imem=1))
+       call bind_obs("dis_JB", "Jet Broadening w.r.t. boson axis in DIS", &

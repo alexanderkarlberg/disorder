@@ -14,7 +14,7 @@ for f in $D/mcfm/*.f $D/mcfm/loop/*.f; do
   o=$(basename $(dirname $f))_$(basename $f .f).o
   $FF -c $f -o $o; O="$O $o"
 done
-for m in psmc born31 me41 dip41 virt31 iop31 nlo31; do
+for m in ew31 psmc born31 me41 dip41 virt31 iop31 nlo31; do
   $F9 -c $D/$m.f90 -o $m.o; O="$O $m.o"
 done
 L=$($LC --libdir)

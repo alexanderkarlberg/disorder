@@ -1,14 +1,18 @@
 !-----------------------------------------------------------------------
 ! Below-cut part of tau_2-sliced NNLO DIS 2+1 at fixed (x, Q^2): the 2+1
-! Born (photon exchange) in bins of tau_zQ, times the leading-power
+! Born (photon; photon + Z with EW31 as dis31/nlo31) in bins of tau_zQ, times the leading-power
 ! cumulant of nnlo21/lp21 for each tau_cut. With the above-cut part
 ! (dis31/nlo31 in mode 1) this gives dsigma/dx dQ^2 [pb/GeV^2]:
 !   b0: O(alpha_s)   Born
 !   b1: O(alpha_s^2) below the cut   (+ nlo31 lo above it = NLO 2+1 correction)
 !   b2: O(alpha_s^3) below the cut   (+ nlo31 vi + kp + r above it = NNLO 2+1 correction)
-! Born matrix elements: DISENT's MATTHR (photon exchange; alpha_s/2pi
-! factored out, the normalisation of born31/me41), parton 2 the quark and 3
-! the gluon (quark Born) or the antiquark (gluon Born).
+! Born matrix elements: DISENT's MATTHR (alpha_s/2pi factored out, the
+! normalisation of born31/me41), parton 2 the quark and 3 the gluon (quark
+! Born) or the antiquark (gluon Born). Photon + Z (8 Oct): the quark Born
+! is S w1 + O w2 (S = (p1.p6)^2 + (p2.p7)^2, O = (p1.p7)^2 + (p2.p6)^2 in
+! units of the unit-charge QQ/(S + O), w = ew31_w of the flavour; = MATTHR,
+! nnlo21/tests/harness_born21), the gluon Born with (w1 + w2)/2 summed over
+! the produced flavour (the parity-odd part is odd under q <-> qbar).
 !
 ! Usage: sliced21 part ncall itmx seed x Q2 [softtable [h [pdfmask]]]   (part = b0, b1, b2;
 ! tabchk: beam table at node spacing h (default 0.02) against direct evaluation)
@@ -20,6 +24,12 @@
 !   sliced21 mktab i0 i1 <prefix> [dlnQ [h]]   (nodes i0..i1, in parallel;
 !                                    defaults 0.1 in ln Q, 0.02 in ln(xi/(1-xi)))
 !   sliced21 tabchkg <prefix>          (grid against direct evaluation)
+!
+! W exchange (EW31 = "2 lepton", 9 Oct): only the beam classes the W couples
+! to, b out of the down-type classes (lp21_nodn: separate beam tables), the
+! gluon class with the two W pairs, no closed loop; 2+1 Born and one loop =
+! MATTHR/VIRTHR (tests/harness_born21 -noNC -CC). ZFIX = 3 (mode 2): tau_zQ
+! bins in the inclusive cuts (event shape, against NNLOJET).
 !
 ! Mode 3 (P2B, as dis31/nlo31 mode 3): sliced21 part ncall itmx seed p2b <table prefix> [softtable]
 ! 1+1 lab-frame jet bins with O(2+1 Born) - O(projected 1+1 Born) per event
@@ -174,7 +184,7 @@ contains
     real(dp), intent(in) :: Pk(4,6), Q2, xB, eta, jac, dphi, wgt
     real(dp), external :: alphasPDF
     real(dp) :: P(4,7), as, fpdf(-5:5), w, Q, tz
-    real(dp) :: QQ, GQ, born(3), f0(3), c1(ntc,3), c2(ntc,3), val(ntc), mu(3)
+    real(dp) :: QQ, GQ, born(nbc), f0(nbc), c1(ntc,nbc), c2(ntc,nbc), val(ntc), mu(nbc), wk(2,nbc), nfk(2,nbc), fc(nbc), rS
     logical :: inb(nobmax)
     real(dp) :: dp2b(nobmax)
     integer :: b, k, c
@@ -208,20 +218,27 @@ contains
     as = alphasPDF(Q)
     call pdfs(eta, Q, fpdf)
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))
-    born(1) = QQ*4.0_dp/9*(fpdf(2) + fpdf(-2) + fpdf(4) + fpdf(-4))
-    born(2) = QQ*1.0_dp/9*(fpdf(1) + fpdf(-1) + fpdf(3) + fpdf(-3) + fpdf(5) + fpdf(-5))
-    born(3) = GQ*11.0_dp/9*fpdf(0)
+    ! couplings of the beam classes (lp21: up q, up qbar, down q, down qbar,
+    ! gluon) per helicity class S, O
+    call class_weights(Q2, wk, nfk)
+    mu(1:4) = QQ; mu(5) = GQ
     select case (trim(bpart))
     case ('b0')
+       rS = (dd(1,6)**2 + dd(2,7)**2)/(dd(1,6)**2 + dd(1,7)**2 + dd(2,7)**2 + dd(2,6)**2)
+       fc = [fpdf(2) + fpdf(4), fpdf(-2) + fpdf(-4), fpdf(1) + fpdf(3) + fpdf(5), &
+            & fpdf(-1) + fpdf(-3) + fpdf(-5), fpdf(0)]
+       if (lp21_nodn) fc(3:4) = fc(3:4) - [fpdf(5), fpdf(-5)]
+       do c = 1, nbc
+          born(c) = mu(c)*fc(c)*merge(rS*wk(1,c) + (1 - rS)*wk(2,c), wk(1,c), c <= 4)
+       enddo
        val = sum(born)
     case ('b1', 'b2')
-       call lp21_born(P, eta, ntc, tcs, f0, c1, c2)
+       call lp21_born(P, eta, ntc, tcs, wk, nfk, f0, c1, c2)
        ! unit-charge matrix element times the cumulant coefficients (which
-       ! carry the e^2-weighted PDFs themselves; with a PDF mask a class can
+       ! carry the couplings and PDFs themselves; with a PDF mask a class can
        ! have f0 = 0 but c1, c2 /= 0 through the off-diagonal beam functions)
-       mu(1:2) = QQ; mu(3) = GQ*11.0_dp/9
        val = 0
-       do c = 1, 3
+       do c = 1, nbc
           if (trim(bpart) == 'b1') then
              val = val + mu(c)*c1(:,c)*(as/(2*pi))
           else
@@ -253,6 +270,62 @@ contains
       dd = mdot(P(:,i), P(:,j))
     end function dd
   end function b21_eval
+
+  ! couplings wk(k, c) of lp21's beam classes c for hard21's helicity
+  ! classes k (S, O): photon e_q^2; photon + Z ew31_w of a flavour of the
+  ! class; gluon summed over the produced flavour. nfk(k, c): the coupling
+  ! ratio of hard21's two-loop N_F,V term (boson on a closed quark loop),
+  ! sum_{(h,l) in k} c(h,l) cV(l) / sum c(h,l)^2 with c = ew31_cpl(-f) (the
+  ! convention of ew31_w) and cV(l) = sum_q (c_q(1,l) + c_q(2,l))/2 the
+  ! vector coupling of the loop (photon: sum e_q/e_q; the axial part, which
+  ! cancels in each massless isodoublet, is dropped; docs/nc-dropped-terms.md)
+  subroutine class_weights(Q2, wk, nfk)
+    real(dp), intent(in) :: Q2
+    real(dp), intent(out) :: wk(2,nbc), nfk(2,nbc)
+    integer, parameter :: fr(4) = [2, -2, 1, -1]
+    real(dp) :: cm(2,2), cV(2), num(2), den(2), ng(2)
+    integer :: c, Q, l
+    cV = 0
+    if (ew31_mode /= 2) then
+       do Q = 1, 5
+          call ew31_cpl(Q, Q2, cm)
+          cV = cV + (cm(1,:) + cm(2,:))/2
+       enddo
+    endif
+    do c = 1, 4
+       call ew31_cpl(-fr(c), Q2, cm)
+       call class_sums(cm, num, den)
+       wk(:,c) = den/2; nfk(:,c) = num/den
+       ! W: only the classes the W couples to (no closed loop)
+       if (ew31_mode == 2 .and. ew31_out(fr(c)) == 0) wk(:,c) = 0
+       if (ew31_mode == 2) nfk(:,c) = 0
+    enddo
+    if (ew31_mode == 2) then
+       ! g -> q qbar': the two W pairs of (u,d), (c,s)
+       call ew31_cpl(-1, Q2, cm)
+       call class_sums(cm, num, den)
+       wk(:,5) = 2*sum(den)/4; nfk(:,5) = 0
+       return
+    endif
+    ng = 0; wk(:,5) = 0
+    do Q = 1, 5
+       call ew31_cpl(-Q, Q2, cm)
+       call class_sums(cm, num, den)
+       ng = ng + [sum(num), sum(den)]; wk(:,5) = wk(:,5) + sum(den)/4
+    enddo
+    nfk(:,5) = ng(1)/ng(2)
+  contains
+    ! sums over the helicity classes S (h = l) and O (h /= l)
+    subroutine class_sums(a, num, den)
+      real(dp), intent(in) :: a(2,2)
+      real(dp), intent(out) :: num(2), den(2)
+      num = 0; den = 0
+      do l = 1, 2
+         num(1) = num(1) + a(l,l)*cV(l); den(1) = den(1) + a(l,l)**2
+         num(2) = num(2) + a(3-l,l)*cV(l); den(2) = den(2) + a(3-l,l)**2
+      enddo
+    end subroutine class_sums
+  end subroutine class_weights
 end module sliced21_mod
 
 program sliced21
@@ -264,9 +337,17 @@ program sliced21
   integer, allocatable :: sd(:)
   integer :: lpmask
   common/lpmask/lpmask
-  real(dp) :: avg, err, chi2, hb, bt(9,3), bd(9,3), xi, rr, em(3)
+  real(dp) :: avg, err, chi2, hb, bt(9,nbc), bd(9,nbc), xi, rr, em(nbc)
   integer :: k
   call get_command_argument(1, bpart)
+  call get_environment_variable('EW31', arg)
+  if (len_trim(arg) > 0) then
+     read(arg, *) ew31_mode, ew31_lepton
+     write(*,'(a,2i2)') ' EW31 (mode, lepton)', ew31_mode, ew31_lepton
+  endif
+  ! W exchange: b has no coupling, not in the down-type beam classes (the
+  ! tables differ)
+  lp21_nodn = ew31_mode == 2
   if (trim(bpart) == 'mktab' .or. trim(bpart) == 'tabchkg') then
      call initPDFSetByName('NNPDF30_nlo_as_0118')
      call initPDF(0)
@@ -291,11 +372,11 @@ program sliced21
            call random_number(rr); xi = gximin*(0.95_dp/gximin)**rr
            call random_number(rr); call lp21_setq(gqlo*(gqhi/gqlo)**rr)
            call beam_at(xi, bt); call lp21_beam_direct(xi, bd)
-           do i = 1, 3
+           do i = 1, nbc
               em(i) = max(em(i), maxval(abs(bt(:,i) - bd(:,i)))/maxval(abs(bd(:,i))))
            enddo
         enddo
-        write(*,'(a,3es10.2)') ' beam grid: max deviation / max coefficient (up, down, gluon)', em
+        write(*,'(a,5es10.2)') ' beam grid: max deviation / max coefficient (up q, qbar, down q, qbar, gluon)', em
      endif
      stop
   endif
@@ -326,7 +407,10 @@ program sliced21
      nob = merge(15, 16, mode == 2); nv = ntc*nob; iv = merge(ntc, 2*ntc, mode == 2)
      q2lo = gqlo**2; q2hi = gqhi**2; ylo = 0.2_dp; yhi = 0.6_dp
      call get_environment_variable('ZFIX', arg)
-     if (mode == 2 .and. (trim(arg) == '1' .or. trim(arg) == '2')) then
+     if (mode == 2 .and. trim(arg) == '3') then
+        ! ZFIX = 3 (9 Oct): tau_zQ bins in the inclusive cuts, no window
+        zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
+     elseif (mode == 2 .and. (trim(arg) == '1' .or. trim(arg) == '2')) then
         ! diagnostic window around (x, Q2) = (0.01, 400): ZFIX = 1 with the
         ! mode-1 observable, ZFIX = 2 with the ZEUS jet selection (7 Oct)
         xfix = 0.01_dp; Q2fix = 400
@@ -357,13 +441,13 @@ program sliced21
      do k = 1, 200
         call random_number(rr); xi = xfix*(0.95_dp/xfix)**rr
         call beam_at(xi, bt); call lp21_beam_direct(xi, bd)
-        do i = 1, 3
+        do i = 1, nbc
            em(i) = max(em(i), maxval(abs(bt(:,i) - bd(:,i)))/maxval(abs(bd(:,i))))
         enddo
-        if (maxval(abs(bt(:,3) - bd(:,3)))/maxval(abs(bd(:,3))) > 3e-4_dp) &
-             write(*,'(a,es12.4,a,9es11.3)') ' xi', xi, '  gluon table-direct / max:', (bt(:,3) - bd(:,3))/maxval(abs(bd(:,3)))
+        if (maxval(abs(bt(:,5) - bd(:,5)))/maxval(abs(bd(:,5))) > 3e-4_dp) &
+             write(*,'(a,es12.4,a,9es11.3)') ' xi', xi, '  gluon table-direct / max:', (bt(:,5) - bd(:,5))/maxval(abs(bd(:,5)))
      enddo
-     write(*,'(a,f7.4,a,3es10.2)') ' beam table h', hb, ': max deviation (up, down, gluon)', em
+     write(*,'(a,f7.4,a,5es10.2)') ' beam table h', hb, ': max deviation (up q, qbar, down q, qbar, gluon)', em
      stop
   endif
   write(*,'(a,a,a,i10,a,i4,a,i6,a,f9.6,a,f10.2)') ' sliced21 part ', trim(bpart), ' ncall', ncall, ' itmx', itmx, &

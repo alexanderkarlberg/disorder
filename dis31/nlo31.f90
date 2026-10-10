@@ -40,8 +40,20 @@
 ! projection subtracted event by event: cell (k, b) gets theta(tau_2 >
 ! tcs(k)) [O_b(event) - O_b(1+1 Born at the event's x, Q^2, y)]. 16 rows:
 ! total, >= 1 jet, leading-jet p_T (7), leading-jet y (6), >= 2 jets.
+!
+! Photon + Z (env EW31 = "mode lepton", as dis31/tests; 8 Oct): the flavour
+! sums from the values with ew31's basis couplings (born_basis, eval_nc). For vi the
+! basis sums keep the part of the one loop even under the reflection y ->
+! -y (the odd part breaks m2(1,1) = m2(2,2); it integrates to zero). The
+! closed-loop vector term of vi (virt31_vloop) is linear in the line's
+! coupling and weighted apart (photon e_q sum e; NC ew31_wl).
+! W exchange (EW31 = "2 lepton", 9 Oct): representative channels of
+! generation 1 weighted per incoming flavour (cc_reps, cc_w; unit CKM in
+! (u,d), (c,s), no coupling for b; tests/harness_ccsum: = the sum over all
+! final-state flavours).
 !-----------------------------------------------------------------------
 module nlo31_mod
+  use ew31
   use psmc
   use born31
   use me41
@@ -92,7 +104,8 @@ module nlo31_mod
   ! mode 2 diagnostic (ZFIX = 1, 6 Oct): Q^2 and y squeezed to a window of
   ! relative width zfw around the mode-1 point (x, Q2 arguments) and the
   ! mode-1 observable (tau_zQ bins): each part must reproduce mode 1 after
-  ! division by the window, dsigma/dx dQ2 = (y/x) sigma/(dQ2 dy)
+  ! division by the window, dsigma/dx dQ2 = (y/x) sigma/(dQ2 dy); ZFIX = 3:
+  ! the same observable in the full inclusive cuts
   logical :: zfix = .false.
   real(dp), parameter :: zfw = 1e-3_dp
   ! mode 2, P2B-improved slicing (env P2BSLICE = 1, 6 Oct; Campbell, Neumann,
@@ -374,18 +387,39 @@ contains
        call virt31_ren(Pk, fl, Q2, v, t)
        call iop31_i(Pk, fl, Q2, iv)
        val(1) = v(0) + iv(0)
+       val(2) = virt31_vloop
     case ('kp')
        call iop31_kp(Pk, fl, Q2, val(1), val(2), val(3))
     end select
   end subroutine born_eval
+
+  ! photon + Z: born_eval with ew31's basis couplings k on the line(s) of
+  ! flavour fb
+  subroutine born_basis(Pk, fl, Q2, k, fb, val)
+    real(dp), intent(in) :: Pk(4,7), Q2
+    integer, intent(in) :: fl(4), k, fb
+    real(dp), intent(out) :: val(3)
+    ew31_basis = k; ew31_bf = fb
+    call born_eval(Pk, fl, Q2, val)
+    ew31_basis = 0
+  end subroutine born_basis
+
+  ! the weights of the basis values for a line of flavour f (ew31_w)
+  function ncw(f, Q2) result(w)
+    integer, intent(in) :: f
+    real(dp), intent(in) :: Q2
+    real(dp) :: w(2)
+    call ew31_w(f, Q2, w)
+  end function ncw
 
   real(dp) function born_part(r, wgt) result(res)
     real(dp), intent(in) :: r(:), wgt
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,7), dphi, as, fpdf(-5:5), w, x, fa(-5:5)
     real(dp) :: u1(3), u2(3), u4(3), m3(3,3), c3(3,3), t(3), eq1, eq2, acc(nv)
+    real(dp) :: v1(3,2), v2(3,2), v4(3,2), va(3,2), vb(3,2), lv1(3), lv2(3), w1(3,6), w2(3,6)
     logical :: ok
-    integer :: f, Q, k
+    integer :: f, Q, k, j1, j1o, j2, j2o
     res = 0
     if (usepsmc .and. mode >= 2) then
        call lepton2(r(1:2), Q2, y, xB, jac, ok)
@@ -409,39 +443,83 @@ contains
     call pdfs(eta, sqrt(Q2), fpdf)
     w = jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(as/(2*pi))**2
     if (trim(part) /= 'lo') w = w*as/(2*pi)
-    ! unit-charge values: q g g (d), g -> q qbar g (d), identical (d)
-    call born_eval(Pk, [1, 1, 0, 0], Q2, u1); u1 = u1*9
-    call born_eval(Pk, [0, 1, -1, 0], Q2, u2); u2 = u2*9
-    call born_eval(Pk, [1, 1, 1, -1], Q2, u4); u4 = u4*9
-    ! different flavours: (e_q, e_Q) = (d,u), (u,d), (d,s)
-    call born_eval(Pk, [1, 1, 2, -2], Q2, m3(:,1))
-    call born_eval(Pk, [2, 2, 1, -1], Q2, m3(:,2))
-    call born_eval(Pk, [1, 1, 3, -3], Q2, m3(:,3))
-    do k = 1, 3
-       call solve3(m3(k,:), c3(k,:))
-    enddo
     if (trim(part) == 'kp') then
        x = eta + (1 - eta)*r(size(r))
        call pdfs(eta/x, sqrt(Q2), fa)
     endif
-    do f = -5, 5
-       if (f == 0) then
-          ! g -> q qbar g
-          do Q = 1, 5
-             res = res + bterm(0, ech(Q)**2*u2)
-          enddo
-          cycle
-       endif
-       eq1 = ech(f)
-       res = res + 0.5_dp*bterm(f, eq1**2*u1)
-       res = res + 0.5_dp*bterm(f, eq1**2*u4)
-       do Q = 1, 5
-          if (Q == abs(f)) cycle
-          eq2 = ech(Q)
-          t = eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3)
-          res = res + bterm(f, t)
+    if (ew31_mode == 2) then
+       ! W exchange (9 Oct): representative channels, weighted per incoming
+       ! flavour (cc_w; tests/harness_ccsum)
+       call cc_reps(j1, j1o, j2, j2o)
+       call born_eval(Pk, [j1, j1o, 0, 0], Q2, w1(:,1)); call born_eval(Pk, [j1, j1o, 5, -5], Q2, w1(:,2))
+       call born_eval(Pk, [j1, j1o, j1o, -j1o], Q2, w1(:,3)); call born_eval(Pk, [j1, j1o, j1, -j1], Q2, w1(:,4))
+       call born_eval(Pk, [j1, j1, j2o, -j2], Q2, w1(:,5)); call born_eval(Pk, [j1o, j1o, j1o, -j1], Q2, w1(:,6))
+       call born_eval(Pk, [-j1o, -j1, 0, 0], Q2, w2(:,1)); call born_eval(Pk, [-j1o, -j1, -5, 5], Q2, w2(:,2))
+       call born_eval(Pk, [-j1o, -j1, -j1, j1], Q2, w2(:,3)); call born_eval(Pk, [-j1o, -j1, -j1o, j1o], Q2, w2(:,4))
+       call born_eval(Pk, [-j1o, -j1o, -j2, j2o], Q2, w2(:,5)); call born_eval(Pk, [-j1, -j1, -j1, j1o], Q2, w2(:,6))
+       call born_eval(Pk, [0, j1o, -j1, 0], Q2, t)
+       res = bterm(0, 2*t)
+       do f = -5, 5
+          if (f == 0) cycle
+          res = res + bterm(f, matmul(merge(w1, w2, f > 0), cc_w(f, j1, j1o, j2, j2o, 0.5_dp)))
        enddo
-    enddo
+    elseif (ew31_mode /= 0) then
+       ! photon + Z: basis values (diagonal, off-diagonal) on the line of
+       ! flavour 1 (and 2), weighted per flavour
+       do k = 1, 2
+          call born_basis(Pk, [1, 1, 0, 0], Q2, k, 1, v1(:,k))
+          call born_basis(Pk, [0, 1, -1, 0], Q2, k, 1, v2(:,k))
+          call born_basis(Pk, [1, 1, 1, -1], Q2, k, 1, v4(:,k))
+          call born_basis(Pk, [1, 1, 2, -2], Q2, k, 1, va(:,k))
+          call born_basis(Pk, [1, 1, 2, -2], Q2, k, 2, vb(:,k))
+       enddo
+       do f = -5, 5
+          if (f == 0) cycle
+          if (f > 0) res = res + bterm(0, ncv(v2, f))
+          res = res + 0.5_dp*bterm(f, ncv(v1 + v4, f))
+          do Q = 1, 5
+             if (Q == abs(f)) cycle
+             res = res + bterm(f, ncv(va, f) + ncv(vb, sign(Q, f)))
+          enddo
+       enddo
+    else
+       ! unit-charge values: q g g (d), g -> q qbar g (d), identical (d)
+       call born_eval(Pk, [1, 1, 0, 0], Q2, u1); u1 = u1*9
+       call born_eval(Pk, [0, 1, -1, 0], Q2, u2); u2 = u2*9
+       call born_eval(Pk, [1, 1, 1, -1], Q2, u4); u4 = u4*9
+       ! vi: the closed-loop term (val(2)) is e_q sum e, not e_q^2: for the
+       ! d values above -3 e_q times it
+       lv1 = 0; lv2 = 0
+       if (trim(part) == 'vi') then
+          lv1(1) = -u1(2)/3; u1(1) = u1(1) - u1(2); u1(2) = 0
+          lv2(1) = -u2(2)/3; u2(1) = u2(1) - u2(2); u2(2) = 0
+       endif
+       ! different flavours: (e_q, e_Q) = (d,u), (u,d), (d,s)
+       call born_eval(Pk, [1, 1, 2, -2], Q2, m3(:,1))
+       call born_eval(Pk, [2, 2, 1, -1], Q2, m3(:,2))
+       call born_eval(Pk, [1, 1, 3, -3], Q2, m3(:,3))
+       do k = 1, 3
+          call solve3(m3(k,:), c3(k,:))
+       enddo
+       do f = -5, 5
+          if (f == 0) then
+             ! g -> q qbar g
+             do Q = 1, 5
+                res = res + bterm(0, ech(Q)**2*u2 + ech(Q)*lv2)
+             enddo
+             cycle
+          endif
+          eq1 = ech(f)
+          res = res + 0.5_dp*bterm(f, eq1**2*u1 + eq1*lv1)
+          res = res + 0.5_dp*bterm(f, eq1**2*u4)
+          do Q = 1, 5
+             if (Q == abs(f)) cycle
+             eq2 = ech(Q)
+             t = eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3)
+             res = res + bterm(f, t)
+          enddo
+       enddo
+    endif
     res = res*w
     if (mode >= 1) then
        if (res /= res) then
@@ -453,6 +531,19 @@ contains
        call fill(Q2, res*wgt)
     endif
   contains
+    ! photon + Z: the basis values v(:,k) of a line of flavour f weighted;
+    ! vi: the closed-loop term v(2,:) with ew31_wl
+    function ncv(v, f) result(t)
+      real(dp), intent(in) :: v(3,2)
+      integer, intent(in) :: f
+      real(dp) :: t(3), w(2), wl(2)
+      w = ncw(f, Q2)
+      t = matmul(v, w)
+      if (trim(part) == 'vi') then
+         call ew31_wl(f, Q2, wl)
+         t = [dot_product(v(1,:) - v(2,:), w) + dot_product(v(2,:), wl), 0.0_dp, 0.0_dp]
+      endif
+    end function ncv
     ! one Born flavour class with incoming fb and values val(3)
     real(dp) function bterm(fb, val)
       integer, intent(in) :: fb
@@ -556,7 +647,7 @@ contains
        ! negative-energy parton; e.g. partons of +-5e6 GeV that cancel, next
        ! to a real with tau_2 ~ 1e-9..1e-8) drops the whole event, as plain
        ! slicing effectively does (there both sides fail every cut)
-       if (p2bslice .and. mode == 2 .and. (degen .or. any(P3(4,1:4,id) < 0))) dropev = .true.
+       if (p2bslice .and. mode <= 2 .and. (degen .or. any(P3(4,1:4,id) < 0))) dropev = .true.
        sub = sub - val(id)*F3
        if (dbgprint .and. F3(iv) /= 0) write(0,'(a,i3,a,es12.4,a,es12.4,a,f5.1,a,3es11.3)') ' DBG dip', id, ' val', val(id), &
             & ' t2', t2last, ' F(iv)', F3(iv), ' E', P3(4,2:4,id)
@@ -569,6 +660,7 @@ contains
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,8), dphi, as, fpdf(-5:5), w, smin, W2
     real(dp) :: u1(nv), u2(nv), u4(nv), u6(nv), m3(nv,3), c3(nv,3), m5(nv,3), c5(nv,3), eq1, eq2, sg(nv), F4(nv)
+    real(dp) :: n1(nv,2), n2(nv,2), n4(nv,2), n6(nv,2), nqa(nv,2), nqb(nv,2), ga(nv,2), gb(nv,2), wf(2)
     integer :: i, j, f, Q, Q2i, ic, tdw
     logical :: ok
     res = 0
@@ -612,7 +704,7 @@ contains
     ! they would enter with O - O~ /= 0. Leaving out O - O~ for these events
     ! is power suppressed (tau_2 <~ 1e-8). Dropping them altogether
     ! (p2bdrop = 0, first version) also loses their dipoles above the cut.
-    dropev = p2bslice .and. mode == 2 .and. t2last < p2btmin
+    dropev = p2bslice .and. mode <= 2 .and. t2last < p2btmin
     garbev = .false.
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
@@ -622,7 +714,7 @@ contains
     if (garbev) then
        ngarbev = ngarbev + 1; res = 0; return
     endif
-    if (p2bslice .and. mode == 2) then
+    if (p2bslice .and. mode <= 2) then
        nrealev = nrealev + 1
        if (dropev) ndropev = ndropev + 1
        if (dropev .and. p2bdrop == 0) then
@@ -657,6 +749,11 @@ contains
     endif
   contains
     subroutine eval_sg()
+       if (ew31_mode == 2) then
+          call eval_cc(); return
+       elseif (ew31_mode /= 0) then
+          call eval_nc(); return
+       endif
        ! unit-charge values
        call real_evalv(Pk, [1, 1, 0, 0, 0], F4, u1); u1 = 9*u1        ! q -> q g g g
        call real_evalv(Pk, [0, 1, -1, 0, 0], F4, u2); u2 = 9*u2       ! g -> q qbar g g
@@ -689,6 +786,65 @@ contains
           enddo
        enddo
     end subroutine eval_sg
+    ! photon + Z: basis values on the line of flavour 1 (and 2), as born_part
+    subroutine eval_nc()
+       integer :: k
+       do k = 1, 2
+          call real_basis([1, 1, 0, 0, 0], k, 1, n1(:,k))
+          call real_basis([0, 1, -1, 0, 0], k, 1, n2(:,k))
+          call real_basis([1, 1, 1, -1, 0], k, 1, n4(:,k))
+          call real_basis([0, 1, -1, 1, -1], k, 1, n6(:,k))
+          call real_basis([1, 1, 2, -2, 0], k, 1, nqa(:,k))
+          call real_basis([1, 1, 2, -2, 0], k, 2, nqb(:,k))
+          call real_basis([0, 1, -1, 2, -2], k, 1, ga(:,k))
+          call real_basis([0, 1, -1, 2, -2], k, 2, gb(:,k))
+       enddo
+       sg = 0
+       do f = -5, 5
+          if (f == 0) cycle
+          wf = ncw(f, Q2)
+          sg = sg + fpdf(f)*matmul(n1/6 + n4/2, wf)
+          do Q = 1, 5
+             if (Q == abs(f)) cycle
+             sg = sg + fpdf(f)*(matmul(nqa, wf) + matmul(nqb, ncw(sign(Q, f), Q2)))
+          enddo
+       enddo
+       do Q = 1, 5
+          wf = ncw(Q, Q2)
+          sg = sg + fpdf(0)*matmul(n2/2 + n6/4, wf)
+          do Q2i = Q + 1, 5
+             sg = sg + fpdf(0)*(matmul(ga, wf) + matmul(gb, ncw(Q2i, Q2)))
+          enddo
+       enddo
+    end subroutine eval_nc
+    ! W exchange: representative channels as born_part (gluon: g -> q qbar
+    ! g g, and with a neutral pair: different, identical quarks, identical
+    ! antiquarks)
+    subroutine eval_cc()
+       real(dp) :: r1(nv,6), r2(nv,6), rg(nv,4)
+       integer :: j1, j1o, j2, j2o
+       call cc_reps(j1, j1o, j2, j2o)
+       call real_evalv(Pk, [j1, j1o, 0, 0, 0], F4, r1(:,1)); call real_evalv(Pk, [j1, j1o, 5, -5, 0], F4, r1(:,2))
+       call real_evalv(Pk, [j1, j1o, j1o, -j1o, 0], F4, r1(:,3)); call real_evalv(Pk, [j1, j1o, j1, -j1, 0], F4, r1(:,4))
+       call real_evalv(Pk, [j1, j1, j2o, -j2, 0], F4, r1(:,5)); call real_evalv(Pk, [j1o, j1o, j1o, -j1, 0], F4, r1(:,6))
+       call real_evalv(Pk, [-j1o, -j1, 0, 0, 0], F4, r2(:,1)); call real_evalv(Pk, [-j1o, -j1, -5, 5, 0], F4, r2(:,2))
+       call real_evalv(Pk, [-j1o, -j1, -j1, j1, 0], F4, r2(:,3)); call real_evalv(Pk, [-j1o, -j1, -j1o, j1o, 0], F4, r2(:,4))
+       call real_evalv(Pk, [-j1o, -j1o, -j2, j2o, 0], F4, r2(:,5)); call real_evalv(Pk, [-j1, -j1, -j1, j1o, 0], F4, r2(:,6))
+       call real_evalv(Pk, [0, j1o, -j1, 0, 0], F4, rg(:,1)); call real_evalv(Pk, [0, j1o, -j1, 5, -5], F4, rg(:,2))
+       call real_evalv(Pk, [0, j1o, -j1, j1o, -j1o], F4, rg(:,3)); call real_evalv(Pk, [0, j1o, -j1, j1, -j1], F4, rg(:,4))
+       sg = fpdf(0)*2*matmul(rg, [0.5_dp, 3.0_dp, 0.5_dp, 0.5_dp])
+       do f = -5, 5
+          if (f == 0) cycle
+          sg = sg + fpdf(f)*matmul(merge(r1, r2, f > 0), cc_w(f, j1, j1o, j2, j2o, 1.0_dp/6))
+       enddo
+    end subroutine eval_cc
+    subroutine real_basis(fl, k, fb, val)
+       integer, intent(in) :: fl(5), k, fb
+       real(dp), intent(out) :: val(nv)
+       ew31_basis = k; ew31_bf = fb
+       call real_evalv(Pk, fl, F4, val)
+       ew31_basis = 0
+    end subroutine real_basis
   end function real_part
 
   ! the quantity VEGAS integrates in mode 1: the cell iv, or a tau_2 slice
@@ -710,8 +866,9 @@ contains
     integer, intent(in) :: n
     real(dp), intent(in) :: pin(4), p(4,n), Q
     real(dp), intent(out) :: F(nv)
-    real(dp) :: t2, tz
-    integer :: k, b, i
+    real(dp) :: t2, pb(4,2)
+    logical :: inb(nobmax), inp(nobmax), okp
+    integer :: k, b
     ! non-finite momenta (numerically degenerate mapped configurations, 7 Oct
     ! cluster: NaN made kt_jets write act(0), "double free or corruption"):
     ! the configuration is not accepted; with P2B it marks a degenerate dipole
@@ -731,18 +888,53 @@ contains
        call accept_p2b(pin, p, n, Q, F)
        return
     endif
-    tz = 1
-    do i = 1, n
-       if (p(3,i) < 0) tz = tz + 2*p(3,i)/Q
-    enddo
     t2 = tau2cm(pin, p, n)/Q
+    call zq_bins(p, n, Q, inb)
+    if (p2bslice) then
+       ! P2B (9 Oct, as accept_zeus): below tau_cut O(event) - O(projected 2+1 Born)
+       t2last = t2; degen = t2code < 0
+       inp = .false.
+       if (t2 <= tcs(1)) then
+          call project21(pin, p, n, pb, okp)
+          if (okp) then
+             call zq_bins(pb, 2, Q, inp)
+          else
+             inp = inb
+          endif
+       endif
+       do b = 1, nzb
+          do k = 1, ntc
+             F(k + ntc*(b - 1)) = merge(1.0_dp, 0.0_dp, inb(b))
+             if (t2 <= tcs(k) .and. inp(b)) F(k + ntc*(b - 1)) = F(k + ntc*(b - 1)) - 1
+             if (p2bextra .and. t2 > tcs(k)) F(k + ntc*(b - 1)) = 0
+          enddo
+       enddo
+       return
+    endif
     do b = 1, nzb
-       if (tz < zlo(b) .or. tz >= zhi(b)) cycle
+       if (.not. inb(b)) cycle
        do k = 1, ntc
           if (t2 > tcs(k)) F(k + ntc*(b - 1)) = 1
        enddo
     enddo
   end subroutine accept
+
+  ! tau_zQ bins of n partons (Breit frame)
+  subroutine zq_bins(p, n, Q, inb)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: p(4,n), Q
+    logical, intent(out) :: inb(nobmax)
+    real(dp) :: tz
+    integer :: i, b
+    tz = 1
+    do i = 1, n
+       if (p(3,i) < 0) tz = tz + 2*p(3,i)/Q
+    enddo
+    inb = .false.
+    do b = 1, nzb
+       inb(b) = tz >= zlo(b) .and. tz < zhi(b)
+    enddo
+  end subroutine zq_bins
 
   ! mode 3: F(k + ntc*(b-1)) = theta(tau_2 > tcs(k)) [O_b(event) - O_b(Born)]
   subroutine accept_p2b(pin, p, n, Q, F)
@@ -1412,6 +1604,36 @@ contains
     real(dp), external :: alphasPDF
     alphasPDF_ = alphasPDF(q)
   end function alphasPDF_
+
+  ! W exchange: the representative flavours (generation 1: line j1 -> j1o;
+  ! generation 2: j2 -> j2o); W- (e-, nubar): u -> d, W+: d -> u
+  subroutine cc_reps(j1, j1o, j2, j2o)
+    integer, intent(out) :: j1, j1o, j2, j2o
+    j1 = merge(2, 1, ew31_lepton == 0 .or. ew31_lepton == 3)
+    j1o = ew31_out(j1); j2 = j1 + 2; j2o = j1o + 2
+  end subroutine cc_reps
+
+  ! the multiplicities of the representative channels for an incoming
+  ! (anti)quark f (unit CKM in (u,d), (c,s), b without coupling):
+  ! (line + gluons, line + neutral pair (s, c or b), identical quarks on the
+  ! line and pair, line + pair of its partner, the other generation's W
+  ! pair, the W pair with an identical quark); fg = the symmetry factor of
+  ! the gluons (1/2 for 3+1, 1/6 for 4+1); tests/harness_ccsum
+  function cc_w(f, j1, j1o, j2, j2o, fg) result(w)
+    integer, intent(in) :: f, j1, j1o, j2, j2o
+    real(dp), intent(in) :: fg
+    real(dp) :: w(6)
+    integer :: a
+    a = abs(f)
+    w = 0
+    if ((f > 0 .and. (a == j1 .or. a == j2)) .or. (f < 0 .and. (a == j1o .or. a == j2o))) then
+       w = [fg, 3.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 0.0_dp]
+    elseif (a == 5) then
+       w(5) = 2
+    else
+       w(5) = 1; w(6) = 0.5_dp
+    endif
+  end function cc_w
 end module nlo31_mod
 
 program nlo31
@@ -1457,7 +1679,11 @@ program nlo31
      nob = 15; nv = ntc*nob; iv = ntc
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
      call get_environment_variable('ZFIX', arg)
-     if (trim(arg) == '1' .or. trim(arg) == '2') then
+     if (trim(arg) == '3') then
+        ! ZFIX = 3 (9 Oct): the mode-1 observable (tau_zQ bins) in the
+        ! inclusive cuts, no window (event shape, against NNLOJET dis_tauzq)
+        zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
+     elseif (trim(arg) == '1' .or. trim(arg) == '2') then
         ! ZFIX = 1: window with the mode-1 observable; 2: with the ZEUS jet
         ! selection (7 Oct)
         if (trim(arg) == '1') then
@@ -1467,6 +1693,12 @@ program nlo31
         ylo = Q2fix/(xfix*s)*(1 - zfw/2); yhi = Q2fix/(xfix*s)*(1 + zfw/2)
         write(*,'(a,4es14.6)') ' ZFIX window Q2, y:', q2lo, q2hi, ylo, yhi
      endif
+  elseif (mode == 3) then
+     ! VEGAS target: >= 1 jet row (the total row vanishes identically in P2B)
+     nob = 16; nv = ntc*nob; iv = 2*ntc
+     q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
+  endif
+  if (mode == 1 .or. mode == 2) then
      call get_environment_variable('P2BSLICE', arg)
      if (trim(arg) == '1') then
         p2bslice = .true.
@@ -1478,10 +1710,6 @@ program nlo31
         if (p2bextra) write(*,'(a)') ' P2BEXTRA: only theta(T <= tau_cut) (O - O~)'
         write(*,'(a)') ' P2BSLICE: below tau_cut O(event) - O(projected 2+1 Born)'
      endif
-  elseif (mode == 3) then
-     ! VEGAS target: >= 1 jet row (the total row vanishes identically in P2B)
-     nob = 16; nv = ntc*nob; iv = 2*ntc
-     q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
   endif
   ! diagnostics (6 Oct): VEGAS target cell from the environment (VTARGET = k,
   ! index into the cell vector; default unchanged)
@@ -1506,6 +1734,11 @@ program nlo31
   if (len_trim(arg) > 0) then
      read(arg, *) iv
      write(*,'(a,i5)') ' VEGAS target cell', iv
+  endif
+  call get_environment_variable('EW31', arg)
+  if (len_trim(arg) > 0) then
+     read(arg, *) ew31_mode, ew31_lepton
+     write(*,'(a,2i2)') ' EW31 (mode, lepton)', ew31_mode, ew31_lepton
   endif
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]

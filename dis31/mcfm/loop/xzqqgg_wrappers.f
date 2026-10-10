@@ -4,7 +4,8 @@
 !
 c disorder (2026-10-03): the helicity-configuration wrappers of MCFM 10.3's
 c src/Zbb/xzqqgg.f (a6treeg1) and src/Zbb/xzqqgg_v.f (a61g1lc, a61g1slc,
-c a61g1nf, a61gcol, a63g1), copied unchanged, for dis31/virt31.f90.
+c a61g1nf, a61gcol, a63g1; 2026-10-08: a64v, the boson on a closed quark
+c loop, vector coupling), copied unchanged, for dis31/virt31.f90.
 
       function a6treeg1(st,j1,j2,j3,j4,j5,j6,za,zb)
       implicit none
@@ -148,3 +149,29 @@ c----wrapper to a63g that also includes config st='qpqbmgmgm'
       return
       end
 
+      function a64v(st,j1,j4,j2,j3,j5,j6,za,zb)
+      implicit none
+      include 'types.f'
+      complex(dp):: a64v
+
+c----definition (2.13) of BDK, writes in terms of fvs and fvf
+      integer:: j1,j2,j3,j4,j5,j6
+      include 'mxpart.f'
+      include 'zprods_decl.f'
+      include 'heldefs.f'
+      integer st
+      complex(dp):: fvs,fvf
+
+      if     (st==hqpqbmgmgm) then
+        a64v=-fvs(hqpqbmgpgp,j4,j1,j3,j2,j6,j5,zb,za)
+     &       -fvf(hqpqbmgpgp,j4,j1,j3,j2,j6,j5,zb,za)
+      elseif (st==hqpqbmgmgp) then
+        a64v=-fvs(hqpqbmgpgm,j1,j4,j3,j2,j5,j6,za,zb)
+     &       -fvf(hqpqbmgpgm,j1,j4,j3,j2,j5,j6,za,zb)
+      else
+        a64v=-fvs(st,j1,j4,j2,j3,j5,j6,za,zb)
+     &       -fvf(st,j1,j4,j2,j3,j5,j6,za,zb)
+      endif
+
+      return
+      end

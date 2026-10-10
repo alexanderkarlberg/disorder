@@ -2830,6 +2830,250 @@ r.**
 - Cluster instructions: rerun r (B, F) and all TECHDIFF sets with the guard
   and VEGAS_EQUAL = 2; report the tail statistics and F's flatness.
 
+**NC/CC for NNLO 2+1, stage 1a: me31 with photon + Z (8 Oct, branch
+`2026-10-nnlo21-ncc`).**
+- AK: implement the NC/CC ingredients now; keep the coding style; option 1
+  for the axial pair-flavour terms (as disorder's MATFOR and HOPPET).
+  HOPPET's InitC3NNLO sets the singlet parts of C3 to zero ("no impact on
+  Z case").
+- New `dis31/ew31.f90`: helicity couplings c(hq, hl) = Q_f q_l + z_f z_l
+  Q²/(Q² + MZ²) as in MCFM's qqb_z2jet (zcouple), disorder's MZ, MW; e∓,
+  ν, ν̄ (ν: × √2 for the lepton spin average). Photon default.
+- `me31`: m2 weighted per helicity; four-quark with helicity couplings per
+  line.
+  - Fixed against disorder's NC MATFOR (`harness_me31`): the DIS crossing
+    puts the outgoing quark of the first line into MCFM's incoming-quark
+    slot (helicity label exchanged for quarks). The pair line (5,6) is in
+    MCFM's own orientation (not exchanged).
+  - With photon + Z the interference of the boson on different quark lines
+    is dropped (different flavours, and its pair = incoming flavour member
+    in the identical-quark |D|², |E|²); the direct × exchange interference
+    is kept.
+  - Result: me31/MATFOR − 1 ≤ 1.5e-13 for e⁻, e⁺, ν, ν̄ (50 points, all
+    flavours); photon ≤ 1e-13. (`-Zonly`, `-intonly` are not in ew31.)
+- Size of the dropped terms (`dis31/tests/axsum31`, full 3+1 phase space,
+  labels symmetrised, e⁻), against disorder's inclusive NC:
+  - (2.4 ± 0.5)e-4 at x = 0.01, Q² = 400 (LO 104.3, NNLO coefficient −2.18);
+  - 7.4e-8 at x = 0.1, Q² = 5000 (LO 3.3e-2);
+  - −2.4e-9 at x = 0.3, Q² = 20000 (LO 3.9e-4).
+  That is ≈ 2–6e-6 of LO and ≤ 1e-3 of the NNLO coefficient. For e⁺ the sign
+  flips at low Q² (F3-like). Negligible.
+- Next: born31 (production 3+1 Born, colour correlations), me41, dip41,
+  virt31/iop31, the nlo31 flavour sums (from charges to couplings); then CC.
+- **Stage 1b: born31, me41, the dipoles with photon + Z (8 Oct).**
+  - born31: q g g / g q q̄ g with per-helicity weights; the parity-derived
+    right-handed quark line weighted c(1,l)² + c(2,l')²; in the
+    spin-correlated case 2 c(pq,pl)²; four quarks as me31.
+  - me41: xzqqggg weighted as me31. `msq_gqqQQg`/`makemb_photon` (our
+    photon version of MCFM's msq_ZqqQQg) take per-helicity couplings and a
+    flag `nll`: the line-line interference within a pairing class is
+    dropped (terms A, D, F, G from the boson on each line alone); the
+    direct-exchange terms B, C, E are kept, as in me31. The leptons enter as
+    (4,3): lepton label exchanged.
+  - Tests with EW31 = "1 0", "1 1", "1 2" (e⁻, e⁺, ν):
+    - harness_born31: msq = me31 4e-16, colour conservation 1e-15,
+      polarisation sum 4e-14, soft and spin-correlated collinear limits as
+      the photon;
+    - harness_lim41: every me41 channel in its collinear limits against
+      me31, 1.7e-4 at the smallest y, as the photon;
+    - harness_dip41: me41/Σ dipoles − 1 = 8e-5, as the photon.
+    The ν case (pure Z, maximal parity violation) checks the helicity
+    conventions of every line.
+- **Stage 1c: nlo31 flavour sums with photon + Z (8 Oct).**
+  - The photon sums use unit charges and `solve3` (charge structures); with
+    Z the couplings depend on helicity, so for `EW31 = "mode lepton"`
+    (mode 1) nlo31 evaluates every channel with ew31's basis couplings
+    (`ew31_basis` 1: c = 1 on the diagonal helicity pairs, 2: off-diagonal,
+    on the line(s) of flavour `ew31_bf`, zero elsewhere) and weights per
+    flavour with (c11² + c22², c12² + c21²)/2 of `ew31_cpl(-f)`. Exact with
+    option 1 (linear in the squared couplings per line) and tree-level
+    parity. Antiquarks from the conjugated evaluations (C invariance, as
+    me31/me41 implement them).
+  - Pitfall found on the way: the basis couplings must carry ew31's
+    quark/antiquark helicity exchange. Without it the dipoles whose mapped
+    Born has the line crossed (initial-state g → q q̄) got the wrong relative
+    helicity; the bare 4+1 was fine. Real minus dipoles was off by up to 5 %
+    (gluon and antiquark channels), opposite for e⁻ and e⁺.
+  - Evaluations per point: Born 10 (photon 6), real 16 (photon 10); r costs
+    1.8× the photon. vi stops with Z (no one-loop amplitudes yet).
+  - Checks, e⁻, e⁺, ν (point by point, against the explicit sum over
+    flavour assignments with symmetry factors):
+    - `nlo31 chk`: lo and r agree to all 11 printed digits;
+    - kp (scratch test of born_part against an explicit kp_conv sum): 13
+      digits;
+    - every 4+1 channel alone (me41 and real minus dipoles) ≤ 1e-8;
+    - photon (no EW31): lo, kp, r and the mode-1 cells bit-identical to
+      d03c2a5.
+  - With MZ → 1e10 the NC sums differ from the photon at 1e-3 point by
+    point: the photon keeps the line-line interference that option 1 drops
+    (e_q e_Q for different flavours, and the identical-flavour one). It is
+    odd under pair exchange and integrates to zero, so this is not a
+    pointwise test.
+  - `build_nlo31.sh` now compiles ew31 (since d03c2a5 it did not build).
+- **Stage 1d: below the cut (sliced21, lp21, hard21) with photon + Z (8 Oct).**
+  - The 2+1 Born has one quark line, so nothing is dropped there (option 1
+    concerns only 3+1/4+1 and the two-loop closed quark loop, see below).
+    DISENT's MATTHR splits the quark Born into S = (p1·p6)² + (p2·p7)² and
+    O = (p1·p7)² + (p2·p6)² (C2 ± C3). In ew31 terms the quark Born is
+    QQ/(S+O) (S w1 + O w2) with w = `ew31_w(f)`, and the gluon Born is GQ
+    Σ_q (w1 + w2)/2 (the parity-odd part, odd under q ↔ q̄, dropped as in
+    MATTHR).
+  - hard21 returns the hard function per helicity class as well (optional
+    `hk`). The one-loop (and two-loop) ratios differ between S and O, so
+    with Z they need separate weights. Classes: amplitudes {1,2,5,6} = S,
+    {3,4,7,8} = O.
+  - lp21: the beam table is now unweighted in 5 classes (up q, up q̄, down
+    q, down q̄, gluon); `lp21_born` takes the couplings wk(k, c) per helicity
+    class and beam class and combines the classes with hard21's Born
+    fractions. sliced21 computes the couplings (`class_weights`; photon
+    e_q², NC from ew31) and splits b0 with S/(S+O). **The beam grids of
+    mode 2 must be rebuilt** (`sliced21 mktab`); `lp21_grid_load` refuses
+    the old 3-class files.
+  - `nnlo21/tests/harness_born21` (with disorder's flags; `build_harness.sh`)
+    against DISENT, 50 points, photon, e⁻, e⁺, ν:
+    - hard21 classes S:O = S/O to 6e-15;
+    - quark Born = MATTHR to 3e-15 for f = −5..5, gluon Born 8e-16;
+    - one loop per class: H1/H0 = hard_fact + (QQ ± QQ3)/2 over the class
+      Born (VIRTHR's C2 QQ + C3 QQ3, QQ3 from VIRT3PV) to 6e-13.
+  - On the way: hard21 has a step of ~1e-5 relative in H1 within 1.3e-3 of
+    the region boundaries s_ij = s45 (NNLOJET's displacement v → v − 1e-3
+    for 1 − v < 1e-3, inherited; DISENT is smooth there). It is negligible
+    after integration and was there before; the harness uses a fixed seed.
+  - Photon: sliced21 b0, b1, b2 at (0.01, 400) identical to HEAD to all 9
+    printed digits in all ten τ_cut cells; test_lp21 unchanged (2e-5, the
+    beam-integral tolerance).
+  - NC with MZ → 1e10 (scratch copy of ew31): b0, b1, b2 for e⁻ and e⁺ equal
+    the photon to all 9 digits (exact test of the weights, the q/q̄ classes
+    and the gluon sum).
+  - With the Z at (0.01, 400), τ_cut = 1e-5: b0 +0.7 % (e⁻), +0.3 % (e⁺)
+    against the photon; ν 0.33 pb/GeV² (pure Z).
+  - Beam table: the q̄ classes have 4e-3 deviation relative to their own
+    maximum (small sea at large ξ). The interpolation is linear in the
+    classes, so q + q̄ has exactly the old error (1e-3).
+  - Not done yet (stage 3): the two-loop N_F,γ term (boson on a closed
+    quark loop) still uses photon charges with Z. With Z its vector part is
+    Σ v_q, and its axial part is the analogue of the dropped pair-flavour
+    terms. To be decided together with the 3+1 one-loop closed-loop terms.
+  - Next: NLO 2+1 with Z (b1 + lo) against disorder's DISENT with
+    `-includeZ` (tau2_nlo, as the photon validation of 1–3 Oct), once
+    stage 2 is in, in one campaign.
+- **Stage 2: one-loop 3+1 (virt31) with photon + Z (8 Oct).**
+  - qq̄gg: each helicity term (hq, lh) of the BDK amplitudes weighted with
+    c(hq, lh)² (ew31_cpl of the line; MCFM's label convention without
+    exchange). Four quarks (`fourq_cpl`): cq(polq, 3 − polz) and
+    cQ2(polb, 3 − polz) (the leptons enter as (4,3), as in me41). The
+    mapping was fixed by a scan of the label exchanges against me31 (only
+    these two and their parity mirrors give tree = me31 in every channel).
+    Option 1 as in me31: in 2 Re(tree* loop) the cross terms of the boson on
+    the two lines are dropped, direct × exchange kept. The boson on a closed
+    quark loop stays out (vector: Furry; axial: only via the top–bottom
+    splitting, analogous to the pair-flavour terms). `virt31_keepint`
+    (diagnostic) keeps the line–line interference.
+  - `harness_virt31` (EW31 env added), photon, e⁻, e⁺, ν, ν̄: tree = me31 to
+    6e-14, double pole 6e-14, single pole (−⟨I⟩ with born31's colour
+    correlations) 1.3e-12. `harness_iop31`: V + I poles cancel to 2e-13,
+    RG and μ_F checks as before.
+  - Finite part against NNLOJET's Z functions with ewcalc couplings set to
+    ew31's (no width), e⁻ and ν, with ours keeping the line–line interference
+    (`dis31_nnlojet/harness_v31z`, outside the repository; README there):
+    with each point plus its mirror image (y → −y), and the gluon channel
+    averaged over q ↔ q̄ as NNLOJET's sB2g1Z does, K equals the photon's
+    (ν: twice), the single pole ratio is 1, and (v0 − K X0)/tree = −5.79471429
+    (qq̄gg) and −1.71982418 (four quarks) at every point, the photon's scheme
+    constants.
+  - **Open:** point by point the reflection-odd (ε-tensor) parts of the
+    one-loop interference differ between virt31 (MCFM's crossing) and
+    NNLOJET. They are neither opposite nor absent in one of the codes. They
+    exist only with Z (c_LL ≠ c_RR) and integrate to zero for observables
+    symmetric under the reflection (everything we compute). A third
+    reference would settle it.
+  - nlo31 vi with Z enabled. The basis sums assume m2(1,1) = m2(2,2), which
+    the one-loop odd part breaks, so they keep exactly the reflection-even
+    part. Checked against the explicit flavour sum (scratch test with
+    arbitrary flavour weights): equal to 9 digits for P + mirror, e⁻, e⁺, ν.
+  - Photon: nlo31 vi bit-identical to the previous commit.
+  - Still to do for full NC: the two-loop closed-loop N_F,γ term in hard21
+    with Z (stage 3), CC, and the NC validation campaign (NLO 2+1 against
+    DISENT `-includeZ`; NNLO against NNLOJET with Z).
+
+## 2026-10-08 (evening) — NC stage 3, closed-loop terms, dropped-term notes
+
+- **Correction (virt31, also photon):** virt31's comment said the photon
+  couples to no closed quark loop in q q̄ g g (Furry). Wrong: with three
+  gluons on the loop (two external, one to the quark line) the vector term
+  survives (BDK's A6^v, colour (N − 4/N), ∝ Σ e_q; MCFM's `mqqb_vec0`).
+  virt31 (ported from MCFM's colourchoice-0 path) had left it out. Now
+  included (`fvs.f`, `fvf.f`, `a64v` from MCFM, unchanged), photon and Z
+  (loop coupling Σ_f v_f, `ew31_cv`). Checked against MCFM's own
+  `xzqqgg_v` at DIS points: our closed-loop term / MCFM's c·c_V-weighted
+  `mqqb_vec0` equals our main term / MCFM's `mqqb`, at every point, all
+  three channels, photon, e⁺, ν. Finite (the pole checks of harness_virt31
+  and harness_iop31 unchanged, ≤ 4e-13). Size for the photon: −0.03 % of
+  vi in NLO 3+1, 3e-6 of vi at (0.01, 400): no visible effect on any
+  earlier result. NNLOJET's DIS process lacks it too (the photon
+  finite-part agreement of 2 Oct was therefore without this term on both
+  sides).
+- nlo31: the closed-loop term is linear in the line's coupling (c·c_V), so
+  it is weighted apart (`virt31_vloop`): photon −3 e_q times the d value;
+  NC basis values with unit loop coupling, weights `ew31_wl`. Checked
+  against the explicit flavour sum: photon point by point (11 digits), NC
+  point + mirror (11 digits). A stale `virt31_vloop` from a previous q q̄ g g
+  call leaked into four-quark channels during development (found by this
+  check, fixed before commit: reset in `virt31_ren`).
+- **Stage 3, two-loop N_F,V term (hard21's G):** linear in the coupling
+  ratio nfz per helicity amplitude; lp21 evaluates hard21 with the term off
+  and with ratio 1 and combines per class with nfk(k, c) from sliced21
+  (`class_weights`): Σ_class c(h,l) c_V(l) / Σ c(h,l)², c_V the vector
+  coupling of the loop (photon: Σ e/e_q and 1/11, as before). The axial
+  part is dropped. Photon b1, b2 at (0.01, 400) identical to before (all
+  digits); NC with MZ → 1e10 equal to the photon (e⁻, e⁺).
+- **Dropped terms:** `docs/nc-dropped-terms.md` (for the paper): every
+  term, whether it exists, kept/dropped, size. Open: the axial
+  closed-loop terms (rows 5, 10, 12) need a numerical estimate; HOPPET's
+  singlet treatment for F2/FL with Z to be documented.
+- NC validation started (x = 0.1, Q² = 5000, e⁻ and ν): NLO 2+1 (sliced21
+  b1 + nlo31 lo) against DISENT with `-includeZ` (tau2_nlo, new flags),
+  136 jobs via the dispatcher (`runs/ncz1`).
+- **NC validation of NLO 2+1 against DISENT with Z (8 Oct, evening)**,
+  x = 0.1, Q² = 5000 (y = 0.49), τ_zQ bins, `runs/ncz1`: sliced21 b1 (8
+  seeds) + nlo31 lo (20 seeds, psmc) against tau2_nlo's DISENT reference
+  (40 × 3M events), (b1 + lo)/DISENT − 1 in %:
+  - e⁻, total bin [0.05, 0.5): −0.13 ± 0.31 (τ_cut 2e-4), +0.27 ± 0.35
+    (1e-4); all six bins within ~1σ at 1–2e-4 except [0.2, 0.3) −1.7 ± 1.1
+    and [0.4, 0.5) +7.6 ± 3.0;
+  - ν (pure Z), total bin: −0.32 ± 0.29 (2e-4), +0.09 ± 0.33 (1e-4); the
+    same two bins −2.4 ± 1.1 and +5.2 ± 2.3. The two leptons share the lo
+    seeds, so these are one correlated fluctuation (or an effect of these
+    bins at x = 0.1), not two.
+  - Below 3e-5 the sums drift up by ~1 % (2σ): the lo runs used the old
+    technical cut 1e-9 W², known to bias τ_cut ≤ 3e-5 (5–6 Oct).
+  - **Correction:** the first ν reference (s097–s136) was wrong: my new
+    `-neutrino` in tau2_nlo did not set `Zonly` (set_parameters does: no
+    photon for neutrinos), so the neutrino coupled to the photon; ours/DISENT
+    came out flat at −60 % in every bin. Fixed (tau2_nlo), rerun s137–s176.
+
+## 2026-10-08 (late evening) — cluster DIPGARB reruns merged; axial estimate; HOPPET with Z
+
+- Cluster (`origin/2026-10-nnlo21-cluster`, REPORT-2026-10-08b, merged into
+  2026-10-nnlo21 by fast-forward and into -ncc): the garbage-dipole guard
+  removes the 1e60–1e179 values but the 1e5–1e6 tail of r stays (52 of
+  3500 B seeds flagged). Replays: real events deep in collinear/soft
+  corners (s_min/W² ~ 1e-9, at the technical cut) whose dipole is orders
+  of magnitude larger and has its mapped Born above τ_cut — not garbage.
+  ZEUS NNLO plain means agree with NNLOJET to 2e-3 (11.8, 12.0, 12.4, 14.1
+  ± 1.1–1.3 pb against 11.12 ± 1.19), undefined below 1e-3; DIAG within
+  ≤ 2σ down to 1e-5. Fixed point still not flat (10.1 → 6.2 from 1e-3 to
+  1e-4). Advice to AK: no more cluster jobs until the tail has a method fix.
+- Axial closed loop of the one-loop 3+1 (row 5 of nc-dropped-terms):
+  0.0041 ± 0.0002 pb = 2.7e-4 of vi (qq̄gg channels) in the HERA 3-jet
+  set-up, e⁻, MCFM's BDK axial amplitudes (heavy-top approximation);
+  m_t-independent (173 vs 500 GeV).
+- HOPPET with Z (section 2 of nc-dropped-terms): option-1 flavour weights at
+  all orders; C3 singlet zero at NNLO (consistent); at N3LO the fl11 terms
+  of F2/FL carry MVV's photon normalisation 3⟨e⟩ but get the Z weights
+  v² + a² — not the closed-loop coupling Σ v_f our 2+1 side uses. To be
+  resolved before an N3LO 1+1 with Z by P2B.
+
 ## 2026-10-09 — the heavy tail of r: non-massless psmc momenta (fixed)
 
 - **Correction of the 8 Oct conclusion** ("real events deep in collinear/soft
@@ -2871,3 +3115,226 @@ r.**
 - An exact local replay of the cluster blow-ups is not possible: the d638917
   build matches the cluster's iteration 1 bit for bit but drifts from
   iteration 2 (−8520.976 vs −8520.246), so VEGAS adapts differently.
+
+## 2026-10-09 (afternoon) — HOPPET's N3LO fl11 terms with Z
+
+- **Photon: exact.** MVV's fl11 decomposition (non-singlet e_q² · 3⟨e⟩,
+  pure singlet ⟨e⟩²/⟨e²⟩ − 3⟨e⟩, gluon ⟨e⟩²/⟨e²⟩) reproduces the diagram
+  coupling e_q Σe per flavour because 3e_q² − e_q = 2/3 for both charges
+  (exact rational check nf = 3, 4, 5). Numerically (program
+  `~/work/disorder-comparisons/hoppet-fl11/fl11z.f90`, outside the repo):
+  HOPPET's photon fl11 = exact couplings to 1e-9. Closes the open photon
+  question of 8 Oct.
+- **Z, γZ: approximate.** HOPPET weights the fl11 sum with v_q² + a_q² and
+  2 e_q v_q; the diagram couplings are g_V,q Σ g_V (Z), e_q Σ g_V + g_V,q Σ e
+  (γZ), and (Σ g_V)², 2 Σe Σg_V for the gluon. For γZ even the sign of the
+  fl11 term differs (x = 0.01, Q² = 400: −0.37 vs +1.66, rest of the N3LO
+  coefficient −159). Size: ≲ 3·10⁻⁵ of F2^γZ, ≲ 10⁻⁵ of F2^Z (FL smaller),
+  i.e. 1–2% of the N3LO coefficient of F2^γZ, ≲ 0.3% for F2^Z; below 1e-6
+  in the e±p cross section at HERA. Table in `docs/nc-dropped-terms.md`
+  section 2. For a consistent N3LO 1+1 with Z by P2B the fix belongs in
+  HOPPET (weight the fl11 pieces with the diagram couplings).
+- F3: HOPPET's C3 at N3LO has MVV's fl02 term through the valence
+  function (`C%NS_V = cfN3LO_F3NS_val`). **Correction (same afternoon):**
+  this entry first said C3 had no fl02 term at all (a grep missed the NS_V
+  line) and asked whether W should use it; that was wrong, the 8 Oct text
+  was right, the question is void.
+- HOPPET bug found on the way: `InitCoefHolder` tests the optional
+  argument `use_exact_cf` directly (`coefficient_functions_holder.f90`
+  line 123) instead of its local copy `use_exact`, so a call without it
+  segfaults (`structure_functions` always passes it, so HOPPET's own use is
+  fine).
+- Patch for HOPPET (for AK to port; outside the repo,
+  `~/work/disorder-comparisons/hoppet-fl11/hoppet-fl11-Z-couplings.patch`,
+  against d891044 = 2.3.0-272): the fl11 terms of the Z and γZ structure
+  functions get the diagram couplings (new `fl11_split`, internal `fl11_Z`,
+  `fl11_gZ`); photon, F3 and W unchanged. Tests, pristine vs patched build
+  of the same commit (`sfcmp.f90`, `sfvfn.f90`): EM, F3^Z, F2^W+ at N3LO
+  bit-identical; ΔF2^γZ, ΔF2^Z, ΔFL equal (exact − HOPPET) × (α_s/2π)³ of
+  `fl11z.f90` to 4 digits (e.g. 2.952e-5 vs 2.0284 × 1.455e-5 at x = 0.01,
+  Q² = 400); variable flavour number finite, n_f = 3 (Σe = 0) left at zero.
+  Second patch `hoppet-initcoefholder-optional.patch` for the optional-
+  argument bug.
+- fl02 (F3, both bosons on the closed loop): HOPPET's couplings for Z and
+  γZ are the loop sums, exactly (`fl02z.f90`, equal to 7 digits); no patch
+  needed.
+- HOPPET ctest: pristine 18/18; patched 17/18, `structure_functions_example`
+  differs exactly in F1/F2 Z and γZ at N3LO (N3LO coefficient of F2^Z up to
+  3%, F2^γZ up to 22% where it is small, F1 ≤ 1%), nothing else. With the
+  regenerated reference (`hoppet-fl11-Z-reference-output.patch`) 18/18.
+  `structure_functions_example_flavour` cannot see it (flavour-decomposed
+  SFs stop at NLO).
+- History/APFEL++: HOPPET's NC weighting of fl11 is from 1c110a8 (2016) and
+  unchanged; the Feb 2023 fixes from the comparison with V. Bertone (1058001,
+  8c4ac2a) changed the coefficient functions (δ(1−x) pieces, fl11 parts of
+  C2S3C, NC/CC difference pieces), not the couplings. The comparison plots
+  (now `benchmarking/apfelpp-checks`) are EM only. APFEL++ has the same
+  per-flavour effective-charge weighting of fl11 for Z and γZ
+  (`ElectroWeakCharges`, `DISNCBasis`), so it shares the issue. HOPPET's
+  GitHub issues (7) contain nothing on this.
+- yadism (0.13.11 / 8bbfdc8): fl11 coupling routine has the right structure
+  (⟨Q_b⟩Q_b′) but a mode bug: γZ orderings give ⟨Z⟩Z_q + ⟨γ⟩γ_q instead of
+  ⟨γ⟩Z_q + ⟨Z⟩γ_q (d quark: 0.0734 vs 0.0198), and ZZ includes ⟨a⟩a_q.
+  Confirmed with yadism's own `partonic_coupling_fl11` in a scratch venv; fix
+  tested (`~/work/disorder-comparisons/hoppet-fl11/yfix.py`). Size ≤ 6·10⁻⁵ of
+  F2^γZ. fl02 in F3: correct in yadism and APFEL++.
+- Bug-report pages for AK to pass on: APFEL++ (V. Bertone)
+  https://claude.ai/artifact/76tsS1d8vZt4vWiwNpdmkS, yadism
+  https://claude.ai/artifact/UaaDjNhibLSKLns1EXjHkC.
+
+## 2026-10-09 (evening) — fixed-point non-flatness; 5-class beam grid; event-shape set-up
+
+AK (Fri afternoon): free rein for the weekend up to (not including) the
+clean-up: (1) fixed-point non-flatness, (2) 5-class beam tables, then CC,
+NNLO-with-Z validation prep, the rest.
+
+**Beam grid (5 classes, ZEUS/inclusive Q range).** `sliced21 mktab` for the
+29 nodes with the NC-branch build (46b1e4b), thA371a:
+`~/work/disorder-comparisons/nnlo21/beamgrid5/zeus5_*.tab`. `tabchkg`: max
+deviation / max coefficient 1.1e-3, 5.3e-3, 4.0e-4, 6.7e-3, 3.3e-3 (up q,
+q̄, down q, q̄, gluon).
+
+**Fixed point (x = 0.01, Q² = 400): where the drift is.** From the cluster's
+DIAG combination (F_g_diag): the NNLO falls 10.1 → 6.2 between τ_cut = 1e-3
+and 1e-4 only in the two lowest τ_zQ bins (0.05–0.1: 3.31 → 0.43; 0.1–0.2:
+3.24 → 2.22); the bins 0.2–0.5 are flat within errors. The same two bins
+carry the NLO power corrections (0.05–0.1: 2.75, 4.03, 4.16 at 1e-3, 1e-4,
+1e-5); NLO total 14.99 (1e-3) vs 16.68 (1e-4), 16.82 (3e-5), DISENT 16.885.
+- P2B for mode 1 (new: nlo31 accept with `P2BSLICE=1` in mode 1, τ_zQ bins
+  of the projected 2+1 Born; without P2BSLICE bit-identical, lo and r):
+  - NLO, P2B − plain (`P2BEXTRA=1`, 12 seeds lo): 0.20 ± 0.10 at 1e-3,
+    0.09 ± 0.06 at 1e-4. P2B does **not** remove the fixed-point drift
+    (NLO P2B 15.19 at 1e-3): the drift is the ordinary leading-power
+    slicing correction (O(τ_cut log^k)), not a recoil/fiducial effect.
+  - NNLO, P2B − plain (vi 24, kp 16, r 96 seeds): −3.1 ± 1.6 (1e-3),
+    −1.4 ± 0.6 (1e-4), −0.2 ± 0.6 (3e-5), −0.15 ± 0.58 (1e-5). NNLO with P2B:
+    6.9, 4.7 ± 0.7 (1e-4), 8.4 ± 3.6, 3.7 ± 0.7 (1e-5); plain 6.2 ± 0.8
+    (1e-4), 3.8 ± 1.2 (1e-5).
+- Conclusion so far: the 1e-3 → 1e-4 drift is power corrections in the
+  bins next to the 2-jet edge (consistent with the NLO); below 1e-4 the NNLO
+  is ≈ 4–6 within errors, with no independent reference. The "plateau 8.5"
+  of 6 Oct and the cluster's 10.3–11.5 are both superseded.
+- A narrow-window NNLOJET reference is not feasible (NNLOJET samples the
+  whole lepton phase space; Q²/y are only selectors). Instead: the same
+  observable as an **event shape in the inclusive cuts** (AK's plan C):
+  - our side: new `ZFIX=3` (mode 2, τ_zQ bins, 125 < Q² < 20000,
+    0.2 < y < 0.6, no window); LO 969.46 ± 0.93 pb in 0.05 < τ_zQ < 0.5;
+  - NNLOJET: `dis_thrust` is NOT our τ_zQ (normalised to Σ|p| in the current
+    hemisphere, no energy cut: infrared-unsafe for 2+1 Borns with an empty
+    current hemisphere). Added locally `dis_tauzq` = 1 − 2 Σ_{p_z>0} p_z/Q
+    (`driver/core/EvalDIS.f90`, `Observables.f90`, originals kept as
+    `.orig`; separate build `build-tauzq`); runcard
+    `~/work/disorder-comparisons/nnlo21/nnlojet_tauzq/template.run`.
+
+**W exchange (CC) for the NNLO 2+1 pieces (9 Oct, evening; local 80e28ab).**
+- ew31: `ew31_mode = 2`: c(L,L) = Q²/(Q² + M_W²)/(2 sin²θ_W) (labels and
+  lepton cases as for Z), unit CKM in (u,d), (c,s), no coupling for b (as
+  disorder's CC, HOPPET and NNLOJET's default identity CKM);
+  `ew31_out(f)`: the outgoing flavour of the boson line.
+- me31/me41/born31/virt31: the boson line identified with ew31_out; four
+  quarks with couplings per assignment of the outgoing quarks (W on the
+  incoming line or on the pair), the two assignments interfering
+  (four_quark_cc; me41 via msq_gqqQQg with the exchanged pairing's couplings,
+  a backwards-compatible generalisation; gluon-initiated g → q q̄ Q Q̄ with
+  the W on one pair).
+- **Checks (all four leptons):**
+  - me31 = DISENT's CC MATFOR to 1e-12 for every incoming parton (with
+    `ew31_ccmatfor`, see below);
+  - me41 against me31 in all single collinear limits (harness_lim41),
+    born31 (= me31, colour conservation, polarisation sums, soft and spin
+    limits), the sum of dipoles against me41 in all limits (harness_dip41):
+    as for photon/Z (≤ 1e-4 at the smallest parameter);
+  - virt31: tree = me31, poles = −⟨I⟩ (≤ 5e-13), incl. EXX, EXY and the
+    W-on-the-pair identical-quark channel; the finite part has no
+    independent W check yet (NNLOJET's DISW four-quark functions: not done);
+  - nlo31's sums from representative channels (generation 1, multiplicities
+    per incoming flavour) = brute-force sums over all final-state flavours
+    (harness_ccsum, 3+1 and 4+1, 5e-16);
+  - sliced21's 2+1 Born and one loop per helicity class = MATTHR/VIRTHR CC
+    (harness_born21 -noNC -CC, 1e-15 / 6e-13);
+  - photon and photon + Z bit-identical to the build before (lo, r).
+- **DISENT's CC MATFOR omits a physical term:** for incoming flavours the W
+  cannot hit directly (d, s, ū, c̄ for W⁻) the identical-quark
+  interference of the two W-on-the-pair assignments (e.g. d → d d ū). Up
+  to 10% of those (small) channels pointwise. NC MATFOR keeps the analogous
+  term (D·E*). Our code keeps it (default); `ew31_ccmatfor` drops it for
+  comparisons. Affects disorder's CC P2B at NNLO (differential only). To
+  report to AK.
+- sliced21/lp21: W classes (up q, down q̄ for W⁻; b out of the down
+  classes via `lp21_nodn`, separate beam tables with a flag word; gluon class
+  with the two W pairs; no closed loop). W beam grid
+  `beamgrid5w/zeus5w_*.tab` (tabchkg ≤ 7.7e-3).
+- LO in the ZEUS set-up against NNLOJET epNJJ (W⁻, identity CKM): total
+  3.7554 ± 0.0011 vs 3.7508 ± 0.0028 pb (1.5σ); per Q² bin within 0.1%
+  except 500–1000 GeV² +0.38% (2.5σ, 4 NNLOJET seeds). The photon shows the
+  same pattern (one bin +0.42%, 2.5σ; total 103.286 ± 0.016 vs 103.281):
+  NNLOJET's single-run bin errors are somewhat optimistic.
+- LO with photon + Z (ZEUS) against NNLOJET V_NC = Z+GAMMA: Z/γ per Q² bin
+  within NNLOJET's errors (−0.24 … +0.17%, up to 2σ; Z/γ = 1.36 in the top
+  bin).
+- Event shape τ_zQ (ZFIX = 3) against NNLOJET (local dis_tauzq): LO 969.46 ±
+  0.93 vs 968.87 ± 0.55 pb; our NLO (b1 + lo, 16 seeds): 249–252 pb at
+  τ_cut ≤ 1e-4, power corrections of −30 pb at 1e-3 (lowest bin), P2B flatter
+  from 5e-4. NNLOJET NLO (V, R) and our W NLO against DISENT running.
+- **W: NLO 2+1 against DISENT -CC (9 Oct, evening)**, x = 0.1, Q² = 5000,
+  τ_zQ bins, `runs/ccw1` (as ncz1: sliced21 b1 8 seeds + nlo31 lo 20 seeds
+  against tau2_nlo -noNC -CC, 40 × 3M events), (b1 + lo)/DISENT − 1 in %:
+  - e⁻ (W⁻), total bin [0.05, 0.5): −0.25 ± 0.31 (τ_cut 2e-4), +0.26 ± 0.35
+    (1e-4); ν (W⁺): −0.46 ± 0.27, −0.06 ± 0.31.
+  - Per bin the same pattern as the Z check (ncz1): [0.2, 0.3) −2.1 ± 1.1
+    (e⁻), [0.4, 0.5) +8.0 ± 2.4 (e⁻, rising with smaller τ_cut; ν −0.4 ±
+    2.8). The Z runs show +7.6 ± 3.0 in the same bin with the same seeds,
+    so this is the correlated fluctuation noted there (or a property of the
+    bin at x = 0.1), not something W-specific. The DISENT reference does
+    not include the B–B identical-quark interference that MATFOR CC drops,
+    but it enters only at 4+1 (NNLO), not here.
+- **W one loop against NNLOJET, pointwise (9 Oct, evening)**:
+  `harness_v31w` (outside the repository, dis31_nnlojet): virt31 with W⁻
+  (e⁻) against NNLOJET DISWm's four-quark RV functions (C-type per
+  assignment, D0g1Wa/b-type interferences), ten channel types including
+  the B–B identical-quark one (d → d d ū). Point + mirror: one K for all
+  channels, pole ratio 1, finite constant −1.71982418 (the four-quark
+  scheme constant of the photon check) everywhere. The W finite part is
+  now independently checked.
+- **Correction (reflection-odd one-loop parts, open since 8 Oct):** I wrote
+  "neither opposite nor absent". That was wrong. NNLOJET's one-loop
+  functions equal ours with all helicities flipped. For W the odd part is
+  exactly −ours in all channels. For Z it is exactly −ours unswapped and
+  exactly ours with the quark and lepton helicities both swapped (scratch
+  ew31), for q q̄ g g and four quarks, e⁻ and ν. The 8 Oct q q̄ g g
+  comparison is now contaminated by our closed-loop vector term, which
+  NNLOJET's DIS lacks; it is removed for this check. A global flip only
+  changes the sign of the ε-tensor (absorptive) term. NNLOJET's
+  `D0g1Wab.f` comments: "Fill only the LLL amplitudes. These correspond
+  to our RRR amplitudes because ? But it works...". Which sign is physical
+  is not settled; it cancels for reflection-symmetric observables (all of
+  ours).
+- **Event shape τ_zQ at NLO against NNLOJET (9 Oct, night)**, photon,
+  inclusive cuts (ZFIX = 3), patched NNLOJET (`dis_tauzq`), V + R from 8 +
+  24 seeds (`runs/esnnlojet`) against our b1 + lo (16 seeds, `runs/esnlo`),
+  pb, τ_cut 1e-4 (plain): [0.05, 0.1) 49.3 ± 1.4 vs 49.3 ± 1.0; [0.1, 0.2)
+  85.5 ± 0.9 vs 84.9 ± 0.2; [0.2, 0.3) 52.3 ± 0.7 vs 52.7 ± 0.1; [0.3, 0.4)
+  36.1 ± 0.6 vs 36.3 ± 0.1; [0.4, 0.5) 25.8 ± 0.6 vs 26.4 ± 0.1; total 248.9
+  ± 2.0 vs 249.7 ± 1.1. Same at 3e-5. P2B agrees as well (from 5e-4).
+- **W NLO, the [0.2, 0.3) and [0.4, 0.5) deviations:** 20 new lo seeds
+  (521–540, `runs/ccw1x`) give the same deviations (+5.6 ± 2.4 % in [0.4,
+  0.5) at 2e-4). The error is dominated by b1 (sliced21, 8 seeds, ≈2 % of
+  the bin against 0.5 % from lo), and Z and W used the **same b1 seeds**
+  (601–608). So the shared piece is b1, not lo as I wrote above. 16 new b1
+  seeds (609–624) are running.
+- **Axial closed loop of the 2+1 one loop (row 10 of nc-dropped-terms, 10
+  Oct, night):** MCFM's Z + jet anomaly term (`A53`, large-m_t expansion)
+  crossed to DIS e⁻ p and PDF-weighted over the 2+1 Born phase space,
+  τ_zQ ∈ [0.05, 0.5): axial/Born = (α_s/2π)·c with c = −5·10⁻⁵ (0.01, 400),
+  −3·10⁻⁴ (0.05, 1000), −4·10⁻³ (0.1, 5000), −7·10⁻³ (0.2, 10⁴); at most
+  ~1.4·10⁻⁴ of the 2+1 Born, ~10⁻³ of the NLO correction. Scratch program
+  outside the repository (`disorder-comparisons/axial21`). The tree/virtual
+  normalisation relies on the leading-colour double pole of A51; it was not
+  checked numerically (an order-of-magnitude estimate).
+- **Resolved (10 Oct, 00:30):** the 16 new b1 seeds (609–624) alone give
+  [0.4, 0.5) −1.1 ± 1.9 % and [0.2, 0.3) −1.0 ± 1.0 % at τ_cut 2e-4. With
+  all 24 b1 and 40 lo seeds: every bin within 1.6σ of DISENT, total bin
+  −0.40 ± 0.24 % (2e-4) and +0.04 ± 0.27 % (1e-4). The old deviations were
+  an upward fluctuation of b1 seeds 601–608 in [0.4, 0.5). The Z check
+  (ncz1) used the same seeds, so its +7.6 ± 3.0 % there is the same
+  fluctuation. Lesson: use distinct seeds per validation run.

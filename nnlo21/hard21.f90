@@ -36,7 +36,10 @@
 ! parton 2 the quark, 3 the antiquark. h(0) = sum over helicities of
 ! |M0|^2 (spinor level, no couplings), h(1), h(2) = H^(1)/H^(0) and
 ! H^(2)/H^(0) in powers of alpha_s(mu)/2pi at mu^2 = Q^2. scheme = 0: SCET,
-! 1: Catani's finite remainders (for tests).
+! 1: Catani's finite remainders (for tests). Optional hk(0:2,2): the same
+! for the two classes of relative quark-lepton helicity separately (for
+! photon + Z; k = 1 has |M0|^2 proportional to (p1.p6)^2 + (p2.p7)^2 in
+! DISENT's labels, k = 2 to (p1.p7)^2 + (p2.p6)^2; harness_hard21).
 !-----------------------------------------------------------------------
 module hard21
   implicit none
@@ -54,15 +57,19 @@ module hard21
   public :: hard21_eval, hard21_coeffs
 contains
 
-  subroutine hard21_eval(P, ichan, eq, h)
+  subroutine hard21_eval(P, ichan, eq, h, hk)
     real(dp), intent(in) :: P(4,7), eq
     integer, intent(in) :: ichan
     real(dp), intent(out) :: h(0:2)
+    real(dp), intent(out), optional :: hk(0:2,2)
     complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
     real(dp) :: pm(mxpart,4), s12, s13, s23, s45
     complex(dp) :: c(3,0:2,2), amp(0:2,8), al, be, ga, de
     complex(dp), external :: ampqqbgll
     integer :: k, j, iperm
+    ! the amplitudes j of each helicity class (hk)
+    integer, parameter :: jk(8) = [1, 1, 2, 2, 1, 1, 2, 2]
+    real(dp) :: t(0:2,2)
     pm = 0
     if (ichan == 1) then
        pm(1,:) = P(:,2); pm(2,:) = -P(:,1); pm(3,:) = P(:,3)
@@ -92,13 +99,21 @@ contains
           endif
        enddo
     enddo
-    h = 0
+    t = 0
     do j = 1, 8
-       h(0) = h(0) + abs(amp(0,j))**2
-       h(1) = h(1) + 2 * real(amp(0,j) * conjg(amp(1,j)), dp)
-       h(2) = h(2) + 2 * real(amp(0,j) * conjg(amp(2,j)), dp) + abs(amp(1,j))**2
+       k = jk(j)
+       t(0,k) = t(0,k) + abs(amp(0,j))**2
+       t(1,k) = t(1,k) + 2 * real(amp(0,j) * conjg(amp(1,j)), dp)
+       t(2,k) = t(2,k) + 2 * real(amp(0,j) * conjg(amp(2,j)), dp) + abs(amp(1,j))**2
     enddo
+    h = t(:,1) + t(:,2)
     h(1:2) = h(1:2) / h(0)
+    if (present(hk)) then
+       hk = t
+       do k = 1, 2
+          hk(1:2,k) = t(1:2,k) / t(0,k)
+       enddo
+    endif
   contains
     real(dp) function mdot(v)
       real(dp), intent(in) :: v(4)

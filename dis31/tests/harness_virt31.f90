@@ -8,31 +8,55 @@
 !    (gamma_q = 3 CF/2, gamma_g = beta0, n_f = 5), with born31's T_i.T_k.
 ! The finite part is checked against NNLOJET outside the repository
 ! (~/cernbox/disorder-comparisons/dis31_nnlojet).
+! Couplings: photon, or with the environment EW31 = "mode lepton" those of
+! ew31 (e.g. "1 0": photon + Z, e-).
 program harness_virt31
   use me31
   use born31
   use virt31
+  use ew31
   implicit none
   integer, parameter :: dp = kind(1.0d0)
   real(dp), parameter :: CF = 4.0_dp/3, CA = 3, b0 = (11*CA - 2*5)/6
   real(dp) :: P3(4,7), r(8), v(-2:0), t, m, msq, cc(4,4), pd, ps, mu2, worst(3)
   integer :: ipt, ic, i, j, imu
+  character(32) :: arg
   integer, parameter :: nfl = 9
   integer, parameter :: fls(4,nfl) = reshape([2,2,0,0, -1,-1,0,0, 0,1,-1,0, 0,2,-2,0, 1,1,2,-2, &
        & 2,2,2,-2, -1,-1,-2,2, -2,-2,-2,2, 1,2,1,-2], [4,nfl])
+  ! W exchange (EW31 = "2 l", 9 Oct): W- channels (line u -> d, pair d ubar;
+  ! W on the line only, EXX, EXY, on the pair only with identical quarks,
+  ! pair only), conjugated u <-> d, c <-> s for W+
+  integer, parameter :: flsw(4,nfl) = reshape([2,1,0,0, -1,-2,0,0, 0,1,-2,0, 2,1,3,-3, &
+       & 2,1,1,-1, 2,1,2,-2, 1,1,1,-2, 1,1,3,-4, -1,-2,-3,3], [4,nfl])
+  integer, parameter :: sw(0:5) = [0, 2, 1, 4, 3, 5]
+  integer :: fl(4,nfl)
+  call get_environment_variable('EW31', arg)
+  if (len_trim(arg) > 0) read(arg, *) ew31_mode, ew31_lepton
+  fl = fls
+  if (ew31_mode == 2) then
+     fl = flsw
+     if (ew31_lepton == 1 .or. ew31_lepton == 2) then
+        do ic = 1, nfl
+           do i = 1, 4
+              fl(i,ic) = sign(sw(abs(flsw(i,ic))), flsw(i,ic))
+           enddo
+        enddo
+     endif
+  endif
   worst = 0
   do ipt = 1, 4
      call random_number(r); call dis_point(r, P3)
      do imu = 1, 2
         mu2 = merge(50.0_dp, 800.0_dp, imu == 1)
         do ic = 1, nfl
-           call me31_tree(P3, fls(:,ic), m)
-           call virt31_ren(P3, fls(:,ic), mu2, v, t)
-           call born31_cc(P3, fls(:,ic), msq, cc)
+           call me31_tree(P3, fl(:,ic), m)
+           call virt31_ren(P3, fl(:,ic), mu2, v, t)
+           call born31_cc(P3, fl(:,ic), msq, cc)
            pd = 0; ps = 0
            do i = 1, 4
-              pd = pd - merge(CA, CF, fls(i,ic) == 0)*msq
-              ps = ps - merge(b0, 1.5_dp*CF, fls(i,ic) == 0)*msq
+              pd = pd - merge(CA, CF, fl(i,ic) == 0)*msq
+              ps = ps - merge(b0, 1.5_dp*CF, fl(i,ic) == 0)*msq
               do j = 1, 4
                  if (j /= i) ps = ps + cc(i,j)*log(mu2/(2*abs(mdot(P3(:,i), P3(:,j)))))
               enddo
@@ -40,7 +64,7 @@ program harness_virt31
            worst(1) = max(worst(1), abs(t/m - 1))
            worst(2) = max(worst(2), abs(v(-2)/pd - 1))
            worst(3) = max(worst(3), abs(v(-1) - ps)/msq)
-           if (ipt == 1 .and. imu == 1) write(*,'(a,4i3,a,3es14.5)') ' fl', fls(:,ic), &
+           if (ipt == 1 .and. imu == 1) write(*,'(a,4i3,a,3es14.5)') ' fl', fl(:,ic), &
                 & '  v(-2:0)/tree:', v/t
         enddo
      enddo
