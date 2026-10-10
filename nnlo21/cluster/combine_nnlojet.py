@@ -52,7 +52,7 @@ def main():
         data = {o: [] for o in OBS}
         cpus = []
         for d in jobs:
-            fs = {o: glob.glob(os.path.join(d, 'DIS.*.%s.s*.dat' % o)) for o in OBS}
+            fs = {o: glob.glob(os.path.join(d, 'DIS*.%s.s*.dat' % o)) for o in OBS}
             if not all(len(fs[o]) == 1 for o in OBS):
                 print('skipping', d, {o: len(fs[o]) for o in OBS}); continue
             for o in OBS:

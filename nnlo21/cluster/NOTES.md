@@ -538,3 +538,28 @@ and to node failures are not included (several hundred core-h).
   NNLOJET at all tau_cut down to 1e-5 (error 5.9 pb there).
 - Replays s5368 (r), s2077 (rcorr) with P2BDEBUG=1: no DBG BIG events at these iteration sizes (8e3-2e4), `results/dbg/h*.log`.
 - Tools: garb_report.py (plain-weights counts added), combine_b4.sh.
+
+## 10 Oct: UPDATE 10 Oct (Z, W, E NNLO validations against NNLOJET) -- phase 1 (build, tables, pilots, submission)
+- Code: HEAD bf8d504 (origin/2026-10-nnlo21-ncc merged). bin5 = `$P/bin5/{sliced21,nlo31}` (md5 in `MD5SUMS`), built on a
+  compute node (job 48819098) in `$P/builds/sliced21-bf8d504`; bin..bin4 untouched.
+- Checks bin4 vs bin5 (`$P/runs/chk5`, VEGAS_EQUAL=2, seed 7): sliced21 b0 (zeus tables old 3-class for bin4, zeus5 for bin5,
+  30k x 3) bit-identical. nlo31 lo mode 2 (100k x 3) is NOT bit-identical: iteration 1 is identical, iterations 2, 3 differ by
+  <= 2e-3 relative (0.2 sigma), also without P2BSLICE; both binaries are deterministic on their own. Code differences in me31/
+  virt31/nlo31 flavour sums (Z, W refactoring) change the integrand at rounding level and the VEGAS grid follows.
+- Tables: `$P/tables/zeus5_{0..28}.tab` (photon/Z) and `zeus5w_*` (EW31="2 0"), 29 jobs each (`$P/tables/mk5`). `tabchkg`:
+  zeus5 max deviation / max coefficient (up, ubar, down, dbar, gluon) 9.3e-5 4.9e-3 5.6e-4 3.6e-3 2.1e-3; zeus5w 4.8e-4 3.0e-3
+  3.1e-4 3.8e-3 2.0e-3 (all < 1e-2).
+- NNLOJET: Z, W with the existing OpenMP build (`$P/nnlojet`); E with `$P/src/omp-tauzq/nnlojet-v1.0.2` (fresh v1.0.2 source +
+  `nnlojet-v1.0.2-dis_tauzq.patch`, OPENMP=ON, own install; job 48819103); the production install is not touched.
+  Set directories `$P/runs/nnj-{Z,W,E}` made by `mk_nnj_set.sh` (template runcard, `nnlojet` link to the install used;
+  `nnlojet_card.py` takes the process from the template, `nnlojet_prod.sh` the install from `$N/nnlojet`). Warmups: LO 1M[5],
+  R V 2M[5], VV 1M[5], RV RRb 10M[6], RRa 8M[4] (Z RRa_1) / 5M[4] (others: cheaper, A had frozen RRa warmups at 4 iterations).
+  E warmups LO, R, V, VV converge (chi2/it ~1, LO 970.3 pb, R 73.0, V 175.4 pb in the last iterations).
+- Per-job CPU at the same ncall relative to the photon ZEUS production (A): E 0.8, Z 1.15 (LO, R, V, VV).
+- Bug fixed on the way: `nnlojet_prod.sh`, `size_nnlojet.py`, `combine_nnlojet.py` globbed `DIS.*`; W's files are `DISWm.*`.
+- Our side (`mk_ours_set.py`, lists `$P/runs/ours5/{E,Z,W}[-pilot]/<part>`, B commands with bin5): Z EW31="1 0", W EW31="2 0",
+  P2BSLICE=1; E ZFIX=3 plain (+ P2BSLICE=1 P2BEXTRA=1 lo/vi/kp/r, a quarter of the seeds); b0 16 seeds (7.5M x 6), b1 200, b2 100,
+  lo 200, vi 250, kp 200, r 3500 (seeds 1001-), rcorr 400 (TECHDIFF TECHMIN="1d-10 1d-8"), VEGAS_EQUAL=2 for r, rcorr.
+  Pilots (4 seeds each, seeds 9001-9004): CPU per job [core-h] b1 0.40/0.44/0.42 (E/Z/W), b2 0.64/0.74/0.72, lo 0.12/0.14/0.14,
+  kp 0.085/0.11/0.10, vi 1.01/2.92/3.16, r 1.10/2.89/1.91, rcorr 0.37/0.81/0.55; E extras lo-x 0.11, kp-x 0.075, vi-x 0.22,
+  r-x 1.26. All outputs finite.

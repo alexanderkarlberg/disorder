@@ -2,7 +2,7 @@
 # Set up the NNLOJET warmups of a validation set (10 Oct).
 #   mk_nnj_set.sh SET TEMPLATE.run NNLOJET_INSTALL_DIR
 # Creates $P/runs/nnj-SET/{template.run,nnlojet -> install,warmup/<part>/s1,warm-{big,small}.list}.
-# Warmups: LO 1M[5]; R,V 2M[5]; VV 1M[5] (8 threads); RV, RRb 10M[6], RRa 8M[4] (32 threads).
+# Warmups: LO 1M[5]; R,V 2M[5]; VV 1M[5] (8 threads); RV, RRb 10M[6], RRa 8M[4] (5M[4] for Z RRa_2-5, E, W; cheaper) (32 threads).
 set -e
 SET=$1; T=$2; I=$3
 P=/ptmp/mpp/akarlber/disorder-nnlo21; N=$P/runs/nnj-$SET; S=/u/akarlber/work/disorder/nnlo21/cluster
