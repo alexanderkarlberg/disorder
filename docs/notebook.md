@@ -3369,3 +3369,43 @@ NNLOJET (its D0g1Wab.f comment) and put it into the bug report (now removed).**
   would change the trees at the rounding level during the cluster
   validations).
 - Harnesses: `disorder-comparisons/dis31_nnlojet/todd` (with the KMM pdf).
+
+## 2026-10-10 — fixed-point non-flatness: per-bin power corrections
+
+AK: look into the fixed-point (F) non-flatness. Analysis of the cluster's
+F_g_diag per τ_zQ bin (`~/work/disorder-comparisons/nnlo21/fscale.py`;
+NLO reference: DISENT per bin, `runs/tcut1/tcut1.json`).
+- **NLO:** the relative power correction is set mainly by τ_cut/τ_lo (τ_lo =
+  lower bin edge; the best of lower edge, centre, upper edge), but the lowest
+  bin is 2–4× worse at equal τ_cut/τ_lo: near the 2-jet edge the corrections
+  grow faster than 1/τ_zQ. All bins within ≈ 1.5% of their plateau for
+  τ_cut ≲ 2e-3·τ_lo. Side finding: on the plateau the upper three bins sit
+  −0.5 … −1.1% below the DISENT reference (1–3σ; total 16.68 ± 0.05 at 1e-4
+  against 16.885 ± 0.04); to keep an eye on in the cluster's NLO.
+- **NNLO:** every bin is flat for τ_cut ≲ 5e-3·τ_lo (and τ_cut ≥ 1e-4, above
+  the technical-cut region). Value at the largest τ_cut in that window per
+  bin, pulls against the smaller τ_cut with the nested-sample error
+  √|σ_a² − σ_b²| (the τ_cut points share events):
+  - r_max = 5e-3: 0.56 ± 0.48 (2e-4), 2.46 ± 0.23 (5e-4), 1.58 ± 0.12,
+    1.21 ± 0.08 (1e-3), 0.80 ± 0.05 (2e-3); all pulls ≤ 2.2; total 6.61 ± 0.55;
+  - r_max = 2.5e-3: total 6.01 ± 0.71, pulls ≤ 1.2;
+  - common τ_cut: 6.3 ± 0.6 (2e-4), 6.2 ± 0.8 (1e-4).
+  With r_max = 1e-2 and 2e-2 the lowest two bins fail (pulls 3–8), i.e.
+  the window ends at about 5e-3·τ_lo.
+- **Conclusion (replaces "fixed point not flat"):** each bin has a plateau
+  once τ_cut ≲ 5e-3 times its distance to the 2-jet edge; the total drifts
+  between 1e-3 and 2e-4 only because the lowest bins reach their plateaus
+  last. NNLO at the fixed point ≈ 6.3 ± 0.6 pb/GeV² (all bins, 0.05–0.5).
+  Below 1e-4 the upper bins dip by 1–2σ where the technical-cut correction
+  rcorr grows (≈ 6 at 1e-5): the known technical-cut residual, not slicing.
+  For a τ_zQ-binned observable a per-bin choice of τ_cut is legitimate (each
+  bin is its own cross section) and gives smaller errors. A Born-dependent
+  cut τ_cut·τ_zQ(Born)/τ_ref would be the same thing for binned τ_zQ; not
+  implemented.
+- **ZEUS (B set) does not follow this rule:** the bins converging last
+  against NNLOJET are the hard ones (p̄_T 30–60: +6σ at 1e-3, m₁₂ 65–120:
+  +4.8σ), not those nearest the dijet edge, plus the known fiducial √τ in the
+  high-Q² NLO bins. From 1e-4 all bins are within ≈ 2σ (p̄_T 22–30 +3.2 at
+  1e-4, +1.2 at 3e-5). Why the hard bins converge slowly is open.
+- Still no independent reference for the fixed-point value: the E set on
+  the cluster (τ_zQ bins in inclusive cuts against NNLOJET) is that test.

@@ -54,7 +54,12 @@ P2B for mode 1). Notebook 8–10 Oct for the local checks.
    within +30% of that; otherwise report first. Order: E, Z, W.
 6. Report, as for B: per observable bin and τ_cut against NNLOJET (Z, W:
    total, Q², p̄_T, m12; E: the five τ_zQ bins and their sum, plain and
-   P2B), plain means, flagged seeds, tail statistics.
+   P2B), plain means, flagged seeds, tail statistics. For E add, per bin,
+   the value at the largest τ_cut with τ_cut ≤ 5e-3 × (lower bin edge) and
+   τ_cut ≥ 1e-4, with the pulls against the smaller τ_cut using
+   √|σ_a² − σ_b²| (the τ_cut points share events), and the sum of these
+   per-bin values (notebook 10 Oct: at the fixed point each τ_zQ bin is flat
+   in that window; the total only once the lowest bin is).
 
 ## UPDATE 9 Oct: psmc fix, rerun the B set (AK: go)
 
