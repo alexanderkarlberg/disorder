@@ -814,5 +814,8 @@ of those small channels pointwise; NC MATFOR keeps the analogous term in E).
   bin errors (largest relative change 18% in a near-zero e⁺ p_T bin). The
   references still need regenerating (`run_validation.py --generate
   --prefix …` for p2b_cc_Q_30_x_0.1_{,noscaleuncert_,positron_,neutrino_,
-  neutrino_positron_} and p2b_nc_cc_includeZ_Q_30_x_0.1_); left to AK (the
-  regeneration was not permitted in this session's mode).
+  neutrino_positron_} and p2b_nc_cc_includeZ_Q_30_x_0.1_).
+- AK: "regenerate the references and push the branch". Regenerated with
+  `run_validation.py --generate --prefix …` (worktree build, g++ wrapper):
+  36 histogram files; the totals and logs differed only in volatile lines
+  (timestamps, timing, banner) and were kept. Full ctest 82/82.
