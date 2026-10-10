@@ -8,5 +8,6 @@ ulimit -s unlimited; export OMP_STACKSIZE=1024M OMP_NUM_THREADS=1
 w=$N/warmup/$part/s1
 [ -f $w/done ] || { echo "warmup of $part not finished"; exit 3; }
 for g in $w/DIS.*.y*; do case $g in *.txt|*.log) ;; *) cp -f $g . ;; esac; done
-NNLOJET=$N/../../nnlojet/bin/NNLOJET /u/akarlber/work/disorder/nnlo21/cluster/nnlojet_card.py $N/template.run $part production $nc 1 $seed > job.run
-exec $N/../../nnlojet/bin/NNLOJET --run job.run
+NJ=$N/../../nnlojet/bin/NNLOJET; [ -x $N/nnlojet/bin/NNLOJET ] && NJ=$N/nnlojet/bin/NNLOJET
+NNLOJET=$NJ /u/akarlber/work/disorder/nnlo21/cluster/nnlojet_card.py $N/template.run $part production $nc 1 $seed > job.run
+exec $NJ --run job.run

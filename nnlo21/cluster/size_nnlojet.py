@@ -28,7 +28,7 @@ for pd in sorted(glob.glob(prod + '/*')):
     vals, cpu = [], []
     for d in js:
         row = [rd(glob.glob(d + '/DIS.*.cross.s*.dat')[0])[0, 0]]
-        for o in ('q2', 'ptavg_12', 'm12'):
+        for o in os.environ.get('OBS', 'q2,ptavg_12,m12').split(','):
             h = rd(glob.glob(d + '/DIS.*.%s.s*.dat' % o)[0])
             row += list(h[:, 3]*(h[:, 2] - h[:, 0]))
         vals.append(row)

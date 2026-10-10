@@ -13,8 +13,8 @@ import re, subprocess, sys, os
 NNLOJET = os.environ.get('NNLOJET', '/ptmp/mpp/akarlber/disorder-nnlo21/nnlojet/bin/NNLOJET')
 
 
-def lumi(part):
-    out = subprocess.run([NNLOJET, '-listlumi', 'epLJJ'], capture_output=True, text=True, check=True).stdout
+def lumi(part, proc='epLJJ'):
+    out = subprocess.run([NNLOJET, '-listlumi', proc], capture_output=True, text=True, check=True).stdout
     for l in out.splitlines():
         m = re.match(r'^\s*(\w+)\s+(.*! channel:.*)$', l)
         if m and m.group(1) == part:
@@ -29,7 +29,7 @@ def main():
     else:
         m = re.match(r'^(RR)([ab])_\d+$', part)
         head = 'CHANNELS  region = %s' % m.group(2) if m else 'CHANNELS'
-        chans = lumi(part)
+        chans = lumi(part, re.search(r'^PROCESS\s+(\w+)', open(tmpl).read(), re.M).group(1))
     txt = open(tmpl).read()
     txt = re.sub(r'iseed = SEED', 'iseed = %s' % seed, txt)
     txt = re.sub(r'\n\s*warmup = WARMUP\s*\n', '\n  %s = %s[%s]\n' % (mode, ncall, niter), txt)
