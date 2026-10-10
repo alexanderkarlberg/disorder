@@ -748,7 +748,7 @@ C   CONFIGURATION.
      $     A,B,C,DS,D1,D2,E,Q,G,QQ,EMSQ,DOT,
      $     C2N(-6:6),C3N(-6:6),C2C(-6:6),C3C(-6:6),CG(6),QNC3,QCC,QCC3,
      $     X1PV,X2PV,X1SY,X2SY,DPV,DSY,EPV,ESY,EXXPV,EXXSY,EXYPV,EXYSY,
-     $     QG3,D13
+     $     QG3,D13,EYYPV,EYYSY,QYY,QYY3
       LOGICAL LPV,LCC
       INTEGER SCHEME,NF
       DOUBLE PRECISION CF,CA,TR,PI,PISQ,HF,CUTOFF,EQ(-6:6),SCALE
@@ -811,7 +811,11 @@ C   interference E is replaced by its W-attachment classes: EXX (W on
 C   the incoming-quark line in both amplitudes; pair flavour = partner
 C   of the incoming quark) and EXY (W on the incoming line interfering
 C   with W on the q qbar pair, e.g. d u ubar from an incoming u; not
-C   identical particles, hence no factor HF). The parity-violating
+C   identical particles, hence no factor HF), and EYY (W on the q qbar
+C   pair in both amplitudes, for incoming partons the W cannot couple
+C   to, e.g. d -> d d ubar for W-; identical quarks, factor HF; weights
+C   C2C(-I) and -C3C(-I), the couplings of the charge conjugate; added
+C   2026-10, before which it was missing). The parity-violating
 C   parts of the gluon-initiated and boson-on-the-pair (QQ) terms are
 C   odd under exchange of the final-state quark and antiquark and are
 C   dropped, as is the interference of the boson on different quark
@@ -844,6 +848,7 @@ C   the original arithmetic is unchanged.
       IF (LCC) THEN
         CALL FEXX3(P(1,6),P(1,1),P(1,2),P(1,3),P(1,4),EXXPV,EXXSY)
         CALL FEXY3(P(1,6),P(1,1),P(1,2),P(1,3),P(1,4),EXYPV,EXYSY)
+        CALL FEYY3(P(1,6),P(1,1),P(1,2),P(1,3),P(1,4),EYYPV,EYYSY)
         QCC=Q-HF*(CF-CA/2)*E+HF*(CF-CA/2)*(-EXXSY/16)
      $       +(CF-CA/2)*(-EXYSY/16)
         QCC3=QG3+NF*TR*D13+HF*(CF-CA/2)*(-EXXPV/16)
@@ -852,6 +857,10 @@ C   the original arithmetic is unchanged.
         QCC=QCC*(4*PI/137)**2*4/EMSQ
         QCC3=QCC3*256*PI**4*CF/EMSQ
         QCC3=QCC3*(4*PI/137)**2*4/EMSQ
+        QYY=HF*(CF-CA/2)*(-EYYSY/16)*256*PI**4*CF/EMSQ
+        QYY=QYY*(4*PI/137)**2*4/EMSQ
+        QYY3=HF*(CF-CA/2)*(-EYYPV/16)*256*PI**4*CF/EMSQ
+        QYY3=QYY3*(4*PI/137)**2*4/EMSQ
       ENDIF
 C---INCLUDE EXTERNAL FACTORS
       Q=Q*256*PI**4*CF/EMSQ
@@ -864,6 +873,7 @@ C---INCLUDE EXTERNAL FACTORS
         M(I)=C2N(I)*Q
         IF (LPV) M(I)=M(I)+C3N(I)*QNC3
         IF (LCC) M(I)=M(I)+C2C(I)*QCC+C3C(I)*QCC3
+     $       +C2C(-I)*QYY-C3C(-I)*QYY3
         DO J=1,NF
           M(I)=M(I)+CG(J)*QQ
         ENDDO

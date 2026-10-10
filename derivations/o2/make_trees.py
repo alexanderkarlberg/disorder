@@ -13,6 +13,7 @@ jobs = {
  "e3": (g.fourq_exch(S4, "-1", H), {"EPV": "Eh77 - Eh76", "ESY": "Eh77 + Eh76"}, False),
  "exx3": (g.fourq_exch(S4, "-1", H, attach=("xx",)), {"EXXPV": "Eh77 - Eh76", "EXXSY": "Eh77 + Eh76"}, False),
  "exy3": (g.fourq_exch(S4, "-1", H, attach=("xy",)), {"EXYPV": "Eh77 - Eh76", "EXYSY": "Eh77 + Eh76"}, False),
+ "eyy3": (g.fourq_exch(S4, "-1", H, attach=("yy",)), {"EYYPV": "Eh77 - Eh76", "EYYSY": "Eh77 + Eh76"}, False),
  "conthr3": (g.conthr({"qa": [(1,"p2")], "qb": [(-1,"p1")], "pc": [(1,"p3")]}, "-1", H),
              {"C3PV": "Ch77 - Ch76", "C3SY": "Ch77 + Ch76"}, True),
 }
@@ -38,6 +39,7 @@ specs = [
  ("e3", "FE3", M4, None, ["EPV","ESY"], None, "identical-quark interference Re A_dir A_exch^*, all boson attachments;\nq(p1) -> q(p2) q(p3) qbar(p4)"),
  ("exx3", "FEXX3", M4, None, ["EXXPV","EXXSY"], None, "identical-quark interference, boson on the incoming-quark line in\nboth amplitudes (CC: pair flavour = partner of the incoming quark)"),
  ("exy3", "FEXY3", M4, None, ["EXYPV","EXYSY"], None, "interference of boson on the incoming line (g -> q3 qbar4) with\nboson on the (p2,p4) pair (line p1 -> p3); CC: q(p2), q'(p3), qbar'(p4)"),
+ ("eyy3", "FEYY3", M4, None, ["EYYPV","EYYSY"], None, "identical-quark interference, boson on the q qbar pair in both\namplitudes ((p3,p4) and (p2,p4)); CC: the W cannot couple to the\nincoming quark, e.g. d(p1) -> d(p2) d(p3) ubar(p4) for W-"),
  ("conthr3", "FCONTH3", ["k","p1","p2","p3","vv"], {"Dac": [(1,"p2"),(1,"p3")], "Dbc": [(-1,"p1"),(1,"p3")]},
   ["C3PV","C3SY"], None, "spin-correlated l q(p1) -> l q(p2) g(p3) with the gluon polarisation\nsum replaced by vv vv: helicity difference and sum"),
 ]

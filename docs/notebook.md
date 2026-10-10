@@ -786,3 +786,33 @@ AK: the DISENT fix goes out as a bug-fix release 2.2.1. Version set to 2.2.1
 release-notes entry "Unreleased" became "2.2.1" and now says that an aborted
 event lost, in expectation, its X-independent pieces. The validation ignores
 the version in the banner, so no reference changes.
+
+## 2026-10-10 — CC MATFOR: the W-on-the-pair identical-quark interference
+
+AK (10 Oct): "Fix MATFOR". Found on 9 Oct while extending the NNLO 2+1 work
+(dis31's me31, MCFM crossed) to W exchange: for incoming partons the W
+cannot couple to (W⁻: d, s, ū, c̄), the four-quark final state d d ū (etc.)
+has two assignments with the W on the pair, and they interfere (identical
+quarks). DISENT's CC MATFOR (2.2.0) had the classes EXX (W on the incoming
+line in both amplitudes) and EXY (line × pair) but not this one (up to 10%
+of those small channels pointwise; NC MATFOR keeps the analogous term in E).
+
+- `derivations/o2/make_trees.py`: new class "yy" of `fourq_exch` (boson on
+  (p3,p4) in the direct and on (p2,p4) in the exchanged amplitude) →
+  `FEYY3` in `src/disent_o2_trees.f` (regenerated; the other routines come
+  out identical).
+- MATFOR: + HF (CF − CA/2)(−EYY/16) with weights C2C(−I) (parity-even) and
+  −C3C(−I) (parity-odd), the CC couplings of the charge-conjugate parton:
+  exactly the partons whose conjugate the W hits, with the PV sign of a
+  quark/antiquark as for EXX.
+- Check: dis31's harness_me31 (ncc branch, built against this build) with
+  the B–B term kept in me31 (`CCBB=1`): me31/MATFOR − 1 ≤ 6e-14 (e⁻), 2e-13
+  (e⁺), 8e-13 (ν), 4e-12 (ν̄), 50 points, all flavours. Without the term it
+  now fails, as it should; photon + Z unchanged (≤ 6e-13).
+- Full ctest: 76/82; the six CC P2B NNLO validation configurations fail
+  in their histogram files only (totals identical): shifts ≤ 0.01 of the
+  bin errors (largest relative change 18% in a near-zero e⁺ p_T bin). The
+  references still need regenerating (`run_validation.py --generate
+  --prefix …` for p2b_cc_Q_30_x_0.1_{,noscaleuncert_,positron_,neutrino_,
+  neutrino_positron_} and p2b_nc_cc_includeZ_Q_30_x_0.1_); left to AK (the
+  regeneration was not permitted in this session's mode).
