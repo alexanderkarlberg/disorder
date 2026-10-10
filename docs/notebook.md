@@ -3338,3 +3338,34 @@ carry the NLO power corrections (0.05–0.1: 2.75, 4.03, 4.16 at 1e-3, 1e-4,
   an upward fluctuation of b1 seeds 601–608 in [0.4, 0.5). The Z check
   (ncz1) used the same seeds, so its +7.6 ± 3.0 % there is the same
   fluctuation. Lesson: use distinct seeds per validation run.
+
+## 2026-10-10 — which sign of the reflection-odd one-loop term is right
+
+AK: dig into the literature; report to NNLOJET only if their code is wrong.
+**Result: NNLOJET is right; our virt31 has the wrong sign of the
+reflection-odd (T-odd) part. This corrects 9–10 Oct, where I suspected
+NNLOJET (its D0g1Wab.f comment) and put it into the bug report (now removed).**
+- Literature: Körner, Melić, Merebashvili, hep-ph/0002302 (PRD 62 096011),
+  eqs. (3.7), (3.12)–(3.14): the T-odd DIS structure functions H5, H8, H9
+  (quark initiated, leading and subleading colour) and the sin φ, sin 2φ
+  coefficients, ε_0123 = −1, ε(k, p, p′, q) ∝ +sin φ; they agree with the
+  independent cut calculation of Hagiwara, Hikasa, Kai.
+- 5-point (2+1): MCFM's BDK amplitudes (disorder's port in
+  src/disent_virt3.f, labels LL) give T-odd = +0.0013 × KMM (with
+  2/y²(D sin φ + E sin 2φ)) at every point, the same constant for both colour
+  structures (`todd5`). NNLOJET's B1g1W/Bt1g1W agree with MCFM, sign
+  included (`todd5nj`). So both 5-point implementations are physical.
+- 6-point: collinear factorisation (final-state pair, CS FF map, y → 0) must
+  give T6/tree6 → T5/tree5 (the one-loop splitting's absorptive part
+  multiplies a T-even tree). virt31: u → d g g (d ∥ g) and u → d c c̄ (c ∥ c̄,
+  averaged over the azimuth) both tend to −1.00000 (`todd6`). NNLOJET's 6-point
+  = −ours exactly (harness_v31w/z) → +1: consistent.
+- Cause: ew31's helicity labels ("z_f exchanged for quarks", 8 Oct) were
+  fixed against MATFOR, a T-even comparison that fixes the quark helicity
+  relative to the lepton but not the global flip; exchanging the lepton
+  labels instead (equivalently both, SWAPHEL=ql) gives NNLOJET's sign. No
+  effect on any result (reflection-symmetric observables; nlo31's flavour
+  sums keep only the even part). Fixing ew31 is left for the clean-up (it
+  would change the trees at the rounding level during the cluster
+  validations).
+- Harnesses: `disorder-comparisons/dis31_nnlojet/todd` (with the KMM pdf).
