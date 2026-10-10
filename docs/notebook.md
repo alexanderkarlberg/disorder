@@ -819,3 +819,21 @@ of those small channels pointwise; NC MATFOR keeps the analogous term in E).
   `run_validation.py --generate --prefix …` (worktree build, g++ wrapper):
   36 histogram files; the totals and logs differed only in volatile lines
   (timestamps, timing, banner) and were kept. Full ctest 82/82.
+
+### 10 Oct: why the NNLOJET and pointwise checks of 26 Sep missed it (correction)
+
+- The 26 Sep entry says every Z/W ingredient of MATFOR "agrees point by point
+  with an independent implementation". That overstated it: the
+  identical-quark interference classes were only compared with DISENT's own
+  expressions, which were added to the other code because it lacks them (a
+  circular check), and the class list (EXX, EXY) was never enumerated against
+  all four attachments (xx, xy, yx, yy) and all incoming flavours. `num4q.py`
+  checked the existing classes, not completeness.
+- The O(αs²) comparisons with NNLOJET (26 and 29 Sep: CC e⁻, e⁺; χ²
+  consistent) could not see it: with the same seeds, the term changes the
+  integrated distributions of the validation runs by 5e-6 (e⁻) to 3e-5 (e⁺)
+  of the total, O(1e-4) of the O(αs²) part, while the NNLOJET comparison
+  resolves 0.2–0.6% per bin. Its effect on CC P2B results of 2.2.x is
+  therefore negligible, but it was a real omission.
+- The independent check now is dis31's me31 (MCFM crossed, full amplitude
+  without a class decomposition): equal to the fixed MATFOR to 1e-12.
