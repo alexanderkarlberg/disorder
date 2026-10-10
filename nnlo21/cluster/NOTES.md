@@ -563,3 +563,10 @@ and to node failures are not included (several hundred core-h).
   Pilots (4 seeds each, seeds 9001-9004): CPU per job [core-h] b1 0.40/0.44/0.42 (E/Z/W), b2 0.64/0.74/0.72, lo 0.12/0.14/0.14,
   kp 0.085/0.11/0.10, vi 1.01/2.92/3.16, r 1.10/2.89/1.91, rcorr 0.37/0.81/0.55; E extras lo-x 0.11, kp-x 0.075, vi-x 0.22,
   r-x 1.26. All outputs finite.
+- CPU estimate (10 Oct, before the NNLOJET pilots exist; core-h). Ours (measured pilots x seeds): E 5.6k (incl. extras 1.1k),
+  Z 11.4k, W 7.9k = 24.9k. NNLOJET: production sized as the photon ZEUS one (A, 12.8k) times the per-job CPU ratio (E 0.8,
+  Z 1.15, W assumed 1.15) = 10.2k + 14.7k + 14.7k, warmups ~2.5k per set, pilots ~0.5k per set: ~48k. Total ~73k against
+  the 70k budget (91k limit). Ours submitted 10 Oct (feeder 48820641, groups `$P/runs/ours5/groups5.txt`, order E, Z, W).
+  NNLOJET production NOT yet submitted: waits for the warmups (E, W big ones still pending/running) and the production pilots
+  (`$P/runs/nnj-*/prod/<part>/pilot.list`, 5 seeds per part, fed by `nnj_pilot_wait.sh`); sizing then with
+  `OBS=dis_tauzq size_nnlojet.py` (E) or the default observables (Z, W).
