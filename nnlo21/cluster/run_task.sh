@@ -18,6 +18,8 @@ echo "task $i: $d on $(hostname), $(date)"
 status=$?
 if [ $status -eq 0 ] && grep -qE "$(cat pattern)" run.log; then
     touch done
+    # NNLOJET job directories: pack logs, drop the grid copy (file quota)
+    [ -f job.run ] && /u/akarlber/work/disorder/nnlo21/cluster/nnj_clean.sh .
 else
     [ $status -eq 0 ] && status=97   # ran but no result line
 fi
