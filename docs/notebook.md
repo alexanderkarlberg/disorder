@@ -3409,3 +3409,59 @@ NLO reference: DISENT per bin, `runs/tcut1/tcut1.json`).
   1e-4, +1.2 at 3e-5). Why the hard bins converge slowly is open.
 - Still no independent reference for the fixed-point value: the E set on
   the cluster (τ_zQ bins in inclusive cuts against NNLOJET) is that test.
+
+## 2026-10-11 (Sunday) — the three open questions
+
+AK: look into (a) the hard ZEUS bins, (b) the fixed-point NLO offset, (c) the
+technical-cut residual; not critical.
+
+**(b) Fixed-point NLO offset: none (corrects 10 Oct).** Per bin with the
+DISENT reference error: [0.2, 0.3) −0.036 ± 0.028 (1.3σ), [0.3, 0.4) −0.015 ±
+0.024, [0.4, 0.5) −0.008 ± 0.017 at τ_cut 1e-4; the total at 1e-4 still holds
+the lowest bins' power corrections (−0.07 each); at 3e-5 16.82 ± 0.08 against
+16.885 ± 0.045 (0.7σ). My "1–3σ" compared that total. The ZEUS NLO is fine
+too (−1.1 ± 0.8% at 1e-4 against NNLOJET; all bins within errors).
+
+**(c) Technical-cut residual: understood.** Decade-by-decade TECHDIFF runs
+(`runs/techd`, current build with quad psmc, psmc edge 1e-14, VEGAS_EQUAL=2):
+- fixed point (mode 1, 40 seeds each), total at τ_cut 1e-5: d1 [1e-10, 1e-9] W²
+  11.0 ± 5.5 (median 5.0; = the cluster's rcorr 5.96 ± 0.47), d2 [1e-11,
+  1e-10] 1.4 ± 0.8 (median 0.5), d3 [1e-12, 1e-11] 0.19 ± 0.27 (median 0.002);
+  all ≈ 0 for τ_cut ≥ 1e-4;
+- ZEUS (P2B, 60 seeds), d3 [min(1e-12 W², 1e-10 Q²), min(1e-11 W², 1e-9 Q²)]:
+  −0.24 ± 0.35 (1e-4), 0.1 ± 0.3 (3e-5), 8.3 ± 5.5 (1e-5, median 0.2: a few
+  heavy-tailed seeds), against the cluster's d1 (rcorr) 2.2 / 16.6 / 46 and
+  d2 (conv) −0.1 / 2.3 / 9.0.
+- Each decade grows like 1/τ_cut (real and dipole on opposite sides of the
+  τ_cut boundary in a zone of width ~ the mapping's τ₂ shift), and the series
+  converges by ≈ 5 (ZEUS) to 10 (fixed point) per decade. Below 1e-12 W² the
+  decades give τ_cut-independent offsets and the garbage-dipole count rises
+  (double precision in the dipoles; quick scan, 50k points): do not go
+  lower.
+- Consequence: for τ_cut ≥ 1e-4 nothing to do. Below, d2 must be added as
+  well (the cluster added only d1): ZEUS +2.3 ± 1.3 pb (3e-5), +9 ± 2 pb
+  (1e-5); fixed point upper bins +0.5, +0.15, +0.06 at 1e-5 (part of the
+  1e-5 dips of 10 Oct).
+
+**(a) Hard ZEUS bins: not slow convergence but an upward drift in ln τ_cut,
+present in most bins.** Bin-4 data, NNLO change per unit ln τ_cut in % of
+the bin's LO (nested-sample errors), windows 5e-3→5e-4, 2e-3→2e-4,
+1e-3→1e-4: total +1.3 ± 0.5, +0.6 ± 0.6, +1.0 ± 0.8; p̄_T 30–60 +3.3 ± 0.9,
++4.6 ± 1.4, +4.0 ± 1.2; p̄_T 22–30 ≈ +2.4; m₁₂ 65–120 ≈ +2.4; soft bins
++1 … +2 (≤ 2σ). With d2 added the total reads ≈ 11–12 (2e-2…1e-3), 14.8 (1e-4),
+≈ 17.6 ± 3.7 (3e-5), ≈ 17 ± 6.5 (1e-5) against NNLOJET 11.12 ± 1.19. The fixed
+point (τ_zQ, plain slicing, upper bins) shows no such slope (0 ± 2.5% of NLO).
+The NLO in every ZEUS bin is flat (< 0.1% of LO per unit ln).
+- Excluded: the beam-function grid (b2's τ_cut slope from the grid equals the
+  direct evaluation to median 1e-6, max 6e-4, at hard and soft Born points;
+  0.3% would be needed; `disorder-comparisons/nnlo21` scratch harness hb2).
+- Not usable: the 7 Oct window runs (zwin z2; pre-psmc-fix, weighting bias).
+- Scale of the problem: b2 and r each change by 4–7 × LO per unit ln τ_cut in
+  the hard bins and cancel to the percent level, so a 0.3% effect in either
+  suffices.
+- Candidates: the P2B extra terms at NNLO (ZEUS uses P2BSLICE, the fixed
+  point not), the jet observables, or the per-event μ = Q over the Q²/y range.
+  The cluster's E set (mode 2, τ_zQ bins in the inclusive cuts, plain
+  slicing, plus P2B-extra runs) separates these; the Z set (ZEUS dijets,
+  P2B, fresh seeds) replicates the drift or not. Locally the precision needed
+  (≈ 3500 r seeds) is out of reach.
