@@ -60,6 +60,18 @@ P2B for mode 1). Notebook 8–10 Oct for the local checks.
    √|σ_a² − σ_b²| (the τ_cut points share events), and the sum of these
    per-bin values (notebook 10 Oct: at the fixed point each τ_zQ bin is flat
    in that window; the total only once the lowest bin is).
+7. (11 Oct) Technical cut below τ_cut 1e-4: the residual is a series of
+   decades in s_min (notebook 11 Oct); the second decade is not negligible
+   (ZEUS: +2.3 ± 1.3 pb at 3e-5, +9 ± 2 pb at 1e-5). For each set run, besides
+   rcorr, the second decade `TECHDIFF=1 TECHMIN="1d-11 1d-9" TECHREF="1d-10
+   1d-8" VEGAS_EQUAL=2` (about 200 seeds, as conv) and add it to r for
+   τ_cut < 1e-4; the third decade is ≈ 0 (median), do not go below 1e-12 W².
+8. (11 Oct) Report additionally, per bin: each part (b2, vi, kp, r, rcorr,
+   d2) per τ_cut, and the NNLO change per unit ln τ_cut in the windows
+   5e-3→5e-4, 2e-3→2e-4, 1e-3→1e-4 in % of the bin's LO (pull errors
+   √|σ_a² − σ_b²|). Bin 4 shows an upward drift of ≈ 1% of LO per unit ln in
+   the ZEUS total (3–4.6% in the hard bins, ≈ 3σ); E (plain, τ_zQ) against Z
+   (P2B, jets) and the E P2B-extra runs tell where it comes from.
 
 ## UPDATE 9 Oct: psmc fix, rerun the B set (AK: go)
 
