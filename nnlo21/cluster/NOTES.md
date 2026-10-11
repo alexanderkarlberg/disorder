@@ -598,3 +598,16 @@ and to node failures are not included (several hundred core-h).
   (25.3k with d2); NNLOJET production E 18.6k, Z 7.7k, W 4.3k (30.6k); warmups 7.5k, pilots 1.5k: total ~65k against 70k (limit 91k).
 - NNLOJET feeder (to be run by the coordinator, AK approval):
   `GROUPFILE=/ptmp/mpp/akarlber/disorder-nnlo21/runs/nnj-groups.txt DEADLINE=$(date -d 2026-10-16 +%s) /u/akarlber/work/disorder/nnlo21/cluster/feeder.sh`
+
+## 11 Oct evening: /ptmp file quota hit, recovery
+- 17:30: the /ptmp file-count hard limit (1,572,864 files) was reached. 3,556 running NNLOJET jobs
+  (mostly E RRb_2) died writing their histograms ("Disk quota exceeded", exit 2; ~4,200 core-h lost),
+  ~6,000 failed at launch (exit 0:53), and both feeder chains died (17:39, 18:07).
+- Recovery (AK OK): finished runs archived to /ptmp/mpp/akarlber/archive/*.tar (cs-production prod-nnlo and
+  prod-lonlo, runs/nnlojet/prod, runs/prod/{B,D,F,Bx}); entry counts checked before removing originals.
+- run_task.sh now calls nnj_clean.sh on success in NNLOJET production dirs (path contains /prod/): keeps
+  done, time.log, *.dat; packs run.log, attempts, cmd.sh, pattern, job.run, NNLOJET log into logs.tgz;
+  deletes the copied warmup grid. 11 -> 5 files per job. Already-finished prod dirs cleaned the same way.
+- 20:52: both chains restarted (dis-feeder-nnj with nnj-groups.txt, dis-feeder with ours5/groups-d2.txt,
+  deadline 16 Oct). Failed jobs had no done marker and 1 attempt, so they were resubmitted.
+- combine_nnlojet.py is the bin4 (ZEUS q2/ptavg/m12) combiner: it does not read the E tauzq histograms.
