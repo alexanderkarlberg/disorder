@@ -3338,3 +3338,130 @@ carry the NLO power corrections (0.05–0.1: 2.75, 4.03, 4.16 at 1e-3, 1e-4,
   an upward fluctuation of b1 seeds 601–608 in [0.4, 0.5). The Z check
   (ncz1) used the same seeds, so its +7.6 ± 3.0 % there is the same
   fluctuation. Lesson: use distinct seeds per validation run.
+
+## 2026-10-10 — which sign of the reflection-odd one-loop term is right
+
+AK: dig into the literature; report to NNLOJET only if their code is wrong.
+**Result: NNLOJET is right; our virt31 has the wrong sign of the
+reflection-odd (T-odd) part. This corrects 9–10 Oct, where I suspected
+NNLOJET (its D0g1Wab.f comment) and put it into the bug report (now removed).**
+- Literature: Körner, Melić, Merebashvili, hep-ph/0002302 (PRD 62 096011),
+  eqs. (3.7), (3.12)–(3.14): the T-odd DIS structure functions H5, H8, H9
+  (quark initiated, leading and subleading colour) and the sin φ, sin 2φ
+  coefficients, ε_0123 = −1, ε(k, p, p′, q) ∝ +sin φ; they agree with the
+  independent cut calculation of Hagiwara, Hikasa, Kai.
+- 5-point (2+1): MCFM's BDK amplitudes (disorder's port in
+  src/disent_virt3.f, labels LL) give T-odd = +0.0013 × KMM (with
+  2/y²(D sin φ + E sin 2φ)) at every point, the same constant for both colour
+  structures (`todd5`). NNLOJET's B1g1W/Bt1g1W agree with MCFM, sign
+  included (`todd5nj`). So both 5-point implementations are physical.
+- 6-point: collinear factorisation (final-state pair, CS FF map, y → 0) must
+  give T6/tree6 → T5/tree5 (the one-loop splitting's absorptive part
+  multiplies a T-even tree). virt31: u → d g g (d ∥ g) and u → d c c̄ (c ∥ c̄,
+  averaged over the azimuth) both tend to −1.00000 (`todd6`). NNLOJET's 6-point
+  = −ours exactly (harness_v31w/z) → +1: consistent.
+- Cause: ew31's helicity labels ("z_f exchanged for quarks", 8 Oct) were
+  fixed against MATFOR, a T-even comparison that fixes the quark helicity
+  relative to the lepton but not the global flip; exchanging the lepton
+  labels instead (equivalently both, SWAPHEL=ql) gives NNLOJET's sign. No
+  effect on any result (reflection-symmetric observables; nlo31's flavour
+  sums keep only the even part). Fixing ew31 is left for the clean-up (it
+  would change the trees at the rounding level during the cluster
+  validations).
+- Harnesses: `disorder-comparisons/dis31_nnlojet/todd` (with the KMM pdf).
+
+## 2026-10-10 — fixed-point non-flatness: per-bin power corrections
+
+AK: look into the fixed-point (F) non-flatness. Analysis of the cluster's
+F_g_diag per τ_zQ bin (`~/work/disorder-comparisons/nnlo21/fscale.py`;
+NLO reference: DISENT per bin, `runs/tcut1/tcut1.json`).
+- **NLO:** the relative power correction is set mainly by τ_cut/τ_lo (τ_lo =
+  lower bin edge; the best of lower edge, centre, upper edge), but the lowest
+  bin is 2–4× worse at equal τ_cut/τ_lo: near the 2-jet edge the corrections
+  grow faster than 1/τ_zQ. All bins within ≈ 1.5% of their plateau for
+  τ_cut ≲ 2e-3·τ_lo. Side finding: on the plateau the upper three bins sit
+  −0.5 … −1.1% below the DISENT reference (1–3σ; total 16.68 ± 0.05 at 1e-4
+  against 16.885 ± 0.04); to keep an eye on in the cluster's NLO.
+- **NNLO:** every bin is flat for τ_cut ≲ 5e-3·τ_lo (and τ_cut ≥ 1e-4, above
+  the technical-cut region). Value at the largest τ_cut in that window per
+  bin, pulls against the smaller τ_cut with the nested-sample error
+  √|σ_a² − σ_b²| (the τ_cut points share events):
+  - r_max = 5e-3: 0.56 ± 0.48 (2e-4), 2.46 ± 0.23 (5e-4), 1.58 ± 0.12,
+    1.21 ± 0.08 (1e-3), 0.80 ± 0.05 (2e-3); all pulls ≤ 2.2; total 6.61 ± 0.55;
+  - r_max = 2.5e-3: total 6.01 ± 0.71, pulls ≤ 1.2;
+  - common τ_cut: 6.3 ± 0.6 (2e-4), 6.2 ± 0.8 (1e-4).
+  With r_max = 1e-2 and 2e-2 the lowest two bins fail (pulls 3–8), i.e.
+  the window ends at about 5e-3·τ_lo.
+- **Conclusion (replaces "fixed point not flat"):** each bin has a plateau
+  once τ_cut ≲ 5e-3 times its distance to the 2-jet edge; the total drifts
+  between 1e-3 and 2e-4 only because the lowest bins reach their plateaus
+  last. NNLO at the fixed point ≈ 6.3 ± 0.6 pb/GeV² (all bins, 0.05–0.5).
+  Below 1e-4 the upper bins dip by 1–2σ where the technical-cut correction
+  rcorr grows (≈ 6 at 1e-5): the known technical-cut residual, not slicing.
+  For a τ_zQ-binned observable a per-bin choice of τ_cut is legitimate (each
+  bin is its own cross section) and gives smaller errors. A Born-dependent
+  cut τ_cut·τ_zQ(Born)/τ_ref would be the same thing for binned τ_zQ; not
+  implemented.
+- **ZEUS (B set) does not follow this rule:** the bins converging last
+  against NNLOJET are the hard ones (p̄_T 30–60: +6σ at 1e-3, m₁₂ 65–120:
+  +4.8σ), not those nearest the dijet edge, plus the known fiducial √τ in the
+  high-Q² NLO bins. From 1e-4 all bins are within ≈ 2σ (p̄_T 22–30 +3.2 at
+  1e-4, +1.2 at 3e-5). Why the hard bins converge slowly is open.
+- Still no independent reference for the fixed-point value: the E set on
+  the cluster (τ_zQ bins in inclusive cuts against NNLOJET) is that test.
+
+## 2026-10-11 (Sunday) — the three open questions
+
+AK: look into (a) the hard ZEUS bins, (b) the fixed-point NLO offset, (c) the
+technical-cut residual; not critical.
+
+**(b) Fixed-point NLO offset: none (corrects 10 Oct).** Per bin with the
+DISENT reference error: [0.2, 0.3) −0.036 ± 0.028 (1.3σ), [0.3, 0.4) −0.015 ±
+0.024, [0.4, 0.5) −0.008 ± 0.017 at τ_cut 1e-4; the total at 1e-4 still holds
+the lowest bins' power corrections (−0.07 each); at 3e-5 16.82 ± 0.08 against
+16.885 ± 0.045 (0.7σ). My "1–3σ" compared that total. The ZEUS NLO is fine
+too (−1.1 ± 0.8% at 1e-4 against NNLOJET; all bins within errors).
+
+**(c) Technical-cut residual: understood.** Decade-by-decade TECHDIFF runs
+(`runs/techd`, current build with quad psmc, psmc edge 1e-14, VEGAS_EQUAL=2):
+- fixed point (mode 1, 40 seeds each), total at τ_cut 1e-5: d1 [1e-10, 1e-9] W²
+  11.0 ± 5.5 (median 5.0; = the cluster's rcorr 5.96 ± 0.47), d2 [1e-11,
+  1e-10] 1.4 ± 0.8 (median 0.5), d3 [1e-12, 1e-11] 0.19 ± 0.27 (median 0.002);
+  all ≈ 0 for τ_cut ≥ 1e-4;
+- ZEUS (P2B, 60 seeds), d3 [min(1e-12 W², 1e-10 Q²), min(1e-11 W², 1e-9 Q²)]:
+  −0.24 ± 0.35 (1e-4), 0.1 ± 0.3 (3e-5), 8.3 ± 5.5 (1e-5, median 0.2: a few
+  heavy-tailed seeds), against the cluster's d1 (rcorr) 2.2 / 16.6 / 46 and
+  d2 (conv) −0.1 / 2.3 / 9.0.
+- Each decade grows like 1/τ_cut (real and dipole on opposite sides of the
+  τ_cut boundary in a zone of width ~ the mapping's τ₂ shift), and the series
+  converges by ≈ 5 (ZEUS) to 10 (fixed point) per decade. Below 1e-12 W² the
+  decades give τ_cut-independent offsets and the garbage-dipole count rises
+  (double precision in the dipoles; quick scan, 50k points): do not go
+  lower.
+- Consequence: for τ_cut ≥ 1e-4 nothing to do. Below, d2 must be added as
+  well (the cluster added only d1): ZEUS +2.3 ± 1.3 pb (3e-5), +9 ± 2 pb
+  (1e-5); fixed point upper bins +0.5, +0.15, +0.06 at 1e-5 (part of the
+  1e-5 dips of 10 Oct).
+
+**(a) Hard ZEUS bins: not slow convergence but an upward drift in ln τ_cut,
+present in most bins.** Bin-4 data, NNLO change per unit ln τ_cut in % of
+the bin's LO (nested-sample errors), windows 5e-3→5e-4, 2e-3→2e-4,
+1e-3→1e-4: total +1.3 ± 0.5, +0.6 ± 0.6, +1.0 ± 0.8; p̄_T 30–60 +3.3 ± 0.9,
++4.6 ± 1.4, +4.0 ± 1.2; p̄_T 22–30 ≈ +2.4; m₁₂ 65–120 ≈ +2.4; soft bins
++1 … +2 (≤ 2σ). With d2 added the total reads ≈ 11–12 (2e-2…1e-3), 14.8 (1e-4),
+≈ 17.6 ± 3.7 (3e-5), ≈ 17 ± 6.5 (1e-5) against NNLOJET 11.12 ± 1.19. The fixed
+point (τ_zQ, plain slicing, upper bins) shows no such slope (0 ± 2.5% of NLO).
+The NLO in every ZEUS bin is flat (< 0.1% of LO per unit ln).
+- Excluded: the beam-function grid (b2's τ_cut slope from the grid equals the
+  direct evaluation to median 1e-6, max 6e-4, at hard and soft Born points;
+  0.3% would be needed; `disorder-comparisons/nnlo21` scratch harness hb2).
+- Not usable: the 7 Oct window runs (zwin z2; pre-psmc-fix, weighting bias).
+- Scale of the problem: b2 and r each change by 4–7 × LO per unit ln τ_cut in
+  the hard bins and cancel to the percent level, so a 0.3% effect in either
+  suffices.
+- Candidates: the P2B extra terms at NNLO (ZEUS uses P2BSLICE, the fixed
+  point not), the jet observables, or the per-event μ = Q over the Q²/y range.
+  The cluster's E set (mode 2, τ_zQ bins in the inclusive cuts, plain
+  slicing, plus P2B-extra runs) separates these; the Z set (ZEUS dijets,
+  P2B, fresh seeds) replicates the drift or not. Locally the precision needed
+  (≈ 3500 r seeds) is out of reach.
