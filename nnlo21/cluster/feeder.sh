@@ -15,6 +15,9 @@
 #SBATCH --time=0:20:00
 S=/u/akarlber/work/disorder/nnlo21/cluster
 : "${GROUPFILE:?groups file}"
+# job name of this feeder chain; give concurrent chains different names, or
+# the second one never schedules itself (one pending feeder per name)
+FEEDNAME=${FEEDNAME:-dis-feeder}
 DEADLINE=${DEADLINE:-$(date -d '2026-10-14' +%s)}
 log=$(dirname "$GROUPFILE")/feeder.log
 mkdir -p "$(dirname "$GROUPFILE")/logs-feeder"
@@ -30,9 +33,9 @@ if [ $alldone -eq 1 ]; then echo "all lists done, feeder stops"; exit 0; fi
 # chain); only one pending feeder at a time; never on the flaky et nodes
 if [ -f "$GROUPFILE.stop" ]; then echo "stop file, feeder stops"; exit 0; fi
 if [ "$(date +%s)" -gt "$DEADLINE" ]; then echo "deadline passed, feeder stops"; exit 0; fi
-if [ -z "$(squeue -u "$USER" -h -n dis-feeder -t PD -o %i)" ]; then
-    sbatch --parsable -J dis-feeder --begin=now+60minutes --exclude='et[07-40]' \
-        --export=ALL,GROUPFILE="$GROUPFILE",DEADLINE="$DEADLINE" \
+if [ -z "$(squeue -u "$USER" -h -n "$FEEDNAME" -t PD -o %i)" ]; then
+    sbatch --parsable -J "$FEEDNAME" --begin=now+60minutes --exclude='et[07-40]' \
+        --export=ALL,GROUPFILE="$GROUPFILE",DEADLINE="$DEADLINE",FEEDNAME="$FEEDNAME" \
         -o "$(dirname "$GROUPFILE")/logs-feeder/feeder.%j.out" "$S/feeder.sh"
 fi
 # optional hook (e.g. freezing warmups) before the submissions
