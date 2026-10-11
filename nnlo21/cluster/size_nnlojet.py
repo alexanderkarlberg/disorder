@@ -23,7 +23,7 @@ parts = {}
 for pd in sorted(glob.glob(prod + '/*')):
     p = os.path.basename(pd)
     js = [d for d in glob.glob(pd + '/s*') if os.path.exists(d + '/done')]
-    if len(js) < 5:
+    if len(js) < int(os.environ.get('MINJOBS', 5)):
         continue
     vals, cpu = [], []
     for d in js:
@@ -36,6 +36,9 @@ for pd in sorted(glob.glob(prod + '/*')):
         cpu.append(float(re.search(r'User time \(seconds\): ([\d.]+)', t).group(1)))
     v = np.array(vals)
     parts[p] = (v.mean(0), v.std(0, ddof=1), np.mean(cpu), len(js))
+for fb in os.environ.get('FALLBACK', '').split(','):   # PART=DONORPART: no pilot result, take sigma and CPU of the donor
+    if '=' in fb:
+        a, b = fb.split('='); parts[a] = (parts[b][0], parts[b][1], parts[b][2], 0); print('NOTE: %s sized from %s' % (a, b))
 tot = 0
 for o, rx in ORD.items():
     ps = [p for p in parts if re.match(rx, p)]
@@ -45,11 +48,14 @@ for o, rx in ORD.items():
     if o == 'NNLO':
         val = val.copy(); val[0] = REF_NNLO_PB*1000      # total from our side; bins: |value| with floor
     tr, br = TGT[o]
+    if o == 'NNLO' and 'NNLO_TOT_FB' in os.environ: tr = float(os.environ['NNLO_TOT_FB'])/abs(val[0])
     w = sum(parts[p][1][0]*math.sqrt(parts[p][2]) for p in ps)
     T = tr*abs(val[0])
     N = {p: parts[p][1][0]*w/math.sqrt(parts[p][2])/T**2 for p in ps}
     # per-bin: scale all parts of the order by a common factor until each bin meets its target
     fl = 0.02*abs(val[0])/6 if o == 'NNLO' else 0       # NNLO bins: floor = 2% of total/6
+    if o == 'NNLO' and 'NNLO_TOT_FB' in os.environ: fl = float(os.environ.get('FLOORFRAC', 1/6.))*tr*abs(val[0])   # floor tied to the total target (A: T/6)
+    if o == 'NLO' and os.environ.get('NLO_FLOOR'): fl = float(os.environ['NLO_FLOOR'])*abs(val[0])  # 11 Oct (not used for A)
     f = 1.0
     for b in range(1, len(val)):
         e2 = sum(parts[p][1][b]**2/N[p] for p in ps)

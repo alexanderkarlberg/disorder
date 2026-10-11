@@ -570,3 +570,31 @@ and to node failures are not included (several hundred core-h).
   NNLOJET production NOT yet submitted: waits for the warmups (E, W big ones still pending/running) and the production pilots
   (`$P/runs/nnj-*/prod/<part>/pilot.list`, 5 seeds per part, fed by `nnj_pilot_wait.sh`); sizing then with
   `OBS=dis_tauzq size_nnlojet.py` (E) or the default observables (Z, W).
+
+## 11 Oct: d2 (second technical-cut decade), NNLOJET pilots and production sizing (phase 2)
+- d2 (item 7): `mk_ours_set.py SET d2` (E, Z, W): 200 seeds 2001-2200 each (as rcorr/conv), lists `$P/runs/ours5/{E,Z,W}/d2`,
+  `TECHDIFF=1 TECHMIN="1d-11 1d-9" TECHREF="1d-10 1d-8" VEGAS_EQUAL=2`; cmd.sh diffed against rcorr's (s2001): only TECHMIN changed
+  and TECHREF added. Groups `$P/runs/ours5/groups-d2.txt`, submitted with the feeder (GROUPFILE=that file): feeder 48847583,
+  arrays E 48847584, Z 48847585, W 48847586 (200 tasks each). CPU estimate from rcorr per job (0.37/0.81/0.55 core-h):
+  E 74, Z 162, W 110 = 0.35k core-h (the lower cut may cost a little more). (First run of the script overwrote the per-set
+  `groups.txt` of E/Z/W; restored from groups5.txt. d2 writes `groups-d2.txt` now.)
+- NNLOJET pilots (5 seeds per part, 9001-9005): all done except E RV_7 s9003-9005 and W RRb_2 s9001-9005, which never reached
+  the queue (nnj_pilot_wait.sh submitted only 2 of 5 tasks for E RV_7 and nothing for W RRb_2); resubmitting them was refused
+  by the permission classifier and left to AK; the production covers those parts (W RRb_2 sized from W RRb_1 sigma and CPU,
+  E RV_7 from 2 pilots). nnj_pilot_wait.sh never exits because of these (stopped my wait).
+- Measured per-job CPU (core-h, production ncall of A) E/Z/W: LO 0.63/0.85/0.73, R 0.64/0.86/0.32, V 0.61/0.87/0.32,
+  RRb_1 0.74/0.91/0.62, RRa_1 1.26/1.81/0.73, VV_1 0.16/0.18/0.15. Ratio to A (RRb_1 ~ 1): E 0.8, Z 1.15 as predicted from the
+  warmups; **W measured: R/V/RR/RV/VV are 0.3-0.7 of the Z cost (W/Z about 0.4-0.75, mean ~0.55), not 1.15 relative to A**
+  (so W is ~0.55 x Z ~ 0.63 x A per job).
+- Sizing (`size_nnlojet.py`, now with env NNLO_TOT_FB (absolute NNLO total target, fb), FLOORFRAC (per-bin absolute floor =
+  FLOORFRAC x total target; A: 1/6), NLO_FLOOR (NLO bin floor as fraction of the NLO total; A: none), FALLBACK=PART=DONOR,
+  MINJOBS) with A's relative LO/NLO targets (LO 1e-4; NLO 0.3 % total / 1 % per bin plus floor 0.3 % of the NLO total per bin).
+  NNLO totals: Z 0.8 pb (as A), W 30 fb (2 % of an assumed 1.5 pb = 40 pb x LO ratio), E 5.5 pb. Floors: Z, W 0.4 x T, E 0.5 x T.
+  The A rule (floor T/6 for Z, T = 0.8 pb) would cost 21k for Z alone, bin-driven, so floors were relaxed; E cannot follow A's
+  relative target (RR sigma/job 30-180 pb at LO 970 pb: 400k core-h at T = 0.8 pb). Sizing outputs `$P/runs/nnj-{E,Z,W}/sizing.txt`.
+  Tool: `cluster/mk_nnj_prod.py` (production seeds 1001-, finished pilots count; lists `.../prod/<part>/prod.list`,
+  groups `$P/runs/nnj-groups.txt`, 51 groups, 6 h limit, 12 h for RRa_3 of E/Z, 2000MB, exclude et[07-40]). NOT submitted.
+- CPU table [core-h] (warmups ~2.5k per set incl. done, pilots ~0.5k per set): ours E 5.6k + 0.07k, Z 11.4k + 0.16k, W 7.9k + 0.11k
+  (25.3k with d2); NNLOJET production E 18.6k, Z 7.7k, W 4.3k (30.6k); warmups 7.5k, pilots 1.5k: total ~65k against 70k (limit 91k).
+- NNLOJET feeder (to be run by the coordinator, AK approval):
+  `GROUPFILE=/ptmp/mpp/akarlber/disorder-nnlo21/runs/nnj-groups.txt DEADLINE=$(date -d 2026-10-16 +%s) /u/akarlber/work/disorder/nnlo21/cluster/feeder.sh`

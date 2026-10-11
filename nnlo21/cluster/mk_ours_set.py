@@ -26,11 +26,13 @@ parts = {
  'kp': ('nlo31', 'kp', 2000000, 6, 2001, 200, ['P2B'], 1 if tl == 6 else 2),
  'r': ('nlo31', 'r', 1000000, 6, 1001, 3500, ['P2B', 'EQ'], tl),
  'rcorr': ('nlo31', 'r', 1000000, 6, 2001, 400, ['P2B', 'EQ', 'TD'], tl),
+ 'd2': ('nlo31', 'r', 1000000, 6, 2001, 200, ['P2B', 'EQ', 'TD2'], tl),   # 11 Oct item 7, mode 'd2' only
 }
 runs = []   # (name, partkey, env, nseeds)
 for k in parts:
-    runs.append((k, k, [], 1.0))
-if setn == 'E':
+    if (mode == 'd2') == (k == 'd2'):
+        runs.append((k, k, [], 1.0))
+if setn == 'E' and mode != 'd2':
     for k, f in (('lo', .25), ('vi', .25), ('kp', .25), ('r', .25)):
         runs.append((k + '-x', k, ['P2BEXTRA'], f))
 base = P + '/runs/ours5/' + setn + ('-pilot' if mode == 'pilot' else '')
@@ -42,6 +44,7 @@ for name, k, extra, f in runs:
     elif 'P2B' in flags and p2b: env += ['P2BSLICE=1']
     if 'EQ' in flags: env += ['VEGAS_EQUAL=2']
     if 'TD' in flags: env += ['TECHDIFF=1', 'TECHMIN="1d-10 1d-8"']
+    if 'TD2' in flags: env += ['TECHDIFF=1', 'TECHMIN="1d-11 1d-9"', 'TECHREF="1d-10 1d-8"']
     if mode == 'pilot':
         s0, n = 9001, 4
     else:
@@ -57,5 +60,5 @@ for name, k, extra, f in runs:
     for e in env: a += ['--env', e]
     subprocess.run(a + ['--'] + cmd, check=True, stdout=subprocess.DEVNULL)
     out.append('dis-%s%s-%s %s/jobs.list %d:00:00 1000MB 1 et[07-40]' % (setn, 'p' if mode == 'pilot' else '', name, d, th))
-open(base + '/groups.txt', 'w').write('\n'.join(out) + '\n')
-print(base + '/groups.txt', len(out), 'groups')
+open(base + ('/groups-d2.txt' if mode == 'd2' else '/groups.txt'), 'w').write('\n'.join(out) + '\n')
+print(base + ('/groups-d2.txt' if mode == 'd2' else '/groups.txt'), len(out), 'groups')
