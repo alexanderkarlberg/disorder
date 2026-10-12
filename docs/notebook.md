@@ -3507,3 +3507,18 @@ NNLO 2+1 parts in mode 3 (smoke tests finite).
 - Next: replay of seed 65035 with P2BDEBUG (running) to see the tail events;
   then decide whether the tails are genuine mis-binning (more statistics, or
   smoother binning) or a defect like the psmc one of 9 Oct.
+- **The r tails in mode 3 are a VEGAS-target effect; `VTARGET=0` (12 Oct,
+  morning).** Replays of seed 65035 (bit-identical, also with a per-cell
+  debug trigger) show no single event above 1e10: the ±1.95e5 pb in two
+  neighbouring y bins come from the VEGAS weight. Mode 3 adapts only to the
+  ≥ 1 jet row, to which an event whose leading jet migrates between y bins
+  contributes nothing, so VEGAS never adapts there and the rare points carry
+  large grid weights. New option `VTARGET=0`: VEGAS adapts to the sum of
+  |cells| at the smallest τ_cut over all rows (sampling only; default
+  bit-identical, checked). Same 167 seeds, default against VTARGET=0, r at
+  2e-4 in % of σ_LO(≥ 1 jet): p_T 5–8 −159 ± 28 → −138 ± 2.0; p_T 8–11 +76 ±
+  30 → +53 ± 5.7; y −0.5…0 +24 ± 25 → +69 ± 7.6; y 0…0.5 −119 ± 24 → −142 ±
+  7.0; y 0.5…1 −95 ± 7.2 → −104 ± 1.6; ≥ 2 jets −345 ± 18 → −339 ± 2.8; ≥ 1
+  jet −133 ± 9.2 → −131 ± 6.0; same CPU per job, all bins agree within 2σ.
+  Some bins keep ~10σ seeds. Next: the N3LO r set with VTARGET=0; the same
+  question for mode 2 (ZEUS, target = total row).
