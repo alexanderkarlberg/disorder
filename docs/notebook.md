@@ -3465,3 +3465,45 @@ The NLO in every ZEUS bin is flat (< 0.1% of LO per unit ln).
   slicing, plus P2B-extra runs) separates these; the Z set (ZEUS dijets,
   P2B, fresh seeds) replicates the drift or not. Locally the precision needed
   (≈ 3500 r seeds) is out of reach.
+
+## 2026-10-11/12 (night) — first runs with thsub: N3LO 1+1 by P2B, and the ZEUS P2B − plain term
+
+AK: test the new submission tool (`~/bin/thsub`) with overnight runs; as one
+option "some p2b n3lo jets in the lab frame to see what kind of
+convergence we have". 2666 jobs (≈ 2.4k core-h) in one night; all done with
+exit 0 except one r job on thA357 that vanished mid-run (process group gone,
+users logged in there; thsub marked it `lost` as designed; resubmitted). The
+scheduler filled all 19 thservs (nice 0, ≤ 32 of mine) and the free desktops
+(nice 19) and exited at 03:01.
+
+**ZEUS dijets: P2B − plain (`P2BEXTRA=1`; vi 100, kp 100, r 600 seeds,
+`runs/zx`, `zx_combine.py`).** Its change per unit ln τ_cut in % of the bin's
+LO is tiny in the drifting hard bins (p̄_T 30–60: −0.04 ± 0.03, −0.02 ±
+0.02, 0.00 ± 0.01 in the windows 5e-3→5e-4, 2e-3→2e-4, 1e-3→1e-4; p̄_T 22–30
+≤ 0.1; m₁₂ 65–120 ≤ 0.23 ± 0.14) against the NNLO drift of +2.4 … +4.6;
+total −0.7 ± 0.4 against +1.3 ± 0.5. **The drift is not from P2B**: it sits
+in the plain-slicing parts (b2, vi, kp, r) of the jet bins. Left: the jet
+observables (slow power corrections in hard kinematics) or μ = Q per event
+over the Q²/y range — the cluster's E set (plain, τ_zQ, integrated) separates
+them.
+
+**N3LO 1+1 lab-frame jets by P2B (`runs/n3p`, `n3p_combine.py`).** N3LO
+coefficient = disorder inclusive `-n3locoef` (lab11 analysis, 16 seeds) +
+sliced21 b2 (100) + nlo31 vi (200), kp (100), r (1200) in mode 3, plus the
+technical-cut decades rc1 (150), rc2 (100) below 1e-4; first use of the
+NNLO 2+1 parts in mode 3 (smoke tests finite).
+- The total row is exact at every τ_cut (−0.40% of σ_LO(≥ 1 jet) = the
+  inclusive N3LO coefficient; P2B leaves the total unchanged).
+- Per bin, plain seed means: consistent with flat (pulls against 2e-4 within
+  ≈ 2.5σ), but the errors are 0.5–4% (≥ 1 jet) and up to ±14% of LO in the
+  central rapidity bins from 1e-3 on: ≥ 1 jet −1.4 ± 0.5 (2e-2) … −7.9 ± 4.1
+  (2e-4).
+- The errors come from r: single seeds 23–30 seed-σ out (seed 65035:
+  −14552% and +14488% of LO in the two neighbouring central y bins = a
+  large R − D cancellation binned into adjacent bins); b2, vi, kp are clean
+  (0.02–0.3%). With r trimmed by 1% on each side (diagnostic only, biased):
+  ≥ 1 jet −0.6% of LO, flat from 2e-2 to 1e-3 (±0.1–0.5), then −1.3, −1.5,
+  −2.6 ± 1.1 at 1e-4; forward y and ≥ 2 jets drift up (to +5%).
+- Next: replay of seed 65035 with P2BDEBUG (running) to see the tail events;
+  then decide whether the tails are genuine mis-binning (more statistics, or
+  smoother binning) or a defect like the psmc one of 9 Oct.
