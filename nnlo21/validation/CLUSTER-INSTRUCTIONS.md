@@ -7,6 +7,43 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 12 Oct (after REPORT-2026-10-12): two diagnostic sets, Ex6 and G6 (AK: the cluster is empty, go)
+
+Context (notebook 11–12 Oct, REPORT-2026-10-12): the ZEUS-type jet NNLO (B, Z, W) rises in ln τ_cut
+(W: 7–11σ, not levelling off at 1e-5); the P2B − plain term is not the cause (MPP, 11 Oct); E plain falls
+towards NNLOJET, E P2B agrees but its extras were too noisy. In mode 3 we found (12 Oct) that heavy tails
+of r come from the VEGAS target seeing only one row: new option `VTARGET=0` (VEGAS adapts to the sum of
+|cells| over all rows at the smallest τ_cut; sampling only, default bit-identical): r errors 3–14× smaller
+in jet bins, unbiased. The E extras (target = one τ_zQ row) have the same problem.
+
+1. Build **bin6** from `origin/2026-10-nnlo21-ncc` (92195a5 or later; `nnlo21/build_sliced21.sh`).
+   Check: b0 and lo short runs (mode 2, as for bin5) bit-identical to bin5 without `VTARGET`.
+2. **Ex6 — E P2B extras with VTARGET=0** (the plain parts of E from bin5 stay; P2B = bin5 plain +
+   Ex6 extras): `ZFIX=3 P2BSLICE=1 P2BEXTRA=1 VTARGET=0`, B/E commands of bin5 (`... 2 0 0 psmc 0 0
+   1d-12`, r with `VEGAS_EQUAL=2`): lo-x 200, vi-x 250, kp-x 200, r-x 2000 seeds (CPU from the E
+   pilots ≈ 0.11, 0.22, 0.075, 1.26 core-h per job: ≈ 2.6k core-h). Check first on 20 r-x seeds that the
+   flagged-seed rate (outlier_report, 20× median) is well below bin5's 86/875.
+3. **G6 — fixed-point NNLO at x = 0.1, Q² = 5000 (hard kinematics), photon and W⁻**, plain slicing,
+   mode 1 (τ_zQ bins), `EW31="0 0"` and `EW31="2 0"`:
+   - `sliced21 b1 3000000 6 SEED 0.1 5000 <softtable>`, `sliced21 b2 5000000 6 SEED 0.1 5000 <softtable>`;
+   - `nlo31 lo|vi|kp|r NCALL 6 SEED 1d-9 1 0.1 5000 psmc 0 0 1d-12` (NCALL as B: lo 3M, vi 1M, kp 2M,
+     r 1M; r with `VEGAS_EQUAL=2`); rcorr and d2 as for B (TECHDIFF), with `1 0.1 5000`;
+   - seeds per boson: b1 100, lo 100, b2 100, vi 250, kp 200, r 2000, rcorr 300, d2 150;
+   - pilots (4 seeds per part) for the CPU estimate; rough guess ≈ 3k core-h per boson.
+   - NLO references (DISENT, `tau2_nlo -x 0.1 -Q2 5000 -nev 3000000`, 40 × 3M): W⁻ (with `-CC`) from
+     MPP `runs/ccw1` per bin [NLO coefficient, x dσ/dx dQ² units as combine_tcut]: 0.05–0.1 7.606e-4
+     ± 3.1e-6, 0.1–0.2 5.873e-4 ± 1.4e-6, 0.2–0.3 2.374e-4 ± 6.4e-7, 0.3–0.4 1.212e-4 ± 3.9e-7,
+     0.4–0.5 7.177e-5 ± 2.7e-7, sum 1.7783e-3 ± 2.8e-6; photon: MPP runs it tonight (`runs/fph`), or
+     run 40 seeds of `tau2_nlo` without `-CC` yourself.
+4. Budget ≈ 9k core-h for Ex6 + G6; submit if the pilot estimate is within +30%, otherwise report first.
+   Order: G6 W, Ex6, G6 photon. Watch the /ptmp file count (11 Oct incident): no NNLOJET this time.
+5. Report as REPORT-2026-10-12 (items 6–8 format):
+   - G6: per bin and τ_cut every part, NLO against DISENT, NNLO and its change per unit ln τ_cut in % of
+     the bin's NLO (W and photon separately) — the question is whether the W rise appears at a fixed
+     point in τ_zQ bins (then it is in the 2+1 pieces, not in the jet selection or the Q²/y integration);
+   - Ex6: E NNLO P2B (bin5 plain + Ex6) per bin and total against NNLOJET (59.49 ± 12 pb), with the
+     slopes, and the flagged-seed statistics of the extras with VTARGET=0.
+
 ## UPDATE 10 Oct (after the 9 Oct B round): three NNLO validations against NNLOJET
 
 AK gave free rein over the weekend (9 Oct). When the bin4 B round of
