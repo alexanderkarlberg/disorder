@@ -1,0 +1,30 @@
+LO        429 seeds  sigma         105205 +-      0.527 fb (scatter)  quoted      0.506  ratio  1.04  CPU/job     2718 s  CPU*err^2/job-equiv  3.237e+05
+R          19 seeds  sigma        -7336.1 +-       35.2 fb (scatter)  quoted       47.5  ratio  0.74  CPU/job     2729 s  CPU*err^2/job-equiv  6.428e+07
+RRa_1     405 seeds  sigma        1047.72 +-        213 fb (scatter)  quoted        217  ratio  0.98  CPU/job     5828 s  CPU*err^2/job-equiv  1.073e+11
+RRa_2     131 seeds  sigma        1733.62 +-        397 fb (scatter)  quoted        419  ratio  0.95  CPU/job     5619 s  CPU*err^2/job-equiv  1.161e+11
+RRa_3     721 seeds  sigma        2980.73 +-        929 fb (scatter)  quoted        929  ratio  1.00  CPU/job     8264 s  CPU*err^2/job-equiv  5.143e+12
+RRa_4      49 seeds  sigma        540.542 +-       97.1 fb (scatter)  quoted        110  ratio  0.88  CPU/job     5559 s  CPU*err^2/job-equiv  2.566e+09
+RRa_5     149 seeds  sigma        996.435 +-        241 fb (scatter)  quoted        203  ratio  1.18  CPU/job     6388 s  CPU*err^2/job-equiv  5.508e+10
+RRb_1    2755 seeds  sigma         348.28 +-        128 fb (scatter)  quoted        128  ratio  1.00  CPU/job     4198 s  CPU*err^2/job-equiv  1.905e+11
+RRb_2    1125 seeds  sigma         1150.2 +-        277 fb (scatter)  quoted        273  ratio  1.01  CPU/job     4400 s  CPU*err^2/job-equiv  3.797e+11
+RRb_3     882 seeds  sigma        3154.86 +-        375 fb (scatter)  quoted        387  ratio  0.97  CPU/job     3819 s  CPU*err^2/job-equiv   4.73e+11
+RRb_4     120 seeds  sigma         90.691 +-         42 fb (scatter)  quoted       43.5  ratio  0.97  CPU/job     3086 s  CPU*err^2/job-equiv  6.532e+08
+RRb_5      39 seeds  sigma        335.392 +-       47.1 fb (scatter)  quoted         62  ratio  0.76  CPU/job     5565 s  CPU*err^2/job-equiv  4.821e+08
+RV_1        6 seeds  sigma       -594.684 +-       11.5 fb (scatter)  quoted       17.4  ratio  0.66  CPU/job     3616 s  CPU*err^2/job-equiv  2.889e+06
+RV_2       23 seeds  sigma       -3114.66 +-         33 fb (scatter)  quoted       32.3  ratio  1.02  CPU/job     3793 s  CPU*err^2/job-equiv  9.529e+07
+RV_3      112 seeds  sigma        518.163 +-       40.9 fb (scatter)  quoted       44.1  ratio  0.93  CPU/job     3617 s  CPU*err^2/job-equiv  6.792e+08
+RV_4        5 seeds  sigma        -236.72 +-        6.1 fb (scatter)  quoted       7.82  ratio  0.78  CPU/job     3993 s  CPU*err^2/job-equiv  7.425e+05
+RV_5       16 seeds  sigma       -1258.19 +-       12.7 fb (scatter)  quoted       13.5  ratio  0.94  CPU/job     3755 s  CPU*err^2/job-equiv  9.709e+06
+RV_6        5 seeds  sigma        8.63512 +-       1.94 fb (scatter)  quoted       3.54  ratio  0.55  CPU/job     3570 s  CPU*err^2/job-equiv  6.688e+04
+RV_7        5 seeds  sigma       -50.1979 +-       1.05 fb (scatter)  quoted      0.715  ratio  1.47  CPU/job     3671 s  CPU*err^2/job-equiv  2.017e+04
+V           5 seeds  sigma        18009.4 +-       5.94 fb (scatter)  quoted       4.13  ratio  1.44  CPU/job     3143 s  CPU*err^2/job-equiv  5.543e+05
+VV_1        5 seeds  sigma         144.12 +-      0.243 fb (scatter)  quoted      0.308  ratio  0.79  CPU/job      642 s  CPU*err^2/job-equiv      189.9
+VV_2        5 seeds  sigma        417.369 +-       1.36 fb (scatter)  quoted       1.25  ratio  1.09  CPU/job      634 s  CPU*err^2/job-equiv       5852
+VV_3        5 seeds  sigma        2396.01 +-       5.58 fb (scatter)  quoted       7.15  ratio  0.78  CPU/job     1128 s  CPU*err^2/job-equiv  1.757e+05
+VV_4        5 seeds  sigma        96.4691 +-       0.17 fb (scatter)  quoted       0.17  ratio  1.00  CPU/job      684 s  CPU*err^2/job-equiv      98.38
+VV_5        5 seeds  sigma        290.194 +-      0.455 fb (scatter)  quoted      0.507  ratio  0.90  CPU/job      666 s  CPU*err^2/job-equiv      688.9
+VV_6        5 seeds  sigma       -38.0966 +-     0.0771 fb (scatter)  quoted      0.264  ratio  0.29  CPU/job     2386 s  CPU*err^2/job-equiv      70.83
+VV_7        5 seeds  sigma       -82.9056 +-     0.0414 fb (scatter)  quoted     0.0844  ratio  0.49  CPU/job     2598 s  CPU*err^2/job-equiv      22.21
+LO   coefficient: 105.205 +- 0.000527 pb (LO)
+NLO  coefficient: 10.6733 +- 0.0357 pb (R V)
+NNLO coefficient: 10.874 +- 1.17 pb (RRa_1 RRa_2 RRa_3 RRa_4 RRa_5 RRb_1 RRb_2 RRb_3 RRb_4 RRb_5 RV_1 RV_2 RV_3 RV_4 RV_5 RV_6 RV_7 VV_1 VV_2 VV_3 VV_4 VV_5 VV_6 VV_7)

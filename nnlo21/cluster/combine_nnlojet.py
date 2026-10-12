@@ -15,7 +15,7 @@ import glob, math, os, re, sys
 import numpy as np
 
 ORDERS = {'LO': ('LO',), 'NLO': ('R', 'V'), 'NNLO': ('RR', 'RV', 'VV')}
-OBS = ('cross', 'q2', 'ptavg_12', 'm12')
+OBS = tuple(os.environ.get('NNJ_OBS', 'cross,q2,ptavg_12,m12').split(','))   # E: NNJ_OBS=cross,dis_tauzq
 
 
 def read(fn):
