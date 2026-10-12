@@ -623,3 +623,8 @@ and to node failures are not included (several hundred core-h).
 - Estimate (core-h): G6 W 4.45k, G6 photon 2.91k, Ex6 2.96k (r-x 2.87k): total 10.3k vs 9k budget (+14%, within +30%): submitted.
 - Ex6 20 r-x pilot seeds (VTARGET=0): flagged (20x median) 1/19 finished at the time (s9013) = 5%, against 86/875 = 9.8% in bin5.
 - File count: ~7 files per job dir x 9.0k jobs (incl. 2650 Ex6) = ~65k on top of 800k = ~865k (< 950k).
+
+## 13 Oct: G6 / Ex6 / DISENT-ph combined -- `REPORT-2026-10-13.md`
+- All G6 (W, photon), Ex6 and DISENT-ph seeds done and finite, no reruns. Tools: `combine6.py SET` (G6W|G6P|Ex6), `gen_tables6.py SET`; results `results/{G6W,G6P,Ex6}_6_*`, `outliers6_*`, `rx_tail_compare6.txt`.
+- W NLO references of the instructions are in combine_tcut units already (used without dividing by x); photon DISENT = raw coefficient / x, plain mean over 40 seeds.
+- Ex6 r-x with VTARGET=0: the printed `iteration` values are not on the scale of the result (median max|iteration| 170 vs 14 in bin5), so the 20x-median flag rate (69/2000 vs 86/875) is not like for like; per-seed sd of the total row is 0.73x bin5 at tau_cut 1e-5 and 3-7x at larger tau_cut.
