@@ -854,7 +854,12 @@ contains
   real(dp) function vtarget(a) result(t)
     real(dp), intent(in) :: a(nv)
     integer :: k
-    if (iv == 0) then
+    if (iv == -1) then
+       ! VTARGET = -1 (13 Oct): all cells, every row and tau_cut; for the
+       ! P2B extras (theta(T <= tau_cut)) the smallest tau_cut is the
+       ! smallest region, so VTARGET = 0 adapts to the wrong cells there
+       t = sum(abs(a))
+    elseif (iv == 0) then
        ! VTARGET = 0 (12 Oct): sum of |cells| at the smallest tau_cut over all
        ! observable rows; with P2B in mode 3 the >= 1 jet row misses events
        ! that migrate between bins, whose region VEGAS then never adapts to
@@ -1721,7 +1726,8 @@ program nlo31
   endif
   ! diagnostics (6 Oct): VEGAS target cell from the environment (VTARGET = k,
   ! index into the cell vector; default unchanged); VTARGET = 0: the sum of
-  ! |cells| at the smallest tau_cut over all rows (12 Oct)
+  ! |cells| at the smallest tau_cut over all rows (12 Oct; above-cut parts);
+  ! VTARGET = -1: the sum over all cells (13 Oct; P2B extras)
   tcw = techcut; trw = techcut
   call get_environment_variable('TECHMIN', arg)
   if (len_trim(arg) > 0) read(arg, *) tcw, tcq
