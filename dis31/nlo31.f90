@@ -736,8 +736,11 @@ contains
        endif
        hcacc(1:nv) = hcacc(1:nv) + sg*w*wgt
        res = vtarget(sg)*w
-       if (p2bdebug .and. abs(res) > 1e9_dp) then
-          write(0,'(a,es12.4,a,es12.4,a,es12.4)') ' DBG BIG res', res, ' smin/W2', smin/W2, ' w', w
+       ! (12 Oct) also the largest single cell: in mode 3 the target row can
+       ! stay small while neighbouring bins get large opposite weights
+       if (p2bdebug .and. (abs(res) > 1e9_dp .or. maxval(abs(sg))*w > 1e10_dp)) then
+          write(0,'(a,es12.4,a,es12.4,a,es12.4,a,es12.4,a,i4)') ' DBG BIG res', res, ' smin/W2', smin/W2, ' w', w, &
+               & ' max cell', maxval(abs(sg))*w, ' at', maxloc(abs(sg), 1)
           dbgprint = .true.
           call real_evalv(Pk, [1, 1, 0, 0, 0], F4, u1)
           call real_evalv(Pk, [0, 1, -1, 0, 0], F4, u2)
@@ -851,7 +854,12 @@ contains
   real(dp) function vtarget(a) result(t)
     real(dp), intent(in) :: a(nv)
     integer :: k
-    if (vslice <= 1) then
+    if (iv == 0) then
+       ! VTARGET = 0 (12 Oct): sum of |cells| at the smallest tau_cut over all
+       ! observable rows; with P2B in mode 3 the >= 1 jet row misses events
+       ! that migrate between bins, whose region VEGAS then never adapts to
+       t = sum(abs(a(ntc:nv:ntc)))
+    elseif (vslice <= 1) then
        t = a(iv)
     else
        k = vslice + ntc*(merge(1, nzb, mode >= 2) - 1)
@@ -1712,7 +1720,8 @@ program nlo31
      endif
   endif
   ! diagnostics (6 Oct): VEGAS target cell from the environment (VTARGET = k,
-  ! index into the cell vector; default unchanged)
+  ! index into the cell vector; default unchanged); VTARGET = 0: the sum of
+  ! |cells| at the smallest tau_cut over all rows (12 Oct)
   tcw = techcut; trw = techcut
   call get_environment_variable('TECHMIN', arg)
   if (len_trim(arg) > 0) read(arg, *) tcw, tcq
