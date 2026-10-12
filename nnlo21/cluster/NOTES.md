@@ -611,3 +611,15 @@ and to node failures are not included (several hundred core-h).
 - 20:52: both chains restarted (dis-feeder-nnj with nnj-groups.txt, dis-feeder with ours5/groups-d2.txt,
   deadline 16 Oct). Failed jobs had no done marker and 1 attempt, so they were resubmitted.
 - combine_nnlojet.py is the bin4 (ZEUS q2/ptavg/m12) combiner: it does not read the E tauzq histograms.
+
+## 12 Oct: bin6, Ex6 and G6 (UPDATE 12 Oct steps 1-4)
+- bin6 = `$P/bin6/{sliced21,nlo31,tau2_nlo}` (md5 in MD5SUMS), built from HEAD 7ddc208 (16-core job 48907174, `$P/builds/sliced21-7ddc208`;
+  tau2_nlo from `$P/builds/disent`, cmake -DDISORDER_SLICING=ON). Checks `$P/runs/chk6/chk.sh` (VEGAS_EQUAL=2, seed 7): sliced21 b0 30k x 3 and nlo31 lo mode 2
+  100k x 3 without VTARGET: outputs bit-identical to bin5 (cmp).
+- Generator `mk_g6.py G6W|G6P|Ex6 pilot|prod` -> `$P/runs/ours6/<SET>[-pilot]/<part>`; groups `$P/runs/ours6/groups6.txt` (order G6 W, Ex6, G6 photon),
+  feeder chain dis-feeder-g6 (deadline 19 Oct). DISENT photon NLO: `$P/runs/ours6/DISENT-ph` (40 x 3M, seeds 1-40, no -CC, 30 min each, done).
+- Pilot CPU per job [core-h] (4 seeds; Ex6 r-x 19-20 seeds): G6 W / photon: b1 0.457/0.453, b2 0.774/0.748, lo 0.136/0.119, vi 3.08/1.37, kp 0.092/0.090,
+  r 1.67/1.14, rcorr 0.42/0.34, d2 0.43/0.33; Ex6 r-x 1.43 (others from E pilots 0.11, 0.22, 0.075).
+- Estimate (core-h): G6 W 4.45k, G6 photon 2.91k, Ex6 2.96k (r-x 2.87k): total 10.3k vs 9k budget (+14%, within +30%): submitted.
+- Ex6 20 r-x pilot seeds (VTARGET=0): flagged (20x median) 1/19 finished at the time (s9013) = 5%, against 86/875 = 9.8% in bin5.
+- File count: ~7 files per job dir x 9.0k jobs (incl. 2650 Ex6) = ~65k on top of 800k = ~865k (< 950k).
