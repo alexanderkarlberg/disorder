@@ -7,6 +7,37 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 13 Oct (c): J7 — ZEUS jets in a narrow (x, Q²) window, photon and W, FIRST (AK: as soon as possible)
+
+Why: at the fixed point (G6) the τ_zQ total is flat, but W with the ZEUS jet selection in a narrow window
+around (x, Q²) = (0.01, 400) drifts like the full ZEUS set (MPP `runs/zw2`: +15–21% of the NNLO per unit
+ln τ_cut, 2–3σ, soft jet bins). J7 gives the same for the photon at 4× the MPP statistics, plus more W, so
+the two bosons can be compared jet bin by jet bin at fixed kinematics.
+1. bin6 as it is (7ddc208; the window mode `ZFIX=2` of sliced21 and nlo31 is in it; `VTARGET` is not
+   used). nlo31 takes the window centre from its arguments: `2 0.01 400`, **not** `2 0 0` (empty window).
+   Check in one short run that the log prints `ZFIX window Q2, y:  3.998000E+02  4.002000E+02 ...`.
+2. Commands (`$P` paths; `PH` = photon: `EW31="0 0"`, tables `$P/tables/zeus5`; `W`: `EW31="2 0"`,
+   tables `$P/tables/zeus5w`; every job with `ZFIX=2`):
+   ```
+   b2:  sliced21 b2 5000000 6 SEED zeus <tables> $P/tables/soft.tab
+   vi:  P2BSLICE=1 nlo31 vi 1000000 6 SEED 1d-9 2 0.01 400 psmc 0 0 1d-12
+   kp:  P2BSLICE=1 nlo31 kp 2000000 6 SEED 1d-9 2 0.01 400 psmc 0 0 1d-12
+   r:   P2BSLICE=1 VEGAS_EQUAL=2 nlo31 r 1000000 6 SEED 1d-9 2 0.01 400 psmc 0 0 1d-12
+   rcorr, d2: as r, with the TECHDIFF settings of G6 (rcorr: TECHMIN "1d-10 1d-8"; d2: TECHMIN
+        "1d-11 1d-9", TECHREF "1d-10 1d-8")
+   ```
+   PH: b2 200, vi 240, kp 200, r 1600, rcorr 200, d2 100 (seeds 1001–). W: the same counts minus MPP's
+   (b2 150, vi 180, kp 150, r 1200, rcorr 200, d2 100), on seeds 5001– (MPP used 9001–9700). MPP's local
+   jobs took 0.2 h (kp), about 1.5–2 h (vi), about 2.5–4 h (r) and about 5.5 h (b2) per job on the
+   desktops: about 6k core-h for PH and 5k for W. Pilot of 5 jobs per part for the timing; submit if within
+   +30%.
+3. Order: J7 PH, then N7 RRa_1, then J7 W, then Ex7 and the rest of N7.
+4. Report (as soon as PH is done; W and the others can follow): per ZEUS observable bin (cross, q2,
+   ptavg_12, m12) the NNLO at every τ_cut (with d2 below 1e-4), the NLO, and the slopes per unit ln τ_cut
+   in % of the bin NLO, windows 5e-3→5e-4, 2e-3→2e-4, 1e-3→1e-4, 1e-4→1e-5, pulls as in REPORT-2026-10-13.
+   PH and W side by side, and the ratio of their slopes per bin. Put the raw `ZCELL` outputs in
+   `results/j7/` so that MPP can combine them with `runs/zw2`.
+
 ## UPDATE 13 Oct (b): N7 — NNLOJET W (ZEUS dijets) to 10% at NNLO, the arbiter for the jet drift
 
 Why: our ZEUS-jet NNLO rises in ln τ_cut at a constant rate over 2.5 decades (W total −1.2 to −1.3% of
@@ -23,7 +54,7 @@ separates the two ends at > 5σ.
    existing CPU/job; submit if within +30%, otherwise report first.
 2. **/ptmp file count** (11 Oct incident): keep only what `combine_nnlojet.py` needs per job and pack the
    rest per part (tar) as each job ends; check the count after the first 500 jobs.
-3. Order: N7 RRa_1 first, then Ex7 (UPDATE 13 Oct below), then the rest of N7.
+3. Order: see J7 (UPDATE 13 Oct (c)) above.
 4. Report: NNLOJET W per observable bin (cross, q2, ptavg_12, m12) with the new errors, against ours
    (bin5 `W`) at every τ_cut, pulls, and per bin the τ_cut at which ours crosses NNLOJET. In particular,
    for the total and ptavg 30–60, say which τ_cut range is compatible.
