@@ -7,6 +7,23 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 13 Oct (d): Ex7 pilot to 200 r-x seeds, new decision rule (after the bin7 pilot, 16766e3)
+
+The 20-seed pilot (9101–9120) failed the criterion of UPDATE 13 Oct (robust scatter below Ex6's), and the
+production was rightly not fed. That criterion was the wrong one: the error of the mean is set by the full
+sd, tails included, and Ex6's sd comes from rare tail seeds (total row at 1e-4: sd 3550 over 2000 seeds,
+27 over its 20-seed pilot), which 20 seeds cannot see. If Ex7 had no such tails, its sd of ≈ 450 would give
+≈ 10 pb on 2000 seeds against Ex6's 79, at 0.65 instead of 1.43 core-h per job.
+1. Extend the pilot to 200 r-x seeds: 9121–9300 (with 9101–9120), same command and bin7, ≈ 120 core-h.
+   Priority: after J7 PH, N7 RRa_1 and J7 W (it is small; it may fill gaps).
+2. Decision, total row at τ_cut 1e-3 and 1e-4: **feed Ex7** (the r-x seeds 5001–7000 and the lo/vi/kp-x
+   parts) if (a) sd_Ex7² × 0.65 < sd_Ex6² × 1.43 with sd_Ex6 from the 2000 Ex6 seeds, (b) the fraction of
+   seeds with |value − median| > 20 × (1.48 MAD) is not larger than Ex6's, and (c) the Ex7 and Ex6 means
+   agree within their errors (sd/√N; same integrand, so they must). Otherwise **drop Ex7**: Ex6 + bin5 are
+   the final E extras, and only the report of point 3 below (for Ex6 + bin5) is needed.
+3. Report the 200-seed numbers (mean ± sd/√N, sd, 1.48 MAD, median, outlier fraction; Ex6 and its first
+   200 seeds alongside) before production; feed it without waiting if (a)–(c) hold clearly.
+
 ## UPDATE 13 Oct (c): J7 — ZEUS jets in a narrow (x, Q²) window, photon and W, FIRST (AK: as soon as possible)
 
 Why: at the fixed point (G6) the τ_zQ total is flat, but W with the ZEUS jet selection in a narrow window

@@ -3588,4 +3588,21 @@ cluster's iteration-based outlier flag is not comparable (its §3.1 caveat expla
 13 Oct (02b9f22): Ex7 = Ex6 with `VTARGET=-1` on bin7, combined with Ex6.
 
 Photon with the ZEUS jet selection in the window (`runs/zp2`): started by mistake at 08:18, during
-the day; AK: tonight. Killed at ≈ 08:40 (thsub, by PID), resubmitted at 20:00 with the same seeds.
+the day; AK: tonight. Killed at ≈ 08:40 (thsub, by PID). **Correction**: not resubmitted locally; the photon jets in the
+window went to the cluster as J7 (UPDATE 13 Oct (c), 25b11be), together with N7 (NNLOJET W top-up, (b)).
+
+## 2026-10-13 — Ex7 pilot (cluster, bin7, `VTARGET=-1`) read at MPP
+
+bin7 built from e6d834c (contains 03f6981), bit-identical to bin6 without `VTARGET`. Pilot: 20 r-x seeds
+(9101–9120), all finite, 0.65 core-h per job (Ex6 1.43). Total row (sd / 1.48 MAD, pb) at 1e-3 and 1e-4:
+Ex7 481/267 and 442/62.5; Ex6 pilot (20 seeds, VTARGET=0) 73.5/38.4 and 27.1/11.3; Ex6 (2000 seeds)
+3942/30.4 and 3550/12.1. Medians Ex7 −119/−38, Ex6 −6.3/−1.5 (≈ 2σ at 1e-4 with 20 seeds).
+**Correction**: the record of 13 Oct called `VTARGET=-1` best for the extras (local `runs/exv`, against
+the default target). Against `VTARGET=0` the core of the per-seed distribution is 5–9× wider with −1:
+the target sum(|cells|) over all rows and τ_cut (≈ 2e4 against results of ≈ 100) is dominated by large
+migration weights that cancel between cells, so VEGAS adapts to them rather than to the cells we need.
+Whether −1 is still better for the mean depends on the tails, which made Ex6's sd 100× its core and
+which 20 seeds cannot see; the pilot criterion I wrote (robust scatter below Ex6) was therefore the wrong
+test. Cluster UPDATE 13 Oct (d): pilot to 200 seeds, feed Ex7 only if sd² × cost beats Ex6, the
+outlier fraction is no larger and the means agree; otherwise Ex6 + bin5 are the final E extras.
+
