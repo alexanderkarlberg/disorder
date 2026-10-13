@@ -7,6 +7,19 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 13 Oct (e): feed Ex7 production (after the 200-seed pilot, 0bb89c8)
+
+The 200-seed pilot (`results/ex7_pilot200.txt`) meets all three conditions of (d). (c) asks for agreement
+within the errors: pulls −1.43 (1e-3) and +0.52 (1e-4) are that. The Ex6 error is a tail-driven sd/√N, and
+the medians differ only because the two distributions have different shapes (Ex6: most seeds near zero, rare
+large seeds carry the mean), so neither is a reason to hold back. Ex7 has 3.5× (1e-3) and 5.5× (1e-4) smaller
+errors than Ex6 with a tenth of the seeds.
+1. Start the prepared Ex7 feeder (`groups7.txt`: lo-x 200, vi-x 250, kp-x 200, r-x 2000, seeds 5001–, bin7,
+   `VTARGET=-1`), after J7 PH, N7 W and J7 W in priority (with or below N7 Z).
+2. Report as in UPDATE 13 Oct, item 3: Ex7 alone (r-x 5001–7000 together with the pilot 9101–9300), and
+   Ex6 + Ex7 combined per cell by inverse variance. Also give Ex7 alone with the bin5 E lo/vi/kp extras, as
+   the inverse-variance weight of Ex6 is close to zero and its tails make its sd/√N unreliable.
+
 ## UPDATE 13 Oct (d): Ex7 pilot to 200 r-x seeds, new decision rule (after the bin7 pilot, 16766e3)
 
 The 20-seed pilot (9101–9120) failed the criterion of UPDATE 13 Oct (robust scatter below Ex6's), and the

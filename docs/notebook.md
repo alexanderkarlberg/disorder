@@ -3606,3 +3606,15 @@ which 20 seeds cannot see; the pilot criterion I wrote (robust scatter below Ex6
 test. Cluster UPDATE 13 Oct (d): pilot to 200 seeds, feed Ex7 only if sd² × cost beats Ex6, the
 outlier fraction is no larger and the means agree; otherwise Ex6 + bin5 are the final E extras.
 
+## 2026-10-13 — Ex7 pilot, 200 seeds (cluster 0bb89c8): `VTARGET=-1` IS better for the extras
+
+**Correction of the previous entry** ("against `VTARGET=0` the core is 5–9× wider"; the 20-seed pilot).
+With 200 r-x seeds (9101–9300) the total row is −110.6 ± 25.0 pb (1e-3) and −35.7 ± 14.3 (1e-4), sd 353
+and 203, 0 and 0.5% of seeds beyond 20 × (1.48 MAD). Ex6 (2000 seeds, `VTARGET=0`): 20.8 ± 88.1 and
+−77.4 ± 79.4, sd 3942 and 3550, 3.9% and 3.8% beyond; its first 200 seeds give +666 ± 741 and −832 ± 786.
+The core of Ex7 is wider (1.48 MAD 146 and 67 vs 30 and 12), but the mean is what counts, and Ex6's mean is
+carried by rare large seeds: per core-h (0.65 vs 1.43 per job) Ex7 is ≈ 270× more efficient. Means agree
+(pulls −1.43, +0.52); the medians (−139, −26 vs −6, −1.5) differ only in the shape of the distributions.
+So the 13 Oct conclusion from `runs/exv` (−1 best for the extras) stands. The cluster held production back
+on the 1e-3 pull (its rule: marginal = do not feed); cluster UPDATE 13 Oct (e): feed Ex7 (2000 r-x seeds,
+expected ≈ 7.5 and 4.3 pb on the total row), report Ex7 alone and Ex6 + Ex7.
