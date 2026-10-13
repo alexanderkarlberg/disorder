@@ -7,6 +7,30 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 13 Oct (b): N7 — NNLOJET W (ZEUS dijets) to 10% at NNLO, the arbiter for the jet drift
+
+Why: our ZEUS-jet NNLO rises in ln τ_cut at a constant rate over 2.5 decades (W total −1.2 to −1.3% of
+LO per unit ln, 7–11σ; REPORT-2026-10-12 §5). A constant slope is not what power corrections do, which
+points to a wrong ln τ_cut coefficient below the cut. NNLOJET decides which end is right, but its W
+NNLO is 0.176 ± 0.056 pb (32%). Ours is 0.159 ± 0.009 at 1e-3, 0.180 ± 0.011 at 5e-4 and 0.357 ± 0.045 at
+1e-5, so the two ends differ by 0.18 pb, about 3σ of NNLOJET's error. Brought to ≈ 0.017 pb, NNLOJET
+separates the two ends at > 5σ.
+1. Same runcard, build and workflow as the W production of UPDATE 10 Oct (`nnj5/W`); new seeds only, and
+   combine them with the existing ones. Top up the parts that carry the error (`nnj5/W/parts.txt`):
+   RRa_1 272 → 5500 seeds (error 54 → ≈ 12 fb; ≈ 4.7k core-h), RRb_1 2530 → 5100 (9.8 → 6.9 fb;
+   2.1k), RRa_2 921 → 1850 (0.7k), RRa_3 106 → 420, RRa_5 138 → 550, RRb_5 234 → 940 (together
+   ≈ 0.6k). Total ≈ 8k core-h, target NNLO error ≤ 0.02 pb. Size it with `size_nnlojet.py` from the
+   existing CPU/job; submit if within +30%, otherwise report first.
+2. **/ptmp file count** (11 Oct incident): keep only what `combine_nnlojet.py` needs per job and pack the
+   rest per part (tar) as each job ends; check the count after the first 500 jobs.
+3. Order: N7 RRa_1 first, then Ex7 (UPDATE 13 Oct below), then the rest of N7.
+4. Report: NNLOJET W per observable bin (cross, q2, ptavg_12, m12) with the new errors, against ours
+   (bin5 `W`) at every τ_cut, pulls, and per bin the τ_cut at which ours crosses NNLOJET. In particular,
+   for the total and ptavg 30–60, say which τ_cut range is compatible.
+5. If the cluster is still free after N7: the same for Z (`nnj5/Z`; error 1.17 pb from RRa_3 0.93,
+   RRa_2 0.40, RRb_3 0.38). RRa_3 ×6, RRa_2 and RRb_3 ×2 give ≈ 0.6 pb for ≈ 13k core-h. Report the
+   estimate first, do not submit.
+
 ## UPDATE 13 Oct (after REPORT-2026-10-13): Ex7 = Ex6 again with `VTARGET=-1`
 
 REPORT-2026-10-13 received (MPP). G6 is complete, no further G runs. Ex6 ran with `VTARGET=0` (it had
