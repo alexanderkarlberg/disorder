@@ -643,3 +643,27 @@ and to node failures are not included (several hundred core-h).
   Printed final `iteration` values are ~2.3e4 (VTARGET=-1 scale, not comparable).
 - File projection: Ex6 seed dir = 6 files (attempts, cmd.sh, done, pattern, run.log, time.log) = 7 entries; Ex6 total 18,559 for 2,650 seeds; Ex7 would add ~18.6k.
   /ptmp quota at 925,130 (851k at the start of the day; rising with no job of mine running: not from this session beyond ~5k), so ~944k with Ex7 (< 1.0M).
+
+## 13 Oct: J7 (ZEUS jets, window (x,Q2)=(0.01,400), bin6, ZFIX=2) and N7 (NNLOJET W top-up)
+- Generators `mk_j7.py PH|W` (-> `$P/runs/ours7j/{PH,W}/<part>/{jobs.list,pilot.list}`, groups.txt, groups-pilot.txt) and `mk_n7.py`
+  (new seeds 11001- in `$P/runs/nnj-W/prod/<part>/`, list `prod7.list`, groups `$P/runs/nnj-groups7-{RRa1,rest}.txt`).
+- Window check (`ours7j/chk`, nlo31 lo, `2 0.01 400`, ZFIX=2): log prints `ZFIX window Q2, y: 3.998000E+02 4.002000E+02 3.950593E-01 3.954545E-01`.
+- J7 commands as in the instructions: PH EW31="0 0", tables zeus5, seeds 1001- (b2 200, vi 240, kp 200, r 1600, rcorr 200, d2 100); W EW31="2 0",
+  zeus5w, seeds 5001- (150, 180, 150, 1200, 200, 100). The pilot = the first 5 seeds of each part (they count as production).
+- Pilot CPU [core-h/job]: PH b2 0.933, vi 1.858, kp 0.111, r 1.382, rcorr 0.454, d2 0.489 -> PH 3.0k core-h (instructions ~6k desktop-h).
+  W b2 0.872, kp 0.105, r 1.852, rcorr 0.687, d2 0.662, vi pilot not finished when W was started (G6W vi 3.1 -> ~0.6k) -> W ~3.1k (instr. 5k).
+  Gates passed (-50%, -38%).
+- N7: seeds disjoint (existing 1001-3530, 9001-9005). Targets RRa_1 5500, RRb_1 5100, RRa_2 1850, RRa_3 420, RRa_5 550, RRb_5 940 -> new jobs 5228, 2570,
+  929, 314, 412, 706 = 10159. Existing mean CPU/job (all seeds, size_nnlojet.py) 3295, 2974, 2903, 3859, 1111, 461 s -> 4785+2123+749+337+127+90 =
+  8.2k core-h (instr. 8k, +3%). The errors follow sigma/job: RRa_1 887 fb -> 12 fb at 5500.
+- nnj_clean.sh (called by run_task.sh at the end of a job) covers N7 item 2: 8 entries per finished job dir (dir, done, time.log, logs.tgz, 4 .dat), 9 while running.
+  Measured: finished NNLOJET job 8 entries, ours job dir 8 (mkjobs precreates dir, cmd.sh, pattern = 3).
+- File projection: usage 851k (start), 897k before RRa_1, 914k at 2.4k running RRa_1 jobs; after the first 1462 finished RRa_1 jobs 923.6k (other
+  agents' files also grow); 947.5k at 14:00 with RRa_1 4.8k done. Projection of the rest: N7 rest 4931 x 5 + J7 W 1980 x 5 + PH tail ~ 0.99M
+  (< 1.0M, soft 1,048,576). Z (if submitted) would add ~37k.
+- Submitted 13 Oct: pilots PH 48921395-400 (names dis-jpp-*), N7 RRa_1 feeder dis-feeder-n7a (48921516, array 48921519, nice 500 to let PH go first),
+  PH feeder dis-feeder-j7 (48926765; arrays dis-jp-*, vi list jobs-rest.list = seeds 1006-1240), W pilots dis-jwp-* 48926776-81, W feeder
+  dis-feeder-j7w (48930792; arrays dis-jw-*, vi jobs-rest.list 5006-5180), N7 rest feeder dis-feeder-n7b (48932761; arrays dis-n7-RRb_1 48932806,
+  RRa_2 07, RRa_3 08, RRa_5 09, RRb_5 10). Deadline 17 Oct. Note: alma outside the et nodes had only ~2.5k slots for us; et[07-40] idle but excluded.
+- N7 Z estimate (not submitted; existing done seeds, mean CPU): RRa_3 721 -> x6 = +3605 jobs x 2.30 = 8.3k, RRa_2 131 -> x2 = +131 x 1.56 = 0.2k,
+  RRb_3 882 -> x2 = +882 x 1.06 = 0.9k: 9.4k core-h (instructions 13k), ~4.6k jobs, ~37k files.
