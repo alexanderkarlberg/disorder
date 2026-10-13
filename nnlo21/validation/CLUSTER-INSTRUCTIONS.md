@@ -7,6 +7,26 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 13 Oct (after REPORT-2026-10-13): Ex7 = Ex6 again with `VTARGET=-1`
+
+REPORT-2026-10-13 received (MPP). G6 is complete, no further G runs. Ex6 ran with `VTARGET=0` (it had
+started before the correction of 13 Oct, 02:30), and the report confirms the MPP finding: the extras'
+scatter is 2–7× larger than bin5's at τ_cut ≥ 3e-5 and smaller only at 1e-5, the column VEGAS adapts to.
+The Ex6 results stay valid (the target changes the sampling, not the integrand) and are kept.
+1. Build **bin7** from `origin/2026-10-nnlo21-ncc` (e82e1f8 or later; it contains 03f6981, which bin6,
+   built from 7ddc208, does not). Check: short b0/lo runs bit-identical to bin6 without `VTARGET`, and one
+   short r-x run with `VTARGET=-1` finite.
+2. **Ex7**: the Ex6 commands and seed counts (lo-x 200, vi-x 250, kp-x 200, r-x 2000; ≈ 2.6k core-h) with
+   `ZFIX=3 P2BSLICE=1 P2BEXTRA=1 VTARGET=-1` and bin7, on new seeds disjoint from Ex6 (lo/vi/kp-x 2001–,
+   r-x 1001–3000) and from the bin5 E extras: e.g. 5001– for every part. Pilot of 20 r-x seeds first;
+   continue if the per-seed scatter of the total row at 1e-4 and 1e-3 is below Ex6's.
+3. Report (new file, e.g. REPORT-2026-10-14) for Ex7 alone and for the per-cell inverse-variance combination
+   Ex6 + Ex7: NNLO_P2B and NLO_P2B against NNLOJET, slopes, item-6 window. Per-seed scatter (sd and
+   1.48 MAD) per part and τ_cut for bin5, Ex6 and Ex7 side by side.
+   **Flag outliers on the final per-seed values, not on the `iteration` lines**: with `VTARGET` set,
+   VEGAS integrates the target (sum of |cells|), so the printed iterations are on that scale and are not
+   comparable with runs without `VTARGET` (the caveat of REPORT-2026-10-13 §3.1).
+
 ## UPDATE 12 Oct (after REPORT-2026-10-12): two diagnostic sets, Ex6 and G6 (AK: the cluster is empty, go)
 
 Context (notebook 11–12 Oct, REPORT-2026-10-12): the ZEUS-type jet NNLO (B, Z, W) rises in ln τ_cut
