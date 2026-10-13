@@ -667,3 +667,7 @@ and to node failures are not included (several hundred core-h).
   RRa_2 07, RRa_3 08, RRa_5 09, RRb_5 10). Deadline 17 Oct. Note: alma outside the et nodes had only ~2.5k slots for us; et[07-40] idle but excluded.
 - N7 Z estimate (not submitted; existing done seeds, mean CPU): RRa_3 721 -> x6 = +3605 jobs x 2.30 = 8.3k, RRa_2 131 -> x2 = +131 x 1.56 = 0.2k,
   RRb_3 882 -> x2 = +882 x 1.06 = 0.9k: 9.4k core-h (instructions 13k), ~4.6k jobs, ~37k files.
+- 13 Oct 15:00, N7 Z approved by AK (item 5): `mk_n7.py Z` (same script, argument Z; seeds 11001- disjoint from existing Z 1001-, 9001-9005) in `$P/runs/nnj-Z/prod`,
+  lists `prod/<part>/prod7.list`, groups `$P/runs/nnj-groups7-Z.txt`. New jobs RRa_3 3605 (to 4326, 12 h limit), RRa_2 131 (to 262), RRb_3 882 (to 1764) = 4618,
+  est. 9.4k core-h. Feeder dis-feeder-n7z 48933872 (deadline 17 Oct), arrays dis-n7z-RRa_3 48933875, RRa_2 48933876, RRb_3 48933877, nice 500 (below J7 W and N7 W rest).
+  Files: usage 667k before, 681k after (dirs precreated); final +23k for Z, ~0.77M with the rest of J7/N7 and Ex7 (~18.6k).
