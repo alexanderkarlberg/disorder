@@ -3563,3 +3563,46 @@ Cluster instructions corrected (Ex6: default target, not VTARGET=0; e57dac8 push
   also at fixed kinematics**: the interplay of the k_T jets (R = 1, Breit frame) / lab-frame E_T, η
   selection with the τ₂ slicing, not the 2+1 matrix elements or the Q²/y integration (P2B excluded
   11 Oct). Not yet checked: photon jets in the same window (B photon drifts too, so expected).
+
+## 2026-10-13 — REPORT-2026-10-13 (cluster: G6 fixed point, Ex6) read at MPP
+
+**G6 (x = 0.1, Q² = 5000, τ_zQ bins, photon and W⁻, 2–4× the MPP `runs/fph` statistics, technical-cut
+decades included).** NLO converged to DISENT from τ_cut 1e-4 (totals at 1e-5 +1.6σ W, +0.5σ photon).
+NNLO consistent with `fph` (totals in % of the NLO at 5e-3, 5e-4, 2e-4, 1e-4: W 50.1, 53.2, 52.0, 53.3
+vs 50.1, 54.1, 53.0, 51.0; photon 49.9, 52.8, 53.0, 51.9 vs 50.1, 51.0, 55.0, 54.4; window slopes agree
+within ≤ 2.2σ). Total bin flat below 1e-3 for both bosons (|pull| ≤ 1.8 in 1e-3→1e-4 and 1e-4→1e-5, the
+latter new). The two upper windows (5e-3→5e-4, 2e-3→2e-4) have 4–5σ slopes of either sign, but 5e-3
+and 2e-3 are above the window rule τ_cut ≤ 5e-3 × lower bin edge for every bin except 0.4–0.5.
+**Caveat on the 13 Oct statement "the drift is absent at the fixed point"**: it holds for the total.
+The upper bins (0.2–0.5) rise as τ_cut falls in both bosons by ≈ 1–4% of the bin NLO per unit ln
+(≈ 2–7% of the bin NNLO), also in 1e-3→1e-4, inside the window rule (average of the six upper bin
+slopes −1.9 ± 0.5% of NLO, ≈ 4σ, windows not independent), and are not resolved in 1e-4→1e-5 (errors
+3×). This is the 2–4σ upper-bin rise of `fph`, now confirmed. It is smaller than the jet drift (15–25% of
+the NNLO per unit ln) but has the same sign, and a constant slope in ln τ_cut is what a wrong
+log coefficient below the cut would give. Open; it fits with the jet-observable dissection (next).
+
+**Ex6 (E P2B extras with VTARGET=0).** It confirms `runs/exv`: scatter 2–7× larger than bin5 at
+τ_cut ≥ 3e-5, smaller at 1e-5 (the target column); NNLO_P2B at 1e-5 83 ± 35 pb vs NNLOJET 59 ± 12.
+With `VTARGET` set, the printed VEGAS iterations are on the target's scale (sum of |cells|), so the
+cluster's iteration-based outlier flag is not comparable (its §3.1 caveat explained). Cluster UPDATE
+13 Oct (02b9f22): Ex7 = Ex6 with `VTARGET=-1` on bin7, combined with Ex6.
+
+Photon with the ZEUS jet selection in the window (`runs/zp2`): started by mistake at 08:18, during
+the day; AK: tonight. Killed at ≈ 08:40 (thsub, by PID). **Correction**: not resubmitted locally; the photon jets in the
+window went to the cluster as J7 (UPDATE 13 Oct (c), 25b11be), together with N7 (NNLOJET W top-up, (b)).
+
+## 2026-10-13 — Ex7 pilot (cluster, bin7, `VTARGET=-1`) read at MPP
+
+bin7 built from e6d834c (contains 03f6981), bit-identical to bin6 without `VTARGET`. Pilot: 20 r-x seeds
+(9101–9120), all finite, 0.65 core-h per job (Ex6 1.43). Total row (sd / 1.48 MAD, pb) at 1e-3 and 1e-4:
+Ex7 481/267 and 442/62.5; Ex6 pilot (20 seeds, VTARGET=0) 73.5/38.4 and 27.1/11.3; Ex6 (2000 seeds)
+3942/30.4 and 3550/12.1. Medians Ex7 −119/−38, Ex6 −6.3/−1.5 (≈ 2σ at 1e-4 with 20 seeds).
+**Correction**: the record of 13 Oct called `VTARGET=-1` best for the extras (local `runs/exv`, against
+the default target). Against `VTARGET=0` the core of the per-seed distribution is 5–9× wider with −1:
+the target sum(|cells|) over all rows and τ_cut (≈ 2e4 against results of ≈ 100) is dominated by large
+migration weights that cancel between cells, so VEGAS adapts to them rather than to the cells we need.
+Whether −1 is still better for the mean depends on the tails, which made Ex6's sd 100× its core and
+which 20 seeds cannot see; the pilot criterion I wrote (robust scatter below Ex6) was therefore the wrong
+test. Cluster UPDATE 13 Oct (d): pilot to 200 seeds, feed Ex7 only if sd² × cost beats Ex6, the
+outlier fraction is no larger and the means agree; otherwise Ex6 + bin5 are the final E extras.
+
