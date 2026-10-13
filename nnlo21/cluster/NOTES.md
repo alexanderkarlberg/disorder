@@ -628,3 +628,18 @@ and to node failures are not included (several hundred core-h).
 - All G6 (W, photon), Ex6 and DISENT-ph seeds done and finite, no reruns. Tools: `combine6.py SET` (G6W|G6P|Ex6), `gen_tables6.py SET`; results `results/{G6W,G6P,Ex6}_6_*`, `outliers6_*`, `rx_tail_compare6.txt`.
 - W NLO references of the instructions are in combine_tcut units already (used without dividing by x); photon DISENT = raw coefficient / x, plain mean over 40 seeds.
 - Ex6 r-x with VTARGET=0: the printed `iteration` values are not on the scale of the result (median max|iteration| 170 vs 14 in bin5), so the 20x-median flag rate (69/2000 vs 86/875) is not like for like; per-seed sd of the total row is 0.73x bin5 at tau_cut 1e-5 and 3-7x at larger tau_cut.
+
+## 13 Oct (evening): bin7 and Ex7 pilot (UPDATE 13 Oct); Ex7 production NOT fed (lowest priority, coordinator's change of plan)
+- bin7 = `$P/bin7/{sliced21,nlo31}` (MD5SUMS there), built from HEAD e6d834c (contains 03f6981, e82e1f8; checked with merge-base --is-ancestor) with
+  `nnlo21/build_sliced21.sh $P/src/MCFM-10.3 $P/src/nnlojet-v1.0.2/install/lib64 $P/builds/sliced21-e6d834c` as a 16-core job (48921377, ~1 min). No tau2_nlo copied.
+- Checks `$P/runs/chk7/chk.sh`: sliced21 b0 (30k x 3) and nlo31 lo mode 2 (100k x 3), VEGAS_EQUAL=2, seed 7, without VTARGET: bin6 and bin7 outputs bit-identical (cmp).
+  r-x short run (100k x 3) with `ZFIX=3 P2BSLICE=1 P2BEXTRA=1 VTARGET=-1`: finite.
+- `mk_ex7.py pilot|prod` -> `$P/runs/ours7/Ex7[-pilot]/<part>`; Ex7: lo-x 200, vi-x 250, kp-x 200 (seeds 5001-), r-x 2000 (5001-7000), env as Ex6 but VTARGET=-1, bin7.
+  Seeds disjoint from Ex6 (lo/vi/kp 2001-2250, r 1001-3000), bin5 E extras (r-x 1001-1875, lo/kp/vi-x 2001-2062) and the pilots (Ex6 9001-9020, Ex7 9101-9120).
+  Groups file `$P/runs/ours7/groups7.txt` (copy of Ex7/groups.txt); job lists created, NO feeder started.
+- Pilot: 20 r-x seeds 9101-9120, array 48921477 (dis-x7p-r-x), all done and finite, 0.65 core-h per job (Ex6 pilot 1.43). `scatter7.py DIR` prints sd and 1.48 MAD of the total row.
+  Total row, tau_cut 1e-3 / 1e-4 (sd, 1.48 MAD, pb): Ex7 pilot 481/267 and 442/62.5; Ex6 (2000 seeds, VTARGET=0) 3942/30.4 and 3550/12.1; Ex6 pilot (20 seeds) 73.5/38.4 and 27.1/11.3.
+  Ex7 pilot median -119 / -38 (Ex6 -6.3 / -1.5). The robust scatter is 9x (1e-3) and 5x (1e-4) LARGER than Ex6's, so the criterion (below Ex6) is not met; only the 2000-seed Ex6 sd (tail-driven) is above.
+  Printed final `iteration` values are ~2.3e4 (VTARGET=-1 scale, not comparable).
+- File projection: Ex6 seed dir = 6 files (attempts, cmd.sh, done, pattern, run.log, time.log) = 7 entries; Ex6 total 18,559 for 2,650 seeds; Ex7 would add ~18.6k.
+  /ptmp quota at 925,130 (851k at the start of the day; rising with no job of mine running: not from this session beyond ~5k), so ~944k with Ex7 (< 1.0M).
