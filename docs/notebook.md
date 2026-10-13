@@ -3522,3 +3522,44 @@ NNLO 2+1 parts in mode 3 (smoke tests finite).
   jet −133 ± 9.2 → −131 ± 6.0; same CPU per job, all bins agree within 2σ.
   Some bins keep ~10σ seeds. Next: the N3LO r set with VTARGET=0; the same
   question for mode 2 (ZEUS, target = total row).
+
+## 2026-10-12/13 (night) — fixed point in hard kinematics; E P2B extras and the VEGAS target
+
+AK: after REPORT-2026-10-12 (Z/W jets NNLO rises in ln τ_cut, W 7–11σ; E plain falls),
+swap tonight's runs; the cluster gets UPDATE 12 Oct (Ex6, G6). AK: add statistics if useful.
+
+**Fixed point x = 0.1, Q² = 5000 (`runs/fph`; plain, mode 1, τ_zQ bins; photon and W⁻).**
+- NLO (b1 50 + lo 50) against DISENT (photon: 40 × 3M tonight; W: `runs/ccw1`): converged within ≈ 1σ in
+  every bin; totals at 1e-5 −0.24 ± 0.30% (photon), +0.37 ± 0.30% (W).
+- NNLO (b2 50, vi 60 / 37, kp 50, r 500 / 700), % of the NLO, τ_cut 5e-3, 5e-4, 2e-4, 1e-4: photon total
+  50.1, 51.0, 55.0, 54.4; W total 50.1, 54.1, 53.0, 51.0; slopes per unit ln τ_cut (windows 5e-3→5e-4,
+  2e-3→2e-4, 1e-3→1e-4) photon +0.4 ± 0.5, +0.8 ± 0.6, +1.1 ± 0.8; W +1.8 ± 0.4, −0.2 ± 0.5, −1.5 ± 0.7.
+  The upper τ_zQ bins (0.2–0.5) rise by ≈ 2–5% of the NLO per unit ln in both photon and W (2–4σ in
+  single windows): not W-specific. Below 1e-4 the technical-cut decades are not included here.
+- **The ZEUS W drift (≈ 25% of the NNLO per unit ln) is absent at this fixed point**, although the ZEUS
+  W drift is 8σ in the Q² bin 2000–5000 that contains it, and the W drift is significant in every Q²
+  bin ≥ 1000 (so not a √ŝ/Q effect at low Q²). It grows with p̄_T (−0.9 … −2.0% of LO per unit ln).
+  → it comes with the jet observables. Test running: W with the ZEUS jet selection in the fixed-point
+  window (ZFIX=2 at (0.01, 400), `runs/zw2`).
+- Set-up errors caught before CPU was used (zw2): nlo31 in ZFIX=2 takes the window centre from its
+  arguments (`2 0.01 400`, not `2 0 0`: empty window); W needs the W beam tables (`zeus5w`). 560 jobs
+  cancelled while pending and resubmitted corrected.
+
+**E P2B extras and the VEGAS target (`runs/exv` VTARGET=0, `runs/exw` VTARGET=-1, against the cluster's
+bin5 default).** `VTARGET=0` (smallest τ_cut, all rows; right for the above-cut parts of mode 3) is the
+wrong target for the P2B extras, θ(T ≤ τ_cut): the smallest τ_cut is the smallest region; per-seed spread
+worse than the default in many cells (e.g. r-x bins 0.1–0.3 at 2e-4: 2533 vs 592, 2551 vs 56 pb). New
+`VTARGET=-1` (all cells): per-seed spread against the default lo-x 10–40× smaller, kp-x 3–10× (1e-3),
+r-x 2–4× (1e-3) and 1.8–20× (1e-4), vi-x mixed (lowest bin 5–10× better, two bins ≈ 2× worse).
+Cluster instructions corrected (Ex6: default target, not VTARGET=0; e57dac8 pushed alone); the
+`VTARGET=-1` code (03f6981) awaits AK's OK.
+- **W with the ZEUS jet selection at the fixed-point window (ZFIX=2 at (0.01, 400), P2BSLICE=1;
+  `runs/zw2`; b2 50, vi 27 of 60, kp 50, r 400):** the NNLO in the window rises from 3.04e-8 to
+  4.80e-8 pb between τ_cut 5e-3 and 1e-4; slopes per unit ln τ_cut +4.5e-9 ± 1.5e-9, +6.5e-9 ± 2.1e-9,
+  +4.8e-9 ± 2.2e-9 (3.0, 3.1, 2.2σ), i.e. 15–21% of the NNLO per unit ln, as in the ZEUS W set (≈ 25%);
+  carried by the soft jet bins (p̄_T 8–15, m₁₂ 20–30: 2.4–3.2σ; hard jets are rare at Q² = 400).
+  The same point in τ_zQ bins (F) is flat outside the lowest, power-corrected bins, and so is the
+  fixed point (0.1, 5000) in τ_zQ bins for W and photon. **So the drift comes with the jet observables,
+  also at fixed kinematics**: the interplay of the k_T jets (R = 1, Breit frame) / lab-frame E_T, η
+  selection with the τ₂ slicing, not the 2+1 matrix elements or the Q²/y integration (P2B excluded
+  11 Oct). Not yet checked: photon jets in the same window (B photon drifts too, so expected).

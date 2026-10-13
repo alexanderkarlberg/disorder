@@ -18,11 +18,18 @@ in jet bins, unbiased. The E extras (target = one τ_zQ row) have the same probl
 
 1. Build **bin6** from `origin/2026-10-nnlo21-ncc` (92195a5 or later; `nnlo21/build_sliced21.sh`).
    Check: b0 and lo short runs (mode 2, as for bin5) bit-identical to bin5 without `VTARGET`.
-2. **Ex6 — E P2B extras with VTARGET=0** (the plain parts of E from bin5 stay; P2B = bin5 plain +
-   Ex6 extras): `ZFIX=3 P2BSLICE=1 P2BEXTRA=1 VTARGET=0`, B/E commands of bin5 (`... 2 0 0 psmc 0 0
-   1d-12`, r with `VEGAS_EQUAL=2`): lo-x 200, vi-x 250, kp-x 200, r-x 2000 seeds (CPU from the E
-   pilots ≈ 0.11, 0.22, 0.075, 1.26 core-h per job: ≈ 2.6k core-h). Check first on 20 r-x seeds that the
-   flagged-seed rate (outlier_report, 20× median) is well below bin5's 86/875.
+2. **Ex6 — E P2B extras, more statistics** (the plain parts of E from bin5 stay; P2B = bin5 plain +
+   Ex6 extras): `ZFIX=3 P2BSLICE=1 P2BEXTRA=1`, **default VEGAS target — do NOT set `VTARGET=0`**
+   (correction 13 Oct, 02:30: for the extras, θ(T ≤ τ_cut), `VTARGET=0` adapts to the smallest region
+   and is worse than the default in many cells, MPP test `runs/exv`; if Ex6 already runs with
+   `VTARGET=0`, stop it). **Update 13 Oct, 08:30 (AK OK): use `VTARGET=-1`** (all cells; per-seed spread
+   of r-x 2–20×, lo-x 10–40× smaller than the default, MPP `runs/exw`) for Ex6 seeds not yet started.
+   It needs nlo31 from 03f6981 or later (rebuild bin6 if older; default bit-identical, check as in
+   step 1). Ex6 seeds already running or done with the default target are valid: let them finish, and
+   keep them in separate output directories (`ex6_default/`, `ex6_vtm1/`) so they can be weighted
+   separately.
+   B/E commands of bin5 (`... 2 0 0 psmc 0 0 1d-12`, r with `VEGAS_EQUAL=2`): lo-x 200, vi-x 250,
+   kp-x 200, r-x 2000 seeds (≈ 2.6k core-h).
 3. **G6 — fixed-point NNLO at x = 0.1, Q² = 5000 (hard kinematics), photon and W⁻**, plain slicing,
    mode 1 (τ_zQ bins), `EW31="0 0"` and `EW31="2 0"`:
    - `sliced21 b1 3000000 6 SEED 0.1 5000 <softtable>`, `sliced21 b2 5000000 6 SEED 0.1 5000 <softtable>`;
