@@ -36,7 +36,7 @@ def main():
     a = sys.argv[1:]
     name, lst, tlim, mem = a[:4]
     a = a[4:]
-    cpus, mx, nice, dry = 1, 10**9, 100, False
+    cpus, mx, nice, dry = 1, 10**9, int(os.environ.get('NICE', 100)), False
     while a:
         o = a.pop(0)
         if o == '--cpus': cpus = int(a.pop(0))

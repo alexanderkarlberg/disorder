@@ -686,3 +686,9 @@ and to node failures are not included (several hundred core-h).
 - (a) sd7^2*0.65 = 8.1e4 (1e-3), 2.7e4 (1e-4) against sd6^2*1.43 = 2.2e7, 1.8e7: holds by a factor ~270 (needs only a few % of Ex6's variance). (b) 0 and 0.5% against 3.9% and 3.8%: holds. (c) Ex7-Ex6 = -131 +- 92 (pull -1.43) at 1e-3, +42 +- 81 (+0.52) at 1e-4: consistent but 1e-3 is outside 1 sigma, and Ex6's error is a tail-driven sd/sqrtN (weak test).
 - Caution: Ex7 medians (-139, -26) differ from Ex6's (-6, -1.5) by far more than the Ex6 MAD (the Ex6 distribution is mostly near zero with rare large seeds carrying the mean); Ex7 1.48 MAD is 4.8x (1e-3) and 5.5x (1e-4) larger than Ex6's. Ex7 mean is -4.4 sigma/-2.5 sigma from zero, Ex6's is not significant.
 - Verdict: (a), (b) clear; (c) not clear at 1e-3 -> feeder NOT started (rule: marginal = do not feed). Production lists and groups7.txt remain prepared.
+
+## 13 Oct (evening): UPDATE 13 Oct (e): Ex7 production fed
+- `submit.py` takes the default nice from the environment variable `NICE` (default 100 as before). Feeder chain `dis-feeder-ex7` (first job 48939329, then hourly; self-resubmitting job 48939332 pending), `GROUPFILE=$P/runs/ours7/groups7.txt`, `NICE=500`, DEADLINE 17 Oct (00:00), excluding et[07-40].
+- Arrays (all nice 500): lo-x 48939333 (200), vi-x 48939334 (250), kp-x 48939336 (200), r-x 48939344 (2000); seeds 5001-, bin7, `ZFIX=3 P2BSLICE=1 P2BEXTRA=1 VTARGET=-1`.
+- Files before: 715k (limit 1.0M); Ex7 adds ~18.6k.
+- CPU: r-x 2000 x 0.65, vi-x 250 and lo/kp-x from the Ex6/E pilots: ~1.6-1.8k core-h. Finish depends on how soon the nice-500 tasks get slots behind J7/N7.
