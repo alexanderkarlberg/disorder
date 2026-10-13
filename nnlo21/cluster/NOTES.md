@@ -671,3 +671,18 @@ and to node failures are not included (several hundred core-h).
   lists `prod/<part>/prod7.list`, groups `$P/runs/nnj-groups7-Z.txt`. New jobs RRa_3 3605 (to 4326, 12 h limit), RRa_2 131 (to 262), RRb_3 882 (to 1764) = 4618,
   est. 9.4k core-h. Feeder dis-feeder-n7z 48933872 (deadline 17 Oct), arrays dis-n7z-RRa_3 48933875, RRa_2 48933876, RRb_3 48933877, nice 500 (below J7 W and N7 W rest).
   Files: usage 667k before, 681k after (dirs precreated); final +23k for Z, ~0.77M with the rest of J7/N7 and Ex7 (~18.6k).
+
+## 13 Oct (night): Ex7 pilot extended to 200 r-x seeds, decision of UPDATE 13 Oct (d): NOT fed
+- `mk_ex7.py pilot200` extends `Ex7-pilot/r-x/jobs.list` to seeds 9101-9300; 180 new seeds as array 48932746 (nice 0, bin7, same command/env as the pilot); 9 tasks lost to NODE_FAIL on gt34 resubmitted (48934847). All 200 done, finite. ~0.65 core-h per job.
+- `pilot200.py` -> `results/ex7_pilot200.txt`. Total row (CELL 0.05 0.50), pb, plain means:
+  | set | tau_cut | N | mean +- sd/sqrtN | sd | 1.48 MAD | median | frac > 20 MAD |
+  |---|---|---|---|---|---|---|---|
+  | Ex7 | 1e-3 | 200 | -110.6 +- 25.0 | 353 | 145.5 | -138.6 | 0 |
+  | Ex6 (2000) | 1e-3 | 2000 | 20.8 +- 88.1 | 3942 | 30.4 | -6.3 | 0.039 |
+  | Ex6 first 200 | 1e-3 | 200 | 666 +- 741 | 10470 | 32.1 | -5.2 | 0.045 |
+  | Ex7 | 1e-4 | 200 | -35.7 +- 14.3 | 202.7 | 66.5 | -26.0 | 0.005 |
+  | Ex6 (2000) | 1e-4 | 2000 | -77.4 +- 79.4 | 3550 | 12.1 | -1.45 | 0.038 |
+  | Ex6 first 200 | 1e-4 | 200 | -832 +- 786 | 11110 | 12.5 | -2.6 | 0.055 |
+- (a) sd7^2*0.65 = 8.1e4 (1e-3), 2.7e4 (1e-4) against sd6^2*1.43 = 2.2e7, 1.8e7: holds by a factor ~270 (needs only a few % of Ex6's variance). (b) 0 and 0.5% against 3.9% and 3.8%: holds. (c) Ex7-Ex6 = -131 +- 92 (pull -1.43) at 1e-3, +42 +- 81 (+0.52) at 1e-4: consistent but 1e-3 is outside 1 sigma, and Ex6's error is a tail-driven sd/sqrtN (weak test).
+- Caution: Ex7 medians (-139, -26) differ from Ex6's (-6, -1.5) by far more than the Ex6 MAD (the Ex6 distribution is mostly near zero with rare large seeds carrying the mean); Ex7 1.48 MAD is 4.8x (1e-3) and 5.5x (1e-4) larger than Ex6's. Ex7 mean is -4.4 sigma/-2.5 sigma from zero, Ex6's is not significant.
+- Verdict: (a), (b) clear; (c) not clear at 1e-3 -> feeder NOT started (rule: marginal = do not feed). Production lists and groups7.txt remain prepared.

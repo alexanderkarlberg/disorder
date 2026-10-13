@@ -11,17 +11,17 @@ M2 = ['1d-9', '2', '0', '0', 'psmc', '0', '0', '1d-12']
 EX = {'lo-x': ('lo', 3000000, 5001, 200, [], 1), 'vi-x': ('vi', 1000000, 5001, 250, [], 6),
       'kp-x': ('kp', 2000000, 5001, 200, [], 1), 'r-x': ('r', 1000000, 5001, 2000, ['EQ'], 6)}
 env0 = ['ZFIX=3', 'P2BSLICE=1', 'P2BEXTRA=1', 'VTARGET=-1']
-base = P + '/runs/ours7/Ex7' + ('-pilot' if mode == 'pilot' else '')
+base = P + '/runs/ours7/Ex7' + ('-pilot' if mode in ('pilot', 'pilot200') else '')  # pilot200: r-x 9101-9300, extends the pilot list
 out = []
 for name, (part, nc, s0, n, flags, th) in EX.items():
-    if mode == 'pilot':
+    if mode in ('pilot', 'pilot200'):
         if name != 'r-x': continue
-        s0, n = 9101, 20
+        s0, n = 9101, (200 if mode == 'pilot200' else 20)
     env = list(env0) + (['VEGAS_EQUAL=2'] if 'EQ' in flags else [])
     cmd = [BIN + '/nlo31', part, str(nc), '6', '{seed}'] + M2
     d = '%s/%s' % (base, name); os.makedirs(d, exist_ok=True)
     a = [S + '/mkjobs.py', d + '/jobs.list', d, '%d-%d' % (s0, s0 + n - 1), '--pattern', 'RESULT']
     for e in env: a += ['--env', e]
     subprocess.run(a + ['--'] + cmd, check=True, stdout=subprocess.DEVNULL)
-    out.append('dis-x7%s-%s %s/jobs.list %d:00:00 1000MB 1 et[07-40]' % ('p' if mode == 'pilot' else '', name, d, 6 if mode == 'pilot' else th))
+    out.append('dis-x7%s-%s %s/jobs.list %d:00:00 1000MB 1 et[07-40]' % ('p' if mode != 'prod' else '', name, d, th if mode == 'prod' else 6))
 open(base + '/groups.txt', 'w').write('\n'.join(out) + '\n'); print(base + '/groups.txt', len(out), 'groups')
