@@ -417,6 +417,9 @@ program sliced21
         if (trim(arg) == '1') then
            zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
         endif
+        ! ZWIN = "x Q2" (14 Oct): another window centre (nlo31: arguments 7, 8)
+        call get_environment_variable('ZWIN', arg)
+        if (len_trim(arg) > 0) read(arg, *) xfix, Q2fix
         q2lo = Q2fix*(1 - zfw/2); q2hi = Q2fix*(1 + zfw/2)
         ylo = Q2fix/(xfix*s)*(1 - zfw/2); yhi = Q2fix/(xfix*s)*(1 + zfw/2)
      endif
