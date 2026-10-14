@@ -7,6 +7,26 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 14 Oct (b): J8 — ZEUS jet cuts in a window at the G6 point (x, Q²) = (0.1, 5000), photon (AK: go)
+
+Why: the drift is there for jets at (0.01, 400) (J7) and in the ZEUS set, while the G6 fixed point (0.1, 5000)
+without jets is flat in the total. J8 puts the ZEUS jet cuts at the G6 point. If the jets drift there too, the
+cause comes with the jet selection; if they are flat, it depends on x (gluon content at x = 0.01).
+1. Build **bin8** from `origin/2026-10-nnlo21-ncc` (this commit or later): sliced21 now takes the window
+   centre from `ZWIN="x Q2"` (default (0.01, 400), bit-identical; checked at MPP against the zw2 binary).
+   Check: one short sliced21 b1 run with `ZFIX=2 ZWIN="0.1 5000"` prints `x 0.100000 Q2 5000.00`, and one
+   short nlo31 lo run with `2 0.1 5000` prints `ZFIX window Q2, y:  4.997500E+03  5.002500E+03 ...`.
+2. Commands: those of J7 PH (`EW31="0 0"`, tables `$P/tables/zeus5`, `ZFIX=2`) with bin8, plus
+   `ZWIN="0.1 5000"` for every sliced21 job and the window arguments `2 0.1 5000` (instead of `2 0.01 400`)
+   for every nlo31 job. Seed counts as J7 PH, including the NLO parts you added (b1 100, lo 100): b2 200,
+   vi 240, kp 200, r 1600, rcorr 200, d2 100; seeds 1001–. Pilot 5 per part, submit if within +30% of the
+   J7 PH cost per part (the cross section is smaller here; the CPU per job need not be).
+3. The window straddles the Q² bin edge 5000, so both `q2 2000-5000` and `q2 5000-20000` are filled; use the
+   `total` row as the main number.
+4. Report (as soon as it is done): the J7 tables and slopes for J8, side by side with J7 PH, per bin; in % of
+   |NLO(1e-5)| as before.
+5. X8 of UPDATE 14 Oct goes after J8 (X8 is small).
+
 ## UPDATE 14 Oct (after REPORT-2026-10-14): hold production; one Ex7 check (X8)
 
 REPORT-2026-10-14 received (MPP), thanks; the J7 NLO addition (b1, lo) was the right call. N7 settles the
