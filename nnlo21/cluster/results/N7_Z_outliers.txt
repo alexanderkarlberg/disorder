@@ -1,0 +1,14 @@
+cross value [fb]
+LO     N=  429 mean 1.0521e+05 +- 0.527    median 1.0521e+05 1.48MAD     11.23  max z      3.0 (seed 1321, value 1.0517e+05 fb)  mean without it 1.0521e+05 +- 0.523     n(z>20) 0
+RRa_1  N=  405 mean     1047.7 +- 213      median     792.04 1.48MAD      1125  max z     51.5 (seed 1320, value 58748 fb)  mean without it     904.89 +- 159       n(z>20) 3
+RRa_2  N=  262 mean     3608.2 +- 762      median     2594.6 1.48MAD      3339  max z     54.2 (seed 11083, value 1.8355e+05 fb)  mean without it     2918.8 +- 325       n(z>20) 1
+RRa_3  N= 4326 mean     2920.5 +- 370      median     2514.9 1.48MAD      6773  max z     75.0 (seed 1122, value 5.107e+05 fb)  mean without it     2803.1 +- 351       n(z>20) 25
+RRa_4  N=   49 mean     540.54 +- 97.1     median     412.22 1.48MAD     411.9  max z      5.5 (seed 1022, value 2681.1 fb)  mean without it     495.95 +- 88        n(z>20) 0
+RRa_5  N=  149 mean     996.43 +- 241      median      845.6 1.48MAD      1190  max z     16.9 (seed 1112, value -19286 fb)  mean without it     1133.5 +- 199       n(z>20) 0
+RRb_1  N= 2755 mean     348.28 +- 128      median     471.25 1.48MAD     869.7  max z    327.8 (seed 2637, value -2.8464e+05 fb)  mean without it     451.76 +- 75.9      n(z>20) 10
+RRb_2  N= 1125 mean     1150.2 +- 277      median     1323.1 1.48MAD      2807  max z     46.3 (seed 1403, value -1.2871e+05 fb)  mean without it     1265.7 +- 252       n(z>20) 6
+RRb_3  N= 1764 mean     3381.7 +- 371      median     3045.5 1.48MAD      3069  max z     99.5 (seed 11183, value 3.0853e+05 fb)  mean without it     3208.6 +- 329       n(z>20) 12
+RRb_4  N=  120 mean     90.691 +- 42       median     158.39 1.48MAD     310.2  max z      7.1 (seed 1101, value -2059.1 fb)  mean without it     108.76 +- 38.2      n(z>20) 0
+RRb_5  N=   39 mean     335.39 +- 47.1     median     289.89 1.48MAD     267.2  max z      3.6 (seed 1003, value 1243 fb)  mean without it     311.51 +- 41.7      n(z>20) 0
+RV_2   N=   23 mean    -3114.7 +- 33       median      -3125 1.48MAD       142  max z      2.3 (seed 1016, value -2804.3 fb)  mean without it    -3128.8 +- 31.3      n(z>20) 0
+RV_3   N=  112 mean     518.16 +- 40.9     median     473.99 1.48MAD     412.8  max z      4.0 (seed 1031, value 2134.8 fb)  mean without it      503.6 +- 38.6      n(z>20) 0

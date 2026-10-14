@@ -692,3 +692,10 @@ and to node failures are not included (several hundred core-h).
 - Arrays (all nice 500): lo-x 48939333 (200), vi-x 48939334 (250), kp-x 48939336 (200), r-x 48939344 (2000); seeds 5001-, bin7, `ZFIX=3 P2BSLICE=1 P2BEXTRA=1 VTARGET=-1`.
 - Files before: 715k (limit 1.0M); Ex7 adds ~18.6k.
 - CPU: r-x 2000 x 0.65, vi-x 250 and lo/kp-x from the Ex6/E pilots: ~1.6-1.8k core-h. Finish depends on how soon the nice-500 tasks get slots behind J7/N7.
+
+## 14 Oct: completeness, J7/N7/Ex7 combination (REPORT-2026-10-14)
+- All lists of J7 PH/W, N7 W/Z and Ex7 100% done with finite outputs (`check7.py`; the "active" counts of the last feeder passes were stale); no resubmission needed. RRa_1 s14135, s14146 complete.
+- J7 NLO (b1, lo; not in the J7 lists): `mk_j7nlo.py PH|W` -> `ours7j/<SET>/{b1,lo}` 100 seeds each, groups `groups-nlo.txt`, direct `submit.py` (arrays 48950862-65), 0.53 / 0.15 core-h per job.
+- `combine7n.py`, `combine7j.py`, `combine7e.py`, `gen_tables7.py`; results in `results/{N7,J7,Ex7_7}*`, raw J7 ZCELL in `results/j7/*.zcell.gz` (3.5 MB).
+- N7 Z RRa_2 seed 11083 has 183.5 pb (cross value); heavy-tailed NNLOJET parts are normal, see `results/N7_{W,Z}_outliers.txt`.
+- `/ptmp` file count 756k at the end of the round (limit 1,048,576).
