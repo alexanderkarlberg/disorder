@@ -3687,3 +3687,17 @@ b0, b2 and nlo31 lo, kp, r (window) and r (full ZEUS, plain) are identical to th
 (whole output); with ZCUTS the 15 ZEUS rows and RESULT are unchanged, and at Born level (b0, b2)
 `et4` equals the ZEUS rows exactly and `et4ne` equals `noeta`, as it must (balanced Born jets).
 If the drift is fiducial it should be absent, or much smaller, in `et4`.
+
+## 2026-10-15 — REPORT-2026-10-15 (cluster: X8) read at MPP: Ex7 right, Ex6 and bin5 extras biased at large τ_cut
+
+X8 = the Ex7 extras with VEGAS aimed at the total row at τ_cut 5e-3 (`VTARGET=53`; lo-x 200, vi-x 250,
+kp-x 200, r-x 400 seeds 8001–, ≈ 500 core-h). Total row, τ_cut 2e-2 … 2e-4: X8 − Ex7 pulls lo-x −1.0 … −0.2,
+kp-x −2.2 … 0.0, r-x −1.3 … +2.0 (X8's r-x has single seeds of −62053 and −16146 pb), vi-x +1.4 … +2.0 at
+every τ_cut (one correlated offset of 1–1.7 pb, ≈ 2%; not pursued). Ex6 and bin5 are far off at
+τ_cut ≥ 2e-3 (X8 − bin5 up to +28.5σ in kp-x, +24.6σ in vi-x; X8 − Ex6 up to +7.0σ). **So the reading of
+14 Oct holds: cells VEGAS was not aimed at come out wrong by many of their own σ** (most seeds miss the
+region carrying the mean; sd/√N underestimates the error), with no code error involved. Consequences:
+the Ex7 values of the E P2B extras stand (NNLO_P2B 1.1 ± 15 at 1e-3, 65 ± 16 at 1e-4, 67 ± 34 at 1e-5
+against NNLOJET 59.5 ± 12); the Ex6 and bin5 extras at τ_cut ≥ 2e-3 are not to be used. For
+production: aim VEGAS at every reported cell (`VTARGET=-1`) or check cells with a dedicated target, as
+here. This also makes the J7v test (sampling bias in the plain parts of the jet runs) more relevant.
