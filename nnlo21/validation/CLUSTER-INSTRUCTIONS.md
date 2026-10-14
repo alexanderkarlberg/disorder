@@ -7,6 +7,28 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 15 Oct: G8 — the J8 window with nlo31's other phase-space generator (AK: go)
+
+REPORTs J7v and J8 received (MPP, notebook 15 Oct), thanks. J7v excludes a statistical VEGAS bias (parts
+agree cell by cell, near-Gaussian per-seed values); the cut-design rows show the drift sits entirely in the
+Born-level jet kinematics. Open: a coverage gap of the psmc phase-space generator near the 2+1 limit (a region
+psmc generates badly or not at all gives a deficit that grows as τ_cut falls, whatever VEGAS does). G8 reruns
+the above-cut parts in the J8 window, where the drift is 12–16σ, with the generator of nlo31's argument 9
+set to `flat` instead of `psmc` (Breit-frame lepton + `breit` map, the generator before 5 Oct).
+1. bin9; the J8 commands for **vi, kp, r** (`ZFIX=2 ZCUTS=1 EW31="0 0" P2BSLICE=1`, r with
+   `VEGAS_EQUAL=2`, window `2 0.1 5000`) with argument 9 `flat`:
+   `nlo31 <part> <ncall> 6 SEED 1d-9 2 0.1 5000 flat 0 0 1d-12`. Seeds 6001–.
+   b2, rcorr, d2, b1, lo: J8's as they are (b2 does not use the generator; rcorr and d2 are ≈ 1/10 of the
+   drift there, keep J8's and say so).
+2. Pilot 5 per part first. At MPP (short runs, J8 window, 200k × 4 for r): `flat` r is ≈ 3× slower per call
+   than psmc, with ≈ 3× the per-iteration error before adaptation. Size from the pilot: N per part such that
+   the error of the total NNLO slope 1e-3 → 1e-4 is ≤ 18e-9 pb/GeV² per unit ln (a third of the J8 drift,
+   −54.9e-9 ± 4.6e-9). Submit if ≤ 6k core-h, otherwise report the estimate first.
+3. Report: per part (vi, kp, r) and cell (total, p̄_T 8–15, at every τ_cut) the means for `flat` and J8
+   (psmc) with pulls; per-seed sd, 1.48 MAD, median, fraction beyond 20 MAD; the NNLO total and p̄_T 8–15 and
+   their slopes with the `flat` parts next to J8. The question: does the drift change with the generator?
+4. After J7v is complete (its remaining seeds).
+
 ## UPDATE 14 Oct (d): cut-design rows `ZCUTS=1` attached to J8 and J7v (AK: go)
 
 Why: the literature (docs/literature-fiducial-power-corrections.md, 14 Oct) names √τ·L^k power corrections
