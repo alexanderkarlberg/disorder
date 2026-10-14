@@ -83,7 +83,7 @@ module nlo31_mod
   ! mode 1: fixed (x, Q^2), cells (tau_cut k, tau_zQ bin b) -> k + ntc*(b - 1)
   integer :: mode = 0
   real(dp) :: xfix = 0.01_dp, Q2fix = 400
-  integer, parameter :: ntc = 10, nzb = 6, nobmax = 16, ncell = ntc*nobmax
+  integer, parameter :: ntc = 10, nzb = 6, nobmax = 21, ncell = ntc*nobmax
   real(dp), parameter :: tcs(ntc) = [2e-2_dp, 1e-2_dp, 5e-3_dp, 2e-3_dp, 1e-3_dp, 5e-4_dp, 2e-4_dp, 1e-4_dp, &
        & 3e-5_dp, 1e-5_dp]
   real(dp), parameter :: zlo(nzb) = [0.05_dp, 0.1_dp, 0.2_dp, 0.3_dp, 0.4_dp, 0.05_dp]
@@ -91,7 +91,12 @@ module nlo31_mod
   integer :: nv = 1                ! length of the acceptance vector: 1 (mode 0), ntc*nob (modes 1, 2)
   integer :: nob = nzb             ! number of cell rows: tau_zQ bins (mode 1), observable bins (mode 2)
   ! mode 2: ZEUS-like dijet selection and bins (row 1 total, 2-7 Q^2,
-  ! 8-11 ptavg_12, 12-15 m12)
+  ! 8-11 ptavg_12, 12-15 m12); env ZCUTS = 1 (14 Oct, fiducial power
+  ! corrections of the cut design): rows 16-21 = total and ptavg 8-15 with
+  ! jets E_T > zet4 and ptavg > 8 (et4), without the eta_lab cuts (noeta),
+  ! and both (et4ne)
+  logical :: zcuts = .false.
+  real(dp), parameter :: zet4 = 4
   real(dp) :: q2lo = q2min, q2hi = q2max, ylo = ymin, yhi = ymax
   real(dp), parameter :: zetmin = 8, zetalo = -1, zetahi = 2.5_dp, zm12min = 20
   real(dp), parameter :: zq2e(0:6) = [125.0_dp, 250.0_dp, 500.0_dp, 1000.0_dp, 2000.0_dp, 5000.0_dp, 20000.0_dp]
@@ -1097,7 +1102,7 @@ contains
        enddo
        return
     endif
-    if (.not. inb(1)) return
+    if (.not. any(inb(1:nob))) return
     t2 = tau2cm(pin, p, n)/Q
     do b = 1, nob
        if (.not. inb(b)) cycle
@@ -1177,7 +1182,15 @@ contains
     logical :: pass
     integer :: b
     inb = .false.
-    call zeus_jets(pin, p, n, pass, ptavg, m12)
+    if (zcuts) then
+       call zeus_jets(pin, p, n, pass, ptavg, m12, zet4, .true.)
+       inb(16) = pass .and. ptavg >= zpte(0); inb(17) = inb(16) .and. ptavg < zpte(1)
+       call zeus_jets(pin, p, n, pass, ptavg, m12, zetmin, .false.)
+       inb(18) = pass; inb(19) = pass .and. ptavg < zpte(1)
+       call zeus_jets(pin, p, n, pass, ptavg, m12, zet4, .false.)
+       inb(20) = pass .and. ptavg >= zpte(0); inb(21) = inb(20) .and. ptavg < zpte(1)
+    endif
+    call zeus_jets(pin, p, n, pass, ptavg, m12, zetmin, .true.)
     if (.not. pass) return
     inb(1) = .true.
     do b = 1, 6
@@ -1191,13 +1204,14 @@ contains
 
   ! NNLOJET's DIS jet selection (driver/core/ecuts.f, ecuts_dis): inclusive
   ! kt (R = rjet, E-scheme) in the Breit frame; jets with E_T = sqrt(p_T^2 +
-  ! m^2) > zetmin; then jets outside zetalo < eta_lab < zetahi dropped; then
+  ! m^2) > etm (zetmin); then jets outside zetalo < eta_lab < zetahi dropped (ueta); then
   ! >= 2 jets and m12 > zm12min for the two leading (Breit p_T) jets. The lab
   ! frame from the proton (direction pin) and the incoming lepton klep:
   ! t = P/(2Ep) + k/(2Ee), z = P/(2Ep) - k/(2Ee), proton along +z.
-  subroutine zeus_jets(pin, p, n, pass, ptavg, m12)
+  subroutine zeus_jets(pin, p, n, pass, ptavg, m12, etm, ueta)
     integer, intent(in) :: n
-    real(dp), intent(in) :: pin(4), p(4,n)
+    real(dp), intent(in) :: pin(4), p(4,n), etm
+    logical, intent(in) :: ueta
     logical, intent(out) :: pass
     real(dp), intent(out) :: ptavg, m12
     real(dp) :: jets(4,n), Pp(4), tl(4), zl(4), El, pzl, pabs, etal, pt2j(n), pj(4)
@@ -1209,12 +1223,12 @@ contains
     m = 0
     do i = 1, nj
        pj = jets(:,i)
-       if (pj(1)**2 + pj(2)**2 + max(mdot(pj, pj), 0.0_dp) <= zetmin**2) cycle
+       if (pj(1)**2 + pj(2)**2 + max(mdot(pj, pj), 0.0_dp) <= etm**2) cycle
        El = mdot(pj, tl); pzl = -mdot(pj, zl)
        pabs = sqrt(max(El**2 - max(mdot(pj, pj), 0.0_dp), 0.0_dp))
        if (pabs - abs(pzl) <= 0) cycle
        etal = 0.5_dp*log((pabs + pzl)/(pabs - pzl))
-       if (etal <= zetalo .or. etal >= zetahi) cycle
+       if (ueta .and. (etal <= zetalo .or. etal >= zetahi)) cycle
        m = m + 1; jets(:,m) = pj; pt2j(m) = pj(1)**2 + pj(2)**2
     enddo
     if (m < 2) return
@@ -1647,6 +1661,17 @@ contains
        w(5) = 1; w(6) = 0.5_dp
     endif
   end function cc_w
+
+  ! mode 2 with ZCUTS: the cut-design rows 16-21 (zeus_bins)
+  subroutine zcuts_out(h)
+    real(dp), intent(in) :: h(ncell)
+    character(6), parameter :: nm(3) = ['et4   ', 'noeta ', 'et4ne ']
+    integer :: i
+    do i = 1, 3
+       write(*,'(a,a,2f8.0,10es16.8)') ' ZCELL ', nm(i), 0.0_dp, 0.0_dp, h(1 + ntc*(13 + 2*i):ntc*(14 + 2*i))
+       write(*,'(a,a,2f8.0,10es16.8)') ' ZCELL ', nm(i), zpte(0), zpte(1), h(1 + ntc*(14 + 2*i):ntc*(15 + 2*i))
+    enddo
+  end subroutine zcuts_out
 end module nlo31_mod
 
 program nlo31
@@ -1690,6 +1715,10 @@ program nlo31
      if (usepsmc) call psmc_init(xfix, Q2fix, Q2fix/(xfix*s))
   elseif (mode == 2) then
      nob = 15; nv = ntc*nob; iv = ntc
+     call get_environment_variable('ZCUTS', arg); zcuts = trim(arg) == '1'
+     if (zcuts) then
+        nob = 21; nv = ntc*nob
+     endif
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
      call get_environment_variable('ZFIX', arg)
      if (trim(arg) == '3') then
@@ -1806,6 +1835,7 @@ program nlo31
      do i = 1, 4
         write(*,'(a,2f8.0,10es16.8)') ' ZCELL m12  ', zmje(i-1), zmje(i), hc(1 + ntc*(10 + i):ntc*(11 + i))
      enddo
+     if (zcuts) call zcuts_out(hc)
   elseif (mode == 1) then
      write(*,'(a)') ' CELLS dsigma/dx dQ2 [pb/GeV2] above the cut: tau_zQ bin, then tau_cut columns'
      write(*,'(a,10es12.3)') ' tau_cut     ', tcs

@@ -123,3 +123,23 @@ subtraction and add/subtract R·Õ(proj Φ_R):
 - Crux: one global projection that factorises the N+2 phase space onto Φ_B in
   all double-unresolved limits.
 - Testable at NLO first (AK). Deferred until the slicing is finished.
+
+## 14 Oct 2026: the ZEUS-jet drift, literature against our data
+
+Constant slope in ln τ_cut, jets only (mostly p̄_T 8–15), boson independent, inclusive flat;
+NNLOJET W agrees near τ_cut 1e-3, ours 4–5σ above at ≤ 2e-4. Candidates (arXiv numbers checked):
+- Fiducial √τ·L^k from the symmetric E_T cut (Ebert–Tackmann 1911.08486; CNV 2408.05265, who warn
+  of a false plateau near 1e-3; Frixione–Ridolfi hep-ph/9707345; Banfi–Dasgupta hep-ph/0312108;
+  NNLOJET dijets 1703.05977). √τ·L² has a near-constant slope over 5e-3…1e-5. Against it: our ZEUS
+  runs use P2B, which removes these terms; P2B − plain (11/12 Oct) is small in the hard bins, but
+  p̄_T 8–15 was not examined. Diagnostic: the same events with other cut designs (p̄_T only;
+  staggered 10/8 GeV; Salam–Slade 2106.08329).
+- VEGAS bias of 1/σ²-weighted iterations, ∝ 1/N_ev per run, not reduced by averaging seeds
+  (Lepage 2009.05112; MCFM-9 1909.09117; NNLOJET merging 2503.22804). Tested by J7v.
+- Hadronic τ·L³ power corrections (1612.00450, 1612.02911, 1802.00456; measure/frame 1807.10764;
+  H+jet 1906.01020): slope falls ≈ 30× over our range, not the drift.
+- kT-jet vs jettiness partition (2510.03097, 2502.09327): power suppressed.
+Convergence: P2B with jet cuts (2408.05265, GENEVA Z+jet 2504.11357); τ_cut normalised to the Born
+hard scale, evaluated on the projected Born (1906.01020, 2504.11357); differential T_N subtraction
+between τ_δ and T_off (1505.04794, eq. 2.19); unbiased run combination (frozen grid, equal weights),
+adapting at the smallest τ_cut; fits τ(c3 L³ + c2 L²), with √τ terms as a check.

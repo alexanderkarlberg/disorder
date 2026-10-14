@@ -193,7 +193,7 @@ contains
     if (mode == 2 .and. .not. zfix) then
        klep = Pk(:,5); Q2cur = Q2
        call zeus_bins(Pk(:,1), Pk(:,2:3), 2, inb)
-       if (.not. inb(1)) return
+       if (.not. any(inb(1:nob))) return
        if (trim(bpart) /= 'b0') call lp21_setq(Q)
     elseif (mode == 3) then
        klep = Pk(:,5); kout = Pk(:,6); Q2cur = Q2; xcur = xB
@@ -262,6 +262,9 @@ contains
        hcacc(1 + ntc*(b - 1):ntc*b) = hcacc(1 + ntc*(b - 1):ntc*b) + val*wgt
     enddo
     res = val(ntc)
+    if (mode == 2 .and. .not. zfix) then
+       if (.not. inb(1)) res = 0     ! only in the ZCUTS rows: not in the VEGAS target
+    endif
     ! mode 3: the VEGAS target is the >= 1 jet row (the total row vanishes in P2B)
     if (mode == 3) res = val(ntc)*dp2b(2)
   contains
@@ -405,6 +408,10 @@ program sliced21
   endif
   if (mode >= 2) then
      nob = merge(15, 16, mode == 2); nv = ntc*nob; iv = merge(ntc, 2*ntc, mode == 2)
+     call get_environment_variable('ZCUTS', arg); zcuts = mode == 2 .and. trim(arg) == '1'
+     if (zcuts) then
+        nob = 21; nv = ntc*nob
+     endif
      q2lo = gqlo**2; q2hi = gqhi**2; ylo = 0.2_dp; yhi = 0.6_dp
      call get_environment_variable('ZFIX', arg)
      if (mode == 2 .and. trim(arg) == '3') then
@@ -513,6 +520,7 @@ program sliced21
      do i = 1, 4
         write(*,'(a,2f8.0,10es16.8)') ' ZCELL m12  ', zmje(i-1), zmje(i), hc(1 + ntc*(10 + i):ntc*(11 + i))
      enddo
+     if (zcuts) call zcuts_out(hc)
   else
      write(*,'(a)') ' CELLS dsigma/dx dQ2 [pb/GeV2] below the cut: tau_zQ bin, then tau_cut columns'
      write(*,'(a,10es12.3)') ' tau_cut     ', tcs
