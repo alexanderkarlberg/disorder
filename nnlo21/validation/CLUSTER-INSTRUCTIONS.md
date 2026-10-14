@@ -28,6 +28,13 @@ set to `flat` instead of `psmc` (Breit-frame lepton + `breit` map, the generator
    (psmc) with pulls; per-seed sd, 1.48 MAD, median, fraction beyond 20 MAD; the NNLO total and p̄_T 8–15 and
    their slopes with the `flat` parts next to J8. The question: does the drift change with the generator?
 4. After J7v is complete (its remaining seeds).
+5. Caveat from the MPP short runs (2 flat seeds, vi 100k × 4, r 200k × 4, total row): flat agrees with psmc at
+   τ_cut ≥ 2e-3 but is 15–20% low in vi at 1e-3 and below (vi at 3e-5: −8.4e-6, −7.0e-6 against −10.7e-6 ±
+   0.1e-6 with psmc), with RESULT errors that do not cover the difference. Most likely flat undersamples small τ_2
+   (no log mapping), which would mimic a coverage gap in psmc. So, in addition: 5 flat seeds per part at
+   **4× ncall** in the pilot; if their means move towards psmc, flat is undersampling there, and only the
+   τ_cut where flat is stable under the 4× test count for the comparison (say which). Report per-seed medians
+   next to the means.
 
 ## UPDATE 14 Oct (d): cut-design rows `ZCUTS=1` attached to J8 and J7v (AK: go)
 
