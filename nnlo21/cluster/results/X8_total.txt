@@ -1,0 +1,130 @@
+X8 report numbers: total row (CELL 0.05 0.50) of the extra parts, tau_cut 2e-2..2e-4; plain equal-weight means, err = sd/sqrt(N)
+X8 lo-x: 200 done dirs, 200 parsed, 0 with non-finite cell
+X8 vi-x: 250 done dirs, 250 parsed, 0 with non-finite cell
+X8 kp-x: 200 done dirs, 200 parsed, 0 with non-finite cell
+X8 r-x: 400 done dirs, 400 parsed, 0 with non-finite cell
+Ex7 lo-x: 200 done dirs, 200 parsed, 0 with non-finite cell
+Ex7 vi-x: 250 done dirs, 250 parsed, 0 with non-finite cell
+Ex7 kp-x: 200 done dirs, 200 parsed, 0 with non-finite cell
+Ex7 r-x: 2200 done dirs, 2200 parsed, 0 with non-finite cell
+Ex6 lo-x: 200 done dirs, 200 parsed, 0 with non-finite cell
+Ex6 vi-x: 250 done dirs, 250 parsed, 0 with non-finite cell
+Ex6 kp-x: 200 done dirs, 200 parsed, 0 with non-finite cell
+Ex6 r-x: 2000 done dirs, 2000 parsed, 0 with non-finite cell
+bin5 lo-x: 50 done dirs, 50 parsed, 0 with non-finite cell
+bin5 vi-x: 62 done dirs, 62 parsed, 0 with non-finite cell
+bin5 kp-x: 50 done dirs, 50 parsed, 0 with non-finite cell
+bin5 r-x: 875 done dirs, 875 parsed, 0 with non-finite cell
+
+lo-x  tau_cut 2e-02 X8   N= 200 mean       308.15 err     0.1638 sd      2.3162 1.48MAD      1.947 median      308.39
+lo-x  tau_cut 2e-02 Ex7  N= 200 mean      308.348 err     0.1914 sd      2.7062 1.48MAD      2.177 median      308.18
+lo-x  tau_cut 2e-02 Ex6  N= 200 mean      327.428 err      43.31 sd      612.43 1.48MAD        111 median      219.68
+lo-x  tau_cut 2e-02 bin5 N=  50 mean      113.912 err      24.04 sd      169.96 1.48MAD      95.67 median       75.35
+lo-x  tau_cut 1e-02 X8   N= 200 mean      233.627 err     0.1533 sd      2.1678 1.48MAD      1.761 median      233.71
+lo-x  tau_cut 1e-02 Ex7  N= 200 mean      233.826 err     0.1814 sd      2.5659 1.48MAD      1.953 median      233.57
+lo-x  tau_cut 1e-02 Ex6  N= 200 mean      247.633 err       42.6 sd      602.44 1.48MAD      75.18 median       151.8
+lo-x  tau_cut 1e-02 bin5 N=  50 mean      88.6921 err       21.1 sd      149.18 1.48MAD      76.75 median      58.612
+lo-x  tau_cut 5e-03 X8   N= 200 mean      169.366 err     0.1385 sd      1.9585 1.48MAD       1.66 median      169.36
+lo-x  tau_cut 5e-03 Ex7  N= 200 mean       169.42 err     0.1648 sd      2.3304 1.48MAD      1.936 median      169.17
+lo-x  tau_cut 5e-03 Ex6  N= 200 mean      188.509 err      39.87 sd      563.79 1.48MAD      59.89 median       108.6
+lo-x  tau_cut 5e-03 bin5 N=  50 mean      69.2575 err      20.08 sd      142.01 1.48MAD      62.63 median      43.867
+lo-x  tau_cut 2e-03 X8   N= 200 mean      80.7317 err     0.1214 sd      1.7163 1.48MAD      1.654 median      80.779
+lo-x  tau_cut 2e-03 Ex7  N= 200 mean      80.8038 err     0.1342 sd      1.8985 1.48MAD      1.626 median        80.6
+lo-x  tau_cut 2e-03 Ex6  N= 200 mean      76.7089 err      14.91 sd      210.89 1.48MAD      33.43 median      49.813
+lo-x  tau_cut 2e-03 bin5 N=  50 mean      31.2317 err      16.31 sd      115.32 1.48MAD      24.57 median      19.901
+lo-x  tau_cut 1e-03 X8   N= 200 mean      43.0623 err     0.1034 sd      1.4619 1.48MAD      1.332 median      43.054
+lo-x  tau_cut 1e-03 Ex7  N= 200 mean      43.1802 err     0.1163 sd      1.6451 1.48MAD      1.334 median      43.054
+lo-x  tau_cut 1e-03 Ex6  N= 200 mean      45.4345 err      12.29 sd      173.83 1.48MAD      15.73 median      23.904
+lo-x  tau_cut 1e-03 bin5 N=  50 mean      28.2568 err      8.632 sd       61.04 1.48MAD      13.18 median      9.0153
+lo-x  tau_cut 5e-04 X8   N= 200 mean      22.3956 err     0.0862 sd      1.2191 1.48MAD      1.055 median      22.374
+lo-x  tau_cut 5e-04 Ex7  N= 200 mean      22.5207 err    0.09227 sd      1.3048 1.48MAD      1.286 median      22.503
+lo-x  tau_cut 5e-04 Ex6  N= 200 mean      35.4041 err      12.21 sd      172.71 1.48MAD      10.81 median      13.651
+lo-x  tau_cut 5e-04 bin5 N=  50 mean      17.4993 err      6.051 sd      42.786 1.48MAD      8.159 median      5.5906
+lo-x  tau_cut 2e-04 X8   N= 200 mean      9.21798 err    0.07074 sd      1.0004 1.48MAD     0.9689 median      9.2414
+lo-x  tau_cut 2e-04 Ex7  N= 200 mean      9.29866 err    0.07113 sd       1.006 1.48MAD      1.018 median      9.4026
+lo-x  tau_cut 2e-04 Ex6  N= 200 mean      23.6535 err      11.62 sd      164.27 1.48MAD      4.567 median      5.3427
+lo-x  tau_cut 2e-04 bin5 N=  50 mean      7.43645 err      3.198 sd      22.613 1.48MAD      2.015 median      1.3461
+vi-x  tau_cut 2e-02 X8   N= 250 mean      131.044 err     0.5197 sd      8.2166 1.48MAD      7.259 median      131.71
+vi-x  tau_cut 2e-02 Ex7  N= 250 mean      129.381 err     0.6691 sd      10.579 1.48MAD      7.784 median         131
+vi-x  tau_cut 2e-02 Ex6  N= 250 mean      46.9812 err      12.02 sd      190.05 1.48MAD       13.1 median      8.8535
+vi-x  tau_cut 2e-02 bin5 N=  62 mean     -0.40197 err      5.318 sd      41.871 1.48MAD     0.4579 median    0.091446
+vi-x  tau_cut 1e-02 X8   N= 250 mean      94.5368 err     0.4987 sd      7.8847 1.48MAD      6.615 median      95.331
+vi-x  tau_cut 1e-02 Ex7  N= 250 mean      93.2943 err      0.594 sd      9.3913 1.48MAD      7.639 median      93.667
+vi-x  tau_cut 1e-02 Ex6  N= 250 mean      35.3337 err      9.079 sd      143.56 1.48MAD       9.41 median      5.7055
+vi-x  tau_cut 1e-02 bin5 N=  62 mean     -1.21895 err      5.252 sd      41.353 1.48MAD     0.3892 median    0.064479
+vi-x  tau_cut 5e-03 X8   N= 250 mean       66.494 err     0.4654 sd      7.3593 1.48MAD      6.018 median      67.097
+vi-x  tau_cut 5e-03 Ex7  N= 250 mean      65.5343 err     0.5352 sd      8.4618 1.48MAD      6.787 median      66.157
+vi-x  tau_cut 5e-03 Ex6  N= 250 mean      30.5605 err      8.674 sd      137.14 1.48MAD       7.37 median      4.2793
+vi-x  tau_cut 5e-03 bin5 N=  62 mean     -2.27815 err      4.936 sd      38.868 1.48MAD     0.2551 median     0.10591
+vi-x  tau_cut 2e-03 X8   N= 250 mean      30.3319 err     0.3898 sd      6.1633 1.48MAD      5.287 median      30.814
+vi-x  tau_cut 2e-03 Ex7  N= 250 mean      29.3697 err     0.4329 sd      6.8453 1.48MAD      5.985 median      29.277
+vi-x  tau_cut 2e-03 Ex6  N= 250 mean      18.8074 err      8.048 sd      127.24 1.48MAD      5.104 median       1.746
+vi-x  tau_cut 2e-03 bin5 N=  62 mean     -3.00589 err      4.906 sd      38.631 1.48MAD     0.1934 median   0.0087253
+vi-x  tau_cut 1e-03 X8   N= 250 mean      15.3905 err     0.3479 sd      5.5003 1.48MAD      5.065 median      15.352
+vi-x  tau_cut 1e-03 Ex7  N= 250 mean      14.3753 err     0.3829 sd       6.055 1.48MAD      5.718 median      14.674
+vi-x  tau_cut 1e-03 Ex6  N= 250 mean      17.8534 err       8.03 sd      126.97 1.48MAD      3.285 median      1.0499
+vi-x  tau_cut 1e-03 bin5 N=  62 mean     -3.24161 err      4.903 sd      38.606 1.48MAD      0.122 median   0.0050869
+vi-x  tau_cut 5e-04 X8   N= 250 mean      7.02348 err     0.3089 sd      4.8841 1.48MAD      4.542 median      7.0573
+vi-x  tau_cut 5e-04 Ex7  N= 250 mean      6.33342 err     0.3465 sd      5.4784 1.48MAD      4.778 median      6.0572
+vi-x  tau_cut 5e-04 Ex6  N= 250 mean      13.9929 err        7.5 sd      118.58 1.48MAD      2.209 median     0.79196
+vi-x  tau_cut 5e-04 bin5 N=  62 mean     -3.35003 err       4.91 sd      38.663 1.48MAD    0.04998 median  2.4718e-05
+vi-x  tau_cut 2e-04 X8   N= 250 mean      1.98645 err      0.275 sd      4.3486 1.48MAD      4.107 median      2.0013
+vi-x  tau_cut 2e-04 Ex7  N= 250 mean      1.28672 err      0.295 sd      4.6639 1.48MAD      4.167 median      1.2669
+vi-x  tau_cut 2e-04 Ex6  N= 250 mean      10.4173 err      7.277 sd      115.06 1.48MAD      1.297 median     0.29347
+vi-x  tau_cut 2e-04 bin5 N=  62 mean       -3.906 err      4.867 sd      38.326 1.48MAD    0.03462 median  5.9501e-05
+kp-x  tau_cut 2e-02 X8   N= 200 mean      44.1298 err     0.2463 sd      3.4835 1.48MAD      1.615 median      44.472
+kp-x  tau_cut 2e-02 Ex7  N= 200 mean      44.7017 err     0.1427 sd      2.0186 1.48MAD      1.719 median      44.701
+kp-x  tau_cut 2e-02 Ex6  N= 200 mean      9.84258 err       6.36 sd      89.937 1.48MAD      12.08 median      7.4165
+kp-x  tau_cut 2e-02 bin5 N=  50 mean      3.49136 err      1.405 sd      9.9369 1.48MAD      1.326 median     0.23849
+kp-x  tau_cut 1e-02 X8   N= 200 mean      35.8546 err     0.1845 sd      2.6088 1.48MAD      1.598 median      36.124
+kp-x  tau_cut 1e-02 Ex7  N= 200 mean      36.2914 err     0.1427 sd      2.0177 1.48MAD       1.65 median      36.336
+kp-x  tau_cut 1e-02 Ex6  N= 200 mean      4.98595 err       5.79 sd      81.881 1.48MAD      9.654 median      5.8444
+kp-x  tau_cut 1e-02 bin5 N=  50 mean      3.00273 err      1.242 sd      8.7802 1.48MAD     0.7415 median     0.20586
+kp-x  tau_cut 5e-03 X8   N= 200 mean      26.0611 err     0.1633 sd      2.3098 1.48MAD      1.357 median      26.316
+kp-x  tau_cut 5e-03 Ex7  N= 200 mean      26.5063 err     0.1218 sd      1.7223 1.48MAD      1.541 median       26.55
+kp-x  tau_cut 5e-03 Ex6  N= 200 mean     -1.21326 err      5.101 sd      72.135 1.48MAD      6.305 median      4.0118
+kp-x  tau_cut 5e-03 bin5 N=  50 mean      2.26799 err       1.13 sd      7.9908 1.48MAD     0.6302 median     0.15411
+kp-x  tau_cut 2e-03 X8   N= 200 mean      12.7311 err     0.1186 sd      1.6773 1.48MAD      1.053 median      12.994
+kp-x  tau_cut 2e-03 Ex7  N= 200 mean      12.9903 err     0.1134 sd      1.6037 1.48MAD      1.184 median      12.991
+kp-x  tau_cut 2e-03 Ex6  N= 200 mean     -2.48499 err       4.26 sd      60.248 1.48MAD      3.927 median      1.9747
+kp-x  tau_cut 2e-03 bin5 N=  50 mean      1.54837 err      1.035 sd      7.3171 1.48MAD     0.4429 median     0.12238
+kp-x  tau_cut 1e-03 X8   N= 200 mean      6.06078 err    0.09171 sd       1.297 1.48MAD      1.023 median      6.1908
+kp-x  tau_cut 1e-03 Ex7  N= 200 mean      6.22096 err    0.08791 sd      1.2432 1.48MAD      1.148 median      6.3218
+kp-x  tau_cut 1e-03 Ex6  N= 200 mean      1.27665 err      1.534 sd      21.687 1.48MAD      2.397 median     0.76158
+kp-x  tau_cut 1e-03 bin5 N=  50 mean      1.26077 err     0.8852 sd      6.2591 1.48MAD     0.1753 median    0.042993
+kp-x  tau_cut 5e-04 X8   N= 200 mean       2.4424 err    0.07612 sd      1.0764 1.48MAD     0.9805 median       2.457
+kp-x  tau_cut 5e-04 Ex7  N= 200 mean      2.48914 err     0.0744 sd      1.0522 1.48MAD     0.9148 median      2.4971
+kp-x  tau_cut 5e-04 Ex6  N= 200 mean     0.134743 err     0.8948 sd      12.654 1.48MAD      1.593 median     0.32617
+kp-x  tau_cut 5e-04 bin5 N=  50 mean      1.03411 err     0.8823 sd      6.2391 1.48MAD      0.253 median     0.00772
+kp-x  tau_cut 2e-04 X8   N= 200 mean     0.446135 err    0.06239 sd     0.88229 1.48MAD     0.8197 median     0.44116
+kp-x  tau_cut 2e-04 Ex7  N= 200 mean     0.448098 err    0.05917 sd     0.83684 1.48MAD     0.7153 median      0.4489
+kp-x  tau_cut 2e-04 Ex6  N= 200 mean     0.123978 err     0.5943 sd      8.4053 1.48MAD     0.9426 median    0.098804
+kp-x  tau_cut 2e-04 bin5 N=  50 mean    0.0621474 err     0.1366 sd      0.9658 1.48MAD    0.06379 median   0.0010727
+r-x   tau_cut 2e-02 X8   N= 400 mean     -324.233 err      163.1 sd      3262.1 1.48MAD      185.8 median     -138.51
+r-x   tau_cut 2e-02 Ex7  N=2200 mean      -145.99 err       14.5 sd      680.29 1.48MAD      197.7 median     -144.44
+r-x   tau_cut 2e-02 Ex6  N=2000 mean      109.929 err      201.4 sd      9005.4 1.48MAD      74.98 median     -4.4575
+r-x   tau_cut 2e-02 bin5 N= 875 mean     -95.9018 err      65.52 sd      1938.1 1.48MAD      33.59 median     -2.2977
+r-x   tau_cut 1e-02 X8   N= 400 mean     -394.786 err        163 sd      3259.6 1.48MAD      173.5 median     -209.66
+r-x   tau_cut 1e-02 Ex7  N=2200 mean     -226.973 err      16.47 sd      772.59 1.48MAD      191.6 median     -206.09
+r-x   tau_cut 1e-02 Ex6  N=2000 mean      140.748 err      189.2 sd      8459.4 1.48MAD      71.23 median     -7.4063
+r-x   tau_cut 1e-02 bin5 N= 875 mean     -71.5937 err      62.29 sd      1842.6 1.48MAD      25.67 median     -2.9429
+r-x   tau_cut 5e-03 X8   N= 400 mean      -508.36 err      157.3 sd      3146.2 1.48MAD      180.6 median        -261
+r-x   tau_cut 5e-03 Ex7  N=2200 mean     -296.807 err      18.86 sd      884.73 1.48MAD      188.2 median     -267.64
+r-x   tau_cut 5e-03 Ex6  N=2000 mean      149.757 err        189 sd      8451.5 1.48MAD      61.13 median     -9.7533
+r-x   tau_cut 5e-03 bin5 N= 875 mean     -24.8653 err       42.4 sd      1254.1 1.48MAD      22.24 median     -3.3188
+r-x   tau_cut 2e-03 X8   N= 400 mean     -377.283 err      155.7 sd      3113.4 1.48MAD      155.8 median     -208.34
+r-x   tau_cut 2e-03 Ex7  N=2200 mean     -252.249 err      12.99 sd      609.45 1.48MAD        167 median     -220.06
+r-x   tau_cut 2e-03 Ex6  N=2000 mean      150.409 err      187.5 sd      8385.5 1.48MAD      42.05 median     -9.4604
+r-x   tau_cut 2e-03 bin5 N= 875 mean     -31.6248 err      42.82 sd      1266.7 1.48MAD      17.47 median      -2.738
+r-x   tau_cut 1e-03 X8   N= 400 mean     -189.999 err      19.69 sd      393.78 1.48MAD      127.5 median     -142.08
+r-x   tau_cut 1e-03 Ex7  N=2200 mean     -179.099 err       11.4 sd      534.75 1.48MAD      142.1 median     -151.98
+r-x   tau_cut 1e-03 Ex6  N=2000 mean       20.825 err      88.14 sd      3941.8 1.48MAD      30.39 median     -6.2902
+r-x   tau_cut 1e-03 bin5 N= 875 mean     -70.6355 err      30.87 sd      913.21 1.48MAD      12.01 median     -2.6417
+r-x   tau_cut 5e-04 X8   N= 400 mean     -102.886 err      15.82 sd      316.49 1.48MAD      94.49 median     -84.712
+r-x   tau_cut 5e-04 Ex7  N=2200 mean     -154.185 err      20.83 sd      976.83 1.48MAD      117.5 median     -100.78
+r-x   tau_cut 5e-04 Ex6  N=2000 mean       70.676 err      75.22 sd      3363.9 1.48MAD       22.5 median     -4.4576
+r-x   tau_cut 5e-04 bin5 N= 875 mean     -21.8696 err       33.3 sd      985.01 1.48MAD      8.218 median     -1.2781
+r-x   tau_cut 2e-04 X8   N= 400 mean     -87.3854 err      42.38 sd      847.66 1.48MAD      71.23 median     -36.941
+r-x   tau_cut 2e-04 Ex7  N=2200 mean     -67.6691 err      7.432 sd      348.58 1.48MAD      80.92 median       -49.4
+r-x   tau_cut 2e-04 Ex6  N=2000 mean      75.0213 err      74.84 sd      3347.1 1.48MAD      15.37 median     -2.4521
+r-x   tau_cut 2e-04 bin5 N= 875 mean     -19.9655 err      35.17 sd      1040.4 1.48MAD      6.522 median    -0.79643
