@@ -3671,3 +3671,19 @@ window units) is ≈ 0.1% of b2's own slope (≈ 4e-4 per unit ln; b2 = 1.1e-3 a
 1e-4), i.e. a 0.1% effect in the b2 ↔ (vi + kp + r) cancellation. A sampling bias of that size in r
 (error 0.06% of r per τ_cut) would do it; Ex7 has just shown that cells VEGAS does not adapt to can
 be off by many σ with plain means.
+
+## 2026-10-14 — cut-design rows for the ZEUS selection (ZCUTS), to test fiducial power corrections
+
+Literature (docs/literature-fiducial-power-corrections.md, 14 Oct): a symmetric per-jet E_T cut on two
+jets balanced at Born level gives √τ·L^k power corrections, whose slope in ln τ_cut is almost
+constant over our range. P2B should remove them, and P2B is on in our ZEUS runs, but the lowest
+p̄_T bin, which carries the J7 drift, was never examined for it. New option `ZCUTS=1` (nlo31 and
+sliced21, mode 2, also with the ZFIX=2 window): six extra rows after the 15 ZEUS rows, each as total
+and p̄_T 8–15: `et4` (jets E_T > 4 GeV, p̄_T > 8, η cuts and m12 > 20 as ZEUS: the per-jet cut is far
+from the Born jets), `noeta` (ZEUS E_T cut, no η_lab cuts), `et4ne` (both). nobmax 16 → 21; the
+VEGAS value is unchanged (sliced21: an event only in the extra rows gives 0 to VEGAS).
+Checks (`work/.../nnlo21/zcbuild/chk`, short runs, seed 7, window (0.01, 400)): without ZCUTS, sliced21
+b0, b2 and nlo31 lo, kp, r (window) and r (full ZEUS, plain) are identical to the 37301af binaries
+(whole output); with ZCUTS the 15 ZEUS rows and RESULT are unchanged, and at Born level (b0, b2)
+`et4` equals the ZEUS rows exactly and `et4ne` equals `noeta`, as it must (balanced Born jets).
+If the drift is fiducial it should be absent, or much smaller, in `et4`.
