@@ -3687,3 +3687,51 @@ b0, b2 and nlo31 lo, kp, r (window) and r (full ZEUS, plain) are identical to th
 (whole output); with ZCUTS the 15 ZEUS rows and RESULT are unchanged, and at Born level (b0, b2)
 `et4` equals the ZEUS rows exactly and `et4ne` equals `noeta`, as it must (balanced Born jets).
 If the drift is fiducial it should be absent, or much smaller, in `et4`.
+
+## 2026-10-15 — REPORT-2026-10-15 (cluster: X8) read at MPP: Ex7 right, Ex6 and bin5 extras biased at large τ_cut
+
+X8 = the Ex7 extras with VEGAS aimed at the total row at τ_cut 5e-3 (`VTARGET=53`; lo-x 200, vi-x 250,
+kp-x 200, r-x 400 seeds 8001–, ≈ 500 core-h). Total row, τ_cut 2e-2 … 2e-4: X8 − Ex7 pulls lo-x −1.0 … −0.2,
+kp-x −2.2 … 0.0, r-x −1.3 … +2.0 (X8's r-x has single seeds of −62053 and −16146 pb), vi-x +1.4 … +2.0 at
+every τ_cut (one correlated offset of 1–1.7 pb, ≈ 2%; not pursued). Ex6 and bin5 are far off at
+τ_cut ≥ 2e-3 (X8 − bin5 up to +28.5σ in kp-x, +24.6σ in vi-x; X8 − Ex6 up to +7.0σ). **So the reading of
+14 Oct holds: cells VEGAS was not aimed at come out wrong by many of their own σ** (most seeds miss the
+region carrying the mean; sd/√N underestimates the error), with no code error involved. Consequences:
+the Ex7 values of the E P2B extras stand (NNLO_P2B 1.1 ± 15 at 1e-3, 65 ± 16 at 1e-4, 67 ± 34 at 1e-5
+against NNLOJET 59.5 ± 12); the Ex6 and bin5 extras at τ_cut ≥ 2e-3 are not to be used. For
+production: aim VEGAS at every reported cell (`VTARGET=-1`) or check cells with a dedicated target, as
+here. This also makes the J7v test (sampling bias in the plain parts of the jet runs) more relevant.
+
+## 2026-10-14 — beam tables excluded as the cause of the jet drift
+
+Twice-finer beam grid (0.01 in ln(ξ/(1−ξ)), 0.05 in ln Q, 54 nodes; `work/.../nnlo21/beamgrid5f`, built
+with thsub): tabchkg max deviation / max coefficient 1.1e-4, 9.0e-4, 6.6e-5, 2.5e-3, 2.3e-4 (up q, q̄,
+down q, q̄, gluon) against 1.1e-3, 5.3e-3, 4.0e-4, 6.7e-3, 3.3e-3 for the production grid. J7 photon b2 in
+the (0.01, 400) window (5M × 6, seeds 4001–4020, same binary, both grids; `runs/tabchk`), per-seed
+difference fine − old: total at 1e-4 +5.7e-10 ± 0.6e-10 against b2 = 1.10e-3 (5e-7 relative); slope per unit
+ln τ_cut −7.7e-11 (5e-3→5e-4), −2.2e-10 (1e-3→1e-4), −6.0e-10 (1e-4→1e-5), against the J7 drift of
+≈ −5.6e-7 per unit ln: **2500× smaller**. Same picture in p̄_T 8–15 and m12 20–30. The tables are not the
+cause. A HOPPET-based beam function (AK, 14 Oct: build such convolutions with hoppet) stays as a clean-up
+for production.
+
+## 2026-10-15 — REPORT-2026-10-15-J7v and -J8 read at MPP: no statistical sampling bias; the drift is in the Born-level jet kinematics
+
+**J7v** (J7 photon window; vi, kp, r with VTARGET=-1 and VEGAS_EQUAL=2, all parts rerun on bin9 with
+ZCUTS; r 1581/1600 at the time of the report): the drift stays. Total slope (% of |NLO(1e-5)| per unit
+ln τ_cut) −12.4 ± 4.1, −15.5 ± 5.2, −13.0 ± 6.1 (V9) against J7 PH −17.5 ± 6.1, −17.6 ± 6.8, −21.0 ± 7.1.
+Every part agrees with J7 PH cell by cell within 1–2σ; per-seed vi, kp, r are close to Gaussian (sd ≈
+1.0–1.5 × 1.48 MAD; beyond 20 MAD: none in vi, kp, 1/1600 in r). **So a statistical VEGAS bias (target
+cell, 1/σ² iteration weights, heavy tails) is not the cause** — unlike the P2B extras (X8), these parts
+are well sampled. Not tested: a deterministic coverage gap of the phase-space generator (psmc).
+**J8** (ZEUS jets at (0.1, 5000), photon, bin9, ZCUTS; r 1569/1600): drift at 12–16σ in every bin
+(total −43.9 ± 2.8, −51.8 ± 3.8, −57.3 ± 4.8 % of |NLO| per unit ln; NLO is itself a 300× cancellation
+there). G6 at the same point without jets is flat: not an x or gluon-content effect.
+**Cut-design rows:** et4 − ZEUS and et4ne − noeta are τ_cut-independent to all printed digits (J7v and
+J8). **Correction to my test design (14 Oct):** with P2B this holds by construction (the τ_cut
+dependence enters only through O(projected Born), and the projected jets are balanced, so et4 and ZEUS
+select the same Born events); ZCUTS could not have shown a cut-induced drift with P2B on. It does
+confirm that P2B removes cut-induced terms exactly, and that the drift sits entirely in the Born-level
+jet kinematics: it is a mismatch between the LP spectrum (b2) and the above-cut 3+1 spectrum binned in
+projected-Born jet variables, which nearly integrates to zero over the inclusive Born phase space.
+Excluded so far: boson, LP log structure (RG check), P2B projection, hadronic PCs, beam tables,
+statistical VEGAS bias, cut-induced terms, x/gluon content.
