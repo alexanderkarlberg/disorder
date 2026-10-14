@@ -7,6 +7,28 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 14 Oct (d): cut-design rows `ZCUTS=1` attached to J8 and J7v (AK: go)
+
+Why: the literature (docs/literature-fiducial-power-corrections.md, 14 Oct) names √τ·L^k power corrections
+from the symmetric per-jet E_T cut as a candidate for the drift; their slope in ln τ_cut is almost constant
+over our range. `ZCUTS=1` (nlo31 and sliced21, mode 2, also with ZFIX=2) adds six rows after the 15 ZEUS
+rows: `ZCELL et4`, `noeta`, `et4ne`, each as total (`0 0`) and p̄_T 8–15. et4: jets E_T > 4, p̄_T > 8 (η and
+m12 cuts as ZEUS); noeta: ZEUS E_T cut, no η_lab cuts; et4ne: both. Without ZCUTS the output is
+bit-identical; with it the ZEUS rows and RESULT are unchanged (checked at MPP, notebook 14 Oct).
+1. Build **bin9** from `origin/2026-10-nnlo21-ncc` at this commit or later (it has `VTARGET`, `ZWIN` and
+   `ZCUTS`). Check: a short sliced21 b0 with `ZFIX=2 ZCUTS=1` prints 21 ZCELL rows, with `et4` equal to
+   the ZEUS rows (balanced Born jets).
+2. **J8**: use bin9 instead of bin8 and add `ZCUTS=1` to every job (b2, vi, kp, r, rcorr, d2, b1, lo). If J8
+   jobs are already running on bin8, stop feeding them, keep what is done for the ZEUS rows, and run the
+   remaining seeds on bin9 with ZCUTS=1; report the extra rows from the bin9 seeds only.
+3. **J7v**: bin9 instead of bin7, with `ZCUTS=1` (vi, kp, r as in UPDATE (c)). The extra rows also need
+   the other parts in the window: rerun **J7 PH b2 200, rcorr 200, d2 100, b1 100, lo 100** with bin9,
+   `ZCUTS=1` and the J7 PH commands, seeds 3001– (≈ 400 core-h). The ZEUS rows of J7v can still be combined
+   with J7 PH's old parts as in (c).
+4. Report per set (J8, J7v): for the three variants, the NNLO total and p̄_T 8–15 at every τ_cut, and the
+   slopes as in J7, next to the ZEUS rows. The question: does the drift vanish or shrink in et4?
+5. Order unchanged: J8, J7v (with the reruns of 3), X8.
+
 ## UPDATE 14 Oct (c): J7v — J7 photon above the cut with VEGAS on all cells (AK: go)
 
 Why: a pointwise RG check at MPP (notebook 14 Oct) found no error below the cut. The drift is ≈ 0.1% of
