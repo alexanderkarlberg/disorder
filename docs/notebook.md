@@ -3618,3 +3618,22 @@ carried by rare large seeds: per core-h (0.65 vs 1.43 per job) Ex7 is ≈ 270× 
 So the 13 Oct conclusion from `runs/exv` (−1 best for the extras) stands. The cluster held production back
 on the 1e-3 pull (its rule: marginal = do not feed); cluster UPDATE 13 Oct (e): feed Ex7 (2000 r-x seeds,
 expected ≈ 7.5 and 4.3 pb on the total row), report Ex7 alone and Ex6 + Ex7.
+
+## 2026-10-14 — REPORT-2026-10-14 (cluster: N7, J7, Ex7) read at MPP: the jet drift is a bug of ours
+
+**N7 (NNLOJET W ZEUS dijets topped up):** NNLO total 0.148 ± 0.015 pb (was 0.176 ± 0.056). Ours (W5)
+crosses it at τ_cut ≈ 1.3e-3; pulls at 2e-4, 1e-4, 1e-5: +4.1, +5.3, +4.4 (ptavg 22–30 up to +6.9). Since
+our NNLO keeps rising at a constant rate in ln τ_cut, the agreement near 1e-3 is a crossing, not
+convergence: **the small-τ_cut values are wrong**, and the constant slope points to a wrong single-log
+(ln τ_cut) term at NNLO in the 2+1 slicing, depending on the Born kinematics or the channel (it nearly
+cancels in the inclusive G6 total at x = 0.1, Q² = 5000). NNLOJET Z 12.9 ± 1.0 (one RRa_2 seed of 183.5 pb
+dominates); ours 1.5–2.7σ above at τ_cut ≤ 1e-3, the same pattern at lower significance.
+**J7 (window (0.01, 400), ZEUS jet cuts):** the photon drifts like W; total slope (% of |NLO(1e-5)| per unit
+ln, 1e-3→1e-4) −21 ± 7 (γ), −27 ± 10 (W), ratio 1.26 ± 0.63; similar bin by bin. So neither the W couplings
+nor ew31 are involved. The cluster added b1/lo for the NLO denominators (the instructions had omitted them).
+**Ex7:** E NNLO_P2B (Ex7) at τ_cut 1e-4 / 1e-5: 65 ± 16 / 67 ± 34 against NNLOJET 59.5 ± 12; NLO_P2B → NNLOJET
+from 2e-4. At τ_cut ≥ 2e-3 the extra parts of Ex7 differ from Ex6 and bin5 by up to 29σ (kp-x vs bin5).
+Reading: bin5/Ex6 hardly adapt to the large-τ_cut cells (their per-seed medians are near zero with rare large
+seeds; Ex7's distributions are close to Gaussian), so their means there are unreliable and their errors
+underestimated. Checked by X8 (VTARGET=53, the total row at 5e-3). Cluster UPDATE 14 Oct: hold production of
+ours until the drift is found; X8. Plots: https://claude.ai/artifact/XHDE6je81vPkdT25YJVseE

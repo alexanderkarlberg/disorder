@@ -7,6 +7,25 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 14 Oct (after REPORT-2026-10-14): hold production; one Ex7 check (X8)
+
+REPORT-2026-10-14 received (MPP), thanks; the J7 NLO addition (b1, lo) was the right call. N7 settles the
+jet drift: NNLOJET W 0.148 ± 0.015 pb, ours 4–5σ above at τ_cut ≤ 2e-4 and still rising, and J7 shows the
+photon drifting like W. The cause is in our code and is hunted at MPP. Until then:
+1. **No new production of ours** (sliced21/nlo31) and no further NNLOJET top-ups. Keep all outputs.
+2. **X8, a check of Ex7 at large τ_cut** (REPORT §4.4: Ex7 vs Ex6/bin5 up to 29σ apart at τ_cut ≥ 2e-3).
+   Our reading: bin5 (target cell 60 = total row at 1e-5) and Ex6 (`VTARGET=0`) hardly adapt to the large
+   τ_cut cells, so their means there come from rare seeds and their errors are underestimated. X8 tests this
+   with VEGAS aimed at the total row at τ_cut 5e-3: `VTARGET=53` (cell = column + 10 × (row − 1); total row
+   0.05–0.5 = row 6, 5e-3 = column 3). Check in one short run that the log prints `VEGAS target cell   53`.
+   - Ex7 commands and bin7 (`ZFIX=3 P2BSLICE=1 P2BEXTRA=1`, r-x with `VEGAS_EQUAL=2`), only `VTARGET=53`
+     instead of −1; seeds 8001– (disjoint from Ex7 5001–7000, the pilots 9001–9300, Ex6 and bin5):
+     lo-x 200, vi-x 250, kp-x 200, r-x 400. Estimate first (Ex7 CPU per job); submit if ≤ 1k core-h.
+   - Report (short, e.g. REPORT-2026-10-15): per extra part, total row, τ_cut 2e-2 … 2e-4: X8, Ex7, Ex6, bin5
+     means ± sd/√N, per-seed sd, 1.48 MAD, median, and the pulls X8 − Ex7, X8 − Ex6, X8 − bin5. At 5e-3
+     (the target) X8 should be the most reliable of the four.
+3. N7 Z: no action (the RRa_2 seed 11083 is noted; plain means stay).
+
 ## UPDATE 13 Oct (e): feed Ex7 production (after the 200-seed pilot, 0bb89c8)
 
 The 200-seed pilot (`results/ex7_pilot200.txt`) meets all three conditions of (d). (c) asks for agreement
