@@ -3701,3 +3701,15 @@ the Ex7 values of the E P2B extras stand (NNLO_P2B 1.1 ± 15 at 1e-3, 65 ± 16 a
 against NNLOJET 59.5 ± 12); the Ex6 and bin5 extras at τ_cut ≥ 2e-3 are not to be used. For
 production: aim VEGAS at every reported cell (`VTARGET=-1`) or check cells with a dedicated target, as
 here. This also makes the J7v test (sampling bias in the plain parts of the jet runs) more relevant.
+
+## 2026-10-14 — beam tables excluded as the cause of the jet drift
+
+Twice-finer beam grid (0.01 in ln(ξ/(1−ξ)), 0.05 in ln Q, 54 nodes; `work/.../nnlo21/beamgrid5f`, built
+with thsub): tabchkg max deviation / max coefficient 1.1e-4, 9.0e-4, 6.6e-5, 2.5e-3, 2.3e-4 (up q, q̄,
+down q, q̄, gluon) against 1.1e-3, 5.3e-3, 4.0e-4, 6.7e-3, 3.3e-3 for the production grid. J7 photon b2 in
+the (0.01, 400) window (5M × 6, seeds 4001–4020, same binary, both grids; `runs/tabchk`), per-seed
+difference fine − old: total at 1e-4 +5.7e-10 ± 0.6e-10 against b2 = 1.10e-3 (5e-7 relative); slope per unit
+ln τ_cut −7.7e-11 (5e-3→5e-4), −2.2e-10 (1e-3→1e-4), −6.0e-10 (1e-4→1e-5), against the J7 drift of
+≈ −5.6e-7 per unit ln: **2500× smaller**. Same picture in p̄_T 8–15 and m12 20–30. The tables are not the
+cause. A HOPPET-based beam function (AK, 14 Oct: build such convolutions with hoppet) stays as a clean-up
+for production.
