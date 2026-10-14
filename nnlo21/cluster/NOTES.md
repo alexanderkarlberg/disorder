@@ -699,3 +699,9 @@ and to node failures are not included (several hundred core-h).
 - `combine7n.py`, `combine7j.py`, `combine7e.py`, `gen_tables7.py`; results in `results/{N7,J7,Ex7_7}*`, raw J7 ZCELL in `results/j7/*.zcell.gz` (3.5 MB).
 - N7 Z RRa_2 seed 11083 has 183.5 pb (cross value); heavy-tailed NNLOJET parts are normal, see `results/N7_{W,Z}_outliers.txt`.
 - `/ptmp` file count 756k at the end of the round (limit 1,048,576).
+
+## 14 Oct: J8 (UPDATE 14 Oct (b) + (d)), bin8 and bin9
+- bin8 = `$P/bin8/{sliced21,nlo31}` from HEAD 971f224 (contains 37301af, ZWIN). Window checks passed (`$P/runs/chk8`): sliced21 b1 `ZFIX=2 ZWIN="0.1 5000"` prints `x 0.100000 Q2 5000.00`; nlo31 lo `2 0.1 5000` prints `ZFIX window Q2, y:  4.997500E+03  5.002500E+03  4.938241E-01  4.943182E-01`.
+- bin8 pilots (5 seeds/part, `$P/runs/ours8j/PH`, ZEUS rows only, cost estimate only): core-h/job kp 0.113, rcorr 0.478, d2 0.479, b1 0.562, lo 0.141 (J7 PH 0.111, 0.454, 0.489, 0.53, 0.15: within +-6%); b2, vi, r still running at the start of production.
+- bin9 = `$P/bin9/{sliced21,nlo31}` (MD5SUMS) from HEAD a3d5eee (contains c046b57, ZCUTS; build `$P/builds/sliced21-a3d5eee`, job 48952867). Check (`$P/runs/chk9/chk.sh`, sliced21 b0 30k x 3, seed 7, ZFIX=2): with ZCUTS=1 21 ZCELL rows, et4 rows equal to the ZEUS total and ptavg 8-15 rows, the 15 ZEUS rows and RESULT identical to ZCUTS unset; without ZCUTS identical to bin8. `$P/bin9/READY` marks the check passed.
+- J8 production on bin9 with ZCUTS=1: `mk_j8.py PH`, `mk_j8nlo.py PH` -> `$P/runs/ours8j/PH9` (b2 200, vi 240, kp 200, r 1600, rcorr 200, d2 100, b1 100, lo 100; seeds 1001-), groups `groups-prod.txt`. Feeder `dis-feeder-j9` (first pass by hand 14 Oct 09:38, nice 100, DEADLINE 17 Oct 12:00): arrays b2 48952877, vi 48952978, kp 48952979, r 48952980, rcorr 48952981, d2 48952982, b1 48953082, lo 48953083.
