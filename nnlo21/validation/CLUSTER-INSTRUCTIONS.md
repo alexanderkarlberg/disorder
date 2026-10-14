@@ -7,6 +7,22 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 14 Oct (c): J7v — J7 photon above the cut with VEGAS on all cells (AK: go)
+
+Why: a pointwise RG check at MPP (notebook 14 Oct) found no error below the cut. The drift is ≈ 0.1% of
+the b2 ↔ (vi + kp + r) cancellation (J7 PH total at 1e-4: b2 1.1e-3, NNLO 6e-6), so a sampling bias of
+0.1–0.2% in r (or vi, kp) would explain it. J7 aimed VEGAS at one cell (total row at 1e-5), and vi, kp
+combined iterations with 1/σ² weights; Ex7 showed that cells VEGAS does not adapt to can be far off.
+1. bin7 (it has `VTARGET`), window `2 0.01 400`, `ZFIX=2 EW31="0 0"`, the J7 PH commands for vi, kp, r
+   only, each with `P2BSLICE=1 VTARGET=-1 VEGAS_EQUAL=2` (r already had VEGAS_EQUAL=2). Seeds 3001–
+   (J7 PH used 1001–): vi 240, kp 200, r 1600. Pilot 5 per part; submit if the CPU per job is within
+   +50% of J7 PH's (VTARGET=-1 changes the sampling, not the work per point).
+2. Combine with J7 PH's b2, rcorr, d2 (and b1, lo for the NLO) as they are.
+3. Report: per bin (as J7) the NNLO and the slopes for J7v next to J7 PH; per part and cell the pulls
+   J7v − J7 PH (as `Ex7_7_consistency.txt`); per-seed sd, 1.48 MAD, median and the fraction beyond
+   20 MAD for vi, kp, r in both sets (total row and ptavg 8–15, at 1e-3 and 1e-4).
+4. Order: J8, then J7v, then X8.
+
 ## UPDATE 14 Oct (b): J8 — ZEUS jet cuts in a window at the G6 point (x, Q²) = (0.1, 5000), photon (AK: go)
 
 Why: the drift is there for jets at (0.01, 400) (J7) and in the ZEUS set, while the G6 fixed point (0.1, 5000)

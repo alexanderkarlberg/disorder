@@ -3637,3 +3637,37 @@ Reading: bin5/Ex6 hardly adapt to the large-τ_cut cells (their per-seed medians
 seeds; Ex7's distributions are close to Gaussian), so their means there are unreliable and their errors
 underestimated. Checked by X8 (VTARGET=53, the total row at 5e-3). Cluster UPDATE 14 Oct: hold production of
 ours until the drift is found; X8. Plots: https://claude.ai/artifact/XHDE6je81vPkdT25YJVseE
+
+## 2026-10-14 — pointwise RG check of the below-cut NNLO cumulant (lp21), and J8
+
+AK: bug hunt, (1) pointwise check locally, (3) ZEUS jet cuts at the G6 point on the cluster.
+**(3) J8:** sliced21 takes the window centre from `ZWIN="x Q2"` (ZFIX = 1, 2; default (0.01, 400)).
+Checked locally (`work/.../nnlo21/zwbuild/chk`): b1 (20k × 2, seed 7) without ZWIN, with
+`ZWIN="0.01 400"` and with the zw2 binary: all ZCELL rows identical; with `ZWIN="0.1 5000"` the log
+prints x 0.1, Q² 5000 and nlo31 lo `2 0.1 5000` the matching window; b1 + lo cancel per bin as at
+(0.01, 400). Cluster UPDATE 14 Oct (b) (37301af): J8 = J7 PH with the window at (0.1, 5000).
+**(1) What sets the τ_cut slope below the cut.** The drift is a constant slope in ln τ_cut, so the
+suspect is the L¹ coefficient of the O(α_s²) cumulant (L = ln τ_cut). Per LP function, its two-loop
+single log is fixed by the RGE from its one-loop terms, β0, Γ1/Γ0 and its two-loop non-cusp anomalous
+dimension. Check (`work/disorder-comparisons/nnlo21/rgchk`: `rg_lp21.f90` dumps the distribution
+coefficients lp21 passes to assemblejet; `rg_check.py` goes to Laplace space and compares the
+l³, l², l¹ coefficients of ln F~ at two loops with the RGE):
+- MCFM jet functions (control, RG-consistent by construction): l³, l² exact (1e-15); the implied
+  two-loop non-cusp of the quark jet is the literature γ^J_1 (77.35 in α_s/4π).
+- Soft functions as lp21 calls them (qgq and qag, legs 1, 2 = the jets back to back, 3 = the beam,
+  all six I_ij,m), 19 angles each: l³ and l² exact (≤ 5e-13); the remaining two-loop non-cusp
+  term (l¹ minus β0 × constant minus Γ1/Γ0 × the one-loop angle logs) is 80.973926 for every angle
+  and both channels. So the soft function has no kinematics-dependent single-log error.
+- Beam functions: the test does not apply as written (the one-loop terms depend on μ through the
+  PDF ratios); they are MCFM's, at the Born ξ.
+- Assembly: MCFM's assemblejet (generic convolution of the four slots; jet slot in α_s/4π, beam
+  slots in α_s/2π; lp21 passes the second jet as beam b with J1/2, J2/4, as required). The
+  measure of nlo31 (jets' rest frame, Q_i = 2E_i, beam term p·k/p·u, jet term u·P_J − |P_J|)
+  matches lp21's inputs (E_a, E_2, E_3, y_ij in the jets' rest frame).
+**So far no error on the below-cut side that would give a kinematics-dependent ln τ_cut term.** Not
+checked pointwise: the beam tables in ξ (MCFM functions; table accuracy checked earlier) and the
+above-cut 3+1 NLO near the 2+1 limit. Note the size: in J7 PH the drift (≈ 0.5e-6 per unit ln in the
+window units) is ≈ 0.1% of b2's own slope (≈ 4e-4 per unit ln; b2 = 1.1e-3 against an NNLO of 6e-6 at
+1e-4), i.e. a 0.1% effect in the b2 ↔ (vi + kp + r) cancellation. A sampling bias of that size in r
+(error 0.06% of r per τ_cut) would do it; Ex7 has just shown that cells VEGAS does not adapt to can
+be off by many σ with plain means.
