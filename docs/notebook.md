@@ -3747,3 +3747,16 @@ window where flat is reliable (5e-3 → 5e-4) the total slope is −86.7 ± 40.5
 mktab`/`tabchkg` read `PDFMASK` (masked beam tables; default unchanged). Check (`work/.../nnlo21/chtab`, Q node
 10): unmasked node bit-identical to `beamgrid5/zeus5_10.tab`; mask 1 + mask 2 = unmasked to 9e-11 (the z
 integration tolerance); mask 1 has no gluon class, mask 2 no quark classes. Cluster UPDATE 15 Oct (b).
+
+## 2026-10-15 — vi near the 2+1 limit: virt31 = NNLOJET pointwise down to λ = 1e-7
+
+(AK: check vi pointwise.) `disorder-comparisons/dis31_nnlojet/harness_v31lim.f90`: the one-loop comparison of
+3 Oct (virt31 against NNLOJET's B2g1Z family, finite parts equal up to one constant × tree, −5.79471429 for
+q q̄ g g) at points approaching the limits of the 3+1 configuration: a soft gluon (E = λW), final-state
+collinear q‖g and g‖g (m² = λW²), and initial-state collinear (angle √λ), λ = 1e-1 … 1e-7, both q q̄ g g
+channels (d → d g g, g → d d̄ g), current virt31 (824ab3d) minus its closed-loop term `virt31_vloop` (absent in
+NNLOJET's DIS). Result: the constant holds to ≤ 4e-10 down to λ = 1e-4 in every limit and channel, ≤ 1e-8 at
+1e-5, ≤ 6e-8 at 1e-6 and ≤ 1e-6 at 1e-7. **The one-loop 3+1 matrix element is correct and numerically stable
+in the region the slicing uses**, so vi's matrix element is excluded as the cause of the jet drift (not tested
+near the limits: the four-quark channels, subleading there). The closed-loop term itself vanishes towards the
+limits (O(0.1–0.3) of the tree at generic points).
