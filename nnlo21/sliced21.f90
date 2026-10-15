@@ -24,6 +24,8 @@
 !   sliced21 mktab i0 i1 <prefix> [dlnQ [h]]   (nodes i0..i1, in parallel;
 !                                    defaults 0.1 in ln Q, 0.02 in ln(xi/(1-xi)))
 !   sliced21 tabchkg <prefix>          (grid against direct evaluation)
+! (env PDFMASK = 1 quarks only, 2 gluon only for mktab and tabchkg: tables of one
+! incoming-parton channel, for runs with the same pdfmask, argument 9)
 !
 ! W exchange (EW31 = "2 lepton", 9 Oct): only the beam classes the W couples
 ! to, b out of the down-type classes (lp21_nodn: separate beam tables), the
@@ -355,6 +357,8 @@ program sliced21
      call initPDFSetByName('NNPDF30_nlo_as_0118')
      call initPDF(0)
      call scet_set_colour(4.0_dp/3, 3.0_dp, 0.5_dp)
+     call get_environment_variable('PDFMASK', arg)
+     if (len_trim(arg) > 0) read(arg, *) lpmask
      if (trim(bpart) == 'mktab') then
         call get_command_argument(2, arg); read(arg, *) i
         call get_command_argument(3, arg); read(arg, *) k
