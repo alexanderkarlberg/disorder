@@ -3735,3 +3735,15 @@ jet kinematics: it is a mismatch between the LP spectrum (b2) and the above-cut 
 projected-Born jet variables, which nearly integrates to zero over the inclusive Born phase space.
 Excluded so far: boson, LP log structure (RG check), P2B projection, hadronic PCs, beam tables,
 statistical VEGAS bias, cut-induced terms, x/gluon content.
+
+## 2026-10-15 — REPORT-2026-10-15-G8 read; CH8 (channel split) set up
+
+**G8** (J8 window, vi/kp/r with the `flat` generator, ≈ 15k core-h): flat vi and kp undersample τ_cut < 5e-4
+(4× ncall moves them to psmc; flat vi up to 37σ off at 1e-5); flat r agrees with psmc at every τ_cut within
+errors 5–60× larger; the slope precision asked for is missed by ×7 (flat r scatters 10× more per seed). In the
+window where flat is reliable (5e-3 → 5e-4) the total slope is −86.7 ± 40.5 (flat) against −42.3 ± 2.6e-9
+(psmc), 1.1σ apart: **no sign of a psmc coverage gap** (weak test; "unlikely", not excluded).
+**CH8:** the J8 window split by incoming parton (pdfmask 1 = quarks, 2 = gluon) in every part. New: `sliced21
+mktab`/`tabchkg` read `PDFMASK` (masked beam tables; default unchanged). Check (`work/.../nnlo21/chtab`, Q node
+10): unmasked node bit-identical to `beamgrid5/zeus5_10.tab`; mask 1 + mask 2 = unmasked to 9e-11 (the z
+integration tolerance); mask 1 has no gluon class, mask 2 no quark classes. Cluster UPDATE 15 Oct (b).

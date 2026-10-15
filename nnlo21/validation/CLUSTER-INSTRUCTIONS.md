@@ -7,6 +7,29 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 15 Oct (b): CH8 — the J8 window split into quark- and gluon-initiated channels (AK: go)
+
+REPORT-2026-10-15-G8 received (MPP), thanks; the correction of the sizing is noted. Reading at MPP: where flat
+is reliable (5e-3 → 5e-4) it drifts like psmc; no sign of a psmc gap, and no further generator runs.
+CH8 splits the drift by the incoming parton: quarks + antiquarks (mask 1) and gluon (mask 2). Every part uses the
+same mask (Born luminosity, beam functions, above-cut PDFs), so the two channels add up exactly to J8.
+1. Build **bin10** from `origin/2026-10-nnlo21-ncc` at this commit or later. New: `sliced21 mktab` and `tabchkg`
+   take `PDFMASK=1|2` from the environment (beam tables of one channel; default unchanged). Checked at MPP
+   (node 10): unmasked bit-identical to the production table, mask 1 + mask 2 = unmasked to 9e-11.
+2. Tables: build `$P/tables/zeus5q` (`PDFMASK=1`) and `$P/tables/zeus5g` (`PDFMASK=2`) like `zeus5` (29 nodes,
+   photon); run `tabchkg` on each with the same PDFMASK.
+3. Commands: those of J8 (`ZFIX=2 ZCUTS=1 EW31="0 0"`, window (0.1, 5000), `ZWIN="0.1 5000"` for sliced21,
+   psmc), with the channel mask in every part:
+   - sliced21 (b2, b1): tables `zeus5q` / `zeus5g` and arguments 8, 9 = `0.02 <mask>` (argument 8 is not used
+     in mode 2 but must be there): `sliced21 b2 5000000 6 SEED zeus $P/tables/zeus5q $P/tables/soft.tab 0.02 1`;
+   - nlo31 (vi, kp, r, rcorr, d2, lo): argument 10 = mask, e.g. `nlo31 r 1000000 6 SEED 1d-9 2 0.1 5000 psmc 1 0 1d-12`.
+   Per channel the J8 seed counts: b2 200, vi 240, kp 200, r 1600, rcorr 200, d2 100, b1 100, lo 100 (seeds
+   7001– for mask 1, 8001– for mask 2). About 2 × 3k core-h; pilot 5 per part, submit if within +30% of J8.
+4. Report: per channel and their sum next to J8 (total, both Q² bins, p̄_T and m12 bins): NLO, NNLO at every τ_cut,
+   slopes as in J8 (absolute and in % of the channel's |NLO(1e-5)|), and the pulls (q + g) − J8 per cell (must be
+   consistent). The question: does the drift sit in one channel?
+5. Order: CH8 now (G8 is finished).
+
 ## UPDATE 15 Oct: G8 — the J8 window with nlo31's other phase-space generator (AK: go)
 
 REPORTs J7v and J8 received (MPP, notebook 15 Oct), thanks. J7v excludes a statistical VEGAS bias (parts
