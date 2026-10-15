@@ -3760,3 +3760,16 @@ NNLOJET's DIS). Result: the constant holds to ≤ 4e-10 down to λ = 1e-4 in eve
 in the region the slicing uses**, so vi's matrix element is excluded as the cause of the jet drift (not tested
 near the limits: the four-quark channels, subleading there). The closed-loop term itself vanishes towards the
 limits (O(0.1–0.3) of the tree at generic points).
+
+## 2026-10-15 (night) — REPORT-2026-10-15-CH8 read: the drift is in the quark-initiated channel
+
+J8 window split by the incoming parton (pdfmask 1/2 in every part; per channel the J8 seed counts; 8.6k
+core-h). q + g agrees with J8 (340 pulls, rms 0.89, max 2.6). Total-row NNLO slopes (1e-9 pb/GeV² per unit
+ln), windows 5e-3→5e-4 / 2e-3→2e-4 / 1e-3→1e-4 / 1e-4→1e-5: quark −33.7 ± 2.7, −44.8 ± 3.8, −43.7 ± 5.3,
+−11.3 ± 11.7; gluon −0.7 ± 1.0, −2.7 ± 1.4, −1.5 ± 1.4, +1.5 ± 2.6. Gluon share of the slope 0.03 ± 0.03, and
+≤ 0.06 in every bin. The quark NLO also carries all the NLO τ_cut dependence (gluon NLO nearly flat).
+Quark-Born-specific pieces below the cut: gluon jet function, quark beam function, soft qgq, hard function of
+γ* q → q g; above the cut the quark-initiated 3+1 / 4+1 channels. Also: in every set the 1e-4 → 1e-5 slope is
+consistent with zero (J8 +1.9 ± 13.1, CH8 q −11.3 ± 11.7, J7v −1.4 ± 18): a drift that stops below 1e-4
+would mean large quark-channel power corrections plus a constant offset against NNLOJET rather than a
+wrong log term. Not decided yet.
