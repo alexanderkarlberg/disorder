@@ -3851,3 +3851,20 @@ same seeds and commands, Δkp checked against the MPP same-seed values. The loca
 N3LO 1+1 P2B (`runs/n3p`) with the fixed kp (`KP=kp11 n3p_combine.py`, output `runs/n3p_result_kp11.txt`): every
 bin moves by ≤ 1.0% of σ_LO(≥ 1 jet), at most 0.4σ of its error; the total row is unchanged (it is fixed by the
 inclusive coefficient). The 12 Oct conclusions on that set stand.
+
+## 2026-10-16 (evening) — REPORT-2026-10-16-Q8 read: with the fixed K + P the quark-channel drift stops below τ_cut 1e-4
+
+Q8 (cluster, d4cbdeb): quark channel in the J8 window, CH8 q plus r 2400, rcorr 2200, d2 1600 new seeds (21001–),
+kp from the fixed binary (bin11, the 200 CH8 q kp seeds rerun). Total-row slopes per unit ln τ_cut (1e-9
+pb/GeV², errors from the per-seed differences): 5e-3→5e-4 −10.2 ± 2.0, 1e-3→1e-4 −16.9 ± 3.5, 2e-4→1e-4
+−8.7 ± 11.0, **1e-4→3e-5 +0.8 ± 8.4, 1e-4→1e-5 +8.6 ± 7.3**, 3e-5→1e-5 +17 ± 14 (with the old kp: −33.7,
+−43.7, −36.8, −34.1, −11.3, +13.7). Every cell (p̄T 8–15, both Q² bins) is consistent with zero below 1e-4; above
+it the drift is 16–47% of what it was. Checks: the cluster's same-seed Δkp equals MPP's (−7.40e-8 / −1.276e-7 /
+−1.653e-7 against −7.41e-8 / −1.276e-7 / −1.650e-7); old and new seeds agree (|pull| ≤ 1.2). The 6e-9 target
+was missed (7.3e-9): rcorr and d2 have heavier tails than the 200/100 seeds of the sizing showed (≈ 1% beyond
+20 MAD, up to 33 sd), to be remembered for production sizing.
+Reading: what remains behaves like power corrections that are gone by τ_cut ≈ 1e-4; no sign of a wrong log term
+is left. This does not test the value of the plateau: that needs NNLOJET (KREDO's W, Z, E). The 15 Oct (night)
+statement that a slope stopping below 1e-4 would come "plus a constant offset against NNLOJET" was made with the
+buggy kp and is open again. Cluster UPDATE 16 Oct (c): the KREDO report gives the per-seed slope errors and a
+plateau value (mean over τ_cut 1e-4, 3e-5, 1e-5) with its pull against NNLOJET.

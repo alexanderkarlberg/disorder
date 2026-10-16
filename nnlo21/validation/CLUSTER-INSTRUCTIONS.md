@@ -7,6 +7,20 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 16 Oct (c): Q8 read; two additions to the KREDO report (no new jobs)
+
+REPORT-2026-10-16-Q8 received (MPP), thanks. Reading: with the fixed kp the quark-channel slope is +8.6 ± 7.3
+(1e-4 → 1e-5) and +0.8 ± 8.4 (1e-4 → 3e-5), against −16.9 ± 3.5 (1e-3 → 1e-4): the remaining drift stops below
+1e-4. The missed 6e-9 target (rcorr/d2 tails) is fine; no top-up. What is open is the value of the plateau, which
+KREDO's comparison with NNLOJET decides. In the KREDO report, per set (J8, CH8 q and g, J7 PH, J7 W, J7v, Z, W, E,
+B, G6 photon and W; for E also NNLO_P2B with the Ex7 extras):
+1. slopes for the Q8 windows (5e-3→5e-4, 1e-3→1e-4, 2e-4→1e-4, 1e-4→3e-5, 1e-4→1e-5, 3e-5→1e-5) with both
+   errors, e1 and the per-seed-difference e2, as in Q8;
+2. a plateau value P = mean of the NNLO at τ_cut 1e-4, 3e-5 and 1e-5, per part from the per-seed average over the
+   three τ_cut (error from the seed scatter), summed over parts; for Z, W, E (and N7's W and Z bins) P per bin with
+   its pull against NNLOJET, next to the pulls at each τ_cut; the same for the NLO (b1 + lo).
+Order unchanged: KREDO (a)–(d); report when (a)–(c) are done, (d) may follow.
+
 ## UPDATE 16 Oct (b): KREDO — rerun every kp and kp-x with the fixed nlo31 (AK: go)
 
 A bug in nlo31's K + P was found at MPP (notebook 16 Oct, commit 40c013a): in `kp_conv` a local variable `Cf`
