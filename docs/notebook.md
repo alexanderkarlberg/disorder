@@ -3848,3 +3848,6 @@ with the bug restored 2e-3 … 1 in b and lp. Production output bit-identical (J
 of the impact runs). Cluster UPDATE 16 Oct (b), KREDO: every kp and kp-x rerun with the fixed binary (bin11),
 same seeds and commands, Δkp checked against the MPP same-seed values. The local N3LO 1+1 P2B kp (`runs/n3p`,
 100 seeds) is rerun at MPP (`kp11_*`).
+N3LO 1+1 P2B (`runs/n3p`) with the fixed kp (`KP=kp11 n3p_combine.py`, output `runs/n3p_result_kp11.txt`): every
+bin moves by ≤ 1.0% of σ_LO(≥ 1 jet), at most 0.4σ of its error; the total row is unchanged (it is fixed by the
+inclusive coefficient). The 12 Oct conclusions on that set stand.
