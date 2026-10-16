@@ -3840,3 +3840,11 @@ kp comes from the fixed binary).
   in the Born-level jet kinematics: about half of the drift was this above-cut K + P error.
 - The 15 Oct (night) CH8 result (drift in the quark-initiated channel) stands and is where the bug acts; the
   list of excluded causes stands, with hard21 and I/KP (after the fix) added.
+
+**Follow-up (AK: push, rerun kp, add a test).** 40c013a pushed. Regression test: `nlo31 chk` now also runs
+`check_kp`, kp_conv for q → q against closed forms with a constant PDF (f(ξ/x)/x − f(ξ) = (1 − x)/x makes every
+x integral elementary; b, g, lp one at a time; closed forms checked against mpmath to 30 digits): fixed ≤ 2e-8,
+with the bug restored 2e-3 … 1 in b and lp. Production output bit-identical (J8 kp run against the fixed binary
+of the impact runs). Cluster UPDATE 16 Oct (b), KREDO: every kp and kp-x rerun with the fixed binary (bin11),
+same seeds and commands, Δkp checked against the MPP same-seed values. The local N3LO 1+1 P2B kp (`runs/n3p`,
+100 seeds) is rerun at MPP (`kp11_*`).

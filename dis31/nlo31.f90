@@ -1628,6 +1628,35 @@ contains
     if (.false.) print *, P3, dv, m4, fl3, nd, id, W2
   end subroutine check_sums
 
+  ! (16 Oct) kp_conv for q -> q against closed forms: with a constant PDF
+  ! (f = 1, so f(xi/x)/x - f(xi) = (1 - x)/x) every x integral is elementary;
+  ! Born factors b, g, lp one at a time (the local Cf shadowing CF showed in b
+  ! and lp at 2e-3 - 1; fixed: <= 2e-8)
+  subroutine check_kp()
+    real(dp), external :: ddilog
+    real(dp) :: xis(3) = [0.01_dp, 0.1_dp, 0.5_dp], xi, t, x, res, s(3), ref(3), A, l1, lx
+    integer :: i, k, ip
+    integer, parameter :: n = 200000
+    do k = 1, 3
+       xi = xis(k); l1 = log(1 - xi); lx = log(xi)
+       s = 0
+       do ip = 1, 3
+          do i = 1, n
+             t = (i - 0.5_dp)/n
+             x = xi + (1 - xi)*(1 - (1 - t)**2)
+             call kp_conv(1, 1, .true., merge(1.0_dp, 0.0_dp, ip == 1), merge(1.0_dp, 0.0_dp, ip == 2), &
+                  & merge(1.0_dp, 0.0_dp, ip == 3), x, xi, 1.0_dp, 1.0_dp, res)
+             s(ip) = s(ip) + res*2*(1 - t)/n
+          enddo
+       enddo
+       A = -0.5_dp*l1**2 + lx*l1 + ddilog(xi)
+       ref(1) = CF*(ddilog(xi) - pi**2/6 + lx**2/2 - (1 - xi)*l1 - xi*lx - lx - 1 + xi - 2*A - 5 + pi**2)
+       ref(2) = l1 - lx + 1
+       ref(3) = CF*(2*l1 - lx + 0.5_dp + xi)
+       write(*,'(a,f5.2,3es11.2)') ' kp_conv q -> q (b, g, lp) / closed form - 1, xi', xi, s/ref - 1
+    enddo
+  end subroutine check_kp
+
   real(dp) function alphasPDF_(q)
     real(dp), intent(in) :: q
     real(dp), external :: alphasPDF
@@ -1794,7 +1823,7 @@ program nlo31
   call setup_flavours()
   virt31_finite_only = .true.
   if (trim(part) == 'chk') then
-     call check_sums(); stop
+     call check_sums(); call check_kp(); stop
   endif
   select case (trim(part))
   case ('lo', 'vi'); ndim = 8

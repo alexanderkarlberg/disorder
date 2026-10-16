@@ -7,6 +7,41 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 16 Oct (b): KREDO — rerun every kp and kp-x with the fixed nlo31 (AK: go)
+
+A bug in nlo31's K + P was found at MPP (notebook 16 Oct, commit 40c013a): in `kp_conv` a local variable `Cf`
+shadowed the colour factor `CF` (Fortran is case-insensitive), so the q → q integrated plus-distribution term
+was wrong since the first nlo31 (2 Oct). **Only the parts `kp` and `kp-x` are affected** (every mode); b0, b1,
+b2, lo, vi, r, rcorr, d2, lo-x, vi-x, r-x and all NNLOJET runs stay as they are. At MPP (same seeds, old and
+fixed binary) the fix removes about half of the jet drift (J8 42–55%, J7 PH 47–54%, W5 56–67%); a smaller drift
+remains in the quark channel, so **Q8 continues unchanged** (it runs only r, rcorr, d2).
+1. Build **bin11** from `origin/2026-10-nnlo21-ncc` at this commit or later. Against bin10 only nlo31's kp
+   changes (all other parts, and sliced21, bit-identical: checked at MPP on a J8 kp run, new build = the fixed
+   binary of the impact runs). Checks:
+   - `nlo31 chk 1 1` ends with three lines `kp_conv q -> q (b, g, lp) / closed form - 1, xi ...`, all
+     |values| ≤ 1e-7 (bin10 gives 2e-3 … 1 in the b and lp columns);
+   - one J8 kp seed with bin11 and bin10 (same command): Δ = bin11 − bin10 of the total row at τ_cut 1e-3,
+     1e-4, 1e-5 should be close to MPP's mean −7.41e-8, −1.276e-7, −1.650e-7 pb/GeV² (per-seed scatter ≈ 1%).
+2. Rerun **every kp and kp-x job that enters a reported result** with bin11: the same commands, environment,
+   ncall, itmx and seeds as the original jobs; only the binary changes. New directories next to the old ones
+   (e.g. `kp11`, `kp-x11`); keep the old outputs. Order:
+   - (a) CH8 q and g, J8 (Q8's report needs the CH8 q kp);
+   - (b) J7 PH, J7 W, J7v;
+   - (c) the bin5 validations Z, W, E (and E's kp-x), and B (bin4, with its extras);
+   - (d) G6 photon and W; Ex6, Ex7, X8 (kp-x).
+   Not needed: G8 (flat and psmc kp carry the same bug term, so the comparison stands), D (NNLO 1+1, no kp),
+   N7 (NNLOJET). The local N3LO 1+1 P2B set (MPP `runs/n3p`) is rerun at MPP.
+   Cost: ≈ 3.5k jobs of ≈ 0.1 core-h (X8 kp-x 0.074): a few hundred core-h. Submit if ≤ 2k core-h, otherwise
+   report the estimate first. Q8 has priority if the two compete.
+3. Recombine each set with the bin11 kp / kp-x as in its last report (NNLO per bin at every τ_cut, slopes,
+   pulls against NNLOJET for Z, W, E and the N7 references). Per set also Δkp = bin11 − bin10 per cell with its
+   slope per unit ln τ_cut; compare with MPP's same-seed values (total row, τ_cut 1e-3 / 1e-4 / 1e-5):
+   J8 −7.41e-8 / −1.276e-7 / −1.650e-7, J7 PH −9.21e-7 / −1.532e-6 / −2.190e-6 (pb/GeV²), W5 = bin5 W
+   −0.1043 / −0.1683 / −0.2029 pb. Agreement within errors shows the reruns used the right binary and commands.
+4. Report (REPORT-…-KREDO, as soon as (a) and (b) are done; (c), (d) may follow in a second report): per set the
+   corrected tables next to the bin10 ones, and the Δkp checks of item 3. In the Q8 report use the bin11 CH8 q kp.
+5. Order: Q8 and KREDO (a) now, then KREDO (b)–(d).
+
 ## UPDATE 16 Oct: Q8 — does the quark-channel drift stop below τ_cut 1e-4? (AK: go)
 
 REPORT-2026-10-15-CH8 received (MPP), thanks: the drift is in the quark channel (gluon share 0.03 ± 0.03).
