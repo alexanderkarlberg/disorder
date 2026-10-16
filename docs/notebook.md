@@ -3848,3 +3848,51 @@ with the bug restored 2e-3 … 1 in b and lp. Production output bit-identical (J
 of the impact runs). Cluster UPDATE 16 Oct (b), KREDO: every kp and kp-x rerun with the fixed binary (bin11),
 same seeds and commands, Δkp checked against the MPP same-seed values. The local N3LO 1+1 P2B kp (`runs/n3p`,
 100 seeds) is rerun at MPP (`kp11_*`).
+N3LO 1+1 P2B (`runs/n3p`) with the fixed kp (`KP=kp11 n3p_combine.py`, output `runs/n3p_result_kp11.txt`): every
+bin moves by ≤ 1.0% of σ_LO(≥ 1 jet), at most 0.4σ of its error; the total row is unchanged (it is fixed by the
+inclusive coefficient). The 12 Oct conclusions on that set stand.
+
+## 2026-10-16 (evening) — REPORT-2026-10-16-Q8 read: with the fixed K + P the quark-channel drift stops below τ_cut 1e-4
+
+Q8 (cluster, d4cbdeb): quark channel in the J8 window, CH8 q plus r 2400, rcorr 2200, d2 1600 new seeds (21001–),
+kp from the fixed binary (bin11, the 200 CH8 q kp seeds rerun). Total-row slopes per unit ln τ_cut (1e-9
+pb/GeV², errors from the per-seed differences): 5e-3→5e-4 −10.2 ± 2.0, 1e-3→1e-4 −16.9 ± 3.5, 2e-4→1e-4
+−8.7 ± 11.0, **1e-4→3e-5 +0.8 ± 8.4, 1e-4→1e-5 +8.6 ± 7.3**, 3e-5→1e-5 +17 ± 14 (with the old kp: −33.7,
+−43.7, −36.8, −34.1, −11.3, +13.7). Every cell (p̄T 8–15, both Q² bins) is consistent with zero below 1e-4; above
+it the drift is 16–47% of what it was. Checks: the cluster's same-seed Δkp equals MPP's (−7.40e-8 / −1.276e-7 /
+−1.653e-7 against −7.41e-8 / −1.276e-7 / −1.650e-7); old and new seeds agree (|pull| ≤ 1.2). The 6e-9 target
+was missed (7.3e-9): rcorr and d2 have heavier tails than the 200/100 seeds of the sizing showed (≈ 1% beyond
+20 MAD, up to 33 sd), to be remembered for production sizing.
+Reading: what remains behaves like power corrections that are gone by τ_cut ≈ 1e-4; no sign of a wrong log term
+is left. This does not test the value of the plateau: that needs NNLOJET (KREDO's W, Z, E). The 15 Oct (night)
+statement that a slope stopping below 1e-4 would come "plus a constant offset against NNLOJET" was made with the
+buggy kp and is open again. Cluster UPDATE 16 Oct (c): the KREDO report gives the per-seed slope errors and a
+plateau value (mean over τ_cut 1e-4, 3e-5, 1e-5) with its pull against NNLOJET.
+REPORT-2026-10-16-KREDO (a)+(b) read (cluster 604d998): the kp of J8, CH8 q/g, J7 PH, J7 W and J7v rerun with bin11
+(same cmd.sh, only the binary changed). Same-seed Δkp equals MPP's (J8 −7.40e-8 / −1.276e-7 / −1.654e-7 at
+1e-3 / 1e-4 / 1e-5; J7 PH −9.14e-7 / −1.533e-6 / −2.190e-6, 0.8% from MPP at 1e-3); CH8 g Δkp = 0 exactly. Corrected
+total-row slopes (% of |NLO(1e-5)| per unit ln, 5e-3→5e-4 / 2e-3→2e-4 / 1e-3→1e-4 / 1e-4→1e-5): J8 −20.0, −27.3,
+−33.4 (7σ), +19 ± 14; J7 PH −8.5, −8.0, −11.0 (1.6σ), −16 ± 24; J7 W −8.2, −6.4, −12.0 (1.2σ), +13 ± 18; J7v
+≤ 1.2σ. (c), (d) (Z, W, E, B, G6, extras) are done; their report follows with UPDATE (c)'s plateau values.
+
+## 2026-10-16 (20:00) — REPORT-2026-10-16-KREDO-cd read: with the fixed kp, W, Z, γ and E agree with NNLOJET for τ_cut ≤ 1e-4; correction: G6 was flat only by cancellation
+
+KREDO (c)+(d) (cluster 0825bf3): kp rerun with bin11 for bin5 Z, W, E (and E kp-x), B (from the 11 Oct archive), G6
+photon and W, and kp-x of Ex6, Ex7, X8. Same-seed Δkp for W5 −0.1034 / −0.1676 / −0.2024 pb at 1e-3 / 1e-4 / 1e-5
+(MPP −0.1043 / −0.1683 / −0.2029); the kp-x changes are within about 2σ of zero (P2B extras unchanged within errors).
+Pulls of the total against NNLOJET at τ_cut 1e-4 / 3e-5 / 1e-5 (before the fix):
+- W vs N7 (0.148 ± 0.015): −1.9 / −1.6 / +0.1 (+5.3 / +0.5 / +4.4); 15 W bins rms 1.5 / 1.3 / 0.86, worst −2.6 / −2.3 / +2.3;
+- Z vs N7 (12.92 ± 1.03): −1.0 / +0.6 / +0.1 (+1.7 / +2.7 / +2.0);
+- B (γ) vs NNLOJET (11.12 ± 1.2): −0.5 / −0.5 / −1.7 (B at 1e-5: 0.9, error ≈ 6);
+- E P2B (bin5 extras) +0.2 / +0.8 / +0.2; E plain −0.3 at 1e-5 (P2B needed above, as before).
+Above 1e-4 the values now lie below NNLOJET (W −4 to −8σ at τ_cut ≥ 5e-4, Z ≈ −2σ): the sign has turned.
+**G6 (x = 0.1, Q² = 5000, τ_zQ bins, no jets)**: with the fixed kp the total-bin slopes are positive above 1e-4,
+G6P +0.77 / +2.80 / +2.36% of the bin NLO per unit ln (3.1, 4.0, 5.8σ; 5e-3→5e-4 / 2e-3→2e-4 / 1e-3→1e-4), G6W
++0.78 / +3.48 / +1.76 (3.0, 10.5, 4.0σ); largest in the 0.05–0.1 bin (+9.9σ, +10.5σ at 2e-3→2e-4); 1e-4→1e-5
+consistent with zero (−0.8 ± 1.3, +0.3 ± 0.9). The Δkp slope there is +2.0% of the bin NLO.
+**Correction of the record:** the 14–15 Oct statements that G6 "without jets is flat", hence "not an x or
+gluon-content effect" and that the drift is specific to the jet kinematics, were made with the buggy kp, whose
+slope cancelled G6's drift. With the fix every set (jets or not) drifts above τ_cut ≈ 1e-4 and is flat below,
+which fits power corrections that are gone by 1e-4. Below 1e-4 every set agrees with NNLOJET within about 2σ.
+The ZEUS-wide sets have large errors at 1e-5, so the quantitative plateau test is UPDATE (c)'s (cluster UPDATE
+16 Oct (d): deliver it as an addendum, no jobs, then hold for AK).
