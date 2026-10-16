@@ -586,7 +586,7 @@ contains
     real(dp), intent(in) :: b, g, lp, x, xi, fx, fxi
     real(dp), intent(out) :: res
     real(dp), external :: ddilog
-    real(dp) :: kr, kpl, kd, pr, ppl, pd, R, Pl, D, ipl, A, Bf, Cf, l1
+    real(dp) :: kr, kpl, kd, pr, ppl, pd, R, Pl, D, ipl, A, Bf, Cq, l1
     call iop31_kernel(1, ta, tb, x, kr, kpl, kd)
     call iop31_kernel(2, ta, tb, x, pr, ppl, pd)
     R = kr*b + pr*lp
@@ -600,9 +600,11 @@ contains
        l1 = log(1 - xi)
        A = -0.5_dp*l1**2 + log(xi)*l1 + ddilog(xi)      ! ln((1-x)/x)/(1-x)
        Bf = -l1                                          ! 1/(1-x)
-       Cf = -2*l1 - xi - xi**2/2                         ! (1+x^2)/(1-x)
+       Cq = -2*l1 - xi - xi**2/2                         ! (1+x^2)/(1-x)
        if (tb == 1) then
-          ipl = CF*2*A*b + g*Bf + CF*Cf*lp
+          ! (16 Oct) the integral is Cq: a local Cf shadowed the colour factor CF
+          ! (case-insensitive) and replaced it here by the integral (since dd004f6)
+          ipl = CF*2*A*b + g*Bf + CF*Cq*lp
        else
           ipl = 2*CA*A*b + g*Bf + 2*CA*Bf*lp
        endif
