@@ -6,6 +6,9 @@ NLO = b1+lo; E also P2B = plain + the -x (P2B - plain) terms. NNLOJET: results/n
 import glob, json, math, os, re, sys
 import numpy as np
 P = '/ptmp/mpp/akarlber/disorder-nnlo21/runs'; H = os.path.dirname(os.path.abspath(__file__)); R = H + '/results'
+K11 = os.environ.get('KP11') == '1'  # KREDO: read kp11 / kp-x11 (bin11) instead of kp / kp-x, write to results/kp11
+if K11: R = R + '/kp11'; os.makedirs(R, exist_ok=True)
+def kd(p): return p + '11' if K11 and p in ('kp', 'kp-x') else p
 S = sys.argv[1]
 def ff(x):
     try: return float(x)
@@ -19,7 +22,7 @@ def rows(f):
         elif l.startswith(' CELL '): nm.append(('tauzQ', float(w[1]), float(w[2]))); r.append([ff(x) for x in w[3:]])
     return tc, nm, (np.array(r) if r else None)
 def load(part):
-    fs = [f for f in sorted(glob.glob('%s/ours5/%s/%s/s*/run.log' % (P, S, part))) if os.path.exists(os.path.dirname(f) + '/done')]
+    fs = [f for f in sorted(glob.glob('%s/ours5/%s/%s/s*/run.log' % (P, S, kd(part)))) if os.path.exists(os.path.dirname(f) + '/done')]
     d = [rows(f) for f in fs]; d = [x for x in d if x[2] is not None]
     return d[0][0], d[0][1], np.array([x[2] for x in d])
 def stat(x):  # x: seeds x ...

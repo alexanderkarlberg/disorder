@@ -13,6 +13,9 @@ Plain equal-weight seed means per part (error = scatter/sqrt(N)), parts in quadr
 import glob, json, math, os, re, sys
 import numpy as np
 P = '/ptmp/mpp/akarlber/disorder-nnlo21/runs'; H = os.path.dirname(os.path.abspath(__file__)); R = H + '/results'
+K11 = os.environ.get('KP11') == '1'  # KREDO: read kp11 / kp-x11 (bin11) instead of kp / kp-x, write to results/kp11
+if K11: R = R + '/kp11'; os.makedirs(R, exist_ok=True)
+def kd(p): return p + '11' if K11 and p in ('kp', 'kp-x') else p
 def ff(x):
     try: return float(x)
     except ValueError: return float(re.sub(r"(\d)([+-]\d{3})$", r"\1E\2", x))
@@ -26,7 +29,7 @@ def rows(f):
 INFO = {}
 def load(dirs, part, tag):
     fs = []
-    for d in dirs: fs += [x + 'run.log' for x in sorted(glob.glob('%s/%s/s*/' % (d, part))) if os.path.exists(x + 'done') and os.path.exists(x + 'run.log')]
+    for d in dirs: fs += [x + 'run.log' for x in sorted(glob.glob('%s/%s/s*/' % (d, kd(part)))) if os.path.exists(x + 'done') and os.path.exists(x + 'run.log')]
     dd = [rows(f) for f in fs]; ok = [x for x in dd if x[2] is not None]
     arr = np.array([x[2] for x in ok]); nf = int((~np.isfinite(arr).all(axis=(1, 2))).sum())
     INFO[tag] = (len(fs), len(ok), nf)

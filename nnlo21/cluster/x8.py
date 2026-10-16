@@ -6,6 +6,9 @@ bin5 (ours5/E extras). Plain equal-weight means, error = sd/sqrt(N); pulls = dif
 import glob, json, math, os, re
 import numpy as np
 P = '/ptmp/mpp/akarlber/disorder-nnlo21/runs'; H = os.path.dirname(os.path.abspath(__file__)); R = H + '/results'
+K11 = os.environ.get('KP11') == '1'  # KREDO: read kp11 / kp-x11 (bin11) instead of kp / kp-x, write to results/kp11
+if K11: R = R + '/kp11'; os.makedirs(R, exist_ok=True)
+def kd(p): return p + '11' if K11 and p in ('kp', 'kp-x') else p
 def ff(x):
     try: return float(x)
     except ValueError: return float(re.sub(r"(\d)([+-]\d{3})$", r"\1E\2", x))
@@ -19,7 +22,7 @@ def total(f):
 def load(dirs, part):
     a, n_dir, tc = [], 0, None
     for d in dirs:
-        for s in sorted(glob.glob('%s/%s/s*/' % (d, part))):
+        for s in sorted(glob.glob('%s/%s/s*/' % (d, kd(part)))):
             if not os.path.exists(s + 'done'): continue
             n_dir += 1; t, v = total(s + 'run.log')
             if v is None: continue

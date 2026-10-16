@@ -8,6 +8,9 @@ NNLO_P2B(bin5 extras) is the same with the old bin5 extras (ours5/E/*-x) for com
 import glob, json, math, os, re, sys
 import numpy as np
 P = '/ptmp/mpp/akarlber/disorder-nnlo21/runs'; H = os.path.dirname(os.path.abspath(__file__)); R = H + '/results'
+K11 = os.environ.get('KP11') == '1'  # KREDO: read kp11 / kp-x11 (bin11) instead of kp / kp-x, write to results/kp11
+if K11: R = R + '/kp11'; os.makedirs(R, exist_ok=True)
+def kd(p): return p + '11' if K11 and p in ('kp', 'kp-x') else p
 S = sys.argv[1]; XF = 0.1
 WREF = {(0.05, 0.1): (7.606e-4, 3.1e-6), (0.1, 0.2): (5.873e-4, 1.4e-6), (0.2, 0.3): (2.374e-4, 6.4e-7), (0.3, 0.4): (1.212e-4, 3.9e-7),
         (0.4, 0.5): (7.177e-5, 2.7e-7), (0.05, 0.5): (1.7783e-3, 2.8e-6)}   # CLUSTER-INSTRUCTIONS lines 33-36 (MPP runs/ccw1): already in combine_tcut units (= 'DISENT NLO x 1/x'), used as given (they agree with ours to <1%; dividing by x would be off by 10)
@@ -23,7 +26,7 @@ def rows(f):
     return tc, nm, (np.array(r) if r else None)
 INFO = {}
 def load(d, part):
-    ds = sorted(glob.glob('%s/%s/s*/' % (d, part))); fs = [x + 'run.log' for x in ds if os.path.exists(x + 'done') and os.path.exists(x + 'run.log')]
+    ds = sorted(glob.glob('%s/%s/s*/' % (d, kd(part)))); fs = [x + 'run.log' for x in ds if os.path.exists(x + 'done') and os.path.exists(x + 'run.log')]
     dd = [rows(f) for f in fs]; ok = [x for x in dd if x[2] is not None]
     arr = np.array([x[2] for x in ok]); nf = int((~np.isfinite(arr).all(axis=(1, 2))).sum())
     INFO[d.split('runs/')[1] + '/' + part] = (len(ds), len(fs), len(ok), nf)

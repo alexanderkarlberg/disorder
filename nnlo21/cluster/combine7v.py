@@ -7,6 +7,9 @@ Consistency: per part (vi, kp, r), bin, tau_cut: J7v - J7 PH +- sqrt(e1^2+e2^2) 
 import glob, gzip, json, math, os, re
 import numpy as np
 P = '/ptmp/mpp/akarlber/disorder-nnlo21/runs/ours7j'; H = os.path.dirname(os.path.abspath(__file__)); R = H + '/results'
+K11 = os.environ.get('KP11') == '1'  # KREDO: read kp11 / kp-x11 (bin11) instead of kp / kp-x, write to results/kp11
+if K11: R = R + '/kp11'; os.makedirs(R, exist_ok=True)
+def kd(p): return p + '11' if K11 and p in ('kp', 'kp-x') else p
 def ff(x):
     try: return float(x)
     except ValueError: return float(re.sub(r"(\d)([+-]\d{3})$", r"\1E\2", x))
@@ -19,7 +22,7 @@ def rows(f):
     return tc, nm, (np.array(r) if r else None)
 INFO = {}
 def load(S, p, tag):
-    ds = sorted(glob.glob('%s/%s/%s/s*/' % (P, S, p)), key=lambda s: int(re.search(r's(\d+)/$', s).group(1)))
+    ds = sorted(glob.glob('%s/%s/%s/s*/' % (P, S, kd(p))), key=lambda s: int(re.search(r's(\d+)/$', s).group(1)))
     dd, seeds = [], []
     for d in ds:
         if not os.path.exists(d + 'done'): continue

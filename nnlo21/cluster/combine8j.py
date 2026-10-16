@@ -7,6 +7,9 @@ pull = (N(a)-N(b))/sqrt|ea^2-eb^2|. Bins with NLO = 0 (outside the window's Q2 b
 import glob, gzip, json, math, os, re, sys
 import numpy as np
 P = '/ptmp/mpp/akarlber/disorder-nnlo21/runs/ours8j'; H = os.path.dirname(os.path.abspath(__file__)); R = H + '/results'
+K11 = os.environ.get('KP11') == '1'  # KREDO: read kp11 / kp-x11 (bin11) instead of kp / kp-x, write to results/kp11
+if K11: R = R + '/kp11'; os.makedirs(R, exist_ok=True)
+def kd(p): return p + '11' if K11 and p in ('kp', 'kp-x') else p
 S = sys.argv[1]
 def ff(x):
     try: return float(x)
@@ -21,7 +24,7 @@ def rows(f):
 parts = ['b1', 'lo', 'b2', 'vi', 'kp', 'r', 'rcorr', 'd2']; X = {}; INFO = {}
 os.makedirs(R + '/j8', exist_ok=True)
 for p in parts:
-    ds = sorted(glob.glob('%s/%s/%s/s*/' % (P, S, p)), key=lambda s: int(re.search(r's(\d+)/$', s).group(1)))
+    ds = sorted(glob.glob('%s/%s/%s/s*/' % (P, S, kd(p))), key=lambda s: int(re.search(r's(\d+)/$', s).group(1)))
     dd, seeds = [], []
     for d in ds:
         if not os.path.exists(d + 'done'): continue
