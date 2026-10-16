@@ -3868,3 +3868,9 @@ is left. This does not test the value of the plateau: that needs NNLOJET (KREDO'
 statement that a slope stopping below 1e-4 would come "plus a constant offset against NNLOJET" was made with the
 buggy kp and is open again. Cluster UPDATE 16 Oct (c): the KREDO report gives the per-seed slope errors and a
 plateau value (mean over τ_cut 1e-4, 3e-5, 1e-5) with its pull against NNLOJET.
+REPORT-2026-10-16-KREDO (a)+(b) read (cluster 604d998): the kp of J8, CH8 q/g, J7 PH, J7 W and J7v rerun with bin11
+(same cmd.sh, only the binary changed). Same-seed Δkp equals MPP's (J8 −7.40e-8 / −1.276e-7 / −1.654e-7 at
+1e-3 / 1e-4 / 1e-5; J7 PH −9.14e-7 / −1.533e-6 / −2.190e-6, 0.8% from MPP at 1e-3); CH8 g Δkp = 0 exactly. Corrected
+total-row slopes (% of |NLO(1e-5)| per unit ln, 5e-3→5e-4 / 2e-3→2e-4 / 1e-3→1e-4 / 1e-4→1e-5): J8 −20.0, −27.3,
+−33.4 (7σ), +19 ± 14; J7 PH −8.5, −8.0, −11.0 (1.6σ), −16 ± 24; J7 W −8.2, −6.4, −12.0 (1.2σ), +13 ± 18; J7v
+≤ 1.2σ. (c), (d) (Z, W, E, B, G6, extras) are done; their report follows with UPDATE (c)'s plateau values.
