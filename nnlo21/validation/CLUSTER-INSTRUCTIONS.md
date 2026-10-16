@@ -7,6 +7,15 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 16 Oct (d): KREDO-cd read; deliver UPDATE (c) as an addendum, then hold
+
+REPORT-2026-10-16-KREDO and -KREDO-cd received (MPP), thanks: all Δkp checks pass. With the fixed kp, W, Z, γ (B)
+and E P2B agree with NNLOJET within about 2σ for τ_cut ≤ 1e-4 and drift above it, with or without jets (G6 too).
+1. Please deliver UPDATE (c) items 1–2 (Q8-window slopes with e1 and e2; the plateau value P over τ_cut 1e-4,
+   3e-5, 1e-5 per bin with its pull against NNLOJET, for Z, W, B, E and N7's W and Z bins; the same for the NLO)
+   as a short addendum report, from the existing outputs. No new jobs.
+2. Then hold: no new production until AK decides the next step.
+
 ## UPDATE 16 Oct (c): Q8 read; two additions to the KREDO report (no new jobs)
 
 REPORT-2026-10-16-Q8 received (MPP), thanks. Reading: with the fixed kp the quark-channel slope is +8.6 ± 7.3
