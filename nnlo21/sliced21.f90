@@ -8,7 +8,7 @@
 !   b2: O(alpha_s^3) below the cut   (+ nlo31 vi + kp + r above it = NNLO 2+1 correction)
 ! Born matrix elements: DISENT's MATTHR (alpha_s/2pi factored out, the
 ! normalisation of born31/me41), parton 2 the quark and 3 the gluon (quark
-! Born) or the antiquark (gluon Born). Photon + Z (8 Oct): the quark Born
+! Born) or the antiquark (gluon Born). Photon + Z: the quark Born
 ! is S w1 + O w2 (S = (p1.p6)^2 + (p2.p7)^2, O = (p1.p7)^2 + (p2.p6)^2 in
 ! units of the unit-charge QQ/(S + O), w = ew31_w of the flavour; = MATTHR,
 ! nnlo21/tests/harness_born21), the gluon Born with (w1 + w2)/2 summed over
@@ -27,7 +27,7 @@
 ! (env PDFMASK = 1 quarks only, 2 gluon only for mktab and tabchkg: tables of one
 ! incoming-parton channel, for runs with the same pdfmask, argument 9)
 !
-! W exchange (EW31 = "2 lepton", 9 Oct): only the beam classes the W couples
+! W exchange (EW31 = "2 lepton"): only the beam classes the W couples
 ! to, b out of the down-type classes (lp21_nodn: separate beam tables), the
 ! gluon class with the two W pairs, no closed loop; 2+1 Born and one loop =
 ! MATTHR/VIRTHR (tests/harness_born21 -noNC -CC). ZFIX = 3 (mode 2): tau_zQ
@@ -61,7 +61,7 @@ contains
     res = b21_eval(Pk, Q2, xB, eta, jac, dphi, wgt)
   end function b21_part
 
-  ! correlated sampling (5 Oct): the below-cut 2+1 term at the 2+1 Born that
+  ! correlated sampling: the below-cut 2+1 term at the 2+1 Born that
   ! psmc builds the above-cut 3+1 event from (same unit numbers: lepton2 from
   ! r(1:2), the Born from r(4:6) = psmc_gen(3, r(3:9))'s r(2:4)); with
   ! born_part (nlo31, part lo) on the same r this is the NLO 2+1 coefficient
@@ -104,7 +104,7 @@ contains
     res = sqrt(res)
   end function c1_part
 
-  ! correlated NNLO 2+1 (mode 1, fixed x, Q^2; 6 Oct): b2 at the 2+1 Born
+  ! correlated NNLO 2+1 (mode 1, fixed x, Q^2): b2 at the 2+1 Born
   ! from r(2:4); vi and kp at the 3+1 point of psmc_gen(3, v3), v3 = [r(1),
   ! r(2:4), r(5:7)], kp's x = r(8); r (real minus dipoles) at the 4+1 point of
   ! psmc_gen(4, v4), v4 = [r(9), r(10), r(2:4), r(11:16)] (its 3+1 sub-point
@@ -264,9 +264,6 @@ contains
        hcacc(1 + ntc*(b - 1):ntc*b) = hcacc(1 + ntc*(b - 1):ntc*b) + val*wgt
     enddo
     res = val(ntc)
-    if (mode == 2 .and. .not. zfix) then
-       if (.not. inb(1)) res = 0     ! only in the ZCUTS rows: not in the VEGAS target
-    endif
     ! mode 3: the VEGAS target is the >= 1 jet row (the total row vanishes in P2B)
     if (mode == 3) res = val(ntc)*dp2b(2)
   contains
@@ -412,23 +409,15 @@ program sliced21
   endif
   if (mode >= 2) then
      nob = merge(15, 16, mode == 2); nv = ntc*nob; iv = merge(ntc, 2*ntc, mode == 2)
-     call get_environment_variable('ZCUTS', arg); zcuts = mode == 2 .and. trim(arg) == '1'
-     if (zcuts) then
-        nob = 21; nv = ntc*nob
-     endif
      q2lo = gqlo**2; q2hi = gqhi**2; ylo = 0.2_dp; yhi = 0.6_dp
      call get_environment_variable('ZFIX', arg)
      if (mode == 2 .and. trim(arg) == '3') then
-        ! ZFIX = 3 (9 Oct): tau_zQ bins in the inclusive cuts, no window
+        ! ZFIX = 3: tau_zQ bins in the inclusive cuts, no window
         zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
-     elseif (mode == 2 .and. (trim(arg) == '1' .or. trim(arg) == '2')) then
-        ! diagnostic window around (x, Q2) = (0.01, 400): ZFIX = 1 with the
-        ! mode-1 observable, ZFIX = 2 with the ZEUS jet selection (7 Oct)
+     elseif (mode == 2 .and. trim(arg) == '2') then
+        ! ZFIX = 2: a window around (x, Q2) = (0.01, 400) with the ZEUS jet
+        ! selection; ZWIN = "x Q2": another window centre (nlo31: arguments 7, 8)
         xfix = 0.01_dp; Q2fix = 400
-        if (trim(arg) == '1') then
-           zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
-        endif
-        ! ZWIN = "x Q2" (14 Oct): another window centre (nlo31: arguments 7, 8)
         call get_environment_variable('ZWIN', arg)
         if (len_trim(arg) > 0) read(arg, *) xfix, Q2fix
         q2lo = Q2fix*(1 - zfw/2); q2hi = Q2fix*(1 + zfw/2)
@@ -524,7 +513,6 @@ program sliced21
      do i = 1, 4
         write(*,'(a,2f8.0,10es16.8)') ' ZCELL m12  ', zmje(i-1), zmje(i), hc(1 + ntc*(10 + i):ntc*(11 + i))
      enddo
-     if (zcuts) call zcuts_out(hc)
   else
      write(*,'(a)') ' CELLS dsigma/dx dQ2 [pb/GeV2] below the cut: tau_zQ bin, then tau_cut columns'
      write(*,'(a,10es12.3)') ' tau_cut     ', tcs

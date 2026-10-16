@@ -3908,3 +3908,23 @@ comparisons). NLO plateaus with P2B within 1.7σ (Z −1.7, γ −1.4, W +0.2, E
 Ex7, G6 (3–6σ). So: with τ_cut ≤ 1e-4 the NNLO 2+1 agrees with NNLOJET at the level of our errors (15–45% of the
 NNLO coefficient). AK (16 Oct): tag this state (not a release) and pin down 1e-5 after the efficiency work; first
 clean-up, then profiling and efficiency. Tag `nnlo21-2026-10-16` at 85f036a (pushed). Cluster on hold.
+
+## 2026-10-17 — clean-up of nlo31 and sliced21 (step 2 before profiling and efficiency); default output unchanged
+
+AK (16 Oct): clean-up first, then profiling, then efficiency; the list agreed with AK:
+Removed (questions answered): ZCUTS rows (nlo31, sliced21), P2BDEBUG, TECHSLICE, the P2BTMIN / DIPGARB / P2BDROP
+overrides (defaults kept as parameters), the VEGAS slice (argument 11, now read and ignored so that the positions
+stay), the logmap generator, ZFIX = 1, the debug prints and unused-variable silencers, dated history comments,
+dis31/validation/dispatch.sh (thsub replaced it). Modes 1–3 now stop without psmc (G8's `flat` answered); mode 0
+keeps its uniform map (NLO 3+1 regression). Kept: modes 0–3, EW31, P2BSLICE, P2BEXTRA, TECHMIN/TECHREF/TECHDIFF,
+VTARGET, VEGAS_EQUAL, ZFIX = 2 (windows) and 3 (E), ZWIN, pdfmask/PDFMASK, c1/c2, mktab/tabchk(g), chk.
+nlo31.f90 1881 → 1758 lines, sliced21.f90 535 → 523.
+**Regression** (`work/disorder-comparisons/nnlo21/cleanup`: `build.sh`, `regress.sh`, `compare.sh`): 104 short
+fixed-seed configurations from the tag nnlo21-2026-10-16 (nlo31 lo/vi/kp/r in modes 0–3, photon/Z/W, ZEUS, J8
+window, E plain and extras, rcorr/d2, VTARGET, VEGAS_EQUAL, pdfmask; sliced21 b0/b1/b2 in modes 1–3, Z, W, E, J8,
+pdfmask, c1, c2, mktab, tabchk(g); `nlo31 chk`; lp21, hard21, born21 and all dis31 harnesses), ≈ 7 min with 6 in
+parallel. Tag against tag: 91 identical, 15 not reproducible by construction (harnesses and tabchkg draw unseeded
+random points). Cleaned against tag: every kept configuration bit-identical (outputs and beam tables); the 12 that
+differ are the removed features, each as expected: the overrides now give exactly the default run, ZCUTS runs keep
+their ZEUS rows bit-identical, ZFIX = 1 gives the full ZEUS result, logmap/uniform/flat in modes 1–3 stop with
+"modes 1-3 need psmc"; the random-point harnesses pass at the same level (≤ 4e-13).

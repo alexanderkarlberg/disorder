@@ -7,6 +7,13 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## NOTE 17 Oct: clean-up of nlo31/sliced21 (no new jobs; production on hold)
+
+From this commit on, nlo31 and sliced21 no longer read ZCUTS, P2BDEBUG, P2BDROP, P2BTMIN, DIPGARB, TECHSLICE and
+ZFIX = 1, nlo31 ignores argument 11, and modes 1–3 stop unless argument 9 is `psmc`. Every other configuration gives
+bit-identical output (notebook 17 Oct). Old job lists with those switches must not be rerun on a new build; the
+combine scripts for the ZCUTS rows need the bin11 outputs.
+
 ## UPDATE 16 Oct (d): KREDO-cd read; deliver UPDATE (c) as an addendum, then hold
 
 REPORT-2026-10-16-KREDO and -KREDO-cd received (MPP), thanks: all Δkp checks pass. With the fixed kp, W, Z, γ (B)
