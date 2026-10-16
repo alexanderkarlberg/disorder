@@ -3896,3 +3896,15 @@ slope cancelled G6's drift. With the fix every set (jets or not) drifts above τ
 which fits power corrections that are gone by 1e-4. Below 1e-4 every set agrees with NNLOJET within about 2σ.
 The ZEUS-wide sets have large errors at 1e-5, so the quantitative plateau test is UPDATE (c)'s (cluster UPDATE
 16 Oct (d): deliver it as an addendum, no jobs, then hold for AK).
+
+## 2026-10-16 (20:20) — REPORT-2026-10-16-PLATEAU read: the plateau τ_cut 1e-4 … 1e-5 agrees with NNLOJET at 1–2σ; tag nnlo21-2026-10-16
+
+Plateau P = mean of the NNLO at τ_cut 1e-4, 3e-5, 1e-5 (per-seed averages, bin11 kp), cluster bb46374, no new jobs.
+Totals against NNLOJET: Z 13.0 ± 2.0 vs N7 12.9 ± 1.0 (+0.0σ); W 0.087 ± 0.032 vs N7 0.148 ± 0.015 (−1.8σ); γ (B)
+6.7 ± 3.1 vs 11.1 ± 1.2 (−1.3σ); E P2B 50 ± 20 (Ex7 extras), 73 ± 30 (bin5 extras) vs 59 ± 12 (−0.4σ, +0.4σ). Per bin
+(15 ZEUS bins, 6 τ_zQ bins) rms pull 0.7–1.4, 0–2 bins beyond 2σ per set, largest γ m12 65–120 −3.3σ (of ≈ 90
+comparisons). NLO plateaus with P2B within 1.7σ (Z −1.7, γ −1.4, W +0.2, E P2B −0.4/−1.2). Slopes below 1e-4 within
+1.9σ of zero in every set with per-seed errors (e2); above 1e-4 significant drifts in J8, CH8 q, Q8f, E plain, E P2B
+Ex7, G6 (3–6σ). So: with τ_cut ≤ 1e-4 the NNLO 2+1 agrees with NNLOJET at the level of our errors (15–45% of the
+NNLO coefficient). AK (16 Oct): tag this state (not a release) and pin down 1e-5 after the efficiency work; first
+clean-up, then profiling and efficiency. Tag `nnlo21-2026-10-16` at 85f036a (pushed). Cluster on hold.
