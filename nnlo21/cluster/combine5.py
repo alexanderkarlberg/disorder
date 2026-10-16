@@ -7,6 +7,7 @@ import glob, json, math, os, re, sys
 import numpy as np
 P = '/ptmp/mpp/akarlber/disorder-nnlo21/runs'; H = os.path.dirname(os.path.abspath(__file__)); R = H + '/results'
 K11 = os.environ.get('KP11') == '1'  # KREDO: read kp11 / kp-x11 (bin11) instead of kp / kp-x, write to results/kp11
+R0 = R  # inputs (NNLOJET references, earlier results) stay in results/
 if K11: R = R + '/kp11'; os.makedirs(R, exist_ok=True)
 def kd(p): return p + '11' if K11 and p in ('kp', 'kp-x') else p
 S = sys.argv[1]
@@ -54,13 +55,13 @@ def refs():
     for o in ('LO', 'NLO', 'NNLO'):
         d = {}
         d['total'] = None
-        fn = '%s/nnj5/%s/%s.cross.dat' % (R, S, o)
+        fn = '%s/nnj5/%s/%s.cross.dat' % (R0, S, o)
         w = [float(v) for v in open(fn).read().split('\n')[1].split()]
         d[('total', 0.0, 0.0) if S != 'E' else ('tauzQ', 0.05, 0.5)] = (w[0]/1000, w[1]/1000)
         obs = ['dis_tauzq'] if S == 'E' else ['q2', 'ptavg_12', 'm12']
         sx = 0; sv = 0
         for ob in obs:
-            for l in open('%s/nnj5/%s/%s.%s.dat' % (R, S, o, ob)):
+            for l in open('%s/nnj5/%s/%s.%s.dat' % (R0, S, o, ob)):
                 if l.startswith('#') or not l.strip(): continue
                 w = [float(v) for v in l.split()]; lo, hi = w[0], w[2]
                 name = {'dis_tauzq': 'tauzQ', 'ptavg_12': 'ptavg'}.get(ob, ob)

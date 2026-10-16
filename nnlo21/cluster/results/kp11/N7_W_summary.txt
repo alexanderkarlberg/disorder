@@ -1,0 +1,27 @@
+W: per tau_cut, over the 15 bins: worst-bin pull, mean pull, rms pull (bins are correlated through the totals)
+  2e-02 worst ptavg 30-60    -4.4  mean -2.28 rms 2.79
+  1e-02 worst total 0-0      -6.8  mean -3.47 rms 3.88
+  5e-03 worst total 0-0      -7.9  mean -3.88 rms 4.35
+  2e-03 worst total 0-0      -5.9  mean -2.96 rms 3.39
+  1e-03 worst total 0-0      -5.3  mean -2.53 rms 2.97
+  5e-04 worst total 0-0      -5.0  mean -2.40 rms 2.78
+  2e-04 worst ptavg 8-15     -3.3  mean -1.29 rms 1.91
+  1e-04 worst m12 20-30      -2.6  mean -0.73 rms 1.54
+  3e-05 worst m12 65-120     -2.3  mean -0.92 rms 1.32
+  1e-05 worst q2 125-250     +2.3  mean +0.06 rms 0.86
+per bin: NNLOJET NNLO new (old) pb; crossing tau_cut; tau_cut with |pull|<2
+  total 0-0          0.148 +- 0.015   (   0.1757 +- 0.056  ) cross 1e-05                      |pull|<2: 1e-04 3e-05 1e-05
+  q2 125-250      0.008122 +- 0.0018  ( 0.009997 +- 0.003  ) cross 0.0046,0.0014              |pull|<2: 2e-02 1e-02 5e-03 2e-03 1e-03 5e-04 2e-04 1e-04 3e-05
+  q2 250-500       0.01868 +- 0.0042  (  0.01974 +- 0.0081 ) cross none                       |pull|<2: 2e-02 1e-02 5e-03 2e-03 1e-03 5e-04 2e-04 1e-04 3e-05 1e-05
+  q2 500-1000      0.02758 +- 0.0052  (-0.007515 +- 0.029  ) cross none                       |pull|<2: 2e-02 1e-02 5e-03 2e-03 1e-03 5e-04 2e-04 1e-04 3e-05 1e-05
+  q2 1000-2000     0.03768 +- 0.0068  (   0.0211 +- 0.016  ) cross 0.00016,8.4e-05,1.1e-05    |pull|<2: 5e-04 2e-04 1e-04 3e-05 1e-05
+  q2 2000-5000     0.02251 +- 0.0088  (  0.04485 +- 0.011  ) cross 1.4e-05                    |pull|<2: 2e-04 1e-04 3e-05 1e-05
+  q2 5000-20000    0.03341 +- 0.0074  (  0.08758 +- 0.043  ) cross none                       |pull|<2: 2e-02 3e-05 1e-05
+  ptavg 8-15        0.1059 +- 0.014   (   0.1196 +- 0.054  ) cross 1.1e-05                    |pull|<2: 1e-04 3e-05 1e-05
+  ptavg 15-22     0.004691 +- 0.0064  (  0.01196 +- 0.013  ) cross none                       |pull|<2: 2e-04 1e-04 3e-05 1e-05
+  ptavg 22-30     -0.01212 +- 0.0023  (-0.008389 +- 0.0042 ) cross 0.00033                    |pull|<2: 1e-03 5e-04 2e-04 1e-04 3e-05 1e-05
+  ptavg 30-60    -0.008392 +- 0.0025  ( -0.01189 +- 0.0022 ) cross none                       |pull|<2: 2e-04 1e-04 3e-05 1e-05
+  m12 20-30         0.1299 +- 0.011   (   0.1312 +- 0.053  ) cross none                       |pull|<2: 3e-05 1e-05
+  m12 30-45        0.03933 +- 0.0093  (  0.09176 +- 0.032  ) cross 0.018,0.00017              |pull|<2: 2e-02 1e-02 2e-03 1e-03 5e-04 2e-04 1e-04 3e-05 1e-05
+  m12 45-65       -0.01305 +- 0.0051  ( -0.04105 +- 0.027  ) cross 0.00011,8.5e-05            |pull|<2: 2e-02 2e-04 1e-04 3e-05 1e-05
+  m12 65-120     -0.007203 +- 0.0037  (-0.005051 +- 0.007  ) cross none                       |pull|<2: 2e-04 1e-04 1e-05

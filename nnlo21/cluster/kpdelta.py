@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """KREDO (UPDATE 16 Oct (b)) item 3: dkp = bin11 - bin10 kp (or kp-x) per cell, from the same seeds.
   kpdelta.py LABEL OLDDIR [LABEL OLDDIR ...]   (NEWDIR = OLDDIR + '11')  -> results/kp11/KPDELTA_<LABEL>.txt, KPDELTA.json (merged)
-Rows: every ZCELL row (jet sets) or, without ZCELL rows, the RESULT-like lines 'tau_cut' table rows the run prints (see rows()).
+Rows: every ZCELL row (jet sets), every CELL row (tau_zQ bins, 'cell lo-hi'), or, without ZCELL rows, the RESULT-like lines 'tau_cut' table rows the run prints (see rows()).
 Per cell and tau_cut: mean of the per-seed difference, error sd/sqrt(N); and its slope (d(a)-d(b))/ln(a/b) per unit ln for the
 windows of the reports, error from the per-seed difference of the slope."""
 import glob, json, math, os, re, sys
@@ -17,6 +17,7 @@ def rows(f):
         w = l.split()
         if l.startswith(' tau_cut'): tc = [float(x) for x in w[1:]]
         elif l.startswith(' ZCELL '): nm.append('%s %g-%g' % (w[1], float(w[2]), float(w[3]))); r.append([ff(x) for x in w[4:]])
+        elif l.startswith(' CELL ') and tc and len(w) == len(tc) + 3: nm.append('cell %g-%g' % (float(w[1]), float(w[2]))); r.append([ff(x) for x in w[3:]])
         elif tc and len(w) == len(tc) + 1 and not l.startswith(' ZCELL'):
             try: alt.append((w[0], [ff(x) for x in w[1:]]))
             except ValueError: pass

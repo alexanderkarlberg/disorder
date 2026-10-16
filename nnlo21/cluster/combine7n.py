@@ -6,6 +6,8 @@ Crossing tau_cut: ours - NNLOJET changes sign between two neighbouring tau_cut p
 Compatible: |pull| < 2 (and < 1) listed as tau_cut ranges."""
 import json, math, os, sys
 H = os.path.dirname(os.path.abspath(__file__)); R = H + '/results'; S = sys.argv[1]
+R0 = R  # KREDO: KP11=1 reads ours from results/kp11/{W,Z}5.json (bin11 kp) and writes to results/kp11; NNLOJET stays in results/
+if os.environ.get('KP11') == '1': R = R + '/kp11'
 J = json.load(open('%s/%s5.json' % (R, S))); tc = J['tau_cut']
 def ref(d, o):
     out = {}
@@ -16,7 +18,7 @@ def ref(d, o):
             w = [float(v) for v in l.split()]; lo, hi = w[0], w[2]
             out['%s %g-%g' % ({'ptavg_12': 'ptavg'}.get(ob, ob), lo, hi)] = (w[3]*(hi - lo)/1000, w[4]*(hi - lo)/1000)
     return out
-new = {o: ref('%s/nnj7/%s' % (R, S), o) for o in ('LO', 'NLO', 'NNLO')}; old = ref('%s/nnj5/%s' % (R, S), 'NNLO')
+new = {o: ref('%s/nnj7/%s' % (R0, S), o) for o in ('LO', 'NLO', 'NNLO')}; old = ref('%s/nnj5/%s' % (R0, S), 'NNLO')
 def rng(flags):
     out, cur = [], None
     for t, f in zip(tc, flags):

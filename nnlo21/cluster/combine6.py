@@ -9,6 +9,7 @@ import glob, json, math, os, re, sys
 import numpy as np
 P = '/ptmp/mpp/akarlber/disorder-nnlo21/runs'; H = os.path.dirname(os.path.abspath(__file__)); R = H + '/results'
 K11 = os.environ.get('KP11') == '1'  # KREDO: read kp11 / kp-x11 (bin11) instead of kp / kp-x, write to results/kp11
+R0 = R  # inputs (NNLOJET references, earlier results) stay in results/
 if K11: R = R + '/kp11'; os.makedirs(R, exist_ok=True)
 def kd(p): return p + '11' if K11 and p in ('kp', 'kp-x') else p
 S = sys.argv[1]; XF = 0.1
@@ -76,9 +77,9 @@ elif S == 'G6P':
 elif S == 'Ex6':
     N = {}
     for o in ('LO', 'NLO', 'NNLO'):
-        fn = '%s/nnj5/E/%s.cross.dat' % (R, o); w = [float(v) for v in open(fn).read().split('\n')[1].split()]
+        fn = '%s/nnj5/E/%s.cross.dat' % (R0, o); w = [float(v) for v in open(fn).read().split('\n')[1].split()]
         N[(o, 0.05, 0.5)] = (w[0]/1000, w[1]/1000)
-        for l in open('%s/nnj5/E/%s.dis_tauzq.dat' % (R, o)):
+        for l in open('%s/nnj5/E/%s.dis_tauzq.dat' % (R0, o)):
             if l.startswith('#') or not l.strip(): continue
             w = [float(v) for v in l.split()]; N[(o, w[0], w[2])] = (w[3]*(w[2] - w[0])/1000, w[4]*(w[2] - w[0])/1000)
     ref = N

@@ -1,0 +1,22 @@
+== E item 6 window per bin (tau_cut per bin: 0.05-0.1: 2e-04, 0.1-0.2: 5e-04, 0.2-0.3: 1e-03, 0.3-0.4: 1e-03, 0.4-0.5: 2e-03); pull a-b vs next smaller tau_cut; last pull vs NNLOJET
+NNLO
+  bin 0.05-0.10 tau_cut 2e-04:     14.347 +- 9.3     (smaller 1e-04:     15.272 +- 10.4    pull -0.2)  NNLOJET -11.603 +- 9.9 pull +1.9
+  bin 0.10-0.20 tau_cut 5e-04:     35.327 +- 6.38    (smaller 2e-04:     29.224 +- 7.34    pull +1.7)  NNLOJET 17.494 +- 5.7 pull +2.1
+  bin 0.20-0.30 tau_cut 1e-03:     27.015 +- 2.69    (smaller 5e-04:     22.139 +- 3.31    pull +2.5)  NNLOJET 21.572 +- 3 pull +1.4
+  bin 0.30-0.40 tau_cut 1e-03:     20.203 +- 1.62    (smaller 5e-04:     17.182 +- 2.14    pull +2.1)  NNLOJET 17.506 +- 2.8 pull +0.8
+  bin 0.40-0.50 tau_cut 2e-03:      15.81 +- 1.08    (smaller 1e-03:     14.884 +- 1.29    pull +1.3)  NNLOJET 14.525 +- 3.9 pull +0.3
+  SUM of window values: 112.7 +- 11.1   NNLOJET cross 59.493 +- 12 (pull +3.2)
+NNLO_P2B
+  bin 0.05-0.10 tau_cut 2e-04:     138.06 +- 79.1    (smaller 1e-04:    -26.544 +- 83.3    pull +6.3)  NNLOJET -11.603 +- 9.9 pull +1.9
+  bin 0.10-0.20 tau_cut 5e-04:     4.2732 +- 25.8    (smaller 2e-04:    -6.5319 +- 24.1    pull +1.2)  NNLOJET 17.494 +- 5.7 pull -0.5
+  bin 0.20-0.30 tau_cut 1e-03:     26.871 +- 10.5    (smaller 5e-04:     20.222 +- 4.35    pull +0.7)  NNLOJET 21.572 +- 3 pull +0.5
+  bin 0.30-0.40 tau_cut 1e-03:     24.734 +- 9.42    (smaller 5e-04:     23.572 +- 8.43    pull +0.3)  NNLOJET 17.506 +- 2.8 pull +0.7
+  bin 0.40-0.50 tau_cut 2e-03:     5.7102 +- 8.62    (smaller 1e-03:     8.0807 +- 8.29    pull -1.0)  NNLOJET 14.525 +- 3.9 pull -0.9
+  SUM of window values: 199.65 +- 77.2   NNLOJET cross 59.493 +- 12 (pull +1.8)
+NNLO_P2B(bin5 extras)
+  bin 0.05-0.10 tau_cut 2e-04:     7.5583 +- 41.6    (smaller 1e-04:    -14.662 +- 36.7    pull +1.1)  NNLOJET -11.603 +- 9.9 pull +0.4
+  bin 0.10-0.20 tau_cut 5e-04:    -5.2081 +- 43.7    (smaller 2e-04:     11.569 +- 21.1    pull -0.4)  NNLOJET 17.494 +- 5.7 pull -0.5
+  bin 0.20-0.30 tau_cut 1e-03:     35.871 +- 10.6    (smaller 5e-04:     57.272 +- 36.4    pull -0.6)  NNLOJET 21.572 +- 3 pull +1.3
+  bin 0.30-0.40 tau_cut 1e-03:     11.328 +- 10.5    (smaller 5e-04:     20.451 +- 3.33    pull -0.9)  NNLOJET 17.506 +- 2.8 pull -0.6
+  bin 0.40-0.50 tau_cut 2e-03:    -7.1179 +- 14.3    (smaller 1e-03:     13.308 +- 2.99    pull -1.5)  NNLOJET 14.525 +- 3.9 pull -1.5
+  SUM of window values: 42.431 +- 55.4   NNLOJET cross 59.493 +- 12 (pull -0.3)

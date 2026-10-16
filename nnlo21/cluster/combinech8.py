@@ -10,6 +10,7 @@ import glob, gzip, json, math, os, re
 import numpy as np
 P = '/ptmp/mpp/akarlber/disorder-nnlo21/runs/ours8j'; H = os.path.dirname(os.path.abspath(__file__)); R = H + '/results'
 K11 = os.environ.get('KP11') == '1'  # KREDO: read kp11 / kp-x11 (bin11) instead of kp / kp-x, write to results/kp11
+R0 = R  # inputs (NNLOJET references, earlier results) stay in results/
 if K11: R = R + '/kp11'; os.makedirs(R, exist_ok=True)
 def kd(p): return p + '11' if K11 and p in ('kp', 'kp-x') else p
 def ff(x):
