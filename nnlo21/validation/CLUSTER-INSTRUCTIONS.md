@@ -7,6 +7,30 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 16 Oct: Q8 — does the quark-channel drift stop below τ_cut 1e-4? (AK: go)
+
+REPORT-2026-10-15-CH8 received (MPP), thanks: the drift is in the quark channel (gluon share 0.03 ± 0.03).
+In every set the last window (1e-4 → 1e-5) is consistent with zero (CH8 q −11.3 ± 11.7, J8 +1.9 ± 13.1, against
+≈ −44 and −55 from 1e-3 → 1e-4). That decides between two readings: a wrong ln τ_cut term (the slope continues)
+or large quark-channel power corrections that die out by 1e-4 (the slope stops, and the discrepancy with NNLOJET
+is a constant offset at τ_cut → 0). Q8 measures the quark-channel slope 1e-4 → 1e-5 (and 3e-5) precisely.
+1. bin10, CH8 q set-up exactly (mask 1: `zeus5q`, sliced21 arguments `0.02 1`, nlo31 argument 10 = `1`; J8
+   window and commands). **Only the parts that carry the error below 1e-4: r, rcorr and d2** (and b2, vi, kp only
+   if your budget says they matter; at 1e-5 in J8 the errors were r 2.7e-8, rcorr 1.6e-8, d2 8.5e-9, b2 0.9e-9,
+   vi 2.0e-9, kp 0.4e-9 pb/GeV²).
+2. Sizing: from the CH8 q seeds, per part, the per-seed sd of N(1e-4) − N(1e-5) (and of N(1e-4) − N(3e-5)); choose
+   the extra seeds so that the error of the total-row NNLO slope 1e-4 → 1e-5, combined with CH8 q, is **≤ 6e-9
+   pb/GeV² per unit ln** (now 11.7e-9; the two readings differ by ≈ 40e-9). CPU per job as in CH8 (r 2.03, rcorr
+   0.61, d2 0.60 core-h). Submit if ≤ 15k core-h, otherwise report the estimate first.
+3. Seeds: disjoint from everything of CH8 (CH8 q used 7001–8600 for r, g 8001–9600: the two channels share
+   8001–8600, harmless since the integrands differ, but avoid it now): 21001– for every part (five digits, the
+   four-digit range is used up).
+4. Report: combined with CH8 q (equal-weight seed means over old + new seeds), the quark-channel NNLO total,
+   p̄_T 8–15 and both Q² bins at 2e-4, 1e-4, 3e-5, 1e-5, the slopes 2e-4 → 2e-5-like windows we have (2e-4 → 1e-4,
+   1e-4 → 3e-5, 1e-4 → 1e-5, 3e-5 → 1e-5), and the per-part decomposition of the 1e-4 → 1e-5 change. With the
+   rcorr/d2 contributions shown separately (the technical-cut decades grow fastest at small τ_cut).
+5. Order: now.
+
 ## UPDATE 15 Oct (b): CH8 — the J8 window split into quark- and gluon-initiated channels (AK: go)
 
 REPORT-2026-10-15-G8 received (MPP), thanks; the correction of the sizing is noted. Reading at MPP: where flat
