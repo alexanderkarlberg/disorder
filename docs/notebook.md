@@ -3773,3 +3773,70 @@ Quark-Born-specific pieces below the cut: gluon jet function, quark beam functio
 consistent with zero (J8 +1.9 ± 13.1, CH8 q −11.3 ± 11.7, J7v −1.4 ± 18): a drift that stops below 1e-4
 would mean large quark-channel power corrections plus a constant offset against NNLOJET rather than a
 wrong log term. Not decided yet.
+
+## 2026-10-16 — hard21 excluded; a bug in nlo31's K + P (CF shadowed in `kp_conv`) is about half of the jet drift
+
+AK: check the two-loop hard function and the I/KP operators of the above-cut NLO 3+1, and either confirm an
+issue or rule it out beyond reasonable doubt. Test programs in `work/disorder-comparisons/nnlo21/{h2test,kptest}`
+(not in the repo: they link NNLOJET).
+
+**hard21: excluded.** `h2test/h2nj.f90`: hard21 (Catani scheme; a verbatim copy of hard21_eval's assembly, equal to
+hard21_eval to 5e-13) against NNLOJET v1.0.2's DIS double-virtual functions (B1g2Z = makem0mn + makem1m1 with the
+colour weights of sigVVDIS) at 200 random DIS points per channel (γ* q → q g, γ* g → q q̄): two-loop interference,
+|A1|² and the one-loop interference agree to 3.6e-7 (quark) and 1.4e-11 (gluon). The one-loop conventions differ
+only by the bookkeeping term n_f (L13 + L23)/12 (checked to 4e-15). The Catani → SCET conversion is MCFM's
+(re-derived). hard21 can cause neither the drift nor an offset.
+
+**K + P: bug confirmed and fixed.** In `kp_conv` (dis31/nlo31.f90) the local variable `Cf` (∫₀^ξ (1+x²)/(1−x) dx)
+has the name of the module parameter `CF` (Fortran is case-insensitive; a local declaration legally hides the host
+entity, no compiler warning). In the q → q branch both colour factors of the integral of the plus parts therefore
+read the integral instead of 4/3: ipl = Cq·2A·b + g·Bf + Cq²·lp instead of CF·2A·b + g·Bf + CF·Cq·lp. Only the
+diagonal quark term is affected; present since the first nlo31 (dd004f6, 2 Oct). Fix: the local is now `Cq`.
+- Independent check (`kptest/kp_indep.py`, mpmath): the CS kernels written out from the general formulae
+  (K̄^{ab} = P^{ab} ln((1−x)/x) + P̂′^{ab} + δ^{ab}[T²(2 ln((1−x)/x)/(1−x))₊ − δ(1−x)(γ + K − 5π²/6 T²)], P^{ab},
+  the γ term [1/(1−x)]₊ + δ(1−x)), distributions as ∫ h (F(x) − F(1)), against kp_conv integrated over x
+  (`kpdump`), test PDF ξ^−0.3 (1−ξ)³, ξ = 0.01, 0.1, 0.4, 0.8, Born factors (b, g, lp) = (1,0,0), (0,1,0),
+  (0,0,1), (1.3,−0.7,0.45). Before: q → q off by 1–18% (b), up to 114% (lp alone, near a zero); q → g, g → q,
+  g → g ≤ 2e-10. After: every channel ≤ 2e-10.
+- The rest of I and KP: poles of V + I, d lp/d ln μ_F² and the RG structure were already tested
+  (`dis31/tests/harness_iop31`). The sign of the γ term and the finite constants of I and K̄ (not tested so far):
+  with iop31's formulae, γ* q → q at NLO gives V (−8 C_F) + I (2(γ_q + K_q) − 2π²/3 C_F) + K̄ (−(5 − π²) C_F,
+  and −π²/3 C_F from writing [2 ln((1−x)/x)/(1−x)]₊ with [ln(1−x)/(1−x)]₊) + γ term (−γ_q) = −(9/2 + π²/3) C_F
+  δ(1−x) and −3/2 C_F [1/(1−x)]₊: the MS-bar C₂^q. The opposite sign of g would give +3/2. born_part's channel
+  assignment (q → q, g → q for a quark Born; Σ_q q → g and g → g for a gluon Born) and PDF arguments read fine.
+  **I and KP are now correct beyond reasonable doubt; the bug was the only issue.**
+
+**Correction of the 3 Oct NLO 3+1 validation** (`runs/kpfix3j`; same set-up, kp with the old and the fixed
+binary, 4 seeds each): the old binary reproduces K + P = 31.106 pb (3 Oct: 31.092 ± 0.035); fixed 30.160 pb,
+Δ = −0.946 ± 0.003 pb (3% of the correction). NLO correction (≥ 3 jets) 30.34 → 29.39 ± 0.29 pb against NNLOJET
+RV + RR 29.99 ± 0.68 (+0.5σ → −0.8σ); Q² bins χ² 9.2 → 6.6 for 6. **The 3 Oct validation could not see the bug**
+(1.3σ); "validated at the 2% level of the correction" was true of the comparison, but not a test at that level of
+the K + P piece. The corrected values agree as well.
+
+**Impact on the jet drift** (`runs/kpfix`, kp old/fixed with the same 24 seeds per set; Δkp = fixed − old; slopes
+per unit ln τ_cut, windows 5e-3→5e-4 / 2e-3→2e-4 / 1e-3→1e-4):
+
+| set | Δkp slope | NNLO drift | share removed |
+|---|---|---|---|
+| J8 (photon, ZEUS jets at (0.1, 5000)) | +2.31, +2.36, +2.33e-8 | −4.23, −4.98, −5.53e-8 | 55, 47, 42% |
+| J7 PH (photon, (0.01, 400)) | +2.44, +2.54, +2.65e-7 | −4.67, −4.73, −5.63e-7 | 52, 54, 47% |
+| W5 (W, full ZEUS) | +0.0299, +0.0299, +0.0278 pb | −0.044, −0.045, −0.050 pb | 67, 67, 56% |
+
+Δkp has errors ≤ 1% of itself. W ZEUS total NNLO coefficient after the fix: 0.054 ± 0.009, 0.082 ± 0.014,
+0.104 ± 0.018, 0.154 ± 0.045 pb at τ_cut 1e-3, 2e-4, 1e-4, 1e-5, against NNLOJET 0.148 ± 0.015 (pull −5.3, −3.2,
+−1.9, +0.1; before +0.6, +4.1, +5.3, +4.4). Bin by bin at 1e-5 all within 2.3σ (before up to 4.4σ).
+**A residual drift remains**: J8 −19 ± 3, −26 ± 4, −32 ± 5e-9 (7σ in the last window), J8 1e-4 → 1e-5
++18 ± 13; CH8 quark channel −11 ± 3, −21 ± 4, −20 ± 5, 1e-4 → 1e-5 +5 ± 12 (Δkp sits entirely in the quark
+channel: the bug term needs a quark PDF at both ends); W ZEUS −0.022 ± 0.007 pb (1e-3 → 1e-4, 3σ); J7 1.6σ.
+So the residual still sits in the quark channel and has the opposite sign to NNLOJET's offset at large τ_cut;
+whether it stops below 1e-4 is Q8's question (Q8 runs r, rcorr, d2 only, so it is not affected by the bug; its
+kp comes from the fixed binary).
+
+**Corrections of the record.**
+- Every NNLO 2+1 value with nlo31's kp in this notebook and in the cluster reports (B, Z, W, E, G6, J7, J7v,
+  J8, CH8, G8, Ex6, Ex7, X8) carries the bug; the N3LO 1+1 P2B results (mode 3) too. NLO 2+1 results (no nlo31
+  kp) are not affected. In particular the W and E "agreement with NNLOJET" at small τ_cut (10–14 Oct) and the
+  15 Oct statement that the drift is "a mismatch between the LP spectrum (b2) and the above-cut 3+1 spectrum"
+  in the Born-level jet kinematics: about half of the drift was this above-cut K + P error.
+- The 15 Oct (night) CH8 result (drift in the quark-initiated channel) stands and is where the bug acts; the
+  list of excluded causes stands, with hard21 and I/KP (after the fix) added.
