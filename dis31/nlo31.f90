@@ -152,6 +152,13 @@ module nlo31_mod
   real(dp), parameter :: l11y(0:6) = [-1.0_dp, -0.5_dp, 0.0_dp, 0.5_dp, 1.0_dp, 1.5_dp, 2.5_dp]
   integer :: iv = 1                ! the cell VEGAS integrates (mode 1: smallest tau_cut, all tau_zQ)
   real(dp) :: hc(ncell), hc2, hcacc(ncell)
+  ! acceptance of the mapped dipole Borns within one eval_sg (all flavour
+  ! structures of a real event): the mappings do not depend on the flavours,
+  ! so a Born with exactly the same momenta reuses F and degen (accept_dip)
+  integer, parameter :: nacmax = 64
+  integer :: nac = 0
+  real(dp) :: acP(4,5,nacmax), acF(ncell,nacmax)
+  logical :: acdeg(nacmax)
   ! modes 1-3: slicing-adapted multichannel phase space (dis31/psmc.f90)
   logical :: usepsmc = .false.
   ! incoming-parton mask: 0 all, 1 quarks only, 2 gluon only
@@ -603,7 +610,7 @@ contains
        if (any(abs(val(1:nd)) > dgrel*abs(m4))) garbev = .true.
     endif
     do id = 1, nd
-       call accept(P3(:,1,id), P3(:,2:4,id), 3, sqrt(-mdot(P3(:,5,id), P3(:,5,id))), F3)
+       call accept_dip(P3(:,:,id), F3)
        ! P2B: a numerically degenerate mapped Born (no tau_2 partition, or a
        ! negative-energy parton; e.g. partons of +-5e6 GeV that cancel, next
        ! to a real with tau_2 ~ 1e-9..1e-8) drops the whole event, as plain
@@ -613,6 +620,24 @@ contains
     enddo
   end subroutine real_evalv
 
+  ! accept() of a mapped dipole Born, reused within one eval_sg (nac)
+  subroutine accept_dip(P3, F3)
+    real(dp), intent(in) :: P3(4,7)
+    real(dp), intent(out) :: F3(nv)
+    integer :: c
+    do c = 1, nac
+       if (all(P3(:,1:5) == acP(:,:,c))) then
+          F3 = acF(1:nv,c); degen = acdeg(c)
+          return
+       endif
+    enddo
+    call accept(P3(:,1), P3(:,2:4), 3, sqrt(-mdot(P3(:,5), P3(:,5))), F3)
+    if (nac < nacmax) then
+       nac = nac + 1
+       acP(:,:,nac) = P3(:,1:5); acF(1:nv,nac) = F3; acdeg(nac) = degen
+    endif
+  end subroutine accept_dip
+
   real(dp) function real_part(r, wgt) result(res)
     real(dp), intent(in) :: r(:), wgt
     real(dp), external :: alphasPDF
@@ -621,7 +646,7 @@ contains
     real(dp) :: n1(nv,2), n2(nv,2), n4(nv,2), n6(nv,2), nqa(nv,2), nqb(nv,2), ga(nv,2), gb(nv,2), wf(2)
     integer :: i, j, f, Q, Q2i, ic, tdw
     logical :: ok
-    res = 0
+    res = 0; nac = 0
     if (usepsmc .and. mode >= 2) then
        call lepton2(r(1:2), Q2, y, xB, jac, ok)
        if (.not. ok) return
@@ -694,6 +719,7 @@ contains
     endif
   contains
     subroutine eval_sg()
+       nac = 0
        if (ew31_mode == 2) then
           call eval_cc(); return
        elseif (ew31_mode /= 0) then
