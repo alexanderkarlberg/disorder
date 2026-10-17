@@ -4002,3 +4002,20 @@ seeds × 200k × 6 (3.3M events, it ≥ 2); rcorr: 4 seeds. Page: https://claude
 Options (page): A defensive sampling (VEGAS mixing / damping, psmc flat weight); B psmc channels for double-soft /
 soft-collinear pairs near τ_cut; C restricted dipoles (α < 1) with the α terms in I, K + P; D smooth τ_cut (average
 over τ_cut columns); E pointwise LP subtraction above the cut. Suggested: D and A first, then B, then C.
+
+## 2026-10-17 (night) — variance options D and A tested; AK: fibred P2B (fiber-p2b) as the systematic route
+
+AK: D and A first; keep the parallel fibred-P2B project in mind (Born-fibred subtraction, in principle P2B from N3LO
+down to NLO; NLO promising there, NNLO gain still to be shown).
+**D (average over τ_cut columns): rejected.** From the J8 per-seed data: the average of columns is never better than
+its best column (e.g. avg(3e-5, 1e-5) K = 1.8e-12 vs N(3e-5) 1.2e-12, N(1e-5) 3.5e-12 core-h·(pb/GeV²)²): the large
+fluctuations are common to all columns below an event's τ₂, so averaging only acts like a larger τ_cut.
+**A (defensive VEGAS mixture, scratch copy: a fraction ε of the points uniform, all weighted by the mixture
+density, Jacobian ≤ 1/ε; ε = 0 unchanged).** 200k × 6 per seed (16 seeds): spread down 2–6× and tails gone, but that
+size is pathological without the mixture. **Production size (1M × 6; J8 32 seeds, mode 3 16 seeds; ≈ 120 core-h on
+the thservs):** means unchanged everywhere. J8 r total: gain in variance per run time 1.1–2.0 (ε = 0.05, 0.2), 0.6 at
+3e-5 for ε = 0.2 (within the noise of 32 seeds). J8 rcorr: 3.6 at 1e-4, 0.4–0.8 below (mechanism 3, not helped).
+Mode 3 (N3LO P2B, default VEGAS target = the ≥ 1 jet row): ≥ 1 jet 1.0, but the other bins are dominated by single
+outlier seeds at ε = 0 (1.48 MAD/sd 10–38%) and near-Gaussian with ε = 0.2: gains 15–250 (p_T 8–15), 4.5–190 (p_T
+30–100), 800–4300 (≥ 2 jets), two forward-y bins 0.2 at 1e-5 (outliers of their own); order-of-magnitude only with
+16 seeds. Next (overnight): mode 3 with VTARGET = 0 (12 Oct: 3–14× in jet bins) with and without ε = 0.2, 32 seeds.
