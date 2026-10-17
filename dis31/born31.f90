@@ -42,6 +42,12 @@ module born31
   ! debug/validation: exchange the assignment of the colour-ordered
   ! amplitudes to c1, c2 (q qbar g g)
   logical, public :: born31_swapc = .false.
+  ! the last nbmax evaluations of born31_eval with their arguments and
+  ! settings (born31_any): the dipoles of the flavour structures of a 4+1
+  ! event (dis31/nlo31) map onto the same Borns
+  integer, parameter :: nbmax = 128
+  integer :: nbm = 0, bmi(11,nbmax)
+  real(dp) :: bmP(4,7,nbmax), bmn(4,nbmax), bmm(nbmax), bmc(4,4,nbmax)
   public :: born31_cc, born31_sc
 contains
 
@@ -90,8 +96,27 @@ contains
     call born31_any(P, fl, ig, n, msqv, ccv)
   end subroutine born31_sc
 
-  ! ig = 0: polarisation sums; ig > 0: gluon ig contracted with n
+  ! born31_eval, reused for exactly the same arguments and settings
   subroutine born31_any(P, fl, ig, n, msq, cc)
+    real(dp), intent(in) :: P(4,7), n(4)
+    integer, intent(in) :: fl(4), ig
+    real(dp), intent(out) :: msq, cc(4,4)
+    integer :: key(11), k
+    key = [ig, fl, ew31_mode, ew31_lepton, ew31_basis, ew31_bf, merge(1, 0, ew31_ccmatfor), merge(1, 0, born31_swapc)]
+    do k = 1, min(nbm, nbmax)
+       if (bmP(4,2,k) /= P(4,2)) cycle          ! quick reject: the energy of parton 2
+       if (any(bmi(:,k) /= key)) cycle
+       if (any(bmP(:,:,k) /= P) .or. any(bmn(:,k) /= n)) cycle
+       msq = bmm(k); cc = bmc(:,:,k)
+       return
+    enddo
+    call born31_eval(P, fl, ig, n, msq, cc)
+    nbm = nbm + 1; k = mod(nbm - 1, nbmax) + 1
+    bmi(:,k) = key; bmP(:,:,k) = P; bmn(:,k) = n; bmm(k) = msq; bmc(:,:,k) = cc
+  end subroutine born31_any
+
+  ! ig = 0: polarisation sums; ig > 0: gluon ig contracted with n
+  subroutine born31_eval(P, fl, ig, n, msq, cc)
     real(dp), intent(in) :: P(4,7), n(4)
     integer, intent(in) :: fl(4), ig
     real(dp), intent(out) :: msq, cc(4,4)
@@ -222,7 +247,7 @@ contains
       k = ip(1); kq = ip(2)
       call fourq_forms_cc(P, k, kq, kqb, cl, cp, on(2), bb .and. ew31_ccmatfor, q)
     end subroutine fourq_cc
-  end subroutine born31_any
+  end subroutine born31_eval
 
   ! W exchange: as fourq_forms with the couplings per assignment (cl: W on
   ! the line, cp: on the pair; assignment 1 = D, 2 = E, me31's

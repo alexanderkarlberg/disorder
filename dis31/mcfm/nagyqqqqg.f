@@ -24,8 +24,27 @@ c----  %%CITATION = HEP-PH 9806317;%%
       real(dp):: s167,s267,s134,s234,s345
       complex(dp)::a1(2,2,2,2),a2(2,2,2,2),a3(2,2,2,2),a4(2,2,2,2),
      & t2a,xa(mxpart,mxpart),xb(mxpart,mxpart)
+c disorder (2026-10-17): the amplitudes are kept for the momenta id ngen
+c (common /nagygen/, set by dis31/me41 with the spinor products) and the
+c indices i1..i7, and reused: the four-quark flavour structures of a DIS
+c 4+1 event call this with the same momenta
+      integer:: ngen,nagyn,nagyi,nagyk(8,64)
+      common/nagygen/ngen
+      complex(dp):: nagya(2,2,2,2,4,64)
+      save nagyn,nagyk,nagya
+      data nagyn/0/
 c-----statement function
       t2a(j1,j2,j3,j4)=xa(j1,j2)*xb(j2,j4)+xa(j1,j3)*xb(j3,j4)
+
+      do nagyi=1,min(nagyn,64)
+      if (all(nagyk(:,nagyi) == [ngen,i1,i2,i3,i4,i5,i6,i7])) then
+        a1=nagya(:,:,:,:,1,nagyi)
+        a2=nagya(:,:,:,:,2,nagyi)
+        a3=nagya(:,:,:,:,3,nagyi)
+        a4=nagya(:,:,:,:,4,nagyi)
+        return
+      endif
+      enddo
 
       j1=i1
       j2=i2
@@ -195,6 +214,14 @@ c--- put in photon propagator
       enddo
       enddo
 
+c disorder (2026-10-17): keep them (see above)
+      nagyn=nagyn+1
+      nagyi=mod(nagyn-1,64)+1
+      nagyk(:,nagyi)=[ngen,i1,i2,i3,i4,i5,i6,i7]
+      nagya(:,:,:,:,1,nagyi)=a1
+      nagya(:,:,:,:,2,nagyi)=a2
+      nagya(:,:,:,:,3,nagyi)=a3
+      nagya(:,:,:,:,4,nagyi)=a4
       return
       end
 

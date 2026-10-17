@@ -29,8 +29,33 @@ module me41
   real(dp), parameter :: cnorm = (4*pi/137.0_dp)**2*(8*pi**2)**3
   ! MCFM's average over two incoming gluons in xzqqggg (spinave/V^2)
   real(dp), parameter :: avegg = 0.25_dp/V**2
+  ! ids of the last npm momentum sets given to spinoru (zprods_set)
+  integer, parameter :: npm = 8
+  real(dp) :: pmk(7,4,npm)
+  integer :: pmkid(npm), npmn = 0
   public :: me41_tree
 contains
+
+  ! spinor products of pm for MCFM's routines (/zprods/, /sprods/) and the
+  ! id of the momenta (/nagygen/), with which nagyqqQQg reuses its
+  ! amplitudes: momenta equal to one of the last npm sets keep its id
+  subroutine zprods_set(pm)
+    real(dp), intent(in) :: pm(mxpart,4)
+    complex(dp) :: za(mxpart,mxpart), zb(mxpart,mxpart)
+    common /zprods/ za, zb
+    integer :: ngen
+    common /nagygen/ ngen
+    integer :: k
+    call spinoru(7, pm, za, zb)
+    do k = 1, min(npmn, npm)
+       if (all(pm(1:7,:) == pmk(:,:,k))) then
+          ngen = pmkid(k)
+          return
+       endif
+    enddo
+    npmn = npmn + 1; k = mod(npmn - 1, npm) + 1
+    pmk(:,:,k) = pm(1:7,:); pmkid(k) = npmn; ngen = npmn
+  end subroutine zprods_set
 
   subroutine me41_tree(P, fl, msq)
     real(dp), intent(in) :: P(4,8)
@@ -74,7 +99,7 @@ contains
           enddo
           pm(1,:) = -P(:,1); pm(2,:) = P(:,k)
           pm(5,:) = P(:,ig(1)); pm(6,:) = P(:,ig(2)); pm(7,:) = P(:,ig(3))
-          call spinoru(7, pm, za, zb)
+          call zprods_set(pm)
           call xzqqggg(2, 5, 6, 7, 1, 3, 4, m2)
           call ew31_cpl(fl(1), Q2, c)
        else
@@ -90,7 +115,7 @@ contains
           if (iq == 0 .or. iqb == 0 .or. fl(iq) /= ew31_out(-fl(iqb))) return
           pm(1,:) = -P(:,1); pm(2,:) = P(:,iq); pm(5,:) = P(:,iqb)
           pm(6,:) = P(:,ig(1)); pm(7,:) = P(:,ig(2))
-          call spinoru(7, pm, za, zb)
+          call zprods_set(pm)
           call xzqqggg(2, 1, 6, 7, 5, 3, 4, m2)
           call ew31_cpl(fl(iq), Q2, c)
        endif
@@ -121,7 +146,7 @@ contains
        elseif (fl(ip(1)) == fl(1) .and. fl(ip(2)) == fl(1)) then
           if (fl(kqb(1)) /= -fl(1)) return
           pm(2,:) = P(:,ip(1)); pm(5,:) = P(:,ip(2))
-          call spinoru(7, pm, za, zb)
+          call zprods_set(pm)
           call msq_gqqQQg(2, 1, 5, 6, 7, 4, 3, c, c, c, c, ew31_mode /= 0, MN, MI)
           msq = MI
        else
@@ -134,7 +159,7 @@ contains
           endif
           if (fl(kqb(1)) /= -fl(iq)) return
           pm(2,:) = P(:,k); pm(5,:) = P(:,iq)
-          call spinoru(7, pm, za, zb)
+          call zprods_set(pm)
           call ew31_cpl(fl(iq), Q2, cb); cb = cb(:,[2, 1])
           call msq_gqqQQg(2, 1, 5, 6, 7, 4, 3, c, cb, cb, c, ew31_mode /= 0, MN, MI)
           msq = MN
@@ -161,7 +186,7 @@ contains
        pm(1,:) = -P(:,1)
        pm(2,:) = P(:,ipos(1)); pm(5,:) = P(:,ineg(1))
        pm(6,:) = P(:,ipos(2)); pm(7,:) = P(:,ineg(2))
-       call spinoru(7, pm, za, zb)
+       call zprods_set(pm)
        call ew31_cpl(fl(ipos(1)), Q2, c); c = c(:,[2, 1])
        call ew31_cpl(fl(ipos(2)), Q2, cb); cb = cb(:,[2, 1])
        call msq_gqqQQg(2, 5, 6, 7, 1, 4, 3, c, cb, cb, c, ew31_mode /= 0, MN, MI)
@@ -193,7 +218,7 @@ contains
          ip(1:2) = ip([2, 1]); cl = cl(:,:,[2, 1]); cp = cp(:,:,[2, 1]); on = on([2, 1])
       endif
       pm(2,:) = P(:,ip(1)); pm(5,:) = P(:,ip(2))
-      call spinoru(7, pm, za, zb)
+      call zprods_set(pm)
       call msq_gqqQQg(2, 1, 5, 6, 7, 4, 3, cl(:,:,1), cp(:,:,1), cl(:,:,2), cp(:,:,2), .false., MN, MI)
       if (.not. on(2)) then
          msq = MN
@@ -226,7 +251,7 @@ contains
       pm(1,:) = -P(:,1)
       pm(2,:) = P(:,ipos(1)); pm(5,:) = P(:,ineg(1))
       pm(6,:) = P(:,ipos(2)); pm(7,:) = P(:,ineg(2))
-      call spinoru(7, pm, za, zb)
+      call zprods_set(pm)
       call msq_gqqQQg(2, 5, 6, 7, 1, 4, 3, ce(:,:,1), ce(:,:,2), ce(:,:,3), ce(:,:,4), .false., MN, MI)
       kk = count(on)
       msq = merge(MI, MN, kk == 2)

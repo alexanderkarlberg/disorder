@@ -3954,3 +3954,16 @@ largest value in each row (cancellations). Together r is faster by 1.74× (photo
 **Infrastructure:** the session ran on thA371 (not thA371a); thA371a rebooted at ≈ 09:14 (killing a regression
 pass); since then thA371's NFS view of /home/thA371a shows the repo, ~/work and ~/cernbox as owned by nobody
 (writes refused), while thA371a itself is fine. Work continues over ssh thA371a.
+**Change 3** (afternoon 17 Oct, after the NFS outage; thA371a again): results reused for identical arguments
+within an event. born31_any keeps the last 128 evaluations (key: momenta, flavours, spin-correlation vector,
+ew31 settings, born31_swapc; quick reject on the energy of parton 2): the CS mappings do not depend on the
+flavours, so the dipoles of different flavour structures map onto the same Borns. me41 gives each momentum set it
+passes to spinoru an id (/nagygen/), and MCFM's nagyqqQQg (marked block) reuses its amplitudes for the same id and
+slot indices: the four-quark structures (identical quarks and the three charge assignments solved for e_q², e_Q²,
+e_q e_Q) differ only in the charges, which multiply the amplitudes afterwards. This is the "one evaluation for the
+three charge pieces" of the profile page, done by exact reuse instead of rewriting the MCFM routine. First build
+failed on a name clash (cache array `ca` against MCFM's colour factor CA in constants.f; renamed). Bit-identical
+(91/91, timing outputs identical, harnesses unchanged). r: photon 12.1 → 9.1 s, Z 27.3 → 13.8 s, W 16.2 → 10.6 s
+(J8 window, 40k points). **Since the clean-up r is 2.20× (photon), 2.98× (Z), 2.56× (W) faster.** New profile
+(photon): dipole Borns incl. the cache 48%, psmc 19% (its quad-precision parts 15%), me41 15%, spinoru 13%,
+accept 8%: per-point gains are now small; the main lever is the variance (tails of r, rcorr, d2).
