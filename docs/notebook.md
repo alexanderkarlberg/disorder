@@ -3967,3 +3967,15 @@ failed on a name clash (cache array `ca` against MCFM's colour factor CA in cons
 (J8 window, 40k points). **Since the clean-up r is 2.20× (photon), 2.98× (Z), 2.56× (W) faster.** New profile
 (photon): dipole Borns incl. the cache 48%, psmc 19% (its quad-precision parts 15%), me41 15%, spinoru 13%,
 accept 8%: per-point gains are now small; the main lever is the variance (tails of r, rcorr, d2).
+
+## 2026-10-17 (afternoon) — REPORT-2026-10-17-BUDGET read: error budget of the ZEUS-wide sets; tail diagnosis started
+
+Cluster 1742d80/89c1149 (analysis only; old code before changes 1–3; kp bin11). Share of Σ sd·√CPU (total row): r
+72–94% at N(1e-4) (W 90, Z 94, B 94, E 93, G6P 92%), 73–80% at N(1e-5); rcorr + d2 2–5% at 1e-4 but 16–25% at
+1e-5 and 17–33% of N(1e-4) − N(1e-5); vi, kp, b2 2–5%; Ex7's r-x 24% at 1e-4 in E P2B. Tails: rcorr sd/(1.48 MAD)
+3.5–8.5 with 0.25–1% of the seeds beyond 20 MAD carrying 34–94% of its variance; d2 2.0–4.7; r 1.1–2.1 (B: 0.11% of
+the r seeds carry 49% of its variance at 1e-4; Z 16%, E 27% at 1e-5; W, G6P none); r-x 7.3. Core-h for an NNLO error
+of 10% of NNLOJET's value: W 1.1e4 / 5.2e4, Z 1.8e4 / 6.1e4, B 2.2e4 / 6.7e4, E 2.8e4 / 1.1e5 at τ_cut 1e-4 / 1e-5
+(old code; changes 1–3 divide by ≈ 2–3). The seed counts used were not optimal: the optimal allocation reaches the
+same 1e-5 errors with 1.5–3.6× less CPU. Consequence: the tail diagnosis (instrumented scratch copy of nlo31 in
+work/disorder-comparisons/nnlo21/tails, not committed) covers r and rcorr in the J8 window.
