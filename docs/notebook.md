@@ -3928,3 +3928,29 @@ random points). Cleaned against tag: every kept configuration bit-identical (out
 differ are the removed features, each as expected: the overrides now give exactly the default run, ZCUTS runs keep
 their ZEUS rows bit-identical, ZFIX = 1 gives the full ZEUS result, logmap/uniform/flat in modes 1–3 stop with
 "modes 1-3 need psmc"; the random-point harnesses pass at the same level (≤ 4e-13).
+
+## 2026-10-17 — profiling (step 3) and the first two speed-ups of r
+
+**Error budget** (J8 window, cluster per-seed outputs, CPU per job from the J8 pilots; share of Σ_p sd_p·√CPU_p, which
+sets the error at fixed CPU with optimal seed counts): r 84–91%, rcorr 5–10%, d2 0–4%, vi 2–3%, b2, kp < 1%. Heavy
+tails: sd/(1.48 MAD) = 1.5 for r at 1e-5, 3.4–3.9 for rcorr and d2. At the present speed an NNLO error of 1e-9
+pb/GeV² (≈ 5% of the J8 NNLO) at τ_cut 1e-5 needs ≈ 3.5M core-h (1.4M without the tails). The same table for the
+ZEUS-wide sets is requested from the cluster (UPDATE 17 Oct, analysis only).
+**Profile** (callgrind, nlo31 r, J8 window, photon, 4000 points, 1693 real events): real_evalv over ≈ 10 flavour
+structures 88%; in it the dipoles' mapped Borns (born31, colour/spin correlated) 35% (complex abs alone 13%),
+accept() for every dipole of every structure 28% (216 calls per real event; tau2cm 15%, ZEUS jets 9%), me41 24%
+(four-quark channel 20%); psmc 9%. vi: 96% in the BDK one loop (but 2–3% of the budget). Page:
+https://claude.ai/artifact/6GPgL8pPXy9hqs44B9LYNg
+**Change 1** (8869854): within an eval_sg, a mapped dipole Born with exactly the same momenta reuses accept()'s
+F and degen (the CS mappings do not depend on the flavours). Bit-identical (91/91 deterministic regression
+configurations); r in the J8 window 1.42× (photon), 1.33× (Z), 1.45× (W) faster.
+**Change 2** (this commit): |z|² as Re² + Im² instead of abs(z)**2 in born31 (no hypot); r a further 1.25×
+(photon), 1.19× (Z), 1.21× (W). Not bit-identical. **Lesson:** after VEGAS adapts, last-bit changes move the
+grid edges in regions of almost no weight (rebin divides by near-zero bin weights), so iteration 2 draws a
+different, statistically equivalent sample: outputs moved by ≈ 0.1% against errors of ±3%. Non-bit-identical
+changes are therefore validated before adaptation (regress1.sh: the suite with one iteration): 87/89 deterministic
+outputs identical to all printed digits; n3_rc1/rc2 (mode-3 technical-cut differences) differ by ≤ 2e-10 of the
+largest value in each row (cancellations). Together r is faster by 1.74× (photon, 20.1 → 11.5 s), 1.57× (Z, 41.1 → 26.2 s) and 1.74× (W, 27.1 → 15.6 s).
+**Infrastructure:** the session ran on thA371 (not thA371a); thA371a rebooted at ≈ 09:14 (killing a regression
+pass); since then thA371's NFS view of /home/thA371a shows the repo, ~/work and ~/cernbox as owned by nobody
+(writes refused), while thA371a itself is fine. Work continues over ssh thA371a.

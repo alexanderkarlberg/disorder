@@ -247,7 +247,7 @@ contains
     do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
        D(j1,j2,j3) = cl(j1,j3,1)*A(j1,j2,j3) - cp(j2,j3,1)*B(j1,j2,j3)
        E(j1,j2,j3) = cl(j1,j3,2)*Ae(j1,j2,j3) - cp(j2,j3,2)*Be(j1,j2,j3)
-       sDD = sDD + abs(D(j1,j2,j3))**2; sEE = sEE + abs(E(j1,j2,j3))**2
+       sDD = sDD + abs2(D(j1,j2,j3)); sEE = sEE + abs2(E(j1,j2,j3))
     enddo; enddo; enddo
     if (both .and. .not. dropint) then
        do j1 = 1, 2; do j3 = 1, 2
@@ -348,7 +348,7 @@ contains
       integer :: h
       form = 0
       do h = 1, nh
-         form = form + wt(h)*(c(1,1)*abs(A(1,h))**2 + c(2,2)*abs(A(2,h))**2 &
+         form = form + wt(h)*(c(1,1)*abs2(A(1,h)) + c(2,2)*abs2(A(2,h)) &
               & + 2*c(1,2)*real(A(1,h)*conjg(A(2,h)), dp))
       enddo
     end function form
@@ -382,9 +382,9 @@ contains
        ! c_q A - c_Q B (me31), one colour structure D
        do j1 = 1, 2; do j2 = 1, 2; do j3 = 1, 2
           if (ew31_mode == 0) then
-             sDD = sDD + abs(cq(j1,j3)*A(j1,j2,j3) - cQ2(j2,j3)*B(j1,j2,j3))**2
+             sDD = sDD + abs2(cq(j1,j3)*A(j1,j2,j3) - cQ2(j2,j3)*B(j1,j2,j3))
           else
-             sDD = sDD + abs(cq(j1,j3)*A(j1,j2,j3))**2 + abs(cQ2(j2,j3)*B(j1,j2,j3))**2
+             sDD = sDD + abs2(cq(j1,j3)*A(j1,j2,j3)) + abs2(cQ2(j2,j3)*B(j1,j2,j3))
           endif
        enddo; enddo; enddo
     else
@@ -393,10 +393,10 @@ contains
           D(j1,j2,j3) = cq(j1,j3)*A(j1,j2,j3) - cQ2(j2,j3)*B(j1,j2,j3)
           E(j1,j2,j3) = cq(j1,j3)*Ae(j1,j2,j3) - cQ2(j2,j3)*Be(j1,j2,j3)
           if (ew31_mode == 0) then
-             sDD = sDD + abs(D(j1,j2,j3))**2; sEE = sEE + abs(E(j1,j2,j3))**2
+             sDD = sDD + abs2(D(j1,j2,j3)); sEE = sEE + abs2(E(j1,j2,j3))
           else
-             sDD = sDD + abs(cq(j1,j3)*A(j1,j2,j3))**2 + abs(cQ2(j2,j3)*B(j1,j2,j3))**2
-             sEE = sEE + abs(cq(j1,j3)*Ae(j1,j2,j3))**2 + abs(cQ2(j2,j3)*Be(j1,j2,j3))**2
+             sDD = sDD + abs2(cq(j1,j3)*A(j1,j2,j3)) + abs2(cQ2(j2,j3)*B(j1,j2,j3))
+             sEE = sEE + abs2(cq(j1,j3)*Ae(j1,j2,j3)) + abs2(cQ2(j2,j3)*Be(j1,j2,j3))
           endif
        enddo; enddo; enddo
        ! E' = -E in the colour basis (me31's interference sign)
@@ -414,4 +414,10 @@ contains
     enddo
     q(1,1) = 16*(g4q(1,1)*sDD + g4q(2,2)*sEE + 2*g4q(1,2)*sDE)
   end subroutine fourq_forms
+
+  ! |z|^2 without the hypot of abs(z)
+  elemental real(dp) function abs2(z)
+    complex(dp), intent(in) :: z
+    abs2 = real(z, dp)**2 + aimag(z)**2
+  end function abs2
 end module born31
