@@ -42,7 +42,7 @@ Seeds = those of the reported combinations (W5, Z5, E5 as combine5, B as combine
   | r-x (Ex7) | 7.3 | 1.7% | 84% |
 
   vi, kp, b2, vi-x, kp-x: sd/MAD 0.9-1.4, no seed beyond 20 MAD.
-- **The difference N(1e-4) - N(1e-5)** has r shares of 64-78% and rcorr+d2 shares of 19-39%.
+- **The difference N(1e-4) - N(1e-5)** has r shares of 64-78% and rcorr+d2 shares of 17-33% (r-x 14% in E P2B).
 
 ## 2. Tables per set (from `results/kp11/BUDGET_tables.md`)
 
