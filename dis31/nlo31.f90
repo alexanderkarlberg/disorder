@@ -29,8 +29,9 @@
 ! Environment: EW31 = "mode lepton" (boson, as dis31/tests); P2BSLICE = 1
 ! (P2B-improved slicing), P2BEXTRA = 1 (only the P2B term, the "extras");
 ! TECHMIN, TECHREF, TECHDIFF (technical cut, rcorr/d2); VTARGET (VEGAS
-! target cell); VEGAS_EQUAL (iteration weights of the cells); ZFIX (mode 2:
-! 2 window around (x, Q2), 3 tau_zQ bins in the inclusive cuts).
+! target cell); VEGAS_EQUAL (iteration weights of the cells); VEGAS_MIX
+! (defensive mixture, see vegas); ZFIX (mode 2: 2 window around (x, Q2), 3
+! tau_zQ bins in the inclusive cuts).
 !
 ! Mode 2 (nnlo21 validation against NNLOJET): the above-cut part for
 ! ZEUS-like dijets (nnlo21/validation/nnlojet_epLJJ_zeus2j.run), integrated
@@ -1404,6 +1405,11 @@ contains
   ! VEGAS (Lepage), importance sampling with a factorised grid; per
   ! iteration estimates combined with inverse-variance weights. Histograms:
   ! per-iteration sums of w f, combined the same way as the integral.
+  ! VEGAS_MIX = eps (environment): defensive mixture, a fraction eps of the
+  ! points uniform and every point weighted by the mixture density, so that
+  ! the jacobian stays below 1/eps where the grid has adapted away (17 Oct:
+  ! mode 3 with VTARGET = 0 and eps = 0.2, 4-2000x in variance per CPU time
+  ! over the default; eps = 0 is the plain grid)
   subroutine vegas(ndim, ncall, itmx, avg, err, chi2, fun)
     integer, intent(in) :: ndim, ncall, itmx
     interface
@@ -1417,10 +1423,14 @@ contains
     real(dp) :: xi(0:nbin,ndim), d(nbin,ndim), r(ndim), x(ndim), jac, f, s1, s2, wsum
     real(dp) :: hit(nbin), dt, rc, xin(0:nbin), est(200), var(200), xo, xn
     integer :: ia(ndim), it, ic, j, k, i, vequal
+    real(dp) :: emix, u, pg
     character(16) :: ev
     vequal = 0
     call get_environment_variable('VEGAS_EQUAL', ev)
     if (len_trim(ev) > 0) read(ev, *) vequal
+    emix = 0
+    call get_environment_variable('VEGAS_MIX', ev)
+    if (len_trim(ev) > 0) read(ev, *) emix
     do j = 1, ndim
        xi(:,j) = [(real(i, dp)/nbin, i = 0, nbin)]
     enddo
@@ -1430,13 +1440,29 @@ contains
        do ic = 1, ncall
           call random_number(r)
           jac = 1
-          do j = 1, ndim
-             xn = r(j)*nbin
-             ia(j) = min(int(xn) + 1, nbin)
-             xo = xi(ia(j),j) - xi(ia(j)-1,j)
-             x(j) = xi(ia(j)-1,j) + (xn - (ia(j) - 1))*xo
-             jac = jac*xo*nbin
-          enddo
+          u = 1
+          if (emix > 0) call random_number(u)
+          if (u < emix) then
+             ! a uniform point and its density under the grid
+             x = r; pg = 1
+             do j = 1, ndim
+                ia(j) = 1
+                do while (ia(j) < nbin .and. xi(ia(j),j) <= x(j))
+                   ia(j) = ia(j) + 1
+                enddo
+                pg = pg/(nbin*(xi(ia(j),j) - xi(ia(j)-1,j)))
+             enddo
+          else
+             do j = 1, ndim
+                xn = r(j)*nbin
+                ia(j) = min(int(xn) + 1, nbin)
+                xo = xi(ia(j),j) - xi(ia(j)-1,j)
+                x(j) = xi(ia(j)-1,j) + (xn - (ia(j) - 1))*xo
+                jac = jac*xo*nbin
+             enddo
+             pg = 1/jac
+          endif
+          if (emix > 0) jac = 1/((1 - emix)*pg + emix)
           f = fun(x, jac/ncall)*jac
           if (f /= f) f = 0
           s1 = s1 + f; s2 = s2 + f*f

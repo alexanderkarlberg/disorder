@@ -4019,3 +4019,14 @@ Mode 3 (N3LO P2B, default VEGAS target = the ≥ 1 jet row): ≥ 1 jet 1.0, but 
 outlier seeds at ε = 0 (1.48 MAD/sd 10–38%) and near-Gaussian with ε = 0.2: gains 15–250 (p_T 8–15), 4.5–190 (p_T
 30–100), 800–4300 (≥ 2 jets), two forward-y bins 0.2 at 1e-5 (outliers of their own); order-of-magnitude only with
 16 seeds. Next (overnight): mode 3 with VTARGET = 0 (12 Oct: 3–14× in jet bins) with and without ε = 0.2, 32 seeds.
+**Overnight (18 Oct, 01:15): mode 3 (N3LO P2B) r, 4 variants × 32 seeds at production size (1M × 6; 96 + 32 jobs).**
+Gain in variance per CPU time against the default target without mixture, per lab bin, τ_cut 1e-4 / 1e-5:
+default + ε 0.2: ≥ 1 jet 2.0 / 1.3, p_T bins 2–115 / 3–134, y bins 2–13 / 2–20, ≥ 2 jets 159 / 202;
+VTARGET = 0: 2.3 / 1.3, 6–52 / 3–182, 7–30 / 3–53, 600 / 339;
+**VTARGET = 0 + ε 0.2: 8.7 / 4.0, 43–216 / 30–154, 16–87 / 23–235, 2171 / 1823** (1.5–15× over VTARGET = 0 alone),
+the only variant near-Gaussian in every bin (1.48 MAD/sd 54–133%; the default without mixture: 9–54%). Means agree
+(except the outlier-hit default in ≥ 2 jets). **Correction:** the N3LO 1+1 P2B runs of 12 Oct (runs/n3p) used the
+default target without mixture: their jet-bin errors (0.5–6% of LO) were inflated by single outlier seeds, and with
+such tails the error estimates themselves were unreliable; the 12 Oct statement that the jet bins are flat within
+errors stands only at that (poor) precision. Recommendation for mode 3: VTARGET = 0 and VEGAS_MIX = 0.2; for the J8 /
+ZEUS r: VEGAS_MIX = 0.2 (1–2×, harmless). nlo31 now has VEGAS_MIX (off by default, bit-identical).
