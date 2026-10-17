@@ -3979,3 +3979,26 @@ of 10% of NNLOJET's value: W 1.1e4 / 5.2e4, Z 1.8e4 / 6.1e4, B 2.2e4 / 6.7e4, E 
 (old code; changes 1–3 divide by ≈ 2–3). The seed counts used were not optimal: the optimal allocation reaches the
 same 1e-5 errors with 1.5–3.6× less CPU. Consequence: the tail diagnosis (instrumented scratch copy of nlo31 in
 work/disorder-comparisons/nnlo21/tails, not committed) covers r and rcorr in the J8 window.
+
+## 2026-10-17 (evening) — tail diagnosis of r and rcorr: three mechanisms, no bug
+
+Instrumented scratch copy of nlo31 (work/disorder-comparisons/nnlo21/tails, not committed): every event's contribution c
+to the total-row cells at τ_cut 1e-4 and 1e-5 (J8 window, production settings), and for large events every flavour
+structure and dipole (value, τ̃₂ of the mapped Born, acceptance in both cells), the invariants and momenta. r: 6
+seeds × 200k × 6 (3.3M events, it ≥ 2); rcorr: 4 seeds. Page: https://claude.ai/artifact/KyFDhs5pSGZNhvVcwN1iH6
+- Concentration: in r 30 events carry 62–72% of Σc², the top 0.1% 92–96%; in rcorr at 1e-5 the top 5 of 573k events
+  carry all of it (the largest 70× the whole r cell in its iteration).
+- (1) Large sampling weights: moderately resolved r events (τ₂ ~ 1e-3, smallest invariant ~ 1e-3 W²) with weights
+  10³–10⁵ above typical (VEGAS grid concentrated on the singular regions of the target cell).
+- (2) Real and dipoles on different sides of τ_cut: the τ cut acts on the real and on each mapped Born separately;
+  a dipole whose τ̃₂ straddles τ_cut is left unsubtracted in that cell (≈ 1/s_ij). Reals with τ₂ > 1e-3 still carry
+  25% of the variance of N(1e-4) − N(1e-5) this way. Variance of the 1e-5 cell by the real's τ₂: > 1e-3 50%,
+  1e-4–1e-3 19%, 3e-5–1e-4 16%, 1e-5–3e-5 15%.
+- (3) Double-unresolved reals just above τ_cut (rcorr, d2; r at 1e-5): the largest rcorr event is q + two hard jets
+  (18, 23 GeV) + two soft gluons of 0.45 and 2.8 MeV, nearly collinear to each other (s₄₅ = 7e-10 W²), τ₂ = 1.14e-5;
+  removing the softer gluon leaves τ̃₂ = 1.0–1.14e-5 (straddling), removing the harder 1.2e-6; |M|² = 3e16 left largely
+  uncancelled. Expected behaviour of slicing above the cut with NLO dipoles, not a bug (the singly unresolved
+  cancellations work; τ₂ behaves collinear-safely).
+Options (page): A defensive sampling (VEGAS mixing / damping, psmc flat weight); B psmc channels for double-soft /
+soft-collinear pairs near τ_cut; C restricted dipoles (α < 1) with the α terms in I, K + P; D smooth τ_cut (average
+over τ_cut columns); E pointwise LP subtraction above the cut. Suggested: D and A first, then B, then C.
