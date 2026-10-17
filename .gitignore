@@ -32,3 +32,6 @@
 *.app
 
 *~*
+
+# Python bytecode
+__pycache__/

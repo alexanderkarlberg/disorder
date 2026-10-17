@@ -20,11 +20,17 @@
 ! (as the NLO slicing tests); lo then is the O(alpha_s^2) part of NLO 2+1
 ! above the cut, vi + kp + r the O(alpha_s^3) part of NNLO 2+1 above it.
 !
-! Usage: nlo31 part ncall itmx [seed [techcut [mode x Q2 [logmap|uniform [pdfmask]]]]]
-!        (part = lo, vi, kp, r; pdfmask 0 all, 1 quarks only, 2 gluon only;
-!        9th argument: uniform | logmap | psmc (slicing-adapted multichannel, dis31/psmc.f90))
-!        optional 11th: vslice k (VEGAS adapts to tcs(k) < tau_2 < tcs(k-1))
-!        optional 12th: psmc edge (default 1e-10): lower end of its log maps
+! Usage: nlo31 part ncall itmx [seed [techcut [mode x Q2 [psmc [pdfmask [- [edge]]]]]]]
+!        part = lo, vi, kp, r (chk: the self-checks); modes 1-3 need psmc, the
+!        slicing-adapted multichannel phase space (dis31/psmc.f90), mode 0 uses
+!        the uniform Breit-frame map; pdfmask 0 all, 1 quarks only, 2 gluon
+!        only; argument 11 is not used (kept so that the positions stay); edge:
+!        the lower end of psmc's log maps (default 1e-10)
+! Environment: EW31 = "mode lepton" (boson, as dis31/tests); P2BSLICE = 1
+! (P2B-improved slicing), P2BEXTRA = 1 (only the P2B term, the "extras");
+! TECHMIN, TECHREF, TECHDIFF (technical cut, rcorr/d2); VTARGET (VEGAS
+! target cell); VEGAS_EQUAL (iteration weights of the cells); ZFIX (mode 2:
+! 2 window around (x, Q2), 3 tau_zQ bins in the inclusive cuts).
 !
 ! Mode 2 (nnlo21 validation against NNLOJET): the above-cut part for
 ! ZEUS-like dijets (nnlo21/validation/nnlojet_epLJJ_zeus2j.run), integrated
@@ -34,20 +40,20 @@
 ! Breit p_T). Cells: observable bin (total, Q^2, ptavg_12, m12) x tau_cut
 ! (tau_2 = T_2/Q), sigma per bin in pb. x and Q2 arguments are ignored.
 !
-! Mode 3 (P2B on the tau_2-sliced 2+1, AK 5 Oct): the same Q^2, y range;
+! Mode 3 (P2B on the tau_2-sliced 2+1): the same Q^2, y range;
 ! 1+1 lab-frame jet observables (as analysis/lab11_analysis.f: anti-k_t R = 1
 ! with rapidity, p_T > 5 GeV, -1 < y < 2.5, proton along +z) with the Born
 ! projection subtracted event by event: cell (k, b) gets theta(tau_2 >
 ! tcs(k)) [O_b(event) - O_b(1+1 Born at the event's x, Q^2, y)]. 16 rows:
 ! total, >= 1 jet, leading-jet p_T (7), leading-jet y (6), >= 2 jets.
 !
-! Photon + Z (env EW31 = "mode lepton", as dis31/tests; 8 Oct): the flavour
+! Photon + Z (env EW31 = "mode lepton", as dis31/tests): the flavour
 ! sums from the values with ew31's basis couplings (born_basis, eval_nc). For vi the
 ! basis sums keep the part of the one loop even under the reflection y ->
 ! -y (the odd part breaks m2(1,1) = m2(2,2); it integrates to zero). The
 ! closed-loop vector term of vi (virt31_vloop) is linear in the line's
 ! coupling and weighted apart (photon e_q sum e; NC ew31_wl).
-! W exchange (EW31 = "2 lepton", 9 Oct): representative channels of
+! W exchange (EW31 = "2 lepton"): representative channels of
 ! generation 1 weighted per incoming flavour (cc_reps, cc_w; unit CKM in
 ! (u,d), (c,s), no coupling for b; tests/harness_ccsum: = the sum over all
 ! final-state flavours).
@@ -83,7 +89,7 @@ module nlo31_mod
   ! mode 1: fixed (x, Q^2), cells (tau_cut k, tau_zQ bin b) -> k + ntc*(b - 1)
   integer :: mode = 0
   real(dp) :: xfix = 0.01_dp, Q2fix = 400
-  integer, parameter :: ntc = 10, nzb = 6, nobmax = 21, ncell = ntc*nobmax
+  integer, parameter :: ntc = 10, nzb = 6, nobmax = 16, ncell = ntc*nobmax
   real(dp), parameter :: tcs(ntc) = [2e-2_dp, 1e-2_dp, 5e-3_dp, 2e-3_dp, 1e-3_dp, 5e-4_dp, 2e-4_dp, 1e-4_dp, &
        & 3e-5_dp, 1e-5_dp]
   real(dp), parameter :: zlo(nzb) = [0.05_dp, 0.1_dp, 0.2_dp, 0.3_dp, 0.4_dp, 0.05_dp]
@@ -91,12 +97,7 @@ module nlo31_mod
   integer :: nv = 1                ! length of the acceptance vector: 1 (mode 0), ntc*nob (modes 1, 2)
   integer :: nob = nzb             ! number of cell rows: tau_zQ bins (mode 1), observable bins (mode 2)
   ! mode 2: ZEUS-like dijet selection and bins (row 1 total, 2-7 Q^2,
-  ! 8-11 ptavg_12, 12-15 m12); env ZCUTS = 1 (14 Oct, fiducial power
-  ! corrections of the cut design): rows 16-21 = total and ptavg 8-15 with
-  ! jets E_T > zet4 and ptavg > 8 (et4), without the eta_lab cuts (noeta),
-  ! and both (et4ne)
-  logical :: zcuts = .false.
-  real(dp), parameter :: zet4 = 4
+  ! 8-11 ptavg_12, 12-15 m12)
   real(dp) :: q2lo = q2min, q2hi = q2max, ylo = ymin, yhi = ymax
   real(dp), parameter :: zetmin = 8, zetalo = -1, zetahi = 2.5_dp, zm12min = 20
   real(dp), parameter :: zq2e(0:6) = [125.0_dp, 250.0_dp, 500.0_dp, 1000.0_dp, 2000.0_dp, 5000.0_dp, 20000.0_dp]
@@ -106,53 +107,43 @@ module nlo31_mod
   real(dp) :: klep(4), Q2cur
   ! mode 3: the outgoing lepton and the event's x (Born projection, lab frame)
   real(dp) :: kout(4), xcur
-  ! mode 2 diagnostic (ZFIX = 1, 6 Oct): Q^2 and y squeezed to a window of
-  ! relative width zfw around the mode-1 point (x, Q2 arguments) and the
-  ! mode-1 observable (tau_zQ bins): each part must reproduce mode 1 after
-  ! division by the window, dsigma/dx dQ2 = (y/x) sigma/(dQ2 dy); ZFIX = 3:
-  ! the same observable in the full inclusive cuts
+  ! mode 2: ZFIX = 2, Q^2 and y squeezed to a window of relative width zfw
+  ! around (x, Q2) (arguments 7, 8) with the ZEUS selection; ZFIX = 3 (zfix):
+  ! the mode-1 observable (tau_zQ bins) in the full inclusive cuts
   logical :: zfix = .false.
   real(dp), parameter :: zfw = 1e-3_dp
-  ! mode 2, P2B-improved slicing (env P2BSLICE = 1, 6 Oct; Campbell, Neumann,
-  ! Vita 2408.05265 eq. 2.14): below the cut the event contributes O(event) -
+  ! P2B-improved slicing (env P2BSLICE = 1; Campbell, Neumann, Vita
+  ! 2408.05265 eq. 2.14): below the cut the event contributes O(event) -
   ! O(projected 2+1 Born) (project21) instead of nothing, which removes the
   ! fiducial power corrections of the cuts. t2code: the partition that
   ! minimised T_2 in the last tau2cm call (-1: none)
-  logical :: p2bslice = .false., p2bdebug = .false., dbgprint = .false.
+  logical :: p2bslice = .false.
   ! P2B: the last tau2cm call found no partition (degenerate configuration);
   ! dropev: drop the current real event with all its dipoles; counters
   logical :: degen = .false., dropev = .false.
   integer(8) :: nrealev = 0, ndropev = 0
-  ! garbage dipoles (8 Oct, cluster replays): a mapped Born with an almost
-  ! zero-energy parton (E ~ 6e-4 GeV, finite, positive) gives dipoles of
-  ! 1e61..1e179 next to a real of ~1e13 (the legitimate large terms). An
-  ! event with a dipole |D| > dgabs and |D| > dgrel |R| (or a non-finite D)
-  ! is dropped with all its dipoles, in every mode (env DIPGARB = "dgabs
-  ! dgrel"; counted)
+  ! garbage dipoles: a mapped Born with an almost zero-energy parton (E ~
+  ! 6e-4 GeV, finite, positive) gives dipoles of 1e61..1e179 next to a real
+  ! of ~1e13 (the legitimate large terms). An event with a dipole |D| >
+  ! dgabs and |D| > dgrel |R| (or a non-finite D) is dropped with all its
+  ! dipoles, in every mode (counted)
   logical :: garbev = .false.
-  real(dp) :: dgabs = 1d30, dgrel = 1d12
+  real(dp), parameter :: dgabs = 1d30, dgrel = 1d12
   integer(8) :: ngarbev = 0, nrall = 0
-  ! P2B r, events with tau_2(real) < p2btmin or a degenerate dipole Born:
-  ! p2bdrop = 0 drop them, 1 (default) give them the plain-slicing weights
-  ! (real theta(T > tau_cut) O, dipoles theta(T~ > tau_cut) O~, degenerate
-  ! ones 0), 2 diagnostic: only their plain weights (all else 0)
-  integer :: p2bdrop = 1
-  ! diagnostic (env P2BEXTRA = 1): only the P2B term theta(T <= tau_cut)
-  ! (O - O~) of every configuration (P2B minus plain slicing)
+  ! P2B r: events with tau_2(real) < p2btmin (independent of the technical
+  ! cut) or a degenerate dipole Born get the plain-slicing weights (real
+  ! theta(T > tau_cut) O, dipoles theta(T~ > tau_cut) O~, degenerate ones 0)
+  real(dp), parameter :: p2btmin = 1d-9
+  ! env P2BEXTRA = 1: only the P2B term theta(T <= tau_cut) (O - O~) of
+  ! every configuration (P2B minus plain slicing, the "extras")
   logical :: p2bextra = .false.
-  ! diagnostic (env TECHSLICE = t > techcut): r only from events with
-  ! techcut <= smin/W2 < t, i.e. what raising the technical cut to t removes
-  real(dp) :: techslice = 0
-  ! P2B r: tau_2(real) below which an event gets the plain weights (or is
-  ! dropped); independent of the technical cut (env P2BTMIN)
-  real(dp) :: p2btmin = 1d-9
-  ! technical cut s_min < min(cw W^2, cq Q^2) (6 Oct, env TECHMIN = "cw cq";
+  ! technical cut s_min < min(cw W^2, cq Q^2) (env TECHMIN = "cw cq";
   ! default cw = techcut, cq = huge). The removed contributions (real and a
   ! dipole on opposite sides of a tau_cut) come from low x (large W^2/Q^2),
   ! where techcut W^2 is too coarse; a pure Q^2 cut is too coarse for small
-  ! W^2. Diagnostic TECHDIFF = 1: only the difference to the reference cut
-  ! TECHREF = "dw dq" (default techcut, huge): weight theta(s_min >= cut)
-  ! - theta(s_min >= reference cut)
+  ! W^2. TECHDIFF = 1: only the difference to the reference cut TECHREF =
+  ! "dw dq" (default techcut, huge): weight theta(s_min >= cut) -
+  ! theta(s_min >= reference cut) (rcorr, d2)
   real(dp) :: tcw = -1, tcq = huge(1.0_dp), trw = -1, trq = huge(1.0_dp)
   logical :: techdiff = .false.
   real(dp) :: t2last = -1
@@ -161,20 +152,10 @@ module nlo31_mod
   real(dp), parameter :: l11y(0:6) = [-1.0_dp, -0.5_dp, 0.0_dp, 0.5_dp, 1.0_dp, 1.5_dp, 2.5_dp]
   integer :: iv = 1                ! the cell VEGAS integrates (mode 1: smallest tau_cut, all tau_zQ)
   real(dp) :: hc(ncell), hc2, hcacc(ncell)
-  ! mode 1: map the mass ratios and decay cosines logistically onto
-  ! [1e-12, 1 - 1e-12] (both ends logarithmic), so that configurations near
-  ! the 2+1 limits (tau_2 ~ 1e-5 needs two small invariants at once in the
-  ! 4+1 real) are sampled; VEGAS adapts on top. Off in mode 0.
-  logical :: logmap = .false.
-  ! mode 1: slicing-adapted multichannel phase space (dis31/psmc.f90)
+  ! modes 1-3: slicing-adapted multichannel phase space (dis31/psmc.f90)
   logical :: usepsmc = .false.
-  ! incoming-parton mask (diagnostics): 0 all, 1 quarks only, 2 gluon only
+  ! incoming-parton mask: 0 all, 1 quarks only, 2 gluon only
   integer :: pdfmask = 0
-  ! mode 1: VEGAS adapts to the slice tcs(vslice) < tau_2 < tcs(vslice-1) of
-  ! all tau_zQ bins (0: to tau_2 > tcs(ntc), the default); the cells are
-  ! filled as before
-  integer :: vslice = 0
-  real(dp), parameter :: tmap = 27.631021115928547_dp     ! ln(1e12)
 contains
 
   subroutine setup_flavours()
@@ -250,20 +231,10 @@ contains
     integer, intent(in) :: n
     real(dp), intent(in) :: rr(:), Q2, y, xB, eta
     real(dp), intent(out) :: Pk(4,n+4), dphi
-    real(dp) :: Q, W2, W, E, pz, beta, gam, k(4,4), m2(3), mtot2, pa(4), rest(4), rm(size(rr))
+    real(dp) :: Q, W2, W, E, pz, beta, gam, k(4,4), m2(3), mtot2, pa(4), rest(4)
     integer :: i, j, ir
     Q = sqrt(Q2); E = eta*Q/(2*xB)
-    ! mapped variables (mass ratios: the first n-2; cosines: every second after them)
-    rm = rr
     dphi = 1
-    if (logmap) then
-       do i = 1, n - 2
-          call lmap(rm(i))
-       enddo
-       do i = n - 1, size(rr), 2
-          call lmap(rm(i))
-       enddo
-    endif
     Pk = 0
     Pk(:,1) = [0.0_dp, 0.0_dp, E, E]
     Pk(:,n+2) = [0.0_dp, 0.0_dp, -Q, 0.0_dp]
@@ -276,7 +247,7 @@ contains
     ir = 0
     do i = 2, n - 1
        ir = ir + 1
-       m2(i) = m2(i-1)*rm(ir)
+       m2(i) = m2(i-1)*rr(ir)
        dphi = dphi*m2(i-1)/(2*pi)
     enddo
     ! decays: remainder of mass^2 m2(i) -> parton i + remainder m2(i+1)
@@ -284,10 +255,10 @@ contains
     do i = 1, n - 1
        mtot2 = m2(i)
        if (i < n - 1) then
-          call twobody(rest, 0.0_dp, m2(i+1), rm(ir+1), rm(ir+2), k(:,i), pa)
+          call twobody(rest, m2(i+1), rr(ir+1), rr(ir+2), k(:,i), pa)
           dphi = dphi*(1 - m2(i+1)/mtot2)/(8*pi)
        else
-          call twobody(rest, 0.0_dp, 0.0_dp, rm(ir+1), rm(ir+2), k(:,i), k(:,i+1))
+          call twobody(rest, 0.0_dp, rr(ir+1), rr(ir+2), k(:,i), k(:,i+1))
           dphi = dphi/(8*pi)
        endif
        ir = ir + 2
@@ -299,22 +270,12 @@ contains
     do j = 1, n
        Pk(:,j+1) = [k(1,j), k(2,j), gam*(k(3,j) + beta*k(4,j)), gam*(k(4,j) + beta*k(3,j))]
     enddo
-  contains
-    ! logistic map of a unit variable, both ends logarithmic down to 1e-12;
-    ! multiplies dphi by the jacobian
-    subroutine lmap(v)
-      real(dp), intent(inout) :: v
-      real(dp) :: t
-      t = tmap*(2*v - 1)
-      v = 1/(1 + exp(-t))
-      dphi = dphi*v*(1 - v)*2*tmap
-    end subroutine lmap
   end subroutine breit
 
   ! massless + mass^2 m2b decay of p (mass^2 p.p) isotropically in its rest
   ! frame, then boosted to p's frame
-  subroutine twobody(p, m2a, m2b, rc, rphi, pa, pb)
-    real(dp), intent(in) :: p(4), m2a, m2b, rc, rphi
+  subroutine twobody(p, m2b, rc, rphi, pa, pb)
+    real(dp), intent(in) :: p(4), m2b, rc, rphi
     real(dp), intent(out) :: pa(4), pb(4)
     real(dp) :: M, ea, pmod, c, st, phi, d(3), qa(4)
     M = sqrt(max(p(4)**2 - sum(p(1:3)**2), 0.0_dp))
@@ -325,7 +286,6 @@ contains
     qa = [pmod*d, ea]
     pa = boostv(qa, p, M)
     pb = p - pa
-    if (.false.) print *, m2a
   end subroutine twobody
 
   function boostv(q, Pt, M) result(r)
@@ -453,7 +413,7 @@ contains
        call pdfs(eta/x, sqrt(Q2), fa)
     endif
     if (ew31_mode == 2) then
-       ! W exchange (9 Oct): representative channels, weighted per incoming
+       ! W exchange: representative channels, weighted per incoming
        ! flavour (cc_w; tests/harness_ccsum)
        call cc_reps(j1, j1o, j2, j2o)
        call born_eval(Pk, [j1, j1o, 0, 0], Q2, w1(:,1)); call born_eval(Pk, [j1, j1o, 5, -5], Q2, w1(:,2))
@@ -602,8 +562,7 @@ contains
        Bf = -l1                                          ! 1/(1-x)
        Cq = -2*l1 - xi - xi**2/2                         ! (1+x^2)/(1-x)
        if (tb == 1) then
-          ! (16 Oct) the integral is Cq: a local Cf shadowed the colour factor CF
-          ! (case-insensitive) and replaced it here by the integral (since dd004f6)
+          ! Cq, not Cf: Fortran is case-insensitive, and a local Cf would hide CF
           ipl = CF*2*A*b + g*Bf + CF*Cq*lp
        else
           ipl = 2*CA*A*b + g*Bf + 2*CA*Bf*lp
@@ -636,11 +595,6 @@ contains
        call me41_tree(Pk, fl, m4)
        sub = m4*F4
     endif
-    if (dbgprint) then
-       call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(-mdot(Pk(:,6), Pk(:,6))), F3)
-       write(0,'(a,es12.4,a,es12.4,a,f5.1,a,5es11.3)') ' DBG real m4', m4, ' t2', t2last, ' F(iv)', F4(iv), &
-            & ' E', Pk(4,2:5)
-    endif
     call dip41_list(Pk, fl, nd, P3, fl3, val)
     if (any(val(1:nd) /= val(1:nd))) then
        garbev = .true.
@@ -656,10 +610,7 @@ contains
        ! slicing effectively does (there both sides fail every cut)
        if (p2bslice .and. mode <= 2 .and. (degen .or. any(P3(4,1:4,id) < 0))) dropev = .true.
        sub = sub - val(id)*F3
-       if (dbgprint .and. F3(iv) /= 0) write(0,'(a,i3,a,es12.4,a,es12.4,a,f5.1,a,3es11.3)') ' DBG dip', id, ' val', val(id), &
-            & ' t2', t2last, ' F(iv)', F3(iv), ' E', P3(4,2:4,id)
     enddo
-    if (dbgprint) write(0,'(a,es12.4)') ' DBG sub(iv)', sub(iv)
   end subroutine real_evalv
 
   real(dp) function real_part(r, wgt) result(res)
@@ -700,17 +651,15 @@ contains
     else
        if (smin < min(tcw*W2, tcq*Q2)) return
     endif
-    if (techslice > 0 .and. smin >= techslice*W2) return
     klep = Pk(:,7); kout = Pk(:,8); Q2cur = Q2; xcur = xB
     call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(Q2), F4)
-    ! P2B slicing (6 Oct): events whose real has tau_2 < p2btmin, or with a
-    ! numerically degenerate mapped dipole Born (set in real_evalv), get the
-    ! plain-slicing weights (p2bdrop = 1). There the real is double
-    ! unresolved and some mapped Borns are garbage (momenta ~1e6 GeV that
-    ! cancel, dipoles ~1e28) which plain slicing never accepts, but with P2B
-    ! they would enter with O - O~ /= 0. Leaving out O - O~ for these events
-    ! is power suppressed (tau_2 <~ 1e-8). Dropping them altogether
-    ! (p2bdrop = 0, first version) also loses their dipoles above the cut.
+    ! P2B: events whose real has tau_2 < p2btmin, or with a numerically
+    ! degenerate mapped dipole Born (set in real_evalv), get the plain-slicing
+    ! weights. There the real is double unresolved and some mapped Borns are
+    ! garbage (momenta ~1e6 GeV that cancel, dipoles ~1e28) which plain
+    ! slicing never accepts, but with P2B they would enter with O - O~ /= 0.
+    ! Leaving out O - O~ for these events is power suppressed (tau_2 <~ 1e-8);
+    ! dropping them altogether would also lose their dipoles above the cut.
     dropev = p2bslice .and. mode <= 2 .and. t2last < p2btmin
     garbev = .false.
     as = alphasPDF(sqrt(Q2))
@@ -723,36 +672,22 @@ contains
     endif
     if (p2bslice .and. mode <= 2) then
        nrealev = nrealev + 1
-       if (dropev) ndropev = ndropev + 1
-       if (dropev .and. p2bdrop == 0) then
-          res = 0; return
-       elseif (dropev) then
+       if (dropev) then
+          ndropev = ndropev + 1
           p2bslice = .false.
           call accept(Pk(:,1), Pk(:,2:5), 4, sqrt(Q2), F4)
           call eval_sg()
           p2bslice = .true.
-       elseif (p2bdrop == 2) then
-          res = 0; return
        endif
     endif
     if (mode >= 1) then
-       ! points where a matrix element is not finite (extreme configurations
-       ! of the logmap sampling) are dropped, as VEGAS does for the integral
+       ! points where a matrix element is not finite are dropped, as VEGAS
+       ! does for the integral
        if (any(sg /= sg)) then
           res = 0; return
        endif
        hcacc(1:nv) = hcacc(1:nv) + sg*w*wgt
        res = vtarget(sg)*w
-       ! (12 Oct) also the largest single cell: in mode 3 the target row can
-       ! stay small while neighbouring bins get large opposite weights
-       if (p2bdebug .and. (abs(res) > 1e9_dp .or. maxval(abs(sg))*w > 1e10_dp)) then
-          write(0,'(a,es12.4,a,es12.4,a,es12.4,a,es12.4,a,i4)') ' DBG BIG res', res, ' smin/W2', smin/W2, ' w', w, &
-               & ' max cell', maxval(abs(sg))*w, ' at', maxloc(abs(sg), 1)
-          dbgprint = .true.
-          call real_evalv(Pk, [1, 1, 0, 0, 0], F4, u1)
-          call real_evalv(Pk, [0, 1, -1, 0, 0], F4, u2)
-          dbgprint = .false.
-       endif
     else
        res = sg(1)*w
        if (res /= 0) call fill(Q2, res*wgt)
@@ -857,25 +792,21 @@ contains
     end subroutine real_basis
   end function real_part
 
-  ! the quantity VEGAS integrates in mode 1: the cell iv, or a tau_2 slice
+  ! the quantity VEGAS integrates in modes 1-3: the cell iv (env VTARGET)
   real(dp) function vtarget(a) result(t)
     real(dp), intent(in) :: a(nv)
-    integer :: k
     if (iv == -1) then
-       ! VTARGET = -1 (13 Oct): all cells, every row and tau_cut; for the
-       ! P2B extras (theta(T <= tau_cut)) the smallest tau_cut is the
-       ! smallest region, so VTARGET = 0 adapts to the wrong cells there
+       ! VTARGET = -1: all cells, every row and tau_cut; for the P2B extras
+       ! (theta(T <= tau_cut)) the smallest tau_cut is the smallest region,
+       ! so VTARGET = 0 adapts to the wrong cells there
        t = sum(abs(a))
     elseif (iv == 0) then
-       ! VTARGET = 0 (12 Oct): sum of |cells| at the smallest tau_cut over all
+       ! VTARGET = 0: sum of |cells| at the smallest tau_cut over all
        ! observable rows; with P2B in mode 3 the >= 1 jet row misses events
        ! that migrate between bins, whose region VEGAS then never adapts to
        t = sum(abs(a(ntc:nv:ntc)))
-    elseif (vslice <= 1) then
-       t = a(iv)
     else
-       k = vslice + ntc*(merge(1, nzb, mode >= 2) - 1)
-       t = a(k) - a(k - 1)
+       t = a(iv)
     endif
   end function vtarget
 
@@ -889,9 +820,9 @@ contains
     real(dp) :: t2, pb(4,2)
     logical :: inb(nobmax), inp(nobmax), okp
     integer :: k, b
-    ! non-finite momenta (numerically degenerate mapped configurations, 7 Oct
-    ! cluster: NaN made kt_jets write act(0), "double free or corruption"):
-    ! the configuration is not accepted; with P2B it marks a degenerate dipole
+    ! non-finite momenta (numerically degenerate mapped configurations; NaN
+    ! would make kt_jets write act(0)): the configuration is not accepted;
+    ! with P2B it marks a degenerate dipole
     if (any(p /= p) .or. any(pin /= pin) .or. any(abs(p) > huge(1.0_dp)/4)) then
        F = 0; degen = .true.; return
     endif
@@ -911,7 +842,7 @@ contains
     t2 = tau2cm(pin, p, n)/Q
     call zq_bins(p, n, Q, inb)
     if (p2bslice) then
-       ! P2B (9 Oct, as accept_zeus): below tau_cut O(event) - O(projected 2+1 Born)
+       ! P2B (as accept_zeus): below tau_cut O(event) - O(projected 2+1 Born)
        t2last = t2; degen = t2code < 0
        inp = .false.
        if (t2 <= tcs(1)) then
@@ -1092,7 +1023,6 @@ contains
              call zeus_bins(pin, pb, 2, inp)
           else
              inp = inb      ! no valid partition (degenerate, T = 0): O - O~ = 0
-             if (p2bdebug) write(0,'(a,i2,i4,es12.4,l2)') ' P2BFAIL n t2code t2 inb1', n, t2code, t2, inb(1)
           endif
        endif
        do b = 1, nob
@@ -1129,7 +1059,7 @@ contains
     logical, intent(out) :: okp
     integer :: i, i1, i2, code
     ! the tau_2 partition; if it is missing or gives no valid projection
-    ! (mapped dipole Borns with an almost zero-energy parton, 6 Oct: there
+    ! (mapped dipole Borns with an almost zero-energy parton: there
     ! T is set to 0 or the soft parton makes a jet degenerate), the two most
     ! energetic partons as the jets and the rest in the beam, which is the
     ! IR-consistent limit (a vanishing parton does not change the Born)
@@ -1148,7 +1078,6 @@ contains
     enddo
     code = 3**(min(i1, i2) - 1) + 2*3**(max(i1, i2) - 1)
     call proj_code(code)
-    if (.not. okp .and. p2bdebug) write(0,'(a,i2,i4)') ' P2BFAIL2 n code', n, code
   contains
     subroutine proj_code(cd)
       integer, intent(in) :: cd
@@ -1184,15 +1113,7 @@ contains
     logical :: pass
     integer :: b
     inb = .false.
-    if (zcuts) then
-       call zeus_jets(pin, p, n, pass, ptavg, m12, zet4, .true.)
-       inb(16) = pass .and. ptavg >= zpte(0); inb(17) = inb(16) .and. ptavg < zpte(1)
-       call zeus_jets(pin, p, n, pass, ptavg, m12, zetmin, .false.)
-       inb(18) = pass; inb(19) = pass .and. ptavg < zpte(1)
-       call zeus_jets(pin, p, n, pass, ptavg, m12, zet4, .false.)
-       inb(20) = pass .and. ptavg >= zpte(0); inb(21) = inb(20) .and. ptavg < zpte(1)
-    endif
-    call zeus_jets(pin, p, n, pass, ptavg, m12, zetmin, .true.)
+    call zeus_jets(pin, p, n, pass, ptavg, m12)
     if (.not. pass) return
     inb(1) = .true.
     do b = 1, 6
@@ -1206,14 +1127,13 @@ contains
 
   ! NNLOJET's DIS jet selection (driver/core/ecuts.f, ecuts_dis): inclusive
   ! kt (R = rjet, E-scheme) in the Breit frame; jets with E_T = sqrt(p_T^2 +
-  ! m^2) > etm (zetmin); then jets outside zetalo < eta_lab < zetahi dropped (ueta); then
+  ! m^2) > zetmin; then jets outside zetalo < eta_lab < zetahi dropped; then
   ! >= 2 jets and m12 > zm12min for the two leading (Breit p_T) jets. The lab
   ! frame from the proton (direction pin) and the incoming lepton klep:
   ! t = P/(2Ep) + k/(2Ee), z = P/(2Ep) - k/(2Ee), proton along +z.
-  subroutine zeus_jets(pin, p, n, pass, ptavg, m12, etm, ueta)
+  subroutine zeus_jets(pin, p, n, pass, ptavg, m12)
     integer, intent(in) :: n
-    real(dp), intent(in) :: pin(4), p(4,n), etm
-    logical, intent(in) :: ueta
+    real(dp), intent(in) :: pin(4), p(4,n)
     logical, intent(out) :: pass
     real(dp), intent(out) :: ptavg, m12
     real(dp) :: jets(4,n), Pp(4), tl(4), zl(4), El, pzl, pabs, etal, pt2j(n), pj(4)
@@ -1225,12 +1145,12 @@ contains
     m = 0
     do i = 1, nj
        pj = jets(:,i)
-       if (pj(1)**2 + pj(2)**2 + max(mdot(pj, pj), 0.0_dp) <= etm**2) cycle
+       if (pj(1)**2 + pj(2)**2 + max(mdot(pj, pj), 0.0_dp) <= zetmin**2) cycle
        El = mdot(pj, tl); pzl = -mdot(pj, zl)
        pabs = sqrt(max(El**2 - max(mdot(pj, pj), 0.0_dp), 0.0_dp))
        if (pabs - abs(pzl) <= 0) cycle
        etal = 0.5_dp*log((pabs + pzl)/(pabs - pzl))
-       if (ueta .and. (etal <= zetalo .or. etal >= zetahi)) cycle
+       if (etal <= zetalo .or. etal >= zetahi) cycle
        m = m + 1; jets(:,m) = pj; pt2j(m) = pj(1)**2 + pj(2)**2
     enddo
     if (m < 2) return
@@ -1313,7 +1233,7 @@ contains
     ub = [0.0_dp, 0.0_dp, 0.0_dp, 1.0_dp]
     best = huge(1.0_dp); u = 0
     do code = 0, 3**n - 1
-       tb = tpart(code, ub, .true.)
+       tb = tpart(code, ub)
        if (tb < best) then
           best = tb; u = ujets(code)
        endif
@@ -1324,13 +1244,13 @@ contains
     ! step 2: exact minimisation in that frame
     T = huge(1.0_dp)
     do code = 0, 3**n - 1
-       tb = tpart(code, u, .false.)
+       tb = tpart(code, u)
        if (tb < T) then
           T = tb; t2code = code
        endif
     enddo
     T = max(T, 0.0_dp)
-    ! degenerate configurations (5 Oct): a mapped Born whose emitter pair is
+    ! degenerate configurations: a mapped Born whose emitter pair is
     ! collinear with its FF spectator has an almost zero-energy parton; in
     ! floating point its invariants can turn negative and a light-cone
     ! energy u.P + |P|_u vanish, so every partition fails and T stayed at
@@ -1370,10 +1290,9 @@ contains
          if (a(k) > 0) w = w + p(:,k)
       enddo
     end function ujets
-    real(dp) function tpart(code, uu, breitf) result(tp)
+    real(dp) function tpart(code, uu) result(tp)
       integer, intent(in) :: code
       real(dp), intent(in) :: uu(4)
-      logical, intent(in) :: breitf
       integer :: a(6), k
       logical :: okp
       real(dp) :: PJ(4,2), uP, m2
@@ -1392,7 +1311,6 @@ contains
          uP = mdot(uu, PJ(:,k)); m2 = max(mdot(PJ(:,k), PJ(:,k)), 0.0_dp)
          tp = tp + m2/(uP + sqrt(max(uP*uP - m2, 0.0_dp)))
       enddo
-      if (.false. .and. breitf) tp = tp
     end function tpart
   end function tau2cm
 
@@ -1470,7 +1388,7 @@ contains
     end interface
     real(dp), intent(out) :: avg, err, chi2
     integer, parameter :: nbin = 50
-    real(dp) :: xi(0:nbin,ndim), d(nbin,ndim), r(ndim), x(ndim), jac, f, f2, s1, s2, wsum, sumw, sumwi
+    real(dp) :: xi(0:nbin,ndim), d(nbin,ndim), r(ndim), x(ndim), jac, f, s1, s2, wsum
     real(dp) :: hit(nbin), dt, rc, xin(0:nbin), est(200), var(200), xo, xn
     integer :: ia(ndim), it, ic, j, k, i, vequal
     character(16) :: ev
@@ -1481,7 +1399,6 @@ contains
        xi(:,j) = [(real(i, dp)/nbin, i = 0, nbin)]
     enddo
     hist = 0; hist2 = 0; hc = 0; hc2 = 0
-    sumw = 0; sumwi = 0
     do it = 1, itmx
        d = 0; s1 = 0; s2 = 0; hacc = 0; hcacc = 0
        do ic = 1, ncall
@@ -1507,7 +1424,7 @@ contains
        ! histograms: this iteration's estimate, weighted like the integral;
        ! with VEGAS_EQUAL = k (environment) the cells of iterations k..itmx get
        ! equal weights instead (an adapted target's 1/s2 can correlate with the
-       ! cells; 6 Oct)
+       ! cells)
        if (vequal > 0) then
           if (it >= vequal) then
              hist = hist + hacc; hist2 = hist2 + 1
@@ -1559,7 +1476,6 @@ contains
     chi2 = chi2/max(itmx - min(2, itmx), 1)
     hist = hist/hist2
     if (hc2 > 0) hc = hc/hc2
-    if (.false.) print *, f2, sumw, sumwi
   end subroutine vegas
 
   subroutine rebin(w, nbin, xold, xnew)
@@ -1586,9 +1502,8 @@ contains
   ! consistency check of the charge-structure sums against the explicit sum
   ! over flavour assignments (lists flb, flr with symmetry factors)
   subroutine check_sums()
-    real(dp) :: r(11), a, b, Q2, y, xB, eta, jac, Pk(4,8), Pb(4,7), dphi, fpdf(-5:5), val(3), W2
-    real(dp) :: P3(4,7,dip41_max), dv(dip41_max), m4
-    integer :: ipt, ib, ir, fl3(4,dip41_max), nd, id
+    real(dp) :: r(11), a, b, Q2, y, xB, eta, jac, Pk(4,8), Pb(4,7), dphi, fpdf(-5:5), val(3)
+    integer :: ipt, ib, ir
     logical :: ok, pass4
     do ipt = 1, 20
        call random_number(r)
@@ -1621,17 +1536,15 @@ contains
              b = b + symr(ir)*fpdf(flr(1,ir))*real_eval(Pk, flr(:,ir), pass4)
           enddo
           b = b*jac*dphi/(2*eta*s)/(16*pi**2)*gev2pb*(alphasPDF_(sqrt(Q2))/(2*pi))**3
-          W2 = Q2*(eta/xB - 1)
        endif
        write(*,'(a,2es18.10)') ' real: structures, explicit', a, b
     enddo
-    if (.false.) print *, P3, dv, m4, fl3, nd, id, W2
   end subroutine check_sums
 
-  ! (16 Oct) kp_conv for q -> q against closed forms: with a constant PDF
-  ! (f = 1, so f(xi/x)/x - f(xi) = (1 - x)/x) every x integral is elementary;
-  ! Born factors b, g, lp one at a time (the local Cf shadowing CF showed in b
-  ! and lp at 2e-3 - 1; fixed: <= 2e-8)
+  ! kp_conv for q -> q against closed forms: with a constant PDF (f = 1, so
+  ! f(xi/x)/x - f(xi) = (1 - x)/x) every x integral is elementary; Born
+  ! factors b, g, lp one at a time (a local Cf shadowing CF, 2 - 16 Oct,
+  ! showed in b and lp at 2e-3 - 1; correct: <= 2e-8)
   subroutine check_kp()
     real(dp), external :: ddilog
     real(dp) :: xis(3) = [0.01_dp, 0.1_dp, 0.5_dp], xi, t, x, res, s(3), ref(3), A, l1, lx
@@ -1692,17 +1605,6 @@ contains
        w(5) = 1; w(6) = 0.5_dp
     endif
   end function cc_w
-
-  ! mode 2 with ZCUTS: the cut-design rows 16-21 (zeus_bins)
-  subroutine zcuts_out(h)
-    real(dp), intent(in) :: h(ncell)
-    character(6), parameter :: nm(3) = ['et4   ', 'noeta ', 'et4ne ']
-    integer :: i
-    do i = 1, 3
-       write(*,'(a,a,2f8.0,10es16.8)') ' ZCELL ', nm(i), 0.0_dp, 0.0_dp, h(1 + ntc*(13 + 2*i):ntc*(14 + 2*i))
-       write(*,'(a,a,2f8.0,10es16.8)') ' ZCELL ', nm(i), zpte(0), zpte(1), h(1 + ntc*(14 + 2*i):ntc*(15 + 2*i))
-    enddo
-  end subroutine zcuts_out
 end module nlo31_mod
 
 program nlo31
@@ -1728,13 +1630,11 @@ program nlo31
      call get_command_argument(8, arg); read(arg, *) Q2fix
   endif
   if (command_argument_count() > 8) then
-     call get_command_argument(9, arg); logmap = trim(arg) == 'logmap'; usepsmc = trim(arg) == 'psmc'
+     call get_command_argument(9, arg); usepsmc = trim(arg) == 'psmc'
   endif
+  if (mode >= 1 .and. .not. usepsmc) stop 'modes 1-3 need psmc (argument 9)'
   if (command_argument_count() > 9) then
      call get_command_argument(10, arg); read(arg, *) pdfmask
-  endif
-  if (command_argument_count() > 10) then
-     call get_command_argument(11, arg); read(arg, *) vslice
   endif
   if (command_argument_count() > 11) then
      call get_command_argument(12, arg); read(arg, *) psedge
@@ -1743,25 +1643,17 @@ program nlo31
   endif
   if (mode == 1) then
      nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
-     if (usepsmc) call psmc_init(xfix, Q2fix, Q2fix/(xfix*s))
+     call psmc_init(xfix, Q2fix, Q2fix/(xfix*s))
   elseif (mode == 2) then
      nob = 15; nv = ntc*nob; iv = ntc
-     call get_environment_variable('ZCUTS', arg); zcuts = trim(arg) == '1'
-     if (zcuts) then
-        nob = 21; nv = ntc*nob
-     endif
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
      call get_environment_variable('ZFIX', arg)
      if (trim(arg) == '3') then
-        ! ZFIX = 3 (9 Oct): the mode-1 observable (tau_zQ bins) in the
-        ! inclusive cuts, no window (event shape, against NNLOJET dis_tauzq)
+        ! ZFIX = 3: the mode-1 observable (tau_zQ bins) in the inclusive
+        ! cuts, no window (event shape, against NNLOJET dis_tauzq)
         zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
-     elseif (trim(arg) == '1' .or. trim(arg) == '2') then
-        ! ZFIX = 1: window with the mode-1 observable; 2: with the ZEUS jet
-        ! selection (7 Oct)
-        if (trim(arg) == '1') then
-           zfix = .true.; nob = nzb; nv = ntc*nob; iv = ntc + ntc*(nzb - 1)
-        endif
+     elseif (trim(arg) == '2') then
+        ! ZFIX = 2: a window around (x, Q2) with the ZEUS jet selection
         q2lo = Q2fix*(1 - zfw/2); q2hi = Q2fix*(1 + zfw/2)
         ylo = Q2fix/(xfix*s)*(1 - zfw/2); yhi = Q2fix/(xfix*s)*(1 + zfw/2)
         write(*,'(a,4es14.6)') ' ZFIX window Q2, y:', q2lo, q2hi, ylo, yhi
@@ -1775,19 +1667,11 @@ program nlo31
      call get_environment_variable('P2BSLICE', arg)
      if (trim(arg) == '1') then
         p2bslice = .true.
-        call get_environment_variable('P2BDEBUG', arg); p2bdebug = trim(arg) == '1'
-        call get_environment_variable('P2BDROP', arg)
-        if (len_trim(arg) > 0) read(arg, *) p2bdrop
-        write(*,'(a,i2)') ' P2BDROP', p2bdrop
         call get_environment_variable('P2BEXTRA', arg); p2bextra = trim(arg) == '1'
         if (p2bextra) write(*,'(a)') ' P2BEXTRA: only theta(T <= tau_cut) (O - O~)'
         write(*,'(a)') ' P2BSLICE: below tau_cut O(event) - O(projected 2+1 Born)'
      endif
   endif
-  ! diagnostics (6 Oct): VEGAS target cell from the environment (VTARGET = k,
-  ! index into the cell vector; default unchanged); VTARGET = 0: the sum of
-  ! |cells| at the smallest tau_cut over all rows (12 Oct; above-cut parts);
-  ! VTARGET = -1: the sum over all cells (13 Oct; P2B extras)
   tcw = techcut; trw = techcut
   call get_environment_variable('TECHMIN', arg)
   if (len_trim(arg) > 0) read(arg, *) tcw, tcq
@@ -1796,15 +1680,9 @@ program nlo31
   call get_environment_variable('TECHDIFF', arg); techdiff = trim(arg) == '1'
   if (tcw /= techcut .or. tcq < huge(1.0_dp) .or. techdiff) write(*,'(a,2es10.2,a,l2,a,2es10.2)') &
        & ' technical cut min(cw W2, cq Q2), cw cq =', tcw, tcq, '  TECHDIFF', techdiff, '  reference', trw, trq
-  call get_environment_variable('DIPGARB', arg)
-  if (len_trim(arg) > 0) read(arg, *) dgabs, dgrel
-  call get_environment_variable('P2BTMIN', arg)
-  if (len_trim(arg) > 0) read(arg, *) p2btmin
-  call get_environment_variable('TECHSLICE', arg)
-  if (len_trim(arg) > 0) then
-     read(arg, *) techslice
-     write(*,'(a,es10.2)') ' TECHSLICE: only events with techcut <= smin/W2 <', techslice
-  endif
+  ! VEGAS target cell (VTARGET = k, index into the cell vector; 0: the sum
+  ! of |cells| at the smallest tau_cut over all rows, for the above-cut
+  ! parts; -1: the sum over all cells, for the P2B extras)
   call get_environment_variable('VTARGET', arg)
   if (len_trim(arg) > 0) then
      read(arg, *) iv
@@ -1866,7 +1744,6 @@ program nlo31
      do i = 1, 4
         write(*,'(a,2f8.0,10es16.8)') ' ZCELL m12  ', zmje(i-1), zmje(i), hc(1 + ntc*(10 + i):ntc*(11 + i))
      enddo
-     if (zcuts) call zcuts_out(hc)
   elseif (mode == 1) then
      write(*,'(a)') ' CELLS dsigma/dx dQ2 [pb/GeV2] above the cut: tau_zQ bin, then tau_cut columns'
      write(*,'(a,10es12.3)') ' tau_cut     ', tcs

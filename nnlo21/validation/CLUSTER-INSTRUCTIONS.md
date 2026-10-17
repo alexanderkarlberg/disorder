@@ -7,6 +7,27 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 17 Oct: error budget per part for the efficiency work (analysis only, no jobs)
+
+AK (16 Oct): next is efficiency. At MPP, from the J8 per-seed outputs: the real part r is 84–91% of the cost per
+unit precision (per-seed sd × sqrt(CPU per job), total row, at τ_cut 1e-4 and 1e-5), rcorr and d2 5–14% (heavy
+tails: sd ≈ 4 × 1.48 MAD), vi, kp, b2 below 5%. Please give the same for the ZEUS-wide sets, from existing outputs:
+1. Sets: W5, Z5, B (bin4), E5 and the Ex7 extras (r-x, vi-x, kp-x, lo-x), G6P; parts b2, vi, kp (bin11), r, rcorr,
+   d2 (and b1, lo for the NLO).
+2. Per set and part: N seeds, mean CPU per job (`cpu_summary.py`), and for the total row (E, G6: the 0.05–0.5 bin)
+   the per-seed sd and 1.48 MAD of N(1e-4), N(1e-5) and N(1e-4) − N(1e-5); sd·sqrt(CPU) and its share of the sum
+   over parts; K = (Σ sd·sqrt(CPU))² and the core-h for an NNLO error of 10% of NNLOJET's value at 1e-5 (W 0.148,
+   Z 12.9, B 11.1, E 59.5 pb).
+3. Per part, the fraction of seeds beyond 20 MAD and the share of the variance they carry.
+Short report (a table per set), then hold.
+
+## NOTE 17 Oct: clean-up of nlo31/sliced21 (no new jobs; production on hold)
+
+From this commit on, nlo31 and sliced21 no longer read ZCUTS, P2BDEBUG, P2BDROP, P2BTMIN, DIPGARB, TECHSLICE and
+ZFIX = 1, nlo31 ignores argument 11, and modes 1–3 stop unless argument 9 is `psmc`. Every other configuration gives
+bit-identical output (notebook 17 Oct). Old job lists with those switches must not be rerun on a new build; the
+combine scripts for the ZCUTS rows need the bin11 outputs.
+
 ## UPDATE 16 Oct (d): KREDO-cd read; deliver UPDATE (c) as an addendum, then hold
 
 REPORT-2026-10-16-KREDO and -KREDO-cd received (MPP), thanks: all Δkp checks pass. With the fixed kp, W, Z, γ (B)
