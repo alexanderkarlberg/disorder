@@ -34,7 +34,9 @@
 ! bins in the inclusive cuts (event shape, against NNLOJET).
 !
 ! Mode 3 (P2B, as dis31/nlo31 mode 3): sliced21 part ncall itmx seed p2b <table prefix> [softtable]
-! 1+1 lab-frame jet bins with O(2+1 Born) - O(projected 1+1 Born) per event
+! 1+1 lab-frame jet bins with O(2+1 Born) - O(projected 1+1 Born) per event;
+! LABSET = zeus05: the set-up of 1803.09973 (nlo31 set_zeus05), also for the
+! beam grid (mktab: Q from 5 GeV to sqrt(s), x from 2.5e-4, its PDF)
 !-----------------------------------------------------------------------
 module sliced21_mod
   use nlo31_mod
@@ -44,9 +46,10 @@ module sliced21_mod
   integer :: nemit = 1      ! correlated sampling: emissions per Born (C1_NEMIT)
   integer :: vbal = 0       ! c1: balanced VEGAS target (C1_VBAL)
   integer, parameter :: ivb = 8   ! tau_cut column of the balanced target (1e-4)
-  ! mode 2: beam-table grid in Q (lp21_grid_build/load)
-  real(dp), parameter :: gqlo = 11.180339887498949_dp, gqhi = 141.42135623730951_dp, gdl = 0.1_dp
-  real(dp), parameter :: gximin = 2e-3_dp, gh = 0.02_dp
+  ! modes 2, 3: beam-table grid in Q (lp21_grid_build/load); LABSET = zeus05:
+  ! Q from 5 GeV to sqrt(s), x from 2.5e-4
+  real(dp) :: gqlo = 11.180339887498949_dp, gqhi = 141.42135623730951_dp, gximin = 2e-3_dp
+  real(dp), parameter :: gdl = 0.1_dp, gh = 0.02_dp
 
 contains
 
@@ -265,7 +268,7 @@ contains
     enddo
     res = val(ntc)
     ! mode 3: the VEGAS target is the >= 1 jet row (the total row vanishes in P2B)
-    if (mode == 3) res = val(ntc)*dp2b(2)
+    if (mode == 3) res = val(ntc)*dp2b(merge(1, 2, zeus05))
   contains
     real(dp) function dd(i, j)
       integer, intent(in) :: i, j
@@ -350,8 +353,14 @@ program sliced21
   ! W exchange: b has no coupling, not in the down-type beam classes (the
   ! tables differ)
   lp21_nodn = ew31_mode == 2
+  ! LABSET = zeus05 (mode 3 and its beam grid): the set-up of 1803.09973
+  call get_environment_variable('LABSET', arg)
+  if (trim(arg) == 'zeus05') then
+     call set_zeus05()
+     gqlo = 5; gqhi = sqrt(s); gximin = 2.5e-4_dp
+  endif
   if (trim(bpart) == 'mktab' .or. trim(bpart) == 'tabchkg') then
-     call initPDFSetByName('NNPDF30_nlo_as_0118')
+     call initPDFSetByName(trim(pdfname))
      call initPDF(0)
      call scet_set_colour(4.0_dp/3, 3.0_dp, 0.5_dp)
      call get_environment_variable('PDFMASK', arg)
@@ -407,9 +416,12 @@ program sliced21
      call get_command_argument(9, arg); read(arg, *) pdfmask
      lpmask = pdfmask
   endif
+  if (zeus05 .and. mode /= 3) stop 'LABSET: mode 3 (p2b) only'
   if (mode >= 2) then
-     nob = merge(15, 16, mode == 2); nv = ntc*nob; iv = merge(ntc, 2*ntc, mode == 2)
-     q2lo = gqlo**2; q2hi = gqhi**2; ylo = 0.2_dp; yhi = 0.6_dp
+     if (.not. zeus05) then
+        nob = merge(15, 16, mode == 2); nv = ntc*nob; iv = merge(ntc, 2*ntc, mode == 2)
+        q2lo = gqlo**2; q2hi = gqhi**2; ylo = 0.2_dp; yhi = 0.6_dp
+     endif
      call get_environment_variable('ZFIX', arg)
      if (mode == 2 .and. trim(arg) == '3') then
         ! ZFIX = 3: tau_zQ bins in the inclusive cuts, no window
@@ -429,7 +441,7 @@ program sliced21
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]
   call random_seed(put=sd)
-  call initPDFSetByName('NNPDF30_nlo_as_0118')
+  call initPDFSetByName(trim(pdfname))
   call initPDF(0)
   call scet_set_colour(4.0_dp/3, 3.0_dp, 0.5_dp)
   if (softtab /= '') call soft_table_init(trim(softtab), 0.025_dp, 0.05_dp)
@@ -495,9 +507,9 @@ program sliced21
         write(*,'(a,2f5.2,10es16.8)') ' CELL ', zlo(i), zhi(i), hc(1 + ntc*(i - 1):ntc*i)
      enddo
   elseif (mode == 3) then
-     write(*,'(a)') ' LCELLS sigma per bin [pb] below the cut, O(event) - O(Born): lab11 bin, then tau_cut columns'
+     write(*,'(a)') ' LCELLS sigma per bin [pb] below the cut, O(event) - O(Born): lab11 or zeus05 row, then tau_cut columns'
      write(*,'(a,10es16.8)') ' tau_cut     ', tcs
-     do i = 1, 16
+     do i = 1, nob
         write(*,'(a,i3,10es16.8)') ' LCELL ', i, hc(1 + ntc*(i - 1):ntc*i)
      enddo
   elseif (mode == 2) then

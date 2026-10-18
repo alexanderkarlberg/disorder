@@ -31,7 +31,8 @@
 ! TECHMIN, TECHREF, TECHDIFF (technical cut, rcorr/d2); VTARGET (VEGAS
 ! target cell); VEGAS_EQUAL (iteration weights of the cells); VEGAS_MIX
 ! (defensive mixture, see vegas); ZFIX (mode 2: 2 window around (x, Q2), 3
-! tau_zQ bins in the inclusive cuts); DIPALPHA (restricted dipoles, dip41).
+! tau_zQ bins in the inclusive cuts); DIPALPHA (restricted dipoles, dip41);
+! LABSET (mode 3: zeus05).
 !
 ! Mode 2 (nnlo21 validation against NNLOJET): the above-cut part for
 ! ZEUS-like dijets (nnlo21/validation/nnlojet_epLJJ_zeus2j.run), integrated
@@ -47,6 +48,12 @@
 ! projection subtracted event by event: cell (k, b) gets theta(tau_2 >
 ! tcs(k)) [O_b(event) - O_b(1+1 Born at the event's x, Q^2, y)]. 16 rows:
 ! total, >= 1 jet, leading-jet p_T (7), leading-jet y (6), >= 2 jets.
+! LABSET = zeus05 (environment): the set-up of NNLOJET's N3LO P2B paper
+! (1803.09973; ZEUS hep-ex/0502029 'global', analysis/nnlojet.f): E_p = 820
+! GeV, NNPDF31_nnlo_as_0118, Q^2 > 25 GeV^2, y > 0.04, E_e' > 10 GeV; k_t
+! R = 1 (E_T scheme), inclusive jets with E_T > 6 GeV, -1 < eta < 3. 31 rows:
+! >= 1 jet, inclusive-jet eta (8) and E_T (8), Q^2 (7) and x (7) of the
+! events with a jet.
 !
 ! Photon + Z (env EW31 = "mode lepton", as dis31/tests): the flavour
 ! sums from the values with ew31's basis couplings (born_basis, eval_nc). For vi the
@@ -73,7 +80,8 @@ module nlo31_mod
   real(dp), parameter :: gev2pb = 0.3893793721e9_dp
   real(dp), parameter :: CF = 4.0_dp/3, CA = 3
   ! set-up (as NNLOJET's epLJJ run for the comparison)
-  real(dp), parameter :: Ee = 27.5_dp, Ep = 920.0_dp, s = 4*Ee*Ep
+  real(dp), parameter :: Ee = 27.5_dp
+  real(dp) :: Ep = 920.0_dp, s = 4*Ee*920.0_dp
   real(dp), parameter :: q2min = 150, q2max = 15000, ymin = 0.1_dp, ymax = 0.9_dp
   real(dp), parameter :: ptmin = 5, rjet = 1
   integer, parameter :: njmin = 3
@@ -90,7 +98,7 @@ module nlo31_mod
   ! mode 1: fixed (x, Q^2), cells (tau_cut k, tau_zQ bin b) -> k + ntc*(b - 1)
   integer :: mode = 0
   real(dp) :: xfix = 0.01_dp, Q2fix = 400
-  integer, parameter :: ntc = 10, nzb = 6, nobmax = 16, ncell = ntc*nobmax
+  integer, parameter :: ntc = 10, nzb = 6, nobmax = 31, ncell = ntc*nobmax
   real(dp), parameter :: tcs(ntc) = [2e-2_dp, 1e-2_dp, 5e-3_dp, 2e-3_dp, 1e-3_dp, 5e-4_dp, 2e-4_dp, 1e-4_dp, &
        & 3e-5_dp, 1e-5_dp]
   real(dp), parameter :: zlo(nzb) = [0.05_dp, 0.1_dp, 0.2_dp, 0.3_dp, 0.4_dp, 0.05_dp]
@@ -151,6 +159,15 @@ module nlo31_mod
   integer :: t2code = -1
   real(dp), parameter :: l11pt(0:7) = [5.0_dp, 8.0_dp, 11.0_dp, 15.0_dp, 20.0_dp, 30.0_dp, 50.0_dp, 100.0_dp]
   real(dp), parameter :: l11y(0:6) = [-1.0_dp, -0.5_dp, 0.0_dp, 0.5_dp, 1.0_dp, 1.5_dp, 2.5_dp]
+  ! mode 3, LABSET = zeus05: set-up (set_zeus05) and bins of 1803.09973;
+  ! elmin: E_e' cut (lepton, lepton2); pdfname: the PDF set of every mode
+  logical :: zeus05 = .false.
+  real(dp) :: elmin = 0
+  character(32) :: pdfname = 'NNPDF30_nlo_as_0118'
+  real(dp), parameter :: z5eta(0:8) = [-1.0_dp, -0.5_dp, 0.0_dp, 0.5_dp, 1.0_dp, 1.5_dp, 2.0_dp, 2.5_dp, 3.0_dp]
+  real(dp), parameter :: z5et(0:8) = [6.0_dp, 8.0_dp, 10.0_dp, 14.0_dp, 21.0_dp, 29.0_dp, 47.0_dp, 71.0_dp, 127.0_dp]
+  real(dp), parameter :: z5q2(0:7) = [25.0_dp, 50.0_dp, 100.0_dp, 250.0_dp, 630.0_dp, 1600.0_dp, 4000.0_dp, 1e5_dp]
+  real(dp), parameter :: z5x(0:7) = [1e-4_dp, 1e-3_dp, 2.5e-3_dp, 6.3e-3_dp, 1.58e-2_dp, 0.04_dp, 0.1_dp, 1.0_dp]
   integer :: iv = 1                ! the cell VEGAS integrates (mode 1: smallest tau_cut, all tau_zQ)
   real(dp) :: hc(ncell), hc2, hcacc(ncell)
   ! acceptance of the mapped dipole Borns within one eval_sg (all flavour
@@ -225,7 +242,7 @@ contains
     Q2 = q2lo*(q2hi/q2lo)**r(1)
     y = ylo + (yhi - ylo)*r(2)
     xB = Q2/(y*s)
-    ok = xB < 1
+    ok = xB < 1 .and. Ee*(1 - y) + Q2/(4*Ee) > elmin
     jac = 0; eta = 0
     if (.not. ok) return
     eta = xB*(1/xB)**r(3)
@@ -945,24 +962,29 @@ contains
     real(dp), intent(out) :: d(nobmax)
     real(dp) :: oe(nobmax), ob(nobmax), Pp(4), pb(4,1)
     Pp = pin*(s/2)/mdot(pin, klep)
-    call lab11_obs(Pp, p, n, oe)
     pb(:,1) = [0.0_dp, 0.0_dp, -sqrt(Q2cur), 0.0_dp] + xcur*Pp     ! q + x P
-    call lab11_obs(Pp, pb, 1, ob)
+    if (zeus05) then
+       call zeus05_obs(Pp, p, n, oe)
+       call zeus05_obs(Pp, pb, 1, ob)
+    else
+       call lab11_obs(Pp, p, n, oe)
+       call lab11_obs(Pp, pb, 1, ob)
+    endif
     d = oe - ob
   end subroutine p2b_diff
 
-  ! 1+1 lab-frame jet observables of the partons p(4,n) (Breit frame), as
-  ! analysis/lab11_analysis.f. Lab tetrad from Breit-frame vectors: t = P/(2Ep)
-  ! + k/(2Ee), z = P/(2Ep) - k/(2Ee) (proton along +z), x from the outgoing
-  ! lepton orthogonal to t and z, y = the Breit y axis (P, k, k' have no y
-  ! component). Partons with E <= 0 or p_T = 0 are dropped.
-  subroutine lab11_obs(Pp, p, n, o)
+  ! lab-frame momenta q(:,1:nq) of the partons p(4,n) (Breit frame). Lab
+  ! tetrad from Breit-frame vectors: t = P/(2Ep) + k/(2Ee), z = P/(2Ep) -
+  ! k/(2Ee) (proton along +z), x from the outgoing lepton orthogonal to t and
+  ! z, y = the Breit y axis (P, k, k' have no y component). Partons with E <=
+  ! 0 or p_T = 0 are dropped.
+  subroutine lab_partons(Pp, p, n, q, nq)
     integer, intent(in) :: n
     real(dp), intent(in) :: Pp(4), p(4,n)
-    real(dp), intent(out) :: o(nobmax)
-    real(dp) :: tl(4), zl(4), xl(4), v(4), q(4,n), pt(n), yr(n), ph(n), dmin, d, ptl, yl, dph
-    logical :: alive(n), isjet(n)
-    integer :: i, j, nq, ia, ja, nj5, b
+    real(dp), intent(out) :: q(4,n)
+    integer, intent(out) :: nq
+    real(dp) :: tl(4), zl(4), xl(4), v(4)
+    integer :: i
     tl = Pp/(2*Ep) + klep/(2*Ee); zl = Pp/(2*Ep) - klep/(2*Ee)
     v = kout - mdot(kout, tl)*tl + mdot(kout, zl)*zl
     xl = v/sqrt(-mdot(v, v))
@@ -974,6 +996,18 @@ contains
        if (v(1)**2 + v(2)**2 <= (1e-12_dp*v(4))**2) cycle
        nq = nq + 1; q(:,nq) = v
     enddo
+  end subroutine lab_partons
+
+  ! 1+1 lab-frame jet observables of the partons p(4,n) (Breit frame), as
+  ! analysis/lab11_analysis.f
+  subroutine lab11_obs(Pp, p, n, o)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: Pp(4), p(4,n)
+    real(dp), intent(out) :: o(nobmax)
+    real(dp) :: q(4,n), pt(n), yr(n), ph(n), dmin, d, ptl, yl, dph
+    logical :: alive(n), isjet(n)
+    integer :: i, j, nq, ia, ja, nj5, b
+    call lab_partons(Pp, p, n, q, nq)
     alive = .false.; alive(1:nq) = .true.; isjet = .false.
     do while (count(alive) > 0)
        call kin()
@@ -1034,6 +1068,82 @@ contains
       enddo
     end subroutine kin
   end subroutine lab11_obs
+
+  ! LABSET = zeus05: the 31 rows of the partons p(4,n) (Breit frame), as
+  ! analysis/nnlojet.f (NNLOJET's DIS1j runcard): longitudinally invariant
+  ! k_t, R = 1, E_T scheme (p_T summed, y and phi p_T weighted, as FastJet's
+  ! Et_scheme; massless, so eta = y); jets with E_T > 6 GeV, -1 < eta < 3
+  subroutine zeus05_obs(Pp, p, n, o)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: Pp(4), p(4,n)
+    real(dp), intent(out) :: o(nobmax)
+    real(dp) :: q(4,n), pt(n), yr(n), ph(n), dmin, d, dph
+    logical :: alive(n), isjet(n)
+    integer :: i, j, nq, ia, ja, nj, b
+    call lab_partons(Pp, p, n, q, nq)
+    do i = 1, nq
+       pt(i) = sqrt(q(1,i)**2 + q(2,i)**2)
+       yr(i) = 0.5_dp*log((q(4,i) + q(3,i))/max(q(4,i) - q(3,i), 1e-300_dp))
+       ph(i) = atan2(q(2,i), q(1,i))
+    enddo
+    alive = .false.; alive(1:nq) = .true.; isjet = .false.
+    do while (count(alive) > 0)
+       dmin = huge(1.0_dp); ia = 0; ja = 0
+       do i = 1, nq
+          if (.not. alive(i)) cycle
+          if (pt(i)**2 < dmin) then
+             dmin = pt(i)**2; ia = i; ja = 0
+          endif
+          do j = i + 1, nq
+             if (.not. alive(j)) cycle
+             dph = abs(ph(i) - ph(j)); if (dph > pi) dph = 2*pi - dph
+             d = min(pt(i), pt(j))**2*((yr(i) - yr(j))**2 + dph**2)
+             if (d < dmin) then
+                dmin = d; ia = i; ja = j
+             endif
+          enddo
+       enddo
+       if (ja == 0) then
+          alive(ia) = .false.; isjet(ia) = .true.
+       else
+          dph = ph(ja) - ph(ia)
+          if (dph > pi) dph = dph - 2*pi
+          if (dph < -pi) dph = dph + 2*pi
+          yr(ia) = (pt(ia)*yr(ia) + pt(ja)*yr(ja))/(pt(ia) + pt(ja))
+          ph(ia) = ph(ia) + pt(ja)*dph/(pt(ia) + pt(ja))
+          if (ph(ia) > pi) ph(ia) = ph(ia) - 2*pi
+          if (ph(ia) <= -pi) ph(ia) = ph(ia) + 2*pi
+          pt(ia) = pt(ia) + pt(ja); alive(ja) = .false.
+       endif
+    enddo
+    o = 0
+    nj = 0
+    do i = 1, nq
+       if (.not. isjet(i)) cycle
+       if (pt(i) < 6 .or. yr(i) < -1 .or. yr(i) > 3) cycle
+       nj = nj + 1
+       do b = 1, 8
+          if (yr(i) >= z5eta(b-1) .and. yr(i) < z5eta(b)) o(1+b) = o(1+b) + 1
+          if (pt(i) >= z5et(b-1) .and. pt(i) < z5et(b)) o(9+b) = o(9+b) + 1
+       enddo
+    enddo
+    if (nj == 0) return
+    o(1) = 1
+    do b = 1, 7
+       if (Q2cur >= z5q2(b-1) .and. Q2cur < z5q2(b)) o(17+b) = 1
+       if (xcur >= z5x(b-1) .and. xcur < z5x(b)) o(24+b) = 1
+    enddo
+  end subroutine zeus05_obs
+
+  ! LABSET = zeus05 (mode 3): the set-up of 1803.09973 (analysis/nnlojet.f)
+  subroutine set_zeus05()
+    zeus05 = .true.; nob = 31; nv = ntc*nob; iv = ntc
+    Ep = 820; s = 4*Ee*Ep; elmin = 10
+    q2lo = 25; q2hi = s; ylo = 0.04_dp; yhi = 1
+    pdfname = 'NNPDF31_nnlo_as_0118'
+    write(*,'(a)') ' LABSET zeus05: E_p 820 GeV, NNPDF31_nnlo_as_0118, Q2 > 25, y > 0.04, E_e'' > 10;' &
+         & //' k_t R = 1 (E_T), E_T > 6, -1 < eta < 3'
+  end subroutine set_zeus05
 
   ! mode 2: F(k + ntc*(b-1)) = theta(tau_2 > tcs(k)) x (the event passes the
   ! ZEUS-like selection and is in observable bin b)
@@ -1246,7 +1356,7 @@ contains
     y = ylo + (yhi - ylo)*r(2)
     xB = Q2/(y*s)
     jac = Q2*log(q2hi/q2lo)*(yhi - ylo)
-    ok = xB < 1
+    ok = xB < 1 .and. Ee*(1 - y) + Q2/(4*Ee) > elmin
     if (ok) call psmc_init(xB, Q2, y)
   end subroutine lepton2
 
@@ -1719,6 +1829,8 @@ program nlo31
      ! VEGAS target: >= 1 jet row (the total row vanishes identically in P2B)
      nob = 16; nv = ntc*nob; iv = 2*ntc
      q2lo = zq2e(0); q2hi = zq2e(6); ylo = 0.2_dp; yhi = 0.6_dp
+     call get_environment_variable('LABSET', arg)
+     if (trim(arg) == 'zeus05') call set_zeus05()
   endif
   if (mode == 1 .or. mode == 2) then
      call get_environment_variable('P2BSLICE', arg)
@@ -1760,7 +1872,7 @@ program nlo31
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]
   call random_seed(put=sd)
-  call initPDFSetByName('NNPDF30_nlo_as_0118')
+  call initPDFSetByName(trim(pdfname))
   call initPDF(0)
   call setup_flavours()
   virt31_finite_only = .true.
@@ -1790,9 +1902,9 @@ program nlo31
         write(*,'(a,2f5.2,10es16.8)') ' CELL ', zlo(i), zhi(i), hc(1 + ntc*(i - 1):ntc*i)
      enddo
   elseif (mode == 3) then
-     write(*,'(a)') ' LCELLS sigma per bin [pb] above the cut, O(event) - O(Born): lab11 bin, then tau_cut columns'
+     write(*,'(a)') ' LCELLS sigma per bin [pb] above the cut, O(event) - O(Born): lab11 or zeus05 row, then tau_cut columns'
      write(*,'(a,10es12.3)') ' tau_cut     ', tcs
-     do i = 1, 16
+     do i = 1, nob
         write(*,'(a,i3,10es16.8)') ' LCELL ', i, hc(1 + ntc*(i - 1):ntc*i)
      enddo
   elseif (mode == 2) then
