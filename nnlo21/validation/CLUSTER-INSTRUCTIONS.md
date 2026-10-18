@@ -7,6 +7,57 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 18 Oct: Z05 — N3LO 1+1 jets by P2B in the ZEUS set-up of NNLOJET's N3LO paper, with scales (AK: go, ≤ 50k core-h)
+
+Goal: N3LO P2B for lab-frame inclusive jets in the set-up of 1803.09973 (Currie et al., ZEUS hep-ex/0502029
+'global'), against the paper's N3LO, at 7 scales. Everything else is done at MPP (notebook 18 Oct; page
+https://claude.ai/artifact/Sa7MEGe3N2f5p1SudqcN5x): NNLOJET's LO/NLO/NNLO (AK's files), disorder LO–NNLO and the
+inclusive N3LO coefficient at 7 scales, and our NLO and NNLO 1+1 by P2B on our 2+1, which agree with NNLOJET (also
+at 7 scales). Here only the NNLO 2+1 parts. Sizing from a 112-job pilot at MPP: r carries > 90 % of the variance;
+the budget resolves η 1–3 and E_T 6–21 GeV (6–27 % of the paper's N3LO correction), not η < 0.5 (known, AK agreed).
+1. Build **bin12** from `origin/2026-10-nnlo21-ncc` at this commit or later (`nnlo21/build_sliced21.sh`). New
+   requirements: HOPPET (`hoppet-config` on PATH; nlo31 and sliced21 now link it, as disorder does) and the LHAPDF
+   set `NNPDF31_nnlo_as_0118`. Checks (all should be quick):
+   - `nlo31 chk 1 1` as for bin11 (the kp_conv lines ≤ 1e-7);
+   - one J8 r seed with bin12 and bin11, same command: identical output (default configurations are
+     bit-identical, 91/91 at MPP; only the header line of the mode-3 LCELLS table changed);
+   - `LABSET=zeus05 SCALES=3 VTARGET=0 VEGAS_MIX=0.2 VEGAS_EQUAL=2 nlo31 r 20000 2 61 1d-9 3 0 0 psmc 0 0 1d-12`:
+     31 LCELL and 217 SCELL lines; the SCELL lines with scales `1.00 1.00` equal the LCELL lines exactly.
+2. Tables (all jobs with `LABSET=zeus05`): beam grids, 5 × 44 jobs of a few minutes each,
+   `sliced21 mktab i i $P/tables/z05` and with `LPGVAR='2 0'` → `$P/tables/z05_x2`, `'0.5 0'` → `z05_xh`,
+   `'2 1'` → `z05_p2`, `'0.5 1'` → `z05_ph`, i = 0 … 43 (check: 44 files each). Soft table as before (softG.tab).
+3. Runs. Environment for all: `LABSET=zeus05 SCALES=3`; mode-3 arguments `M3 = 1d-9 3 0 0 psmc 0 0 1d-12`;
+   `RV = VEGAS_EQUAL=2 VTARGET=0 VEGAS_MIX=0.2`. One directory per part under `$P/Z05/<part>/`, logs
+   `<part>_<seed>.out`. Core-h from MPP thserv timings (cluster cores may differ; see item 4):
+
+   | part | command | seeds | jobs | ≈ h/job | ≈ core-h |
+   |---|---|---|---|---|---|
+   | r | `RV nlo31 r 2000000 6 <seed> M3` | 60001–78700 | 18700 | 2.0 | 37000 |
+   | vi | `nlo31 vi 1000000 6 <seed> M3` | 80001–82729 | 2729 | 1.8 | 4800 |
+   | kp | `nlo31 kp 2000000 6 <seed> M3` | 83001–85479 | 2479 | 0.16 | 400 |
+   | b2 | `sliced21 b2 5000000 6 <seed> p2b $P/tables/z05 softG.tab` | 86001–86729 | 729 | 2.5 | 1800 |
+   | rc1 | `RV TECHDIFF=1 TECHMIN='1d-10 1d-8' nlo31 r 1000000 6 <seed> M3` | 87001–88000 | 1000 | 1.0 | 1000 |
+   | rc2 | `RV TECHDIFF=1 TECHMIN='1d-11 1d-9' TECHREF='1d-10 1d-8' nlo31 r 1000000 6 <seed> 1d-9 3 0 0 psmc 0 0 1d-14` | 88001–89000 | 1000 | 1.0 | 1000 |
+   | b0 | `sliced21 b0 10000000 6 <seed> p2b none` | 89001–89200 | 200 | 0.1 | 20 |
+   | b1 | `sliced21 b1 3000000 6 <seed> p2b $P/tables/z05 softG.tab` | 89201–89600 | 400 | 1.5 | 600 |
+   | lo | `nlo31 lo 20000000 6 <seed> M3` | 89601–90000 | 400 | 1.1 | 440 |
+
+   About 47k core-h and 27.6k jobs (feed them: the 30k queue limit). b2, b1 load the grid variants by the
+   suffixes themselves (`z05_x2` … `z05_ph` next to `z05`). b0, b1, lo with SCALES=3 are the renormalisation-group
+   terms of the lower orders (they are zero at the central scale, by construction).
+4. First wave: 5 % of every part (≈ 1.4k jobs). From it (a) CPU per job per part (`cpu_summary.py`) and the
+   projected total: if it exceeds **50k core-h**, cut the r seeds (from the top of the range) to fit 48k and say
+   so in the notes; (b) the means at τ_cut 1e-4 against the MPP pilot (16 seeds each, r 32 at 1M × 6; σ per bin
+   in pb; r here has 2M calls per iteration, same expectation): ≥ 1 jet / η 2–2.5 (row 8) / E_T 6–8 (row 10):
+   b2 73284 ± 41 / 11133 ± 7 / 37003 ± 39; vi −13213 ± 198 / −2848 ± 13 / −5443 ± 224; kp 6922 ± 39 / 1241 ± 6 /
+   3642 ± 47; r −63501 ± 2308 / −9640 ± 259 / −31578 ± 2605. Agreement within ≈ 3σ: continue without waiting;
+   otherwise stop and report.
+5. Report (REPORT-…-Z05; an interim one when r is at ≈ 25 %, the final one at the end): `nnlo21/cluster/summary_z05.py
+   $P/Z05` writes `Z05-summary.json.gz` (per part, scale, row, τ_cut: n, mean, sd, 1.48 MAD; ≈ 0.1 MB per part)
+   and prints the N3LO P2B part per row; add CPU per part (`cpu_summary.py`), failed jobs, and the fraction of seeds
+   beyond 20 MAD per part. Push the report and the summary file to the results branch (with AK's OK, as before).
+   The combination with the inclusive N3LO coefficient and the comparison with the paper are done at MPP.
+
 ## UPDATE 17 Oct: error budget per part for the efficiency work (analysis only, no jobs)
 
 AK (16 Oct): next is efficiency. At MPP, from the J8 per-seed outputs: the real part r is 84–91% of the cost per
