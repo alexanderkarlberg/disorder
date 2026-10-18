@@ -18,5 +18,5 @@ for m in ew31 psmc born31 me41 dip41 virt31 iop31 nlo31; do
   $F9 -c $D/$m.f90 -o $m.o; O="$O $m.o"
 done
 L=$($LC --libdir)
-gfortran -O2 -o nlo31 $O -L$L -lLHAPDF -Wl,-rpath,$L -lstdc++
+gfortran -O2 -o nlo31 $O -L$L -lLHAPDF -Wl,-rpath,$L $(hoppet-config --libs) -lstdc++
 echo "built $W/nlo31"

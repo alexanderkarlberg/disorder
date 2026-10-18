@@ -17,6 +17,6 @@ FF="gfortran -O2 -ffixed-line-length-132 -ffree-line-length-none -I$M/src/Inc -I
 $FF -c "$here/sliced21.f90"
 OBJ=$(ls *.o | grep -v -e '^test_lp21.o$' -e '^spinoru_dis.o$' -e '^lnrat.o$')   # dis31 has its own lnrat, spinoru
 DOBJ=$(ls dis31/*.o | grep -v -e 'dis31/nlo31.o$')
-gfortran -O2 -o sliced21 $OBJ $DOBJ $(lhapdf-config --libs) -Wl,-rpath,$(lhapdf-config --libdir) \
+gfortran -O2 -o sliced21 $OBJ $DOBJ $(lhapdf-config --libs) -Wl,-rpath,$(lhapdf-config --libdir) $(hoppet-config --libs) \
   -L$L -Wl,-rpath,$L -lnnlojet_core -lstdc++
 echo "built $B/sliced21 and $B/dis31/nlo31"

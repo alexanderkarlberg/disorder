@@ -35,20 +35,6 @@
 ! c1, c2(it,c): the O(alpha_s/2pi) and O((alpha_s/2pi)^2) coefficients of
 ! the cumulant in the same units (divide by f0 for per-Born factors).
 !-----------------------------------------------------------------------
-subroutine fdist(ih, x, xmu, fx, ibeam)
-  implicit none
-  integer :: ih, ibeam
-  double precision :: x, xmu, fx(-5:5), f(-6:6)
-  integer :: lpmask
-  common/lpmask/lpmask
-  call evolvePDF(x, xmu, f)
-  fx = f(-5:5) / x
-  if (lpmask == 1) fx(0) = 0
-  if (lpmask == 2) then
-     fx(-5:-1) = 0; fx(1:5) = 0
-  endif
-end subroutine fdist
-
 module lp21
   use SCET_Jet, only: jetq, jetg
   use mod_slicing_scet, only: soft_G
@@ -70,7 +56,14 @@ module lp21
   ! gq0 + gqh*i, i = 0..nqg-1, each a table as tab; cubic in ln Q
   integer, save :: nqg = 0
   real(dp), save :: gq0, gqh
-  real(dp), allocatable, save :: tabg(:,:,:,:)    ! (0:nt, 9, nbc, 0:nqg-1)
+  real(dp), allocatable, save :: tabg(:,:,:,:,:)  ! (0:nt, 9, nbc, 0:nqg-1, lp21_nsl)
+  ! grid slots (scale variations, 18 Oct): slot s holds the grid of the PDF
+  ! variant (lp21_xif(s), lp21_gid(s)) (fdist); lp21_slot selects the slot
+  ! of beam_at and the variant of fdist (also for building and for the direct
+  ! evaluation outside the grid); lp21_nsl slots are allocated
+  integer, parameter, public :: nslot = 5
+  integer, public, save :: lp21_nsl = 1, lp21_slot = 1, lp21_gid(nslot) = 0
+  real(dp), public, save :: lp21_xif(nslot) = 1
   public :: lp21_init, lp21_born, lp21_beam_direct, lp21_shift, beam_at
   public :: lp21_grid_build, lp21_grid_load, lp21_setq
   ! W exchange (9 Oct): b without coupling, so not in the down-type classes;
@@ -164,10 +157,12 @@ contains
        inquire(unit=u, size=sz)
        if (sz /= 28 + 8_8*(n + 1)*9*nbc + merge(4, 0, lp21_nodn)) &
             & stop 'lp21_grid_load: not a table of nbc beam classes for this boson (old format, or b in the down classes: rebuild)'
-       if (i == 0) then
+       if (i == 0 .and. .not. allocated(tabg)) then
           nt = n; t0 = a; th = b; q0 = q
-          if (allocated(tabg)) deallocate(tabg)
-          allocate(tabg(0:nt, 9, nbc, 0:nqg-1))
+          allocate(tabg(0:nt, 9, nbc, 0:nqg-1, lp21_nsl))
+       elseif (i == 0) then
+          if (n /= nt .or. a /= t0 .or. b /= th .or. size(tabg, 4) /= nqg) stop 'lp21_grid_load: slots differ in nodes'
+          q0 = q
        elseif (n /= nt .or. a /= t0 .or. b /= th) then
           stop 'lp21_grid_load: tables differ in xi nodes'
        endif
@@ -176,7 +171,7 @@ contains
        elseif (i > 1) then
           if (abs(log(q) - (gq0 + gqh*i)) > 1e-10_dp) stop 'lp21_grid_load: Q nodes not equally spaced'
        endif
-       read(u) tabg(:,:,:,i)
+       read(u) tabg(:,:,:,i,lp21_slot)
        close(u)
     enddo
     if (log(Qlo) < gq0 + gqh .or. log(Qhi) > gq0 + gqh*(nqg - 2)) stop 'lp21_grid_load: Q range not covered'
@@ -309,7 +304,7 @@ contains
     b = 0
     do l = 1, 4
        do k = 1, 4
-          b = b + wq(l)*w(k)*tabg(ix + k - 2,:,:,iq + l - 2)
+          b = b + wq(l)*w(k)*tabg(ix + k - 2,:,:,iq + l - 2,lp21_slot)
        enddo
     enddo
   contains
@@ -444,3 +439,26 @@ contains
     enddo
   end subroutine iijm6
 end module lp21
+
+! the PDFs of MCFM's beam functions: f at mu (default), or the variant of the
+! selected grid slot (scale variations: g at xif mu, g = f, P0 x f, P1 x f,
+! P0 x P0 x f; HOPPET, nf = 5)
+subroutine fdist(ih, x, xmu, fx, ibeam)
+  use lp21, only: lp21_slot, lp21_xif, lp21_gid
+  implicit none
+  integer :: ih, ibeam
+  double precision :: x, xmu, fx(-5:5), f(-6:6)
+  integer, parameter :: il(3) = [1, 2, 11]
+  integer :: lpmask
+  common/lpmask/lpmask
+  if (lp21_gid(lp21_slot) == 0) then
+     call evolvePDF(x, lp21_xif(lp21_slot)*xmu, f)
+  else
+     call hoppetEvalSplit(x, lp21_xif(lp21_slot)*xmu, il(lp21_gid(lp21_slot)), 5, f)
+  endif
+  fx = f(-5:5) / x
+  if (lpmask == 1) fx(0) = 0
+  if (lpmask == 2) then
+     fx(-5:-1) = 0; fx(1:5) = 0
+  endif
+end subroutine fdist

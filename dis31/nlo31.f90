@@ -32,7 +32,7 @@
 ! target cell); VEGAS_EQUAL (iteration weights of the cells); VEGAS_MIX
 ! (defensive mixture, see vegas); ZFIX (mode 2: 2 window around (x, Q2), 3
 ! tau_zQ bins in the inclusive cuts); DIPALPHA (restricted dipoles, dip41);
-! LABSET (mode 3: zeus05).
+! LABSET (mode 3: zeus05); SCALES (mode 3: the 7 scales, nlo31_mod).
 !
 ! Mode 2 (nnlo21 validation against NNLOJET): the above-cut part for
 ! ZEUS-like dijets (nnlo21/validation/nnlojet_epLJJ_zeus2j.run), integrated
@@ -168,6 +168,19 @@ module nlo31_mod
   real(dp), parameter :: z5et(0:8) = [6.0_dp, 8.0_dp, 10.0_dp, 14.0_dp, 21.0_dp, 29.0_dp, 47.0_dp, 71.0_dp, 127.0_dp]
   real(dp), parameter :: z5q2(0:7) = [25.0_dp, 50.0_dp, 100.0_dp, 250.0_dp, 630.0_dp, 1600.0_dp, 4000.0_dp, 1e5_dp]
   real(dp), parameter :: z5x(0:7) = [1e-4_dp, 1e-3_dp, 2.5e-3_dp, 6.3e-3_dp, 1.58e-2_dp, 0.04_dp, 0.1_dp, 1.0_dp]
+  ! scale variations (env SCALES = N, mode 3; 18 Oct): the O(a^N) coefficient
+  ! (a = alpha_s/2pi) of the P2B cells at the 7 (xi_R, xi_F) of disorder and
+  ! NNLOJET, by the renormalisation group: a part of order n (a(Q)^n c_n x
+  ! f(Q), nord) gives a(xi_R Q)^N sum_g k_g c_n x g(xi_F Q) with g = f, P0 x
+  ! f, P1 x f, P0 x P0 x f (HOPPET, nf = 5) and k_g from scale_coefs; the
+  ! logs of c_n stay at Q. Cells per scale hcs (SCELL)
+  integer :: nscl = 0, nord = 0
+  integer, parameter :: nsc = 7
+  real(dp), parameter :: scr(nsc) = [1.0_dp, 2.0_dp, 0.5_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp]
+  real(dp), parameter :: scf(nsc) = [1.0_dp, 2.0_dp, 0.5_dp, 1.0_dp, 1.0_dp, 2.0_dp, 0.5_dp]
+  real(dp), parameter :: xis(3) = [1.0_dp, 2.0_dp, 0.5_dp]     ! mu_F = xis(j) Q, j = sj(scale)
+  integer, parameter :: sj(nsc) = [1, 2, 3, 1, 1, 2, 3]
+  real(dp) :: hcs(ncell,nsc), hcsacc(ncell,nsc)
   integer :: iv = 1                ! the cell VEGAS integrates (mode 1: smallest tau_cut, all tau_zQ)
   real(dp) :: hc(ncell), hc2, hcacc(ncell)
   ! acceptance of the mapped dipole Borns within one eval_sg (all flavour
@@ -406,10 +419,10 @@ contains
     real(dp), intent(in) :: r(:), wgt
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,7), dphi, as, fpdf(-5:5), w, x, fa(-5:5)
-    real(dp) :: u1(3), u2(3), u4(3), m3(3,3), c3(3,3), t(3), eq1, eq2, acc(nv)
-    real(dp) :: v1(3,2), v2(3,2), v4(3,2), va(3,2), vb(3,2), lv1(3), lv2(3), w1(3,6), w2(3,6)
-    logical :: ok
-    integer :: f, Q, k, j1, j1o, j2, j2o
+    real(dp) :: u1(3), u2(3), u4(3), m3(3,3), c3(3,3), t(3), acc(nv)
+    real(dp) :: v1(3,2), v2(3,2), v4(3,2), va(3,2), vb(3,2), lv1(3), lv2(3), w1(3,6), w2(3,6), sv(ncell,0:3,3)
+    logical :: ok, need(0:3,3)
+    integer :: k, j, j1, j1o, j2, j2o
     res = 0
     if (usepsmc .and. mode >= 2) then
        call lepton2(r(1:2), Q2, y, xB, jac, ok)
@@ -448,11 +461,6 @@ contains
        call born_eval(Pk, [-j1o, -j1, -j1, j1], Q2, w2(:,3)); call born_eval(Pk, [-j1o, -j1, -j1o, j1o], Q2, w2(:,4))
        call born_eval(Pk, [-j1o, -j1o, -j2, j2o], Q2, w2(:,5)); call born_eval(Pk, [-j1, -j1, -j1, j1o], Q2, w2(:,6))
        call born_eval(Pk, [0, j1o, -j1, 0], Q2, t)
-       res = bterm(0, 2*t)
-       do f = -5, 5
-          if (f == 0) cycle
-          res = res + bterm(f, matmul(merge(w1, w2, f > 0), cc_w(f, j1, j1o, j2, j2o, 0.5_dp)))
-       enddo
     elseif (ew31_mode /= 0) then
        ! photon + Z: basis values (diagonal, off-diagonal) on the line of
        ! flavour 1 (and 2), weighted per flavour
@@ -462,15 +470,6 @@ contains
           call born_basis(Pk, [1, 1, 1, -1], Q2, k, 1, v4(:,k))
           call born_basis(Pk, [1, 1, 2, -2], Q2, k, 1, va(:,k))
           call born_basis(Pk, [1, 1, 2, -2], Q2, k, 2, vb(:,k))
-       enddo
-       do f = -5, 5
-          if (f == 0) cycle
-          if (f > 0) res = res + bterm(0, ncv(v2, f))
-          res = res + 0.5_dp*bterm(f, ncv(v1 + v4, f))
-          do Q = 1, 5
-             if (Q == abs(f)) cycle
-             res = res + bterm(f, ncv(va, f) + ncv(vb, sign(Q, f)))
-          enddo
        enddo
     else
        ! unit-charge values: q g g (d), g -> q qbar g (d), identical (d)
@@ -491,36 +490,80 @@ contains
        do k = 1, 3
           call solve3(m3(k,:), c3(k,:))
        enddo
-       do f = -5, 5
-          if (f == 0) then
-             ! g -> q qbar g
-             do Q = 1, 5
-                res = res + bterm(0, ech(Q)**2*u2 + ech(Q)*lv2)
-             enddo
-             cycle
-          endif
-          eq1 = ech(f)
-          res = res + 0.5_dp*bterm(f, eq1**2*u1 + eq1*lv1)
-          res = res + 0.5_dp*bterm(f, eq1**2*u4)
-          do Q = 1, 5
-             if (Q == abs(f)) cycle
-             eq2 = ech(Q)
-             t = eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3)
-             res = res + bterm(f, t)
-          enddo
-       enddo
     endif
-    res = res*w
+    res = fsum()*w
     if (mode >= 1) then
        if (res /= res) then
           res = 0; return
        endif
        hcacc(1:nv) = hcacc(1:nv) + res*wgt*acc
+       if (nscl > 0) then
+          call scale_need(nord, need)
+          do k = 0, 3
+             do j = 1, 3
+                if (need(k,j)) sv(:,k,j) = fsb(k, j)
+             enddo
+          enddo
+          call scale_add(nord, sqrt(Q2), as, w*wgt, sv)
+       endif
        res = res*vtarget(acc)
     elseif (res /= 0) then
        call fill(Q2, res*wgt)
     endif
   contains
+    ! the flavour sum with the PDFs fpdf (and fa, kp)
+    real(dp) function fsum() result(r)
+      real(dp) :: tt(3), eq1, eq2
+      integer :: f, Q
+      r = 0
+      if (ew31_mode == 2) then
+         r = bterm(0, 2*t)
+         do f = -5, 5
+            if (f == 0) cycle
+            r = r + bterm(f, matmul(merge(w1, w2, f > 0), cc_w(f, j1, j1o, j2, j2o, 0.5_dp)))
+         enddo
+      elseif (ew31_mode /= 0) then
+         do f = -5, 5
+            if (f == 0) cycle
+            if (f > 0) r = r + bterm(0, ncv(v2, f))
+            r = r + 0.5_dp*bterm(f, ncv(v1 + v4, f))
+            do Q = 1, 5
+               if (Q == abs(f)) cycle
+               r = r + bterm(f, ncv(va, f) + ncv(vb, sign(Q, f)))
+            enddo
+         enddo
+      else
+         do f = -5, 5
+            if (f == 0) then
+               ! g -> q qbar g
+               do Q = 1, 5
+                  r = r + bterm(0, ech(Q)**2*u2 + ech(Q)*lv2)
+               enddo
+               cycle
+            endif
+            eq1 = ech(f)
+            r = r + 0.5_dp*bterm(f, eq1**2*u1 + eq1*lv1)
+            r = r + 0.5_dp*bterm(f, eq1**2*u4)
+            do Q = 1, 5
+               if (Q == abs(f)) cycle
+               eq2 = ech(Q)
+               tt = eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3)
+               r = r + bterm(f, tt)
+            enddo
+         enddo
+      endif
+    end function fsum
+    ! scale variations: the cells with PDF variant i at mu_F = xis(j) Q
+    function fsb(i, j) result(v)
+      integer, intent(in) :: i, j
+      real(dp) :: v(ncell), f0(-5:5), fa0(-5:5)
+      f0 = fpdf; fa0 = fa
+      call pdfg(i, eta, xis(j)*sqrt(Q2), fpdf)
+      if (trim(part) == 'kp') call pdfg(i, eta/x, xis(j)*sqrt(Q2), fa)
+      v = 0
+      v(1:nv) = fsum()*acc
+      fpdf = f0; fa = fa0
+    end function fsb
     ! photon + Z: the basis values v(:,k) of a line of flavour f weighted;
     ! vi: the closed-loop term v(2,:) with ew31_wl
     function ncv(v, f) result(t)
@@ -665,10 +708,11 @@ contains
     real(dp), intent(in) :: r(:), wgt
     real(dp), external :: alphasPDF
     real(dp) :: Q2, y, xB, eta, jac, Pk(4,8), dphi, as, fpdf(-5:5), w, smin, W2
-    real(dp) :: u1(nv), u2(nv), u4(nv), u6(nv), m3(nv,3), c3(nv,3), m5(nv,3), c5(nv,3), eq1, eq2, sg(nv), F4(nv)
-    real(dp) :: n1(nv,2), n2(nv,2), n4(nv,2), n6(nv,2), nqa(nv,2), nqb(nv,2), ga(nv,2), gb(nv,2), wf(2)
-    integer :: i, j, f, Q, Q2i, ic, tdw
-    logical :: ok
+    real(dp) :: u1(nv), u2(nv), u4(nv), u6(nv), m3(nv,3), c3(nv,3), m5(nv,3), c5(nv,3), sg(nv), F4(nv)
+    real(dp) :: n1(nv,2), n2(nv,2), n4(nv,2), n6(nv,2), nqa(nv,2), nqb(nv,2), ga(nv,2), gb(nv,2)
+    real(dp) :: r1(nv,6), r2(nv,6), rg(nv,4), sv(ncell,0:3,3)
+    integer :: i, j, ic, tdw, j1, j1o, j2, j2o
+    logical :: ok, need(0:3,3)
     res = 0; nac = 0
     if (usepsmc .and. mode >= 2) then
        call lepton2(r(1:2), Q2, y, xB, jac, ok)
@@ -735,6 +779,15 @@ contains
           res = 0; return
        endif
        hcacc(1:nv) = hcacc(1:nv) + sg*w*wgt
+       if (nscl > 0) then
+          call scale_need(nord, need)
+          do i = 0, 3
+             do j = 1, 3
+                if (need(i,j)) sv(:,i,j) = fsr(i, j)
+             enddo
+          enddo
+          call scale_add(nord, sqrt(Q2), as, w*wgt, sv)
+       endif
        res = vtarget(sg)*w
     else
        res = sg(1)*w
@@ -760,26 +813,67 @@ contains
        do ic = 1, nv
           call solve3(m3(ic,:), c3(ic,:)); call solve3(m5(ic,:), c5(ic,:))
        enddo
-       sg = 0
-       do f = -5, 5
-          if (f == 0) cycle
-          eq1 = ech(f)
-          sg = sg + fpdf(f)*eq1**2*(u1/6 + u4/2)
-          do Q = 1, 5
-             if (Q == abs(f)) cycle
-             eq2 = ech(Q)
-             sg = sg + fpdf(f)*(eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3))
-          enddo
-       enddo
-       do Q = 1, 5
-          eq1 = ech(Q)
-          sg = sg + fpdf(0)*eq1**2*(u2/2 + u6/4)
-          do Q2i = Q + 1, 5
-             eq2 = ech(Q2i)
-             sg = sg + fpdf(0)*(eq1**2*c5(:,1) + eq2**2*c5(:,2) + eq1*eq2*c5(:,3))
-          enddo
-       enddo
+       sg = fsum_r()
     end subroutine eval_sg
+    ! the flavour sum with the PDFs fpdf
+    function fsum_r() result(sg)
+       real(dp) :: sg(nv), eq1, eq2, wf(2)
+       integer :: f, Q, Q2i
+       sg = 0
+       if (ew31_mode == 2) then
+          sg = fpdf(0)*2*matmul(rg, [0.5_dp, 3.0_dp, 0.5_dp, 0.5_dp])
+          do f = -5, 5
+             if (f == 0) cycle
+             sg = sg + fpdf(f)*matmul(merge(r1, r2, f > 0), cc_w(f, j1, j1o, j2, j2o, 1.0_dp/6))
+          enddo
+       elseif (ew31_mode /= 0) then
+          do f = -5, 5
+             if (f == 0) cycle
+             wf = ncw(f, Q2)
+             sg = sg + fpdf(f)*matmul(n1/6 + n4/2, wf)
+             do Q = 1, 5
+                if (Q == abs(f)) cycle
+                sg = sg + fpdf(f)*(matmul(nqa, wf) + matmul(nqb, ncw(sign(Q, f), Q2)))
+             enddo
+          enddo
+          do Q = 1, 5
+             wf = ncw(Q, Q2)
+             sg = sg + fpdf(0)*matmul(n2/2 + n6/4, wf)
+             do Q2i = Q + 1, 5
+                sg = sg + fpdf(0)*(matmul(ga, wf) + matmul(gb, ncw(Q2i, Q2)))
+             enddo
+          enddo
+       else
+          do f = -5, 5
+             if (f == 0) cycle
+             eq1 = ech(f)
+             sg = sg + fpdf(f)*eq1**2*(u1/6 + u4/2)
+             do Q = 1, 5
+                if (Q == abs(f)) cycle
+                eq2 = ech(Q)
+                sg = sg + fpdf(f)*(eq1**2*c3(:,1) + eq2**2*c3(:,2) + eq1*eq2*c3(:,3))
+             enddo
+          enddo
+          do Q = 1, 5
+             eq1 = ech(Q)
+             sg = sg + fpdf(0)*eq1**2*(u2/2 + u6/4)
+             do Q2i = Q + 1, 5
+                eq2 = ech(Q2i)
+                sg = sg + fpdf(0)*(eq1**2*c5(:,1) + eq2**2*c5(:,2) + eq1*eq2*c5(:,3))
+             enddo
+          enddo
+       endif
+    end function fsum_r
+    ! scale variations: the cells with PDF variant i at mu_F = xis(j) Q
+    function fsr(i, j) result(v)
+      integer, intent(in) :: i, j
+      real(dp) :: v(ncell), f0(-5:5)
+      f0 = fpdf
+      call pdfg(i, eta, xis(j)*sqrt(Q2), fpdf)
+      v = 0
+      v(1:nv) = fsum_r()
+      fpdf = f0
+    end function fsr
     ! photon + Z: basis values on the line of flavour 1 (and 2), as born_part
     subroutine eval_nc()
        integer :: k
@@ -793,30 +887,12 @@ contains
           call real_basis([0, 1, -1, 2, -2], k, 1, ga(:,k))
           call real_basis([0, 1, -1, 2, -2], k, 2, gb(:,k))
        enddo
-       sg = 0
-       do f = -5, 5
-          if (f == 0) cycle
-          wf = ncw(f, Q2)
-          sg = sg + fpdf(f)*matmul(n1/6 + n4/2, wf)
-          do Q = 1, 5
-             if (Q == abs(f)) cycle
-             sg = sg + fpdf(f)*(matmul(nqa, wf) + matmul(nqb, ncw(sign(Q, f), Q2)))
-          enddo
-       enddo
-       do Q = 1, 5
-          wf = ncw(Q, Q2)
-          sg = sg + fpdf(0)*matmul(n2/2 + n6/4, wf)
-          do Q2i = Q + 1, 5
-             sg = sg + fpdf(0)*(matmul(ga, wf) + matmul(gb, ncw(Q2i, Q2)))
-          enddo
-       enddo
+       sg = fsum_r()
     end subroutine eval_nc
     ! W exchange: representative channels as born_part (gluon: g -> q qbar
     ! g g, and with a neutral pair: different, identical quarks, identical
     ! antiquarks)
     subroutine eval_cc()
-       real(dp) :: r1(nv,6), r2(nv,6), rg(nv,4)
-       integer :: j1, j1o, j2, j2o
        call cc_reps(j1, j1o, j2, j2o)
        call real_evalv(Pk, [j1, j1o, 0, 0, 0], F4, r1(:,1)); call real_evalv(Pk, [j1, j1o, 5, -5, 0], F4, r1(:,2))
        call real_evalv(Pk, [j1, j1o, j1o, -j1o, 0], F4, r1(:,3)); call real_evalv(Pk, [j1, j1o, j1, -j1, 0], F4, r1(:,4))
@@ -826,11 +902,7 @@ contains
        call real_evalv(Pk, [-j1o, -j1o, -j2, j2o, 0], F4, r2(:,5)); call real_evalv(Pk, [-j1, -j1, -j1, j1o, 0], F4, r2(:,6))
        call real_evalv(Pk, [0, j1o, -j1, 0, 0], F4, rg(:,1)); call real_evalv(Pk, [0, j1o, -j1, 5, -5], F4, rg(:,2))
        call real_evalv(Pk, [0, j1o, -j1, j1o, -j1o], F4, rg(:,3)); call real_evalv(Pk, [0, j1o, -j1, j1, -j1], F4, rg(:,4))
-       sg = fpdf(0)*2*matmul(rg, [0.5_dp, 3.0_dp, 0.5_dp, 0.5_dp])
-       do f = -5, 5
-          if (f == 0) cycle
-          sg = sg + fpdf(f)*matmul(merge(r1, r2, f > 0), cc_w(f, j1, j1o, j2, j2o, 1.0_dp/6))
-       enddo
+       sg = fsum_r()
     end subroutine eval_cc
     subroutine real_basis(fl, k, fb, val)
        integer, intent(in) :: fl(5), k, fb
@@ -1144,6 +1216,103 @@ contains
     write(*,'(a)') ' LABSET zeus05: E_p 820 GeV, NNPDF31_nnlo_as_0118, Q2 > 25, y > 0.04, E_e'' > 10;' &
          & //' k_t R = 1 (E_T), E_T > 6, -1 < eta < 3'
   end subroutine set_zeus05
+
+  ! scale variations: the RG coefficients k_g (g = f, P0 x f, P1 x f, P0 x
+  ! P0 x f) of a part of order n in the O(a^nscl) coefficient, L = ln xi^2;
+  ! from a(Q) = a + b0 L_R a^2 + (b0^2 L_R^2 + b1 L_R) a^3 and f(Q) = f -
+  ! a L_F P0 f + a^2 [-L_F P1 + L_F^2/2 P0 P0 + b0 (L_F^2/2 - L_F L_R) P0] f
+  ! (a, f at xi_R Q, xi_F Q; da/dln mu^2 = -b0 a^2 - b1 a^3, nf = 5)
+  subroutine scale_coefs(n, LR, LF, k)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: LR, LF
+    real(dp), intent(out) :: k(0:3)
+    real(dp), parameter :: b0 = (33 - 2*5)/6.0_dp, b1 = (153 - 19*5)/6.0_dp
+    k = 0
+    select case (nscl - n)
+    case (0)
+       k(0) = 1
+    case (1)
+       k(0) = n*b0*LR; k(1) = -LF
+    case (2)
+       if (n /= 1) stop 'scale_coefs: N - n = 2 needs n = 1'
+       k(0) = b0**2*LR**2 + b1*LR; k(1) = b0*(LF**2/2 - 2*LF*LR); k(2) = -LF; k(3) = LF**2/2
+    case default
+       stop 'scale_coefs: SCALES = N needs n <= N <= n + 2'
+    end select
+  end subroutine scale_coefs
+
+  ! scale variations: the PDF variants (i, j) (variant i at mu_F = xis(j) Q;
+  ! i = 0 f, 1 P0 x f, 2 P1 x f, 3 P0 x P0 x f) a part of order n needs
+  subroutine scale_need(n, need)
+    integer, intent(in) :: n
+    logical, intent(out) :: need(0:3,3)
+    real(dp) :: k(0:3)
+    integer :: m
+    need = .false.
+    do m = 1, nsc
+       call scale_coefs(n, 2*log(scr(m)), 2*log(scf(m)), k)
+       need(:,sj(m)) = need(:,sj(m)) .or. k /= 0
+    enddo
+  end subroutine scale_need
+
+  ! scale variations: the current event of order n (weight w with a(Q)^n,
+  ! as = alpha_s(Q)) into the 7 scale cells; sv(:, i, j): its cells with
+  ! the PDF variants of scale_need
+  subroutine scale_add(n, Q, as, w, sv)
+    integer, intent(in) :: n
+    real(dp), intent(in) :: Q, as, w, sv(ncell,0:3,3)
+    real(dp), external :: alphasPDF
+    real(dp) :: k(0:3), v(ncell), aR
+    integer :: m, i
+    do m = 1, nsc
+       call scale_coefs(n, 2*log(scr(m)), 2*log(scf(m)), k)
+       v = 0
+       do i = 0, 3
+          if (k(i) /= 0) v = v + k(i)*sv(:,i,sj(m))
+       enddo
+       aR = alphasPDF(scr(m)*Q)/(2*pi)
+       hcsacc(:,m) = hcsacc(:,m) + v*w*aR**nscl/(as/(2*pi))**n
+    enddo
+  end subroutine scale_add
+
+  ! PDF variant i at x, mu: f (as pdfs), P0 x f, P1 x f, P0 x P0 x f (i = 1,
+  ! 2, 3; HOPPET, nf = 5, normalised to alpha_s/2pi), number densities
+  subroutine pdfg(i, x, mu, g)
+    integer, intent(in) :: i
+    real(dp), intent(in) :: x, mu
+    real(dp), intent(out) :: g(-5:5)
+    integer, parameter :: il(3) = [1, 2, 11]
+    real(dp) :: xg(-6:6)
+    external :: hoppetEvalSplit
+    if (i == 0) then
+       call pdfs(x, mu, g); return
+    endif
+    call hoppetEvalSplit(x, mu, il(i), 5, xg)
+    g = xg(-5:5)/x
+    if (pdfmask == 1) g(0) = 0
+    if (pdfmask == 2) then
+       g(-5:-1) = 0; g(1:5) = 0
+    endif
+  end subroutine pdfg
+
+  ! scale variations: HOPPET's table of the LHAPDF set (fixed nf = 5)
+  subroutine scale_init()
+    external :: hoppetStart, hoppetSetFFN, hoppetAssign, evolvePDF
+    call hoppetStart(0.05_dp, 2)
+    call hoppetSetFFN(5)
+    call hoppetAssign(evolvePDF)
+  end subroutine scale_init
+
+  ! scale variations: the cells per scale, rows 1..nob
+  subroutine print_scells()
+    integer :: m, i
+    write(*,'(a,i2,a)') ' SCELLS O(a^', nscl, ') per scale: xi_R, xi_F, row, then tau_cut columns'
+    do m = 1, nsc
+       do i = 1, nob
+          write(*,'(a,2f5.2,i3,10es16.8)') ' SCELL ', scr(m), scf(m), i, hcs(1 + ntc*(i - 1):ntc*i, m)
+       enddo
+    enddo
+  end subroutine print_scells
 
   ! mode 2: F(k + ntc*(b-1)) = theta(tau_2 > tcs(k)) x (the event passes the
   ! ZEUS-like selection and is in observable bin b)
@@ -1549,9 +1718,9 @@ contains
     do j = 1, ndim
        xi(:,j) = [(real(i, dp)/nbin, i = 0, nbin)]
     enddo
-    hist = 0; hist2 = 0; hc = 0; hc2 = 0
+    hist = 0; hist2 = 0; hc = 0; hc2 = 0; hcs = 0
     do it = 1, itmx
-       d = 0; s1 = 0; s2 = 0; hacc = 0; hcacc = 0
+       d = 0; s1 = 0; s2 = 0; hacc = 0; hcacc = 0; hcsacc = 0
        do ic = 1, ncall
           call random_number(r)
           jac = 1
@@ -1595,11 +1764,11 @@ contains
        if (vequal > 0) then
           if (it >= vequal) then
              hist = hist + hacc; hist2 = hist2 + 1
-             hc = hc + hcacc; hc2 = hc2 + 1
+             hc = hc + hcacc; hc2 = hc2 + 1; hcs = hcs + hcsacc
           endif
        elseif (it >= min(2, itmx)) then
           hist = hist + hacc/s2; hist2 = hist2 + 1/s2
-          hc = hc + hcacc/s2; hc2 = hc2 + 1/s2
+          hc = hc + hcacc/s2; hc2 = hc2 + 1/s2; hcs = hcs + hcsacc/s2
        endif
        write(*,'(a,i3,a,es16.8,a,es12.4)') ' iteration', it, ':', s1, ' +-', sqrt(s2)
        flush(6)
@@ -1642,7 +1811,9 @@ contains
     enddo
     chi2 = chi2/max(itmx - min(2, itmx), 1)
     hist = hist/hist2
-    if (hc2 > 0) hc = hc/hc2
+    if (hc2 > 0) then
+       hc = hc/hc2; hcs = hcs/hc2
+    endif
   end subroutine vegas
 
   subroutine rebin(w, nbin, xold, xnew)
@@ -1869,11 +2040,20 @@ program nlo31
      iop31_alpha = dip41_alpha
      write(*,'(a,f8.5)') ' restricted dipoles, alpha', dip41_alpha
   endif
+  ! scale variations (SCALES = N, mode 3): the O(a^N) cells at the 7 scales
+  call get_environment_variable('SCALES', arg)
+  if (len_trim(arg) > 0) then
+     read(arg, *) nscl
+     if (mode /= 3) stop 'SCALES: mode 3 only'
+     nord = merge(2, 3, trim(part) == 'lo')
+     write(*,'(a,i2,a,i2)') ' SCALES: the O(a^N) coefficient at 7 scales, N =', nscl, '; part of order', nord
+  endif
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]
   call random_seed(put=sd)
   call initPDFSetByName(trim(pdfname))
   call initPDF(0)
+  if (nscl > 0) call scale_init()
   call setup_flavours()
   virt31_finite_only = .true.
   if (trim(part) == 'chk') then
@@ -1907,6 +2087,7 @@ program nlo31
      do i = 1, nob
         write(*,'(a,i3,10es16.8)') ' LCELL ', i, hc(1 + ntc*(i - 1):ntc*i)
      enddo
+     if (nscl > 0) call print_scells()
   elseif (mode == 2) then
      write(*,'(a)') ' ZCELLS sigma per bin [pb] above the cut: observable bin, then tau_cut columns'
      write(*,'(a,10es12.3)') ' tau_cut     ', tcs

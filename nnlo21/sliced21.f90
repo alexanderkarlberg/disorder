@@ -25,7 +25,9 @@
 !                                    defaults 0.1 in ln Q, 0.02 in ln(xi/(1-xi)))
 !   sliced21 tabchkg <prefix>          (grid against direct evaluation)
 ! (env PDFMASK = 1 quarks only, 2 gluon only for mktab and tabchkg: tables of one
-! incoming-parton channel, for runs with the same pdfmask, argument 9)
+! incoming-parton channel, for runs with the same pdfmask, argument 9; env
+! LPGVAR = "xif i": a table of PDF variant i (0 f, 1 P0 x f) at xif Q, for the
+! scale variations: <prefix>_x2, _xh (f at 2Q, Q/2), _p2, _ph (P0 x f))
 !
 ! W exchange (EW31 = "2 lepton"): only the beam classes the W couples
 ! to, b out of the down-type classes (lp21_nodn: separate beam tables), the
@@ -189,10 +191,10 @@ contains
     real(dp), intent(in) :: Pk(4,6), Q2, xB, eta, jac, dphi, wgt
     real(dp), external :: alphasPDF
     real(dp) :: P(4,7), as, fpdf(-5:5), w, Q, tz
-    real(dp) :: QQ, GQ, born(nbc), f0(nbc), c1(ntc,nbc), c2(ntc,nbc), val(ntc), mu(nbc), wk(2,nbc), nfk(2,nbc), fc(nbc), rS
-    logical :: inb(nobmax)
+    real(dp) :: QQ, GQ, val(ntc), mu(nbc), wk(2,nbc), nfk(2,nbc), sv(ncell,0:3,3)
+    logical :: inb(nobmax), need(0:3,3)
     real(dp) :: dp2b(nobmax)
-    integer :: b, k, c
+    integer :: b, k
     res = 0
     Q = sqrt(Q2)
     if (mode == 2 .and. .not. zfix) then
@@ -227,31 +229,7 @@ contains
     ! gluon) per helicity class S, O
     call class_weights(Q2, wk, nfk)
     mu(1:4) = QQ; mu(5) = GQ
-    select case (trim(bpart))
-    case ('b0')
-       rS = (dd(1,6)**2 + dd(2,7)**2)/(dd(1,6)**2 + dd(1,7)**2 + dd(2,7)**2 + dd(2,6)**2)
-       fc = [fpdf(2) + fpdf(4), fpdf(-2) + fpdf(-4), fpdf(1) + fpdf(3) + fpdf(5), &
-            & fpdf(-1) + fpdf(-3) + fpdf(-5), fpdf(0)]
-       if (lp21_nodn) fc(3:4) = fc(3:4) - [fpdf(5), fpdf(-5)]
-       do c = 1, nbc
-          born(c) = mu(c)*fc(c)*merge(rS*wk(1,c) + (1 - rS)*wk(2,c), wk(1,c), c <= 4)
-       enddo
-       val = sum(born)
-    case ('b1', 'b2')
-       call lp21_born(P, eta, ntc, tcs, wk, nfk, f0, c1, c2)
-       ! unit-charge matrix element times the cumulant coefficients (which
-       ! carry the couplings and PDFs themselves; with a PDF mask a class can
-       ! have f0 = 0 but c1, c2 /= 0 through the off-diagonal beam functions)
-       val = 0
-       do c = 1, nbc
-          if (trim(bpart) == 'b1') then
-             val = val + mu(c)*c1(:,c)*(as/(2*pi))
-          else
-             val = val + mu(c)*c2(:,c)*(as/(2*pi))**2
-          endif
-       enddo
-    end select
-    val = val*w
+    val = bval()*w
     if (val(ntc) /= val(ntc)) then
        res = 0; return
     endif
@@ -266,6 +244,15 @@ contains
        endif
        hcacc(1 + ntc*(b - 1):ntc*b) = hcacc(1 + ntc*(b - 1):ntc*b) + val*wgt
     enddo
+    if (nscl > 0) then
+       call scale_need(nord, need)
+       do k = 0, 3
+          do b = 1, 3
+             if (need(k,b)) sv(:,k,b) = fsl(k, b)
+          enddo
+       enddo
+       call scale_add(nord, Q, as, w*wgt, sv)
+    endif
     res = val(ntc)
     ! mode 3: the VEGAS target is the >= 1 jet row (the total row vanishes in P2B)
     if (mode == 3) res = val(ntc)*dp2b(merge(1, 2, zeus05))
@@ -274,6 +261,56 @@ contains
       integer, intent(in) :: i, j
       dd = mdot(P(:,i), P(:,j))
     end function dd
+    ! the per-unit-weight value with the PDFs fpdf (b0) or the beam grid of
+    ! slot lp21_slot (b1, b2)
+    function bval() result(val)
+      real(dp) :: val(ntc), born(nbc), f0(nbc), c1(ntc,nbc), c2(ntc,nbc), fc(nbc), rS
+      integer :: c
+      select case (trim(bpart))
+      case ('b0')
+         rS = (dd(1,6)**2 + dd(2,7)**2)/(dd(1,6)**2 + dd(1,7)**2 + dd(2,7)**2 + dd(2,6)**2)
+         fc = [fpdf(2) + fpdf(4), fpdf(-2) + fpdf(-4), fpdf(1) + fpdf(3) + fpdf(5), &
+              & fpdf(-1) + fpdf(-3) + fpdf(-5), fpdf(0)]
+         if (lp21_nodn) fc(3:4) = fc(3:4) - [fpdf(5), fpdf(-5)]
+         do c = 1, nbc
+            born(c) = mu(c)*fc(c)*merge(rS*wk(1,c) + (1 - rS)*wk(2,c), wk(1,c), c <= 4)
+         enddo
+         val = sum(born)
+      case ('b1', 'b2')
+         call lp21_born(P, eta, ntc, tcs, wk, nfk, f0, c1, c2)
+         ! unit-charge matrix element times the cumulant coefficients (which
+         ! carry the couplings and PDFs themselves; with a PDF mask a class can
+         ! have f0 = 0 but c1, c2 /= 0 through the off-diagonal beam functions)
+         val = 0
+         do c = 1, nbc
+            if (trim(bpart) == 'b1') then
+               val = val + mu(c)*c1(:,c)*(as/(2*pi))
+            else
+               val = val + mu(c)*c2(:,c)*(as/(2*pi))**2
+            endif
+         enddo
+      end select
+    end function bval
+    ! scale variations (mode 3): the cells with PDF variant i at mu_F = xis(j)
+    ! Q; b0: the PDFs, b1, b2: the beam grid of slot j + 2 i (f; P0 x f)
+    function fsl(i, j) result(v)
+      integer, intent(in) :: i, j
+      real(dp) :: v(ncell), f0(-5:5), vl(ntc)
+      integer :: bb
+      f0 = fpdf
+      if (trim(bpart) == 'b0') then
+         call pdfg(i, eta, xis(j)*Q, fpdf)
+      else
+         if (i > 1) stop 'sliced21 SCALES: beam grids of f and P0 x f only'
+         lp21_slot = j + 2*i
+      endif
+      vl = bval()
+      fpdf = f0; lp21_slot = 1
+      v = 0
+      do bb = 1, nob
+         if (dp2b(bb) /= 0) v(1 + ntc*(bb - 1):ntc*bb) = vl*dp2b(bb)
+      enddo
+    end function fsl
   end function b21_eval
 
   ! couplings wk(k, c) of lp21's beam classes c for hard21's helicity
@@ -338,6 +375,7 @@ program sliced21
   use mod_slicing_scet, only: soft_table_init, scet_set_colour
   implicit none
   character(256) :: arg, softtab, gprefix
+  character(3), parameter :: gsuf(2:5) = ['_x2', '_xh', '_p2', '_ph']
   integer :: ncall, itmx, seed, nseed, i
   integer, allocatable :: sd(:)
   integer :: lpmask
@@ -362,6 +400,12 @@ program sliced21
   if (trim(bpart) == 'mktab' .or. trim(bpart) == 'tabchkg') then
      call initPDFSetByName(trim(pdfname))
      call initPDF(0)
+     call get_environment_variable('LPGVAR', arg)
+     if (len_trim(arg) > 0) then
+        read(arg, *) lp21_xif(1), lp21_gid(1)
+        if (lp21_gid(1) > 0) call scale_init()
+        write(*,'(a,f5.2,i2)') ' LPGVAR: beam table of the PDF variant at xif Q, xif, i =', lp21_xif(1), lp21_gid(1)
+     endif
      call scet_set_colour(4.0_dp/3, 3.0_dp, 0.5_dp)
      call get_environment_variable('PDFMASK', arg)
      if (len_trim(arg) > 0) read(arg, *) lpmask
@@ -441,12 +485,31 @@ program sliced21
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]
   call random_seed(put=sd)
+  ! scale variations (SCALES = N, mode 3): the O(a^N) cells at the 7 scales;
+  ! b1, b2 load the grid variants (slots 2, 3: f at 2Q, Q/2; 4, 5: P0 x f)
+  call get_environment_variable('SCALES', arg)
+  if (len_trim(arg) > 0) then
+     read(arg, *) nscl
+     if (mode /= 3) stop 'SCALES: mode 3 only'
+     nord = merge(1, merge(2, 3, trim(bpart) == 'b1'), trim(bpart) == 'b0')
+     write(*,'(a,i2,a,i2)') ' SCALES: the O(a^N) coefficient at 7 scales, N =', nscl, '; part of order', nord
+     lp21_nsl = merge(5, 3, nscl > nord)
+     lp21_xif(1:5) = [1.0_dp, 2.0_dp, 0.5_dp, 2.0_dp, 0.5_dp]; lp21_gid(1:5) = [0, 0, 0, 1, 1]
+  endif
   call initPDFSetByName(trim(pdfname))
   call initPDF(0)
+  if (nscl > 0) call scale_init()
   call scet_set_colour(4.0_dp/3, 3.0_dp, 0.5_dp)
   if (softtab /= '') call soft_table_init(trim(softtab), 0.025_dp, 0.05_dp)
   if (mode >= 2) then
      if (trim(bpart) /= 'b0') call lp21_grid_load(gqlo, gqhi, trim(gprefix))
+     if (nscl > 0 .and. trim(bpart) /= 'b0') then
+        do i = 2, lp21_nsl
+           lp21_slot = i
+           call lp21_grid_load(gqlo, gqhi, trim(gprefix)//gsuf(i))
+        enddo
+        lp21_slot = 1
+     endif
   elseif (trim(bpart) /= 'b0') then
      call lp21_init(sqrt(Q2fix), xfix, hb)
   endif
@@ -512,6 +575,7 @@ program sliced21
      do i = 1, nob
         write(*,'(a,i3,10es16.8)') ' LCELL ', i, hc(1 + ntc*(i - 1):ntc*i)
      enddo
+     if (nscl > 0) call print_scells()
   elseif (mode == 2) then
      write(*,'(a)') ' ZCELLS sigma per bin [pb] below the cut: observable bin, then tau_cut columns'
      write(*,'(a,10es12.3)') ' tau_cut     ', tcs
