@@ -4158,3 +4158,8 @@ https://claude.ai/artifact/Sa7MEGe3N2f5p1SudqcN5x.
   edge; the binned P2B difference has a log-divergent variance in the soft limit of the 2+1 Born, weight ∝ 1/E,
   edge-crossing probability ∝ E); without it (diagnostic only) 0.1 ± 0.3 %. Per scale (figure on the page):
   ours/NNLOJET at each of the 7 scales within errors at LO, NLO and NNLO.
+- **NNLOJET's N3LO MC error from the scatter of the paper's points** (AK): polynomial fits (degree 4–5) to N3LO −
+  NNLO in η and ln E_T leave residuals of 0.3–0.4 % of NNLO; the same test on NNLOJET's NNLO coefficient (true MC
+  error 0.03 %) leaves 0.3–0.9 %: shape, not noise, so ≤ 0.3–0.4 % per bin, plausibly ≤ 0.1 %. The Q² inset (read to
+  0.01 %): N3LO/NNLO = 1.0005, 1.0000, 1.0001, 1.0000 above 250 GeV², smooth to ≤ 0.02 %, but the P2B part hardly
+  enters there. For us (pilot): 0.3 % in the central η bins ≈ 5e6 CPU-h, 0.1 % ≈ 4e7.
