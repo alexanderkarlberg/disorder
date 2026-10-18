@@ -4144,3 +4144,10 @@ https://claude.ai/artifact/Sa7MEGe3N2f5p1SudqcN5x.
   (2–9k by the RR/RV/VV split). The N3LO (NNLOJET's dijet NNLO with P2B) is not recorded: order 10⁵ core-h,
   plausibly a few × 10⁵ (6.7e10 RR-dominated evaluations at ≈ 10 ms ≈ 2e5; or our cluster's NNLOJET ZEUS-dijet
   NNLO, 12.8k + 2.7k core-h for ±1 % of NNLO on the total, scaled to ≈ 1 % per bin in a harder region).
+- **disorder as before** (AK: verify after the NC/MATFOR changes): today's disorder (16/16/32 seeds; photon) against
+  the 2023 disorder runs of the paper (paper_runs/nnlojet, central scale): LO, NLO, NNLO agree in every η and E_T bin
+  (largest pull 2.7: NLO η 2.5–3, −0.13 %; NNLO ≤ 2.2), and with NNLOJET (NLO ≤ 0.25 % of NNLO, NNLO ≤ 1.9σ).
+- **N3LO error against budget** (pilot, optimal split per bin), in % of the NNLO cross section per bin: 5e4 CPU-h:
+  central η 2.7–3.0, forward 0.9–1.4, E_T 0.5–1.5; 3e5: 1.1–1.2, 0.4–0.6, 0.2–0.6; 1e6: 0.6–0.7, 0.2–0.3,
+  0.1–0.3. 1 % of NNLO in every bin ≈ 4.4e5 CPU-h, 0.3 % ≈ 5e6 (NNLOJET's NNLO 1-jet errors are 0.03–0.05 % of NNLO
+  per bin; their N3LO errors are not published).
