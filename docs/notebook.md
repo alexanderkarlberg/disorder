@@ -4030,3 +4030,21 @@ default target without mixture: their jet-bin errors (0.5–6% of LO) were infla
 such tails the error estimates themselves were unreliable; the 12 Oct statement that the jet bins are flat within
 errors stands only at that (poor) precision. Recommendation for mode 3: VTARGET = 0 and VEGAS_MIX = 0.2; for the J8 /
 ZEUS r: VEGAS_MIX = 0.2 (1–2×, harmless). nlo31 now has VEGAS_MIX (off by default, bit-identical).
+
+## 2026-10-18 — restricted dipoles (option C): implemented and validated by alpha-independence
+
+AK (18 Oct): push VEGAS_MIX (061d47c) and start on the restricted dipoles. DIPALPHA = α (nlo31; dip41_alpha,
+iop31_alpha; default 1 = the previous code, bit-identical 91/91): FF dipoles only for y < α, FI for 1 − x < α, IF
+for u < α (Nagy–Trócsányi). The removed regions are away from every singularity, so the change of the integrated
+dipoles is a finite 4d integral; with colour conservation it needs only the Born factors already there:
+- I (FF): + Σ_{I,K final} ⟨T_I·T_K⟩ [ln²α − γ_I/T_I² (α − 1 − ln α)];
+- K + P, regular (iop31_akernel): FI (diagonal) θ(x < 1 − α) [−2 T_b² b ln((2−x)/(1−x)) − g]/(1−x); IF −b ∫_α^1
+  du/u ⟨V^{ab}(x,u)⟩ with the azimuthally averaged kernels (q→q: C_F[2/(1−x+u) − (1+x)], g→q: T_R(1 − 2x(1−x)),
+  q→g: C_F(1+(1−x)²)/x, g→g: 2C_A[1/(1−x+u) + (1−x)/x − 1 + x(1−x)]), in closed form.
+Checks: the closed forms against direct quadrature of the averaged kernels to 2e-18 (alpha/kernels.py). **α-
+independence** (J8 window, production settings, α = 1 and 0.1; r 32, vi 8, kp 8 seeds each; work/.../nnlo21/alpha):
+vi + kp + r agrees in all 33 cell × τ_cut comparisons (11 rows × 1e-3, 1e-4, 1e-5), pulls −1.8 … +1.5, while the parts
+shift individually (total row at 1e-5: vi −1.03e-5, kp −5.3e-6, r +1.55e-5; sum −6.7e-8 ± 1.9e-7): the α terms are
+right to ≈ 1% of their size, in both incoming channels (their mix varies across the bins). Gain for r at α = 0.1:
+39.5 against 63.5 min per job; per-seed sd 4.05e-7 vs 3.15e-7 (1e-4), 6.63e-7 vs 8.12e-7 (1e-5): variance per CPU
+1.0× at 1e-4, 2.4× at 1e-5 (±35% from 32 seeds), mostly from speed.

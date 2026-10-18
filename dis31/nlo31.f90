@@ -31,7 +31,7 @@
 ! TECHMIN, TECHREF, TECHDIFF (technical cut, rcorr/d2); VTARGET (VEGAS
 ! target cell); VEGAS_EQUAL (iteration weights of the cells); VEGAS_MIX
 ! (defensive mixture, see vegas); ZFIX (mode 2: 2 window around (x, Q2), 3
-! tau_zQ bins in the inclusive cuts).
+! tau_zQ bins in the inclusive cuts); DIPALPHA (restricted dipoles, dip41).
 !
 ! Mode 2 (nnlo21 validation against NNLOJET): the above-cut part for
 ! ZEUS-like dijets (nnlo21/validation/nnlojet_epLJJ_zeus2j.run), integrated
@@ -554,10 +554,15 @@ contains
     real(dp), intent(in) :: b, g, lp, x, xi, fx, fxi
     real(dp), intent(out) :: res
     real(dp), external :: ddilog
-    real(dp) :: kr, kpl, kd, pr, ppl, pd, R, Pl, D, ipl, A, Bf, Cq, l1
+    real(dp) :: kr, kpl, kd, pr, ppl, pd, R, Pl, D, ipl, A, Bf, Cq, l1, ra, rga
     call iop31_kernel(1, ta, tb, x, kr, kpl, kd)
     call iop31_kernel(2, ta, tb, x, pr, ppl, pd)
     R = kr*b + pr*lp
+    if (iop31_alpha < 1) then
+       ! restricted dipoles: the regular terms of the removed regions
+       call iop31_akernel(ta, tb, x, ra, rga)
+       R = R + ra*b + rga*g
+    endif
     Pl = kpl*b + ppl*lp
     D = kd*b + pd*lp
     ipl = 0
@@ -1744,6 +1749,13 @@ program nlo31
   if (len_trim(arg) > 0) then
      read(arg, *) ew31_mode, ew31_lepton
      write(*,'(a,2i2)') ' EW31 (mode, lepton)', ew31_mode, ew31_lepton
+  endif
+  ! restricted dipoles (dip41, iop31; 18 Oct): DIPALPHA = alpha < 1
+  call get_environment_variable('DIPALPHA', arg)
+  if (len_trim(arg) > 0) then
+     read(arg, *) dip41_alpha
+     iop31_alpha = dip41_alpha
+     write(*,'(a,f8.5)') ' restricted dipoles, alpha', dip41_alpha
   endif
   call random_seed(size=nseed); allocate(sd(nseed))
   sd = [(1000003*seed + 7919*i, i = 1, nseed)]

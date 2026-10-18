@@ -15,6 +15,9 @@
 !
 ! dip41_list(P4, fl4, nd, P3, fl3, val): all nd dipoles, each with its
 !   mapped Born momenta P3(:,:,id), flavours fl3(:,id) and value val(id).
+! dip41_alpha < 1 (18 Oct): restricted dipoles (Nagy, Trocsanyi): FF only for
+!   y < alpha, FI for 1 - x < alpha, IF for u < alpha; the integrated terms
+!   of the removed regions are in iop31 (iop31_alpha, the same value).
 !-----------------------------------------------------------------------
 module dip41
   use born31
@@ -28,6 +31,7 @@ module dip41
   ! labels of the last dip41_list call (diagnostics): type (1 FF, 2 FI, 3 IF),
   ! emitter i (IF: the final-state parton i), j (FF/FI) and spectator k
   integer, public, save :: dip41_lab(4,dip41_max)
+  real(dp), public, save :: dip41_alpha = 1
   public :: dip41_list
 contains
 
@@ -46,6 +50,9 @@ contains
           if (.not. ff_pair(fl4(i), fl4(j), i, j, fij)) cycle
           do k = 1, 5
              if (k == i .or. k == j) cycle
+             if (dip41_alpha < 1) then
+                if (cut_ff(P4, i, j, k)) cycle
+             endif
              nd = nd + 1
              dip41_lab(:,nd) = [merge(2, 1, k == 1), i, j, k]
              if (k == 1) then
@@ -61,12 +68,29 @@ contains
        if (.not. if_pair(fl4(1), fl4(i), fa)) cycle
        do k = 2, 5
           if (k == i) cycle
+          if (dip41_alpha < 1) then
+             if (mdot(P4(:,i), P4(:,1)) > dip41_alpha*(mdot(P4(:,i), P4(:,1)) + mdot(P4(:,k), P4(:,1)))) cycle
+          endif
           nd = nd + 1
           dip41_lab(:,nd) = [3, i, 0, k]
           call dip_if(P4, fl4, i, k, fa, P3(:,:,nd), fl3(:,nd), val(nd))
        enddo
     enddo
   end subroutine dip41_list
+
+  ! restricted dipoles: FF (k final) removed for y > alpha, FI (k = 1) for
+  ! 1 - x > alpha
+  logical function cut_ff(P4, i, j, k)
+    real(dp), intent(in) :: P4(4,8)
+    integer, intent(in) :: i, j, k
+    real(dp) :: pij, pik, pjk
+    pij = mdot(P4(:,i), P4(:,j)); pik = mdot(P4(:,i), P4(:,k)); pjk = mdot(P4(:,j), P4(:,k))
+    if (k == 1) then
+       cut_ff = pij > dip41_alpha*(pik + pjk)
+    else
+       cut_ff = pij > dip41_alpha*(pij + pik + pjk)
+    endif
+  end function cut_ff
 
   ! can final-state partons i, j (flavours fi, fj) be merged? each unordered
   ! pair once: q g with the quark first, g g and q qbar with i < j

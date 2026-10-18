@@ -24,6 +24,16 @@
 !   into a regular part, the coefficient function of a plus distribution
 !   [plus(x)]_+, and a delta(1-x) coefficient, for parton types a, b
 !   (0 gluon, 1 quark); kind = 1: Kbar, kind = 2: P.
+! iop31_alpha < 1 (18 Oct): restricted dipoles (dip41_alpha, the same
+!   value): the integrals of the removed regions (finite, in 4 dimensions;
+!   checked against quadrature, work/disorder-comparisons/nnlo21/alpha):
+!   I: + <T_I.T_K> [ln^2 alpha - gamma_I/T_I^2 (alpha - 1 - ln alpha)] for
+!     final-state I, K (FF, y > alpha; Nagy, Trocsanyi);
+!   K + P, regular in x (iop31_akernel, coefficients of b and g):
+!     FI (1 - x > alpha, diagonal): theta(x < 1 - alpha)
+!       [-2 T_b^2 b ln((2-x)/(1-x)) - g]/(1-x);
+!     IF (u > alpha): -b int_alpha^1 du/u <V^{ab}(x, u)>, the azimuthally
+!       averaged kernels q -> q, g -> q, q -> g, g -> g.
 !-----------------------------------------------------------------------
 module iop31
   use born31
@@ -34,7 +44,8 @@ module iop31
   real(dp), parameter :: CF = 4.0_dp/3, CA = 3, TR = 0.5_dp, nf = 5
   real(dp), parameter :: gq = 1.5_dp*CF, gg = 11*CA/6 - 2*TR*nf/3
   real(dp), parameter :: Kq = (3.5_dp - pi**2/6)*CF, Kg = (67.0_dp/18 - pi**2/6)*CA - 10*TR*nf/9
-  public :: iop31_i, iop31_kp, iop31_kernel
+  real(dp), public, save :: iop31_alpha = 1
+  public :: iop31_i, iop31_kp, iop31_kernel, iop31_akernel
 contains
 
   subroutine iop31_i(P, fl, mu2, iv)
@@ -59,6 +70,8 @@ contains
           iv(-2) = iv(-2) - cc(i,j)
           iv(-1) = iv(-1) - cc(i,j)*(L + gam/CI)
           iv(0) = iv(0) - cc(i,j)*(L**2/2 - pi**2/3 + (gam*L + gam + KK)/CI)
+          if (iop31_alpha < 1 .and. i > 1 .and. j > 1) iv(0) = iv(0) &
+               & + cc(i,j)*(log(iop31_alpha)**2 - gam/CI*(iop31_alpha - 1 - log(iop31_alpha)))
        enddo
     enddo
   end subroutine iop31_i
@@ -125,6 +138,36 @@ contains
        endif
     endif
   end subroutine iop31_kernel
+
+  ! restricted dipoles: the regular K + P coefficients rb (of b) and rg (of g)
+  ! for incoming type a and Born type b (0 gluon, 1 quark), see the header
+  subroutine iop31_akernel(a, b, x, rb, rg)
+    integer, intent(in) :: a, b
+    real(dp), intent(in) :: x
+    real(dp), intent(out) :: rb, rg
+    real(dp) :: al, la, L, t, u
+    rb = 0; rg = 0
+    al = iop31_alpha; la = log(al)
+    if (al >= 1) return
+    ! L = ln((1-x+al)/(al(2-x)))/(1-x) = ln(1 + t)/(1-x), t = (1-x)(1-al)/(al(2-x)),
+    ! with ln(1 + t) = ln(u) t/(u - 1), u = 1 + t (accurate for small t)
+    t = (1 - x)*(1 - al)/(al*(2 - x)); u = 1 + t
+    L = t/(1 - x)
+    if (u /= 1) L = log(u)*t/(u - 1)/(1 - x)
+    if (a == b .and. x < 1 - al) then
+       rb = -2*merge(CF, CA, b == 1)*log((2 - x)/(1 - x))/(1 - x)
+       rg = -1/(1 - x)
+    endif
+    if (a == 1 .and. b == 1) then
+       rb = rb - CF*(2*L + (1 + x)*la)
+    elseif (a == 0 .and. b == 1) then
+       rb = rb + TR*(1 - 2*x*(1 - x))*la
+    elseif (a == 1 .and. b == 0) then
+       rb = rb + CF*(1 + (1 - x)**2)/x*la
+    else
+       rb = rb - 2*CA*(L - ((1 - x)/x - 1 + x*(1 - x))*la)
+    endif
+  end subroutine iop31_akernel
 
   pure real(dp) function mdot(a, b)
     real(dp), intent(in) :: a(4), b(4)
