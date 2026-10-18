@@ -4151,3 +4151,10 @@ https://claude.ai/artifact/Sa7MEGe3N2f5p1SudqcN5x.
   central η 2.7–3.0, forward 0.9–1.4, E_T 0.5–1.5; 3e5: 1.1–1.2, 0.4–0.6, 0.2–0.6; 1e6: 0.6–0.7, 0.2–0.3,
   0.1–0.3. 1 % of NNLO in every bin ≈ 4.4e5 CPU-h, 0.3 % ≈ 5e6 (NNLOJET's NNLO 1-jet errors are 0.03–0.05 % of NNLO
   per bin; their N3LO errors are not published).
+- **10× NNLO statistics** (AK's page comment; 282 of 288 jobs at 22:00, the rest on an overloaded thserv17 where
+  the autonice daemon reniced them to 13 after a few hours; thsub started them at 0): b1 170, lo 176 seeds. Ours
+  − NNLOJET at τ_cut 1e-4: total +0.07 ± 0.06 % of NNLO; other bins within 0.2–0.7 % errors, flat from 2e-4 to
+  1e-5. η 0–0.5 / 0.5–1: −2.4 / +2.5 ± 2.6 %, all from b1 seed 4206 (one near-soft 2+1 Born across the η = 0.5
+  edge; the binned P2B difference has a log-divergent variance in the soft limit of the 2+1 Born, weight ∝ 1/E,
+  edge-crossing probability ∝ E); without it (diagnostic only) 0.1 ± 0.3 %. Per scale (figure on the page):
+  ours/NNLOJET at each of the 7 scales within errors at LO, NLO and NNLO.
