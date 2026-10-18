@@ -28,7 +28,7 @@
 !        the lower end of psmc's log maps (default 1e-10)
 ! Environment: EW31 = "mode lepton" (boson, as dis31/tests); P2BSLICE = 1
 ! (P2B-improved slicing), P2BEXTRA = 1 (only the P2B term, the "extras");
-! TECHMIN, TECHREF, TECHDIFF (technical cut, rcorr/d2); VTARGET (VEGAS
+! TECHMIN, TECHREF, TECHDIFF (technical cut, rcorr/d2); VTARGET, VTCOL (VEGAS
 ! target cell); VEGAS_EQUAL (iteration weights of the cells); VEGAS_MIX
 ! (defensive mixture, see vegas); ZFIX (mode 2: 2 window around (x, Q2), 3
 ! tau_zQ bins in the inclusive cuts); DIPALPHA (restricted dipoles, dip41);
@@ -182,6 +182,7 @@ module nlo31_mod
   integer, parameter :: sj(nsc) = [1, 2, 3, 1, 1, 2, 3]
   real(dp) :: hcs(ncell,nsc), hcsacc(ncell,nsc)
   integer :: iv = 1                ! the cell VEGAS integrates (mode 1: smallest tau_cut, all tau_zQ)
+  integer :: ivc = ntc             ! VTARGET = 0: the tau_cut column (env VTCOL)
   real(dp) :: hc(ncell), hc2, hcacc(ncell)
   ! acceptance of the mapped dipole Borns within one eval_sg (all flavour
   ! structures of a real event): the mappings do not depend on the flavours,
@@ -922,10 +923,11 @@ contains
        ! so VTARGET = 0 adapts to the wrong cells there
        t = sum(abs(a))
     elseif (iv == 0) then
-       ! VTARGET = 0: sum of |cells| at the smallest tau_cut over all
-       ! observable rows; with P2B in mode 3 the >= 1 jet row misses events
-       ! that migrate between bins, whose region VEGAS then never adapts to
-       t = sum(abs(a(ntc:nv:ntc)))
+       ! VTARGET = 0: sum of |cells| at the smallest tau_cut (or the column
+       ! VTCOL) over all observable rows; with P2B in mode 3 the >= 1 jet row
+       ! misses events that migrate between bins, whose region VEGAS then
+       ! never adapts to
+       t = sum(abs(a(ivc:nv:ntc)))
     else
        t = a(iv)
     endif
@@ -2027,6 +2029,11 @@ program nlo31
   if (len_trim(arg) > 0) then
      read(arg, *) iv
      write(*,'(a,i5)') ' VEGAS target cell', iv
+  endif
+  call get_environment_variable('VTCOL', arg)
+  if (len_trim(arg) > 0) then
+     read(arg, *) ivc
+     write(*,'(a,i3)') ' VTARGET = 0: tau_cut column', ivc
   endif
   call get_environment_variable('EW31', arg)
   if (len_trim(arg) > 0) then
