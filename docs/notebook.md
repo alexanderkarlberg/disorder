@@ -4124,3 +4124,10 @@ https://claude.ai/artifact/Sa7MEGe3N2f5p1SudqcN5x.
   (memory, ~/COMPUTE-JOBS.md).
 - Slip: the four smoke tests of scale mode (minutes) ran in the session shell at nice 7; everything else via
   ssh/thsub at nice 0.
+- **Variance study of r (evening, runs/var, 32 seeds each against the pilot's 32; zeus05/z5var.py):** gain =
+  variance × CPU of the pilot / the variant, τ_cut 1e-4. B (α = 0.1): 2142 against 3394 s per job; η bins 0.94,
+  0.12, 2.35, 1.47, 2.18, 1.43, 7.69, 2.79, ≥ 1 jet 0.08, lowest E_T 0.11: faster and better in some forward bins,
+  but new heavy tails (sd/1.48 MAD 4–8 in ≥ 1 jet, η −0.5–0, E_T 6–8). C (VTCOL = 8): no gain (0.3–2.6), means = A
+  (pulls ≤ 1.1). D (both): as B. No robust gain, nothing near the ~100× the central η bins need: the sizing stands
+  (50k CPU-h resolves η 1–3 and E_T 6–21 GeV, not η < 0.5). The central bins need a binning-safe R − D (fibred P2B),
+  not tuning.
