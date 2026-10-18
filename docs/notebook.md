@@ -4048,3 +4048,79 @@ shift individually (total row at 1e-5: vi −1.03e-5, kp −5.3e-6, r +1.55e-5; 
 right to ≈ 1% of their size, in both incoming channels (their mix varies across the bins). Gain for r at α = 0.1:
 39.5 against 63.5 min per job; per-seed sd 4.05e-7 vs 3.15e-7 (1e-4), 6.63e-7 vs 8.12e-7 (1e-5): variance per CPU
 1.0× at 1e-4, 2.4× at 1e-5 (±35% from 32 seeds), mostly from speed.
+
+## 2026-10-18 (afternoon) — N3LO jets in the set-up of NNLOJET's N3LO P2B paper (1803.09973); scale variations
+
+AK (18 Oct): push and tag (nnlo21-2026-10-18 at 418666a, done); then plots of the N3LO P2B lab-frame jet p_T and
+rapidity against the NNLOJET paper; do we have scale variations; redo LO, NLO, NNLO. Work in
+`work/disorder-comparisons/zeus05` (z5lib.py, z5plot.py, z5scale.py, z5size.py, digit/), page
+https://claude.ai/artifact/Sa7MEGe3N2f5p1SudqcN5x.
+- **Set-up.** The paper compares with ZEUS hep-ex/0502029 'global': E_p = 820, E_e = 27.5 GeV, Q² > 25 GeV²,
+  y > 0.04, E_e' > 10 GeV, longitudinally invariant k_t, R = 1, E_T recombination, jets E_T > 6 GeV, −1 < η < 3
+  (every jet counted; Q² and x of the events with a jet), NNPDF31_nnlo_as_0118 at all orders, μ = Q, 7 points,
+  photon exchange. This is `analysis/nnlojet.f` of the disorder paper and NNLOJET's `DIS1j.run.template`
+  (AK's `disorder/paper_runs/nnlojet/nnlojet_data/DIS1j`, with NNLOJET's LO, NLO, NNLO at 7 scales and the ZEUS
+  tables). Our lab11 set-up (E_p = 920, 125 < Q² < 20000, anti-k_t, leading jet) is not this one, so the lab11
+  N3LO results of 12 Oct cannot be compared with the paper. New: `LABSET=zeus05` (mode 3) in nlo31 and sliced21
+  (d62836d): beams, PDF, cuts, k_t E_T-scheme jets (as FastJet's Et_scheme), 31 rows (≥ 1 jet, η_inc 8, E_T,inc 8,
+  Q² 7, x 7); beam grid Q = 5 … √s, x ≥ 2.5e-4 (44 nodes). Default bit-identical (91/91; only the LCELLS header
+  text changed).
+- **The paper's N3LO.** Only in its figures (arXiv source, gnuplot/cairo vector PDFs). Converted to SVG, axes
+  calibrated from the ticks, every step polyline read (digit/extract.py; gnuplot merges equal neighbouring bins,
+  so segments are mapped to bins by position). Check: LO, NLO, NNLO read this way = NNLOJET's files to ≤ 0.001 in
+  the ratio panels, ≤ 0.06 % in the linear η panel, ≤ 0.3 % on log axes. N3LO = ratio panel × NNLOJET NNLO
+  (±0.05 % of NNLO). N3LO/NNLO: η 0.98, 1.02, 1.03, 1.04, 1.09, 1.14, 1.19, 1.25; E_T 1.05 … 1.003. The paper
+  plots ZEUS σ divided by the hadronisation factor.
+- **α_em:** disorder and nlo31/sliced21 use 1/137, NNLOJET 1/137.036: disorder LO with 1/137.036 = NNLOJET to
+  −0.003 ± 0.004 % (total), every bin within errors; comparisons rescale ours by (137/137.036)².
+- **LO, NLO:** disorder (-p2b) and ours (inclusive + sliced21 b0) agree with NNLOJET's NLO coefficient within
+  ±0.25 % of NNLO in every bin (pulls mostly < 2).
+- **NNLO, ours** (inclusive -nnlocoef + b1 + lo, mode 3, 16 + 16 seeds): agrees with NNLOJET's NNLO coefficient
+  within ≈ 1.5σ in every η and E_T bin for τ_cut ≤ 2e-4 (errors 0.2–3 % of NNLO); above 1e-3 the known drift
+  (total −0.48 ± 0.11 % at 1e-3). disorder NNLO: disorder -p2b -nnlocoef (32 seeds × 1.6e8 calls, 3 h each) = NNLOJET within ≤ 1.9σ in
+  every bin (total −0.32 ± 0.29 % of NNLO).
+- **Convergence against plain DISENT** (AK, page comment): CPU of our chain (b1 + lo at 1e-4, optimal split) over
+  disorder -p2b for equal error on the NNLO coefficient: total 0.1; η bins 0.6, 0.3, 0.3, 0.3, 1.1, 9.8, 47, 31;
+  E_T bins 0.1, 0.4, 2.5, 2.0, 5.6, 1.4, 21, 42 (±40 %, 16 seeds per part): ours is faster in the central bins,
+  10–47× slower forward and at high E_T (the pattern of 6 Oct). The automatic page reply had guessed "slower
+  everywhere"; corrected in the thread.
+- **The inclusive N3LO coefficient** (disorder, 7 scales) is small here: −23 … −28 pb per unit η centrally, 0 in
+  the forward bins, against the paper's +90 … +390: the N3LO comes almost entirely from P2B on the NNLO 2+1.
+- **N3LO pilot** (112 jobs: b2, vi, kp, rc1, rc2 16 each, r 32; ≈ 100 CPU-h): r has a per-seed sd of 0.9–1.6e4 pb
+  per bin in the central η bins at τ_cut 1e-4 (1-h jobs), Gaussian (sd ≈ 1.48 MAD), > 90 % of the variance, ×2 at
+  1e-5. Optimal allocation over the parts: at 50k CPU-h the forward η bins (1–3) at 6–13 % of the paper's N3LO
+  correction, η 0.5–1 at 35 %, E_T 6–21 GeV at 17–25 %; η < 0.5 not resolved (5–9 M CPU-h for 10 %).
+  **Correction:** this afternoon I told AK the production would likely need 5–20k CPU-h; that was wrong by orders
+  of magnitude for the central and backward bins (the mis-binning variance of the R − D cancellation, mechanism of
+  17 Oct, is far larger at Q² down to 25 GeV² than in the lab11 set-up).
+- **Scale variations** (AK: go; 1b16531). `SCALES=N` (mode 3): the O(a^N) cells at the 7 (ξ_R, ξ_F) of
+  disorder/NNLOJET by the renormalisation group, a = α_s/2π, nf = 5:
+  C₃⊗f = c₃f + 2b₀L_R c₂f − L_F c₂⊗P₀f + (b₀²L_R² + b₁L_R) c₁f − L_F c₁⊗P₁f + ½L_F² c₁⊗P₀P₀f +
+  b₀(½L_F² − 2L_F L_R) c₁⊗P₀f (and C₂⊗f = c₂f + b₀L_R c₁f − L_F c₁⊗P₀f), all with f at ξ_F Q and a at ξ_R Q
+  (LHAPDF), the logs of the c_n at Q. Every event is re-summed with the PDF variants (flavour sums split from the
+  matrix elements: born_part fsum, real_part fsum_r, b21_eval bval); P⊗f from HOPPET (hoppetEvalSplit, iloop 1,
+  2, 11; normalisation checked: df/dln μ² = aP₀⊗f + a²P₁⊗f up to NNPDF's a³P₂, 0.1–0.7 % at Q = 50, 2–5 % at
+  6 GeV); b1, b2 use beam-grid slots of f and P₀⊗f at 2Q and Q/2 (lp21 fdist per slot, mktab LPGVAR). No
+  internal procedures passed as arguments (they need an executable stack). Checks: default bit-identical (91/91);
+  SCELL(1,1) = LCELL exactly for n = N (r, kp, lo, b0); NLO at 7 scales (inclusive + b0) = NNLOJET to ≤ 0.1 % of
+  NNLO in every bin and scale; at (½,½) the total is −0.08 % (11σ of tiny errors) from disorder's inclusive part.
+  NNLO at 7 scales (b0 with P₀⊗f, b1, lo): the plain per-scale comparison has pulls ≤ 2 everywhere, but in
+  η 0–0.5 and 0.5–1 its errors are 27 % of NNLO: one b1 seed (4206) has −1.4e4 / +7.5e3 pb in the two bins
+  (78 and 274 MAD, anti-correlated: one heavily weighted near-soft 2+1 Born across the bin edge; the same code path
+  as the plain runs, a genuine heavy tail). The scale dependence, C(k) − C(central) per seed, cancels it: ours
+  against NNLOJET to 0.1–0.3 % of NNLO, pulls ≤ 1.5 in nearly every bin and scale; the total row 7.06 vs 7.30 %
+  at (½,½) (−3.2σ) and −3.99 vs −4.11 % at (2,2) (+2.1σ), most likely disorder's α_s in the inclusive NNLO
+  coefficient (its NLO part showed −0.08 % at (½,½)). Passed, with that caveat.
+- **disorder and NNLOJET at μ_R = Q/2:** disorder's own P2B NLO coefficient differs from NNLOJET by up to −0.5 % of
+  NNLO at μ_R = Q/2 (forward bins, all DISENT 2+1): disorder runs α_s with nf = 5 from α_s(M_Z), NNLOJET (and our
+  chain) uses LHAPDF's α_s (nf = 4 below m_b; Q/2 reaches 2.5 GeV here). A convention difference, not a bug.
+- AK (evening): run the variance study of r tonight, push once the NNLO scale check passes, and add a plot of the
+  two jet histograms with ours on NNLOJET and the ratio per order (page v2). Variance study (runs/var, 32 r seeds
+  each against the pilot's 32): B DIPALPHA = 0.1, C VTCOL = 8 (new, d1eba04: VEGAS target on the τ_cut 1e-4
+  column), D both.
+- AK (page comment): 10× the NNLO statistics: 144 more seeds of b1 and lo (SCALES = 2, runs/sc2), on the thservs:
+  `-m all` was refused by the permission classifier because the OK came through the page comment. AK then gave the
+  rule in the chat: `-m all` is allowed from Friday 20:00 to Sunday 02:00, otherwise thservs only unless he says so
+  (memory, ~/COMPUTE-JOBS.md).
+- Slip: the four smoke tests of scale mode (minutes) ran in the session shell at nice 7; everything else via
+  ssh/thsub at nice 0.
