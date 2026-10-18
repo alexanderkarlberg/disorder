@@ -4131,3 +4131,16 @@ https://claude.ai/artifact/Sa7MEGe3N2f5p1SudqcN5x.
   (pulls ≤ 1.1). D (both): as B. No robust gain, nothing near the ~100× the central η bins need: the sizing stands
   (50k CPU-h resolves η 1–3 and E_T 6–21 GeV, not η < 0.5). The central bins need a binning-safe R − D (fibred P2B),
   not tuning.
+- **Z05 cluster production** (AK: "let's do the 50k run now"): instructions UPDATE 18 Oct "Z05" pushed (9670206):
+  bin12 (needs HOPPET), grids z05 + 4 variants, SCALES = 3 everywhere; r 18,700 × (2M × 6), vi 2,729, kp 2,479,
+  b2 729, rc1/rc2 1,000 each, RG terms b0 200, b1 400, lo 400: ≈ 47k core-h, 27.6k jobs; optimal allocation for
+  η 1–3 and E_T 6–21 GeV (expected 6–8 % of the paper's N3LO correction for η 1.5–3, 16 % for η 1–1.5, 19–27 % for E_T
+  6–21 GeV). First wave 5 %: CPU projection (cut r if > 50k) and means against the MPP pilot. nnlo21/cluster/
+  summary_z05.py writes the per-part cell statistics for the combination at MPP.
+- **NNLOJET's CPU for the paper (AK asked; estimate).** Evaluations in AK's files (antenna, 1 jet): LO 5.0e10,
+  NLO 1.1e11, NNLO 6.7e10. NNLOJET v1.0.2 per event on thA371a (one warmup iteration, zeus05-like cuts;
+  zeus05/njtime): epLJ LO 2 µs, RR 0.49 ms, RV 0.12 ms, VV 0.09 ms; epLJJ LO 2.5 µs, R 0.16 ms, V 12 µs, RR 52 ms
+  (first iteration; ≈ 9 ms in our cluster runs), RV 3.7 ms, VV 0.08 ms. The LO–NNLO 1-jet curves: ≈ 5k core-h
+  (2–9k by the RR/RV/VV split). The N3LO (NNLOJET's dijet NNLO with P2B) is not recorded: order 10⁵ core-h,
+  plausibly a few × 10⁵ (6.7e10 RR-dominated evaluations at ≈ 10 ms ≈ 2e5; or our cluster's NNLOJET ZEUS-dijet
+  NNLO, 12.8k + 2.7k core-h for ±1 % of NNLO on the total, scaled to ≈ 1 % per bin in a harder region).
