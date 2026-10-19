@@ -4183,3 +4183,16 @@ cores ≈ 1.4× faster than the thservs); means within 1.4σ of the MPP pilot; n
 - **Correction of the Z05 instruction:** I asked for bin12 = bin11 on a J8 r seed; the bit-identity holds against
   the tag 418666a, which already contains d5c2021 (|z|², last-bit changes amplified by VEGAS; validated 17 Oct at one
   iteration). The cluster's finding (iteration 1 identical, later iterations differ) is that known change.
+- **Error budget per part (Z05 interim, τ_cut 1e-4, central scale):** r carries 92–99 % of the variance (82–97 % at
+  full r) and 84–96 % of the cost in every bin below E_T = 29 GeV; above, vi and b2 up to 18 % and 13 %; kp
+  negligible. Cost for 1 % of NNLO per bin against τ_cut (optimal split, cluster sd and CPU): worst bin 3e4 (2e-2),
+  6e4 (5e-3), 2e5 (1e-3), 1.4e6 (1e-4); lower τ_cut is worse (× 2–4 at 3e-5, × 3–10 at 1e-5 without outliers; η −1…0
+  at 3e-5 outlier-dominated, 1e7–1e8). Larger τ_cut needs the power corrections removed.
+- **P2B-improved slicing was not used at N3LO** (AK thought it was): P2BSLICE was read only in modes 1–2 (the NNLO
+  DIS+jet validations); mode 3 (N3LO P2B) used plain τ₂ slicing of the 2+1 (form (A) of the 15 Oct nested-P2B
+  check). Now wired into mode 3 (1d4d8b7, default bit-identical 91/91): below τ_cut O(event) − O(P2 event) (the
+  1+1 Born terms cancel since project21 keeps q), the r drop/degenerate handling of P2BSLICE for every mode.
+  Smoke test: P2BEXTRA lo term ≈ 700 pb at 2e-2, ≈ 0.1 pb at 1e-3; r flags 13 of 15815 events for plain weights.
+  Tests submitted (thsub, 64 jobs): (A) lo with P2BSLICE (32 seeds) + the 170 b1 seeds: NNLO 1+1 flatness in τ_cut
+  against NNLOJET; (B) r with P2BSLICE (32 seeds, 2M × 6): per-seed sd per τ_cut column against the cluster's plain
+  r. Queued behind ≈ 7,900 proVBFH-cs jobs of the VBF session (thsub has no priority).
