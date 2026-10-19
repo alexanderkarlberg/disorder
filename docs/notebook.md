@@ -4216,3 +4216,40 @@ cores ≈ 1.4× faster than the thservs); means within 1.4σ of the MPP pilot; n
   So events and counter-events share x, Q², y, the y and E_e' cuts and the x/Q² bins; the Q²/x rows can still differ
   through the jet requirement, and the lab jet bins can differ. Next, when the full Z05 is in: a fit of the τ_cut
   dependence for stability (AK), and the per-bin budget from the final summary.
+
+## 2026-10-19 (evening) — Z05 final: N3LO against the paper; τ_cut fit; budget
+
+REPORT-2026-10-19-Z05 (cluster branch c87ee91; results/Z05-summary.json.gz): every part complete (r 18700, vi
+2729, kp 2479, b2 729, rc1 1000, b0 200, b1 400, lo 400) except 6 slow rc2 seeds (994/1000; rc2 enters only at
+3e-5, 1e-5); 32.3k core-h; 24 r files written twice by zombie et tasks quarantined and rerun. Combined at MPP with
+zeus05/z5n3lo.py (figures now show τ_cut 1e-4 and 1e-3), fit zeus05/z5fit.py, budget zeus05/z5budget.py; page
+v13. δN3LO in % of NNLO, central scale, against the paper:
+- **Forward η (1.5–3): ours is below the paper.** At 1e-3 by 2.3–3.7 % (pulls −5.3, −3.5, −3.2), at 1e-4 by 2.4–4.6 %
+  (−3.3, −2.7, −1.8). Flat in τ_cut from 2e-3 to 1e-4 (η 2.5–3: 23.3, 22.6, 23.1, 23.6, 22.5 against 24.9). The
+  inclusive N3LO term is < 0.01 % of NNLO there, and in η 2.5–3 LO is 3.5 % of NNLO, so the correction is essentially
+  our NNLO 2+1 for forward lab jets. The read-off reproduces NNLOJET's LO/NLO ratios in η to 0.07 %; NNLOJET's N3LO
+  error ≤ 0.3–0.4 % (18 Oct). Open: form A of the fit (below) puts c0 on the paper in η 2–3 (17.5 ± 1.5, 25.3 ± 1.5),
+  A2 does not (17.0 ± 0.8, 20.8 ± 0.9), so a residual τ_cut dependence below 1e-4 that is flat above it is not
+  excluded by these data.
+- E_T 21–71 GeV below the paper at both τ_cut (1e-3: −0.5 ± 1.0 vs +1.7, −1.4 ± 0.6 vs +0.9, +0.3 ± 0.5 vs +0.7;
+  1e-4: −5.4 ± 2.0, −3.4 ± 1.0, −1.2 ± 1.1); the 1e-3 → 1e-4 drop is 1.3–2.7σ depending on the column correlation
+  (not in the summary). Central η: errors 4–9 % at 1e-4; at 1e-3 2–3 %, agreeing with the paper within 0.4–1.8σ.
+- **Correction of the interim (this morning):** "forward η agrees" held only within its errors (18.3 ± 2.1,
+  23.4 ± 2.1); with full r ours is 2–5σ below. The projected full-r errors were too small in central η: the per-seed
+  sd of r at 1e-4 grew 1.4–1.5× (η −1 … 0.5) and 1.1–1.3× (η 0.5 … 1.5) between 6545 and 18700 seeds with the MAD
+  unchanged (tail variance not converged); errors came out 9.4, 6.9, 5.8 against 6.9, 4.6, 4.0 projected, and are
+  probably still underestimates. Budget at 1e-4 (final sd, cluster CPU per job, optimal split): 1 % of NNLO in every
+  bin ≈ 2.5e6 CPU-h (interim 1.4e6), 0.3 % ≈ 2.8e7; at 1e-3 the worst bin needs 2.6e5.
+- **τ_cut fit (AK): it does not help.** Per bin, c0 + τ(c1L + c2L² + c3L³) (A) and with c3 = 0 (A2), over 2e-2…1e-4,
+  2e-2…1e-3, 5e-3…1e-4. The summary has no covariance between the τ_cut columns (each seed fills all), so two models:
+  independent columns, and nested sums with independent τ bands (cov = min(V_c, V_c') for vi, kp, r; b2 fully
+  correlated); 128 local r seeds give correlations between the two (tails decorrelate neighbouring columns), so χ²
+  is indicative only. A: c0 error no smaller than the 1e-4 column's (central η ±4–8 vs ±4–9; forward ±1.5–1.6 vs
+  ±1.3–1.4). A2: errors near the 1e-3 column's (1.5–3× smaller than 1e-4), but c0 moves with the range by up to
+  2–3σ and χ² is poor (η 1.5–2 21/5, η 2.5–3 20/5, E_T 14–21 27/5, 29–47 54/5, 47–71 35/5, correlated model). Over
+  the 12 fits c0 spans 33 % of NNLO (η −1 … −0.5), 22 % (−0.5 … 0), 5–7 % forward. With √τ terms (fiducial) c0 is
+  unconstrained (errors 3–27 %). The large-τ columns are precise but carry power corrections up to 19 % of NNLO; c0
+  then rests on the small-τ columns, as noisy as the 1e-4 result: model dependence replaces statistics. The limit is
+  the r variance as τ₂ → 0 (double-unresolved), as AK said. The column covariance per part could be written by the
+  cluster from the existing .out files (cheap); it would make χ² meaningful and decide the high-E_T drop, not the
+  conclusion on the fit. Not requested.
