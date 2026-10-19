@@ -4196,3 +4196,16 @@ cores ≈ 1.4× faster than the thservs); means within 1.4σ of the MPP pilot; n
   Tests submitted (thsub, 64 jobs): (A) lo with P2BSLICE (32 seeds) + the 170 b1 seeds: NNLO 1+1 flatness in τ_cut
   against NNLOJET; (B) r with P2BSLICE (32 seeds, 2M × 6): per-seed sd per τ_cut column against the cluster's plain
   r. Queued behind ≈ 7,900 proVBFH-cs jobs of the VBF session (thsub has no priority).
+- **P2B-improved slicing in mode 3, first tests** (19 Oct, desktops via thsub -m all with AK's OK; extras only,
+  P2BEXTRA = 1, VTARGET = −1, added to the plain runs; zeus05/z5p2bx.py): (A) one order lower, lo extras (32) +
+  the plain NNLO: against NNLOJET (% of NNLO) the total at 2e-2 −2.19 → −0.70 ± 0.21, at 2e-3 −0.67 → −0.39, at 1e-3
+  −0.35 → −0.30; η 2.5–3 at 2e-2 −7.4 → +0.3 ± 0.4: the fiducial drift is removed, flat to ≈ 2e-3 in most bins
+  (as CNV 2408.05265); the remainder is hadronic (total −0.7 % at 2e-2, η 1–1.5 +3.3 % at 2e-2, +1.3 % at 5e-3). lo
+  extras have no tails (sd ≈ 1.48 MAD). (B) N3LO, r extras (32, 2M × 6): per-seed sd ≈ 1–3e4 pb per central η bin
+  at every τ_cut (2e-2, 1e-3, 1e-4), 15–25× plain r at 2e-2, sd/1.48 MAD 3–7: the extras reach τ₂ → 0, where the
+  double real is doubly unresolved relative to the 2+1 Born (NLO 3+1 dipoles do not cancel it; O − O∘P2 damps it
+  only linearly; tail mechanism 3 of 17 Oct). P2B fixes the fiducial power corrections but does not reduce the cost
+  at N3LO: plain + extras at 1e-3 is noisier than plain at 1e-4. vi and kp extras are small. AK asked whether we
+  include the hadronic (NLP) power corrections of N-jettiness: no, leading power only (Born-frame measure, P2B for
+  the fiducial ones); NLP is known for 0-jettiness and 1-jettiness V/H+jet at NLO, not for our τ₂ and not at
+  O(α_s²) relative for any jet process.
