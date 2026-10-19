@@ -48,6 +48,8 @@
 ! projection subtracted event by event: cell (k, b) gets theta(tau_2 >
 ! tcs(k)) [O_b(event) - O_b(1+1 Born at the event's x, Q^2, y)]. 16 rows:
 ! total, >= 1 jet, leading-jet p_T (7), leading-jet y (6), >= 2 jets.
+! P2BSLICE = 1 (19 Oct): P2B-improved slicing of the 2+1 as in modes 1-2,
+! below tau_cut O(event) - O(projected 2+1 Born) (accept_p2b).
 ! LABSET = zeus05 (environment): the set-up of NNLOJET's N3LO P2B paper
 ! (1803.09973; ZEUS hep-ex/0502029 'global', analysis/nnlojet.f): E_p = 820
 ! GeV, NNPDF31_nnlo_as_0118, Q^2 > 25 GeV^2, y > 0.04, E_e' > 10 GeV; k_t
@@ -682,7 +684,7 @@ contains
        ! negative-energy parton; e.g. partons of +-5e6 GeV that cancel, next
        ! to a real with tau_2 ~ 1e-9..1e-8) drops the whole event, as plain
        ! slicing effectively does (there both sides fail every cut)
-       if (p2bslice .and. mode <= 2 .and. (degen .or. any(P3(4,1:4,id) < 0))) dropev = .true.
+       if (p2bslice .and. (degen .or. any(P3(4,1:4,id) < 0))) dropev = .true.
        sub = sub - val(id)*F3
     enddo
   end subroutine real_evalv
@@ -753,7 +755,7 @@ contains
     ! slicing never accepts, but with P2B they would enter with O - O~ /= 0.
     ! Leaving out O - O~ for these events is power suppressed (tau_2 <~ 1e-8);
     ! dropping them altogether would also lose their dipoles above the cut.
-    dropev = p2bslice .and. mode <= 2 .and. t2last < p2btmin
+    dropev = p2bslice .and. t2last < p2btmin
     garbev = .false.
     as = alphasPDF(sqrt(Q2))
     call pdfs(eta, sqrt(Q2), fpdf)
@@ -763,7 +765,7 @@ contains
     if (garbev) then
        ngarbev = ngarbev + 1; res = 0; return
     endif
-    if (p2bslice .and. mode <= 2) then
+    if (p2bslice) then
        nrealev = nrealev + 1
        if (dropev) then
           ndropev = ndropev + 1
@@ -1010,15 +1012,40 @@ contains
     enddo
   end subroutine zq_bins
 
-  ! mode 3: F(k + ntc*(b-1)) = theta(tau_2 > tcs(k)) [O_b(event) - O_b(Born)]
+  ! mode 3: F(k + ntc*(b-1)) = theta(tau_2 > tcs(k)) [O_b(event) - O_b(Born)];
+  ! with P2BSLICE below tau_cut O_b(event) - O_b(projected 2+1 Born) (P2B-
+  ! improved slicing of the 2+1, as accept_zeus; the 1+1 Born terms cancel,
+  ! project21 keeps q), with P2BEXTRA only that term
   subroutine accept_p2b(pin, p, n, Q, F)
     integer, intent(in) :: n
     real(dp), intent(in) :: pin(4), p(4,n), Q
     real(dp), intent(out) :: F(nv)
-    real(dp) :: d(nobmax), t2
+    real(dp) :: d(nobmax), d2(nobmax), t2, pb(4,2)
+    logical :: okp
     integer :: k, b
     F = 0
     call p2b_diff(pin, p, n, d)
+    if (p2bslice) then
+       t2 = tau2cm(pin, p, n)/Q; t2last = t2; degen = t2code < 0
+       d2 = 0                ! no valid partition (degenerate, T = 0): O - O~ = 0
+       if (t2 <= tcs(1)) then
+          call project21(pin, p, n, pb, okp)
+          if (okp) then
+             call p2b_diff(pin, pb, 2, d2)
+             d2 = d - d2
+          endif
+       endif
+       do b = 1, nob
+          do k = 1, ntc
+             if (t2 > tcs(k)) then
+                if (.not. p2bextra) F(k + ntc*(b - 1)) = d(b)
+             else
+                F(k + ntc*(b - 1)) = d2(b)
+             endif
+          enddo
+       enddo
+       return
+    endif
     if (all(d == 0)) return
     t2 = tau2cm(pin, p, n)/Q
     do b = 1, nob
@@ -2005,7 +2032,7 @@ program nlo31
      call get_environment_variable('LABSET', arg)
      if (trim(arg) == 'zeus05') call set_zeus05()
   endif
-  if (mode == 1 .or. mode == 2) then
+  if (mode >= 1) then
      call get_environment_variable('P2BSLICE', arg)
      if (trim(arg) == '1') then
         p2bslice = .true.
