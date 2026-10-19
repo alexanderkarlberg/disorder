@@ -4260,3 +4260,36 @@ v13. δN3LO in % of NNLO, central scale, against the paper:
   bin in η 1.5–2, 2–2.5, 2.5–3, i.e. 0.13–0.22 % of b2 (or of |r|), 20–50 % of the NNLO 2+1 coefficient there, and
   6–11 % of the 2+1 Born (NLO − LO). Our earlier NNLO 2+1 validations against NNLOJET (Breit-frame dijets, 10–30 %
   errors on the NNLO coefficient) could not see an error of this size.
+
+## 2026-10-19 (night) — desk check of the below-cut NNLO constants (AK: step 1 of the forward-offset hunt)
+
+Needed to explain the forward offset: a τ_cut-independent error of ≈ 6–11 % of the 2+1 Born, i.e. ≈ 100–170 in units
+of (α_s/2π)² × Born in the δ(τ) constant. Checks (scripts in `work/disorder-comparisons/nnlo21/softchk`, built with
+nnlo21/lp21/build.sh; not in the repo):
+- **Soft function: excluded.** MCFM's soft_ab + soft_nab (CEMW fit) exactly as lp21 calls them (legs 1, 2 = the jets
+  back to back, 3 = the beam; qgq and qag; all six I_ij,m from soft_G; MCFM common blocks from lp21_init) against
+  Bell, Dehnadi, Mohrmann, Rahn 2312.11626 (1JN.dipoles.renormalised.csv, colour sums by Casimirs, Laplace space,
+  ln S̃ at L_μ = 0), at their 24 angles θ = tπ/25: NLO equal to 1e-5 (all l coefficients); NNLO l⁴…l¹ to ≤ 6e-4; the
+  NNLO constant within −1.0 … +0.15 (typically −0.2 … −0.4) of (α_s/2π)², against Bell's errors 0.15–0.6, i.e. the
+  CEMW fit accuracy, ≈ 1 % of what is needed. Forward lab jets with E_T > 6–8 GeV keep the beam–jet y_ij ≳ 1e-3 in the
+  jets' rest frame (y = z_p, p_T² = ŝ z(1 − z)), where Bell et al. find the CEMW fit good (it fails only below
+  n_13 ≈ 1e-5). (A first run without lp21_init had n_f = 0 in MCFM's common block and disagreed at NNLO: a set-up slip
+  of the check, not of sliced21, which calls lp21_init/lp21_setq.)
+- **Jet functions: excluded.** MCFM's jetq, jetg (transcription checked against the compiled routines to 1e-15)
+  transformed to Laplace space: one- and two-loop constants equal Becher–Neubert hep-ph/0603140 (quark, b₀⁽²⁾ with
+  their L^n → I_n(L)) and Becher–Bell 1008.1936 (gluon c₂^{J_g}) exactly (symbolic).
+- **Beam functions:** MCFM's xbeam1bis/xbeam2bis with all channels (qq, qq̄, qq', qq̄', qg; gg, gq), n_f = 5
+  (lp21_setq), μ = μ_F = Q, Q_B = 2E_a by the exact cumulant shift (checked by hand): MCFM's NNLO DY/Higgs set; not
+  re-derived here.
+- **Hard function:** Catani-scheme H against NNLOJET's DIS VV to 3.6e-7 (16 Oct); the Catani → SCET conversion
+  (complex logs ln(−s_ij/μ² − i0), only parton-pair invariants, so no timelike-only assumption) is checked numerically
+  at one loop (DISENT-based hard function, 3e-11) and symbolically against MCFM at two loops (3 Oct), not numerically at
+  two loops.
+- **Assembly:** MCFM's assemblejet is a symmetric convolution of the four slots in τ/μ; our second jet in the beam-b
+  slot (J/2, J/4, beam-b b₀ = 1) is consistent with it (code read).
+- **zeus05 analysis with four partons** (r is the first part with four): lab_partons and zeus05_obs are generic in n
+  (arrays sized n, inclusive k_t with E_T recombination), so no truncation.
+**Result: no error in the below-cut constants.** Remaining unverified: the two-loop Catani → SCET conversion
+numerically, the beam functions beyond MCFM's own validation, and the above-cut NLO 3+1 (vi, kp, r) beyond the
+resolved-region comparison with NNLOJET of 3 Oct. Q²/x rows do not help here: the low-Q² and low-x rows still move by
+10–20 % of NNLO between τ_cut 1e-3 and 1e-4.
