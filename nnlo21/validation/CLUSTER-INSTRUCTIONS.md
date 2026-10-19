@@ -7,6 +7,20 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 19 Oct (evening): Z05 column covariance (analysis only, no jobs; AK: go)
+
+At MPP the final Z05 summary was combined with the inclusive N3LO and fitted in τ_cut per bin (notebook 19 Oct
+evening; page https://claude.ai/artifact/Sa7MEGe3N2f5p1SudqcN5x). The fit needs the covariance between the τ_cut
+columns (every seed fills all ten), which `Z05-summary.json.gz` does not have.
+1. Pull this branch and run `nnlo21/cluster/cov_z05.py $P/Z05 results/Z05-cov.json.gz` (it reads the same `.out`
+   files as `summary_z05.py`, central scale only; ≈ 0.2 MB). Do not wait for the 6 slow rc2 seeds: rc2 enters only
+   at 3e-5 and 1e-5, outside the fit ranges.
+2. Check: per part, the diagonal of `cov` for rows 1, 8 and 10 equals the square of the central-scale `sd` in
+   `results/Z05-summary.json.gz` (relative difference ≤ 1e-10; rc2 may differ if its n changed).
+3. Push `results/Z05-cov.json.gz` with a line in NOTES.md (n per part, the check, the corr(1e-3, 1e-4) lines the
+   script prints) to the results branch; AK approved this push. If the rc2 seeds have finished by then, also rerun
+   `summary_z05.py` and push the updated summary, saying whether the rc2 numbers changed. Then hold.
+
 ## UPDATE 18 Oct: Z05 — N3LO 1+1 jets by P2B in the ZEUS set-up of NNLOJET's N3LO paper, with scales (AK: go, ≤ 50k core-h)
 
 Goal: N3LO P2B for lab-frame inclusive jets in the set-up of 1803.09973 (Currie et al., ZEUS hep-ex/0502029

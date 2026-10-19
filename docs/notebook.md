@@ -4253,3 +4253,10 @@ v13. δN3LO in % of NNLO, central scale, against the paper:
   the r variance as τ₂ → 0 (double-unresolved), as AK said. The column covariance per part could be written by the
   cluster from the existing .out files (cheap); it would make χ² meaningful and decide the high-E_T drop, not the
   conclusion on the fit. Not requested.
+- AK (19 Oct evening): "this points to something being simply wrong"; first the column covariance from the
+  cluster (UPDATE 19 Oct evening in nnlo21/validation/CLUSTER-INSTRUCTIONS.md, script nnlo21/cluster/cov_z05.py:
+  per part and row the 10 × 10 covariance and Spearman correlation of the central-scale columns; tested on the
+  local sc2 b0/b1/lo runs: diagonal = sd² to 2e-16). Scale of the forward offset: at 1e-4 it is −49, −18, −6 pb per
+  bin in η 1.5–2, 2–2.5, 2.5–3, i.e. 0.13–0.22 % of b2 (or of |r|), 20–50 % of the NNLO 2+1 coefficient there, and
+  6–11 % of the 2+1 Born (NLO − LO). Our earlier NNLO 2+1 validations against NNLOJET (Breit-frame dijets, 10–30 %
+  errors on the NNLO coefficient) could not see an error of this size.
