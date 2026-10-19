@@ -4209,3 +4209,10 @@ cores ≈ 1.4× faster than the thservs); means within 1.4σ of the MPP pilot; n
   include the hadronic (NLP) power corrections of N-jettiness: no, leading power only (Born-frame measure, P2B for
   the fiducial ones); NLP is known for 0-jettiness and 1-jettiness V/H+jet at NLO, not for our τ₂ and not at
   O(α_s²) relative for any jet process.
+- AK asked to confirm that the mappings keep the lepton kinematics: yes (checked in the code). dip41 copies q and
+  both leptons unchanged (born_slots), FF moves only final-state partons, FI/IF rescale the incoming parton and
+  conserve q (no II dipoles in DIS); project21 keeps q; the 1+1 Born is q + xP at the event's x, Q²; sliced21
+  evaluates the 2+1 Born at the same leptons; the lab frame is built from the leptons and the proton direction.
+  So events and counter-events share x, Q², y, the y and E_e' cuts and the x/Q² bins; the Q²/x rows can still differ
+  through the jet requirement, and the lab jet bins can differ. Next, when the full Z05 is in: a fit of the τ_cut
+  dependence for stability (AK), and the per-bin budget from the final summary.
