@@ -4163,3 +4163,23 @@ https://claude.ai/artifact/Sa7MEGe3N2f5p1SudqcN5x.
   error 0.03 %) leaves 0.3–0.9 %: shape, not noise, so ≤ 0.3–0.4 % per bin, plausibly ≤ 0.1 %. The Q² inset (read to
   0.01 %): N3LO/NNLO = 1.0005, 1.0000, 1.0001, 1.0000 above 250 GeV², smooth to ≤ 0.02 %, but the P2B part hardly
   enters there. For us (pilot): 0.3 % in the central η bins ≈ 5e6 CPU-h, 0.1 % ≈ 4e7.
+
+## 2026-10-19 — Z05 interim (cluster, r at 35 %): first N3LO against the paper; correction of the sizing
+
+REPORT-2026-10-19-Z05-interim (cluster branch 6b26d4a; summary file results/Z05-summary-interim.json.gz, combined
+at MPP with zeus05/z5n3lo.py and disorder's inclusive -n3locoef): all parts done except r (6545 of 18700; vi
+2729, kp 2479, b2 728, rc1 1000, rc2 994, b0 200, b1 400, lo 400); 15.8k core-h used, 32.6k projected (cluster
+cores ≈ 1.4× faster than the thservs); means within 1.4σ of the MPP pilot; no failed runs.
+- δN3LO (τ_cut 1e-4, central scale, % of NNLO) against the paper: forward η agrees (η 2–2.5 18.3 ± 2.1 vs 19.3,
+  2.5–3 23.4 ± 2.1 vs 24.9; 1.5–2 8.7 ± 2.4 vs 14.1, −2.3σ); central η unresolved (errors 4–11 %); E_T ≥ 21 GeV
+  ours −1 … −4 % vs the paper's +0.3 … +1.7 % (pulls −2.0, −3.3, −1.5, −0.9). There δN3LO is a 0.4 % residual of
+  b2 ≈ +970 … +1170 % of NNLO, r ≈ −730 … −920 %, vi ≈ −300 … −340 %, kp ≈ +60 … +90 %: a 0.3 % effect in b2 or r
+  (τ_cut power corrections, largest in hard bins) would explain it; 3e-5/1e-5 too noisy yet. Open.
+- **Correction of 18 Oct (sizing):** the cluster's r (2M × 6) has a per-seed sd 1.3–1.7× the pilot's (1M × 6) in
+  the central η and low-E_T rows, where 0.71× was expected; sd/1.48 MAD 2.1–2.8 there (6545 seeds) against ≈ 1–1.5
+  in the pilot's 32: a heavy tail the pilot did not sample (the lesson of 16 Oct, size from ≥ 1000 seeds, not
+  applied). Variance ≈ 5× higher in those rows; forward rows as projected (0.58×). Corrected budget (cluster sd and
+  CPU per job): 1 % of NNLO in every bin ≈ 1.4e6 CPU-h (not 4.4e5), 0.3 % ≈ 1.5e7 (not 5e6).
+- **Correction of the Z05 instruction:** I asked for bin12 = bin11 on a J8 r seed; the bit-identity holds against
+  the tag 418666a, which already contains d5c2021 (|z|², last-bit changes amplified by VEGAS; validated 17 Oct at one
+  iteration). The cluster's finding (iteration 1 identical, later iterations differ) is that known change.
