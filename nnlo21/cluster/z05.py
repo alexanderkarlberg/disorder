@@ -11,7 +11,7 @@ from collections import Counter
 P = '/ptmp/mpp/akarlber/disorder-nnlo21'; Z = P + '/Z05'; B = P + '/bin12'; T = P + '/tables'
 HERE = os.path.dirname(os.path.abspath(__file__))
 USERCAP = int(os.environ.get('USERCAP', 19000)); DISCAP = int(os.environ.get('DISCAP', 11500)); MAXATT = int(os.environ.get('MAXATT', 4))
-EXCL = 'et[07-40],ct30,gt34,gt37,kt02,kt06,gt25,gt27,gt28,gt29,gt39,gt40,kt01,kt03,kt10'
+EXCL = 'et[07-40],ct30,gt09,gt34,gt37,kt02,kt06,gt25,gt27,gt28,gt29,gt39,gt40,kt01,kt03,kt10'
 ENV = 'export LABSET=zeus05 SCALES=3; '
 RV = 'export VEGAS_EQUAL=2 VTARGET=0 VEGAS_MIX=0.2; '
 M3 = '1d-9 3 0 0 psmc 0 0 1d-12'
