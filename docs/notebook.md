@@ -4293,3 +4293,44 @@ nnlo21/lp21/build.sh; not in the repo):
 numerically, the beam functions beyond MCFM's own validation, and the above-cut NLO 3+1 (vi, kp, r) beyond the
 resolved-region comparison with NNLOJET of 3 Oct. Q²/x rows do not help here: the low-Q² and low-x rows still move by
 10–20 % of NNLO between τ_cut 1e-3 and 1e-4.
+
+## 2026-10-20 (night) — blind audit, MCFM plus.f fix, P2B extras at τ_cut 1e-3, heavy-tail literature, event shapes
+
+AK (19 Oct late): a blind audit of the code against the literature; the P2B-improved result at τ_cut 1e-3 in the plots;
+the event shapes we have, and the sizing of a percent-level NNLO check against NNLOJET; literature on the heavy tails.
+- **Blind audit** (Opus agent, high effort, no access to the notebook or pages; report and test programs in the session
+  scratchpad `audit/`): no error above the per-mille level.
+  - Soft function = Bell et al. grids. Jet functions exact (Becher–Neubert, Becher–Bell). Beam functions = an independent
+    Python implementation with numerical convolutions to 6.5e-10, once MCFM's plus cut-off is removed.
+  - Catani → SCET conversion re-derived from Catani's I and the Becher–Neubert Z: i1zero exact, x2zero to 2e-16.
+    NNLOJET's coefficients with the one-loop shift = 0904.2665's Fortran to 6e-6. H^(1) = an independent DISENT/ERT one
+    loop to 1e-14.
+  - assemblejet = an independent Laplace-space convolution. NLO 3+1: poles cancel to 1e-13; CS dipoles and I, K, P per
+    hep-ph/9605323; the τ₂ cut on real, mapped and 3-parton events.
+  - P2B projection keeps the leptons; zeus05 clustering against FastJet on 20000 events, no mismatch.
+  - D1: MCFM's plus.f drops the subtracted plus integrand for 1 − z < 1e-5. The two-loop beam cumulant was low by ≈ 0.5
+    (quark) / 2.6 (gluon) (α_s/2π)² × Born at 1e-4, ≈ 0.04 % of NNLO in the forward ZEUS bins. Fixed (build patch, cut-off
+    1e-8, within 1e-4 of the exact plus). 1e-13 stalls lp21's adaptive z integration at large ξ: the first patched grid
+    build was killed after 4.6 h at 100 % CPU (normally 4 min per node). nlo31 bit-identical.
+  - D2: CEMW fit 0.25 below Bell et al., ≈ 1e-4 of the Born; left as is.
+  - Not verifiable: the two-loop hard coefficients of the direct quark-channel regions 1c, 2b, 3d, 4b (no reference;
+    continuous).
+- **P2B extras at τ_cut 1e-3** (desktops, thsub -m all overnight with AK's OK; r-x 2032, vi-x 1516, kp-x 515 seeds,
+  ≈ 1430 core-h; zeus05/p2bs, combined with z5p2bx.dn3lo_p2b):
+  - Forward η is as with plain slicing: 9.5 ± 1.9, 16.9 ± 1.4, 23.7 ± 1.5 vs plain 10.4, 17.0, 22.6 vs paper 14.1, 19.3, 24.9.
+    So the forward offset is not a fiducial power correction.
+  - Elsewhere single seeds dominate the r-x mean: a ±4.68e6 pb pair across the η = 1 edge, pairs across E_T = 21 and 71 GeV.
+    These are misbinned near-double-unresolved weights (they cancel in the merged bin).
+  - Two jobs were lost and one finished without output on atlasA215; all three were rerun.
+- **Heavy-tail literature** (agent, report in scratchpad heavytails/REPORT.md). Shortlist:
+  (1) smoothed histogram fills (Rivet-3 fuzzy fills; orthogonal moments 2601.10420);
+  (2) Sherpa-3 NLO_SMEAR dipole-weight shift below α_0, which also covers cut edges;
+  (3) stratified logarithmic sampling in τ₂ per channel, as NNLOJET for N3LO DY;
+  (4) correlated multi-cut extrapolation (MATRIX);
+  (5) robust combination as a stop-gap only (it cannot restore 1/√N, Lugosi–Mendelson).
+  Upper bound of the gain from removing the tails: (sd/1.48 MAD)² = 4–50 in central bins.
+- **Event shapes** (page https://claude.ai/artifact/JwEX5qT1xEaXXMWi4Sxvd7; E5/Ex7 with kp11, τ_zQ 0.05–0.5).
+  - NLO: P2B at 1e-4 within 0.6 pb of NNLOJET per bin.
+  - NNLO: agrees within NNLOJET's 14–85 % errors.
+  - Sizing (error² × CPU scaling, optimistic): the sum and bins 0.2–0.4 at 10 % of the NNLO coefficient ≈ 7.8e4 (NNLOJET)
+    + 7.1e4 (ours) core-h, ≈ 3e5 with a margin of 2 (1.4–3.5σ for a 20–50 % error); 5 % ≈ 1.2e6 with the margin.
