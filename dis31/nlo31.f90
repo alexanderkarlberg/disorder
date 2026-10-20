@@ -32,7 +32,8 @@
 ! target cell); VEGAS_EQUAL (iteration weights of the cells); VEGAS_MIX
 ! (defensive mixture, see vegas); ZFIX (mode 2: 2 window around (x, Q2), 3
 ! tau_zQ bins in the inclusive cuts); DIPALPHA (restricted dipoles, dip41);
-! LABSET (mode 3: zeus05); SCALES (mode 3: the 7 scales, nlo31_mod).
+! LABSET (mode 3: zeus05); SCALES (mode 3: the 7 scales, nlo31_mod); ZSMEAR
+! (zeus05: smeared bin and acceptance edges, zeus05_obs).
 !
 ! Mode 2 (nnlo21 validation against NNLOJET): the above-cut part for
 ! ZEUS-like dijets (nnlo21/validation/nnlojet_epLJJ_zeus2j.run), integrated
@@ -170,6 +171,10 @@ module nlo31_mod
   real(dp), parameter :: z5et(0:8) = [6.0_dp, 8.0_dp, 10.0_dp, 14.0_dp, 21.0_dp, 29.0_dp, 47.0_dp, 71.0_dp, 127.0_dp]
   real(dp), parameter :: z5q2(0:7) = [25.0_dp, 50.0_dp, 100.0_dp, 250.0_dp, 630.0_dp, 1600.0_dp, 4000.0_dp, 1e5_dp]
   real(dp), parameter :: z5x(0:7) = [1e-4_dp, 1e-3_dp, 2.5e-3_dp, 6.3e-3_dp, 1.58e-2_dp, 0.04_dp, 0.1_dp, 1.0_dp]
+  ! ZSMEAR = eps (environment; 20 Oct cost study): the eta and E_T edges of
+  ! zeus05_obs (bins and acceptance) linear over eps x the narrower adjacent
+  ! bin (fuzzy fill), >= 1 jet = 1 - prod(1 - acceptance); 0: sharp
+  real(dp) :: z5eps = 0
   ! scale variations (env SCALES = N, mode 3; 18 Oct): the O(a^N) coefficient
   ! (a = alpha_s/2pi) of the P2B cells at the 7 (xi_R, xi_F) of disorder and
   ! NNLOJET, by the renormalisation group: a part of order n (a(Q)^n c_n x
@@ -1178,9 +1183,9 @@ contains
     integer, intent(in) :: n
     real(dp), intent(in) :: Pp(4), p(4,n)
     real(dp), intent(out) :: o(nobmax)
-    real(dp) :: q(4,n), pt(n), yr(n), ph(n), dmin, d, dph
+    real(dp) :: q(4,n), pt(n), yr(n), ph(n), dmin, d, dph, a0, ae, ap
     logical :: alive(n), isjet(n)
-    integer :: i, j, nq, ia, ja, nj, b
+    integer :: i, j, nq, ia, ja, b
     call lab_partons(Pp, p, n, q, nq)
     do i = 1, nq
        pt(i) = sqrt(q(1,i)**2 + q(2,i)**2)
@@ -1218,32 +1223,54 @@ contains
        endif
     enddo
     o = 0
-    nj = 0
+    a0 = 1
     do i = 1, nq
        if (.not. isjet(i)) cycle
-       if (pt(i) < 6 .or. yr(i) < -1 .or. yr(i) > 3) cycle
-       nj = nj + 1
+       ae = ramp(yr(i), z5eta, 0) - ramp(yr(i), z5eta, 8); ap = ramp(pt(i), z5et, 0)
        do b = 1, 8
-          if (yr(i) >= z5eta(b-1) .and. yr(i) < z5eta(b)) o(1+b) = o(1+b) + 1
-          if (pt(i) >= z5et(b-1) .and. pt(i) < z5et(b)) o(9+b) = o(9+b) + 1
+          o(1+b) = o(1+b) + (ramp(yr(i), z5eta, b-1) - ramp(yr(i), z5eta, b))*ap
+          o(9+b) = o(9+b) + (ramp(pt(i), z5et, b-1) - ramp(pt(i), z5et, b))*ae
        enddo
+       a0 = a0*(1 - ae*ap)
     enddo
-    if (nj == 0) return
-    o(1) = 1
+    o(1) = 1 - a0
+    if (o(1) == 0) return
     do b = 1, 7
-       if (Q2cur >= z5q2(b-1) .and. Q2cur < z5q2(b)) o(17+b) = 1
-       if (xcur >= z5x(b-1) .and. xcur < z5x(b)) o(24+b) = 1
+       if (Q2cur >= z5q2(b-1) .and. Q2cur < z5q2(b)) o(17+b) = o(1)
+       if (xcur >= z5x(b-1) .and. xcur < z5x(b)) o(24+b) = o(1)
     enddo
   end subroutine zeus05_obs
 
+  ! theta(v - e(k)); ZSMEAR: a linear ramp over z5eps x the narrower bin next
+  ! to the edge e(k)
+  real(dp) function ramp(v, e, k) result(t)
+    real(dp), intent(in) :: v, e(0:)
+    integer, intent(in) :: k
+    real(dp) :: h
+    t = merge(1.0_dp, 0.0_dp, v >= e(k))
+    if (z5eps == 0) return
+    if (k == 0) then
+       h = e(1) - e(0)
+    elseif (k == ubound(e, 1)) then
+       h = e(k) - e(k-1)
+    else
+       h = min(e(k) - e(k-1), e(k+1) - e(k))
+    endif
+    t = min(1.0_dp, max(0.0_dp, (v - e(k))/(z5eps*h) + 0.5_dp))
+  end function ramp
+
   ! LABSET = zeus05 (mode 3): the set-up of 1803.09973 (analysis/nnlojet.f)
   subroutine set_zeus05()
+    character(32) :: arg
     zeus05 = .true.; nob = 31; nv = ntc*nob; iv = ntc
     Ep = 820; s = 4*Ee*Ep; elmin = 10
     q2lo = 25; q2hi = s; ylo = 0.04_dp; yhi = 1
     pdfname = 'NNPDF31_nnlo_as_0118'
     write(*,'(a)') ' LABSET zeus05: E_p 820 GeV, NNPDF31_nnlo_as_0118, Q2 > 25, y > 0.04, E_e'' > 10;' &
          & //' k_t R = 1 (E_T), E_T > 6, -1 < eta < 3'
+    call get_environment_variable('ZSMEAR', arg)
+    if (len_trim(arg) > 0) read(arg, *) z5eps
+    if (z5eps > 0) write(*,'(a,f6.3)') ' ZSMEAR: eta and E_T edges smeared over eps x bin, eps', z5eps
   end subroutine set_zeus05
 
   ! scale variations: the RG coefficients k_g (g = f, P0 x f, P1 x f, P0 x
