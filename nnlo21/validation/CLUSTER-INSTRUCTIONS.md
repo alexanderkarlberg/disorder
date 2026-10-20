@@ -7,6 +7,60 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
+## UPDATE 20 Oct: Z05 cost study — P2B extras sharp and smoothed, tail statistics (needs AK's go; ≈ 13.5k core-h)
+
+AK (20 Oct): before changing anything in the NNLO 2+1, measure where the cost goes. At MPP (notebook 20 Oct; page
+https://claude.ai/artifact/TPCiib9Zgdgo6kwWNcx5Xg), from the final Z05 summary and the local Z05 P2B extras (r-x 2032,
+vi-x 1516, kp-x 515 seeds) at τ_cut 1e-3:
+- the extras θ(τ₂ < τ_cut)[O − O∘P₂] have the largest error in all 23 bins of Q², η and E_T (up to ≈ 100 % of NNLO
+  in η 0.5–1.5) on 10 % of the CPU. Nearly all of it is r-x: single seeds carry > 90 % of the variance in 7 bins
+  (misbinning across η = 1, E_T = 71 GeV and the acceptance edges), and in 9 bins the error does not fall when the
+  seeds grow 4× (err(N)/err(N/4) up to 14; 0.5 for well-behaved seeds);
+- new option `ZSMEAR=ε` in nlo31 (commit 9c420cd): the η and E_T edges of the zeus05 rows, bins and acceptance,
+  smeared over ε × the narrower adjacent bin; off by default and bit-identical to before. In 4 seeds rerun at MPP
+  with ε = 0.1 the misbinning giants vanished, but one seed drew a different giant (not at an edge), and on 71 seeds
+  run both ways the per-seed MAD rose in 19 of 23 bins. Whether smoothing lowers the error at large N needs more
+  seeds than the MPP network should carry (AK).
+
+1. Build **bin13** from `origin/2026-10-nnlo21-ncc` at this commit (`nnlo21/build_sliced21.sh`; only nlo31 is used
+   below; the branch also patched MCFM's plus.f in the lp21 build since bin12, which needs new beam grids for
+   sliced21, not used here). Checks:
+   - `LABSET=zeus05 P2BSLICE=1 P2BEXTRA=1 VTARGET=-1 VEGAS_EQUAL=2 VEGAS_MIX=0.2 nlo31 r 40000 2 1234 M3` with bin12
+     and bin13: identical LCELL lines (at MPP the same build pair was identical for r, r-x, vi-x and b2);
+   - the same with `ZSMEAR=0.1` prints ` ZSMEAR: eta and E_T edges smeared over eps x bin, eps  0.100`.
+2. Runs. Environment for all: `LABSET=zeus05` (no SCALES: the extras have no scale cells); `X = P2BSLICE=1
+   P2BEXTRA=1 VTARGET=-1`; `M3` as for Z05. One directory per part under `$P/Z05x/<part>/`, logs
+   `<part>_<seed>.out`. Core-h per job scaled from MPP desktops with the Z05 ratios cluster/MPP of r, vi, kp:
+
+   | part | command | seeds | jobs | ≈ core-h/job | ≈ core-h |
+   |---|---|---|---|---|---|
+   | rx | `X VEGAS_EQUAL=2 VEGAS_MIX=0.2 nlo31 r 2000000 6 <seed> M3` | 6001–10000 | 4000 | 1.4 | 5600 |
+   | rxs | `ZSMEAR=0.1`, otherwise as rx | 6001–10000 | 4000 | 1.4 | 5600 |
+   | rxt | `ZSMEAR=0.3`, otherwise as rx | 6001–7000 | 1000 | 1.4 | 1400 |
+   | vix | `X nlo31 vi 1000000 6 <seed> M3` | 14001–16000 | 2000 | 0.17 | 340 |
+   | vixs | `ZSMEAR=0.1`, otherwise as vix | 14001–16000 | 2000 | 0.17 | 340 |
+   | kpx | `X nlo31 kp 2000000 6 <seed> M3` | 16001–17000 | 1000 | 0.07 | 70 |
+   | kpxs | `ZSMEAR=0.1`, otherwise as kpx | 16001–17000 | 1000 | 0.07 | 70 |
+
+   About 13.5k core-h, 15k jobs. A sharp part and its smoothed ones with the same seed are a pair: submit them
+   interleaved, seed by seed (rx s, rxs s, rxt s, …), so that any partial set gives pairs. rx 6001–8000 are the
+   MPP r-x seeds (bin4 = bin5 = bin6 for nlo31).
+3. First wave: seeds 6001–6400 of rx, rxs, rxt and the first 10 % of vix, vixs, kpx, kpxs (≈ 1.4k jobs). From it:
+   (a) CPU per job (`cpu_summary.py`) and the projected total: above **16k core-h**, cut rx, rxs and rxt together from
+   the top of their seed range; (b) rx against MPP: `LCELL   8` of rx_6001 at MPP is
+   `-1.14560179E+02 -1.28763535E+02 -1.35737477E+02 -1.01055161E+02 -9.20972914E+01 -8.56559802E+01
+   -8.74823576E+01 -8.41895884E+01  7.30530244E+00  5.79539348E+00`; over rx 6001–6400 the medians in τ_cut column
+   5 (1e-3) at MPP are row 2 −125.13 (1.48 MAD 2290), row 8 0.27593 (45.2), row 10 −851.12 (6612). Identical: say
+   so; otherwise (other compiler or CPU) the medians should agree within ≈ 10 % of the MAD. Continue without
+   waiting unless they do not.
+4. Analysis, at the end (no jobs): `nnlo21/cluster/tails_z05.py results/Z05-tails.json.gz $P/Z05 $P/Z05x`. For every
+   part, the existing Z05 b2, vi, kp, r, rc1, rc2 (the per-seed statistics MPP does not have) and the seven new
+   ones, it gives the largest seed's share of the variance, the error ratio for 4× seeds and the column
+   differences against 1e-4. For the pairs it gives smoothed − sharp per seed (≈ 2 MB). It prints a line per part
+   and per pair. If the column covariance of 19 Oct (`Z05-cov.json.gz`) is not done yet, run it as well.
+5. Report (REPORT-…-Z05x): per part the n, the CPU per job and the failed jobs, plus the printed lines. Push the
+   report and `Z05-tails.json.gz` to the results branch (with AK's OK, as before), then hold.
+
 ## UPDATE 19 Oct (evening): Z05 column covariance (analysis only, no jobs; AK: go)
 
 At MPP the final Z05 summary was combined with the inclusive N3LO and fitted in τ_cut per bin (notebook 19 Oct

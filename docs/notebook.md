@@ -4334,3 +4334,45 @@ the event shapes we have, and the sizing of a percent-level NNLO check against N
   - NNLO: agrees within NNLOJET's 14–85 % errors.
   - Sizing (error² × CPU scaling, optimistic): the sum and bins 0.2–0.4 at 10 % of the NNLO coefficient ≈ 7.8e4 (NNLOJET)
     + 7.1e4 (ours) core-h, ≈ 3e5 with a margin of 2 (1.4–3.5σ for a 20–50 % error); 5 % ≈ 1.2e6 with the margin.
+
+## 2026-10-20 (day) — D1 same-seed check; cost study of the NNLO 2+1 piece (Z05, τ_cut 1e-3); smoothing option
+
+- **D1 (plus.f) same-seed check**: b2 with the old and the patched grid, seeds 5101–5116 (1M × 6), new − old in % of
+  NNLO at 1e-4, forward η 1.5–3: +0.28 ± 0.29, +0.24 ± 0.19, +0.35 ± 0.43 (all bins within 1.5σ of zero). Not an
+  event-by-event difference: the VEGAS grids adapt differently after iteration 1. Consistent with the estimated
+  +0.04 %; D1 does not explain the 2–4 % forward offset.
+- **Cost study** (AK: measure where the cost goes before changing anything; page
+  https://claude.ai/artifact/TPCiib9Zgdgo6kwWNcx5Xg; zeus05/z5cost.py, cost/cost_page.py). The split is:
+  (a) the P2B extras θ(τ₂ < τ_cut)[O − O∘P₂] (local r-x 2032, vi-x 1516, kp-x 515 seeds);
+  (b) b2; (c) vi, kp, r (the cluster's final Z05).
+  The observables are Q² (Born-like), η_jet (bin 2.5–3 at the acceptance edge) and E_T,jet, at τ_cut 1e-3.
+  - **CPU and errors.** The CPU so far is 34k core-h: (c) 86 % (r 75 %), (b) 4 %, (a) 10 %. The CPU per job of the
+    extras was calibrated against their plain siblings on the same desktops: r-x ≈ 1.07 r, i.e. 1.47 cluster
+    core-h; vi-x 0.17; kp-x 0.07. (a) has the largest error in all 23 bins (up to 106 % of NNLO in η 1–1.5).
+    For 1 % of NNLO per bin with the optimal split: 600 core-h (Q² > 4000) to 3.6e7 (η 1–1.5), more than 1e6 in 10
+    bins. This assumes 1/√N, which fails for r-x.
+  - **τ_cut.** The P2B total T(1e-3) − T(1e-4) is within errors everywhere; the largest pull is 2.0σ (E_T 29–47,
+    +6.1 ± 3.1 %). No residual is resolved; the bound is set by the noise in (a).
+  - **Tails.** In r-x a single seed carries more than 90 % of the variance in 7 bins, and err(N)/err(N/4) ≥ 0.9 in 9
+    bins (up to 14). b2 has sd/(1.48 MAD) up to 22 in central η. For r, the growth of the production sd from 6545 to
+    18700 seeds converts to a 4× ratio of 0.37–0.69. vi-x and kp-x are healthy except in the high-E_T and high-Q²
+    bins.
+  - **Smoothing.** New option `ZSMEAR=ε` (nlo31, zeus05_obs; local commit 9c420cd). The η and E_T edges, bins and
+    acceptance, become linear ramps over ε × the narrower bin. With ZSMEAR unset the output is bit-identical (r, r-x,
+    vi-x, b2). At ε = 0.1:
+    - in 4 seeds with the largest sharp r-x weights the edge giants (±45σ pairs at η = 1 and E_T = 71 GeV,
+      acceptance-edge giants in Q²) vanished;
+    - the smoothed 6249 drew a −157σ weight in E_T 29–47 without a partner bin;
+    - on 71 seeds run both ways the per-seed MAD rose in 19 of 23 bins (up to 3.5×): rare giants become frequent
+      bounded weights.
+    No error reduction is visible at this N.
+  - **Correction** of the night entry: the P2B extras are *not* a pure misbinning integrand. Smoothing removes the
+    edge class, but a class of large weights away from the edges remains. Its source, for example jet clustering at
+    ΔR = R or the lab boost of a beam-collinear emission, needs per-event weights, which the code does not record.
+- **Local batch stopped.** 4880 thsub -m all jobs (b2, vi, kp, r per-seed tails; r-x and vi-x/kp-x smoothed reruns)
+  were stopped at AK's request ("this much should not be submitted here"): 4722 were killed by ID, all in
+  zeus05/cost; 165 had finished. Partial logs were removed.
+- **Instead:** cluster UPDATE 20 Oct (CLUSTER-INSTRUCTIONS; needs AK's go, ≈ 13.5k core-h). r-x sharp, ε = 0.1
+  (4000 seeds each, the same seeds) and ε = 0.3 (1000 seeds); vi-x and kp-x sharp and smoothed as bias controls.
+  The new nnlo21/cluster/tails_z05.py computes the per-seed tail statistics of all Z05 parts at production
+  statistics (tested at MPP on the local extras).
