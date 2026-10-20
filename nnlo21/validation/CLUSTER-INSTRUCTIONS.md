@@ -7,7 +7,7 @@ file, `CLAUDE.md`, `docs/nnlo21-plan.md` and the nnlo21 entries of
 `docs/notebook.md` (3–6 Oct) first. The page with the current status:
 https://claude.ai/artifact/ChKctwxDdEau7H9DGMxwyW
 
-## UPDATE 20 Oct: Z05 cost study — P2B extras sharp and smoothed, tail statistics (needs AK's go; ≈ 13.5k core-h)
+## UPDATE 20 Oct: Z05 cost study — P2B extras sharp and smoothed, tail statistics (AK: go, ≤ 16k core-h)
 
 AK (20 Oct): before changing anything in the NNLO 2+1, measure where the cost goes. At MPP (notebook 20 Oct; page
 https://claude.ai/artifact/TPCiib9Zgdgo6kwWNcx5Xg), from the final Z05 summary and the local Z05 P2B extras (r-x 2032,

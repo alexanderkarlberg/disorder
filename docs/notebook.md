@@ -4372,7 +4372,7 @@ the event shapes we have, and the sizing of a percent-level NNLO check against N
 - **Local batch stopped.** 4880 thsub -m all jobs (b2, vi, kp, r per-seed tails; r-x and vi-x/kp-x smoothed reruns)
   were stopped at AK's request ("this much should not be submitted here"): 4722 were killed by ID, all in
   zeus05/cost; 165 had finished. Partial logs were removed.
-- **Instead:** cluster UPDATE 20 Oct (CLUSTER-INSTRUCTIONS; needs AK's go, ≈ 13.5k core-h). r-x sharp, ε = 0.1
+- **Instead:** cluster UPDATE 20 Oct (CLUSTER-INSTRUCTIONS; AK: go and push, evening; ≈ 13.5k core-h). r-x sharp, ε = 0.1
   (4000 seeds each, the same seeds) and ε = 0.3 (1000 seeds); vi-x and kp-x sharp and smoothed as bias controls.
   The new nnlo21/cluster/tails_z05.py computes the per-seed tail statistics of all Z05 parts at production
   statistics (tested at MPP on the local extras).
