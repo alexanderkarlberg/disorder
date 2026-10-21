@@ -62,7 +62,7 @@ def queue():
     act = set()
     for l in q:
         f = l.split()
-        if f[0] == 'dis-z05x' and f[2] in ('PD', 'R', 'CF') and f[1].isdigit(): act.add(int(f[1]))
+        if f[0].startswith('dis-z05x') and f[2] in ('PD', 'R', 'CF') and f[1].isdigit(): act.add(int(f[1]))
     return q, act
 cmd = sys.argv[1] if len(sys.argv) > 1 else 'status'
 if cmd == 'init':
