@@ -49,7 +49,9 @@ if an analysis is linked in, `disorder_[...].dat` histogram output.
 ## Tests
 
 Everything runs through `ctest` (`enable_testing()` in the top-level CMakeLists.txt,
-`-DDISORDER_TESTS=OFF` to skip). There are two kinds of test:
+`-DDISORDER_TESTS=OFF` to skip). The unit-test programs (`test_*`, below) are only 
+built by default (`-DCOMPILE_TESTS=OFF` disables them); with it OFF, `ctest` runs only the
+`guard_*` and validation tests. The test programs are built without LTO so they link quickly. There are two kinds of test:
 
 - **Unit tests** (`tests/`, label `unit`, ~1 s in total): small Fortran programs linked against
   the physics code (`disorder_core` object library) plus `analysis/simple_analysis.f`, using the
@@ -80,7 +82,7 @@ Everything runs through `ctest` (`enable_testing()` in the top-level CMakeLists.
   come from that analysis); runs whose LHAPDF set is missing are disabled.
 
 ```
-cmake -S . -B build -DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis.f
+cmake -S . -B build -DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis.f -DCOMPILE_TESTS=ON
 cmake --build build -j
 ctest --test-dir build -j 8 --output-on-failure        # everything (~5 min, dominated by one run)
 ctest --test-dir build -L unit                         # unit tests only

@@ -181,6 +181,10 @@ target_link_libraries(getpdfuncert ${LHAPDF_LIBRARY})
 ##################################################################################
 # Tests: unit tests in tests/, the validation matrix in validation/
 option(DISORDER_TESTS "Build and register the tests with ctest" ON)
+# The test_* unit-test programs in tests/ are only built when this is ON
+# (the guard_* and validation_* tests need only disorder and are always
+# registered together with DISORDER_TESTS).
+option(COMPILE_TESTS "Build the test_* unit-test programs in tests/" ON)
 if(DISORDER_TESTS)
   enable_testing()
   add_subdirectory(tests)

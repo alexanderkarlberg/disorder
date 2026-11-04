@@ -68,7 +68,8 @@ Tests
 
 Unit tests and a validation suite (which compares full runs with stored
 reference output in `validation/ref_runs`) are run with `ctest` from the
-build directory:
+build directory. The unit-test programs (`tests/test_*.f90`) are built by
+default; they can be left out with `-DCOMPILE_TESTS=OFF`. Then run
 
 	ctest -L unit
 
@@ -78,7 +79,9 @@ compiled in,
 	cmake -DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis.f ..
 
 after which `ctest -j 8` runs everything (a few
-minutes). Tests are skipped with `-DDISORDER_TESTS=OFF`.
+minutes). Tests are skipped with `-DDISORDER_TESTS=OFF`. Without
+`-DCOMPILE_TESTS=OFF`, `ctest` still runs the `guard_*` and validation
+tests, but not the unit tests.
 
 Usage
 =====
