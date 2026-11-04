@@ -734,3 +734,16 @@ channels pointwise; NC MATFOR keeps the analogous term in E).
   of 2.2.0 is therefore negligible, but it was a real omission.
 - The independent check now is dis31's me31 (MCFM crossed, full amplitude
   without a class decomposition): equal to the fixed MATFOR to 1e-12.
+
+## 2026-11-04: CI failures on ubuntu-26.04 (FMA contraction)
+
+- CI (run 41842348433, ubuntu-26.04, gfortran 15.2.0, hoppet 2.3.0) failed 3 of 82
+  tests: unit_matthr_nc_photon_{eminus,eplus} (bitwise identity to original DISENT)
+  and validation_p2b_nc_intonly_Q_30_x_0.1_positron (1.3e-5 on values ~6e-7, from a
+  cancellation; tolerance 1e-5). Identical toolchain locally passed everything.
+- Cause: fused multiply-adds. Locally, `-march=haswell` reproduces exactly these three
+  failures; adding `-ffp-contract=off` fixes them. The runner's compiler evidently emits
+  FMAs by default (inferred, runner flags not seen). glibc libm dispatch
+  (GLIBC_TUNABLES hwcaps) made no difference.
+- Fix: `-ffp-contract=off` for Fortran and C++ in the top-level CMakeLists.txt. Tolerances
+  untouched; references unchanged (the default x86-64 build never used FMA).

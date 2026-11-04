@@ -7,9 +7,12 @@ IF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 ENDIF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -ffixed-line-length-132 -fPIC -flto -Wno-maybe-uninitialized")
+# -ffp-contract=off: no fused multiply-adds, so that results do not depend on the
+# default target of the compiler (some toolchains/CI images enable FMA), which breaks
+# the bitwise unit checks and the 1e-5 validation of cancellation-prone quantities.
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffp-contract=off -O3 -ffixed-line-length-132 -fPIC -flto -Wno-maybe-uninitialized")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -fPIC -flto -Wno-maybe-uninitialized")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffp-contract=off -O3 -Wall -Wextra -fPIC -flto -Wno-maybe-uninitialized")
 
 set(CMAKE_BUILD_TYPE Release)
 set(prefix ${CMAKE_INSTALL_PREFIX})
