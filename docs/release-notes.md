@@ -4,7 +4,7 @@ Changes since version 1.0.0 (SciPost Phys. Codebases 32, arXiv:2401.16964).
 The 1.0.0 manual (`docs/disorder-1.0.0-manual.tex`) is left unchanged;
 where it no longer applies, this file says so.
 
-## Unreleased
+## 2.2.1
 
 ### Physics
 
