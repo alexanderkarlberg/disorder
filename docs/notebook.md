@@ -684,3 +684,53 @@ With this, disorder's p2b O(αs²) event shapes agree with NNLOJET for:
 - Why it was not caught: CI runs only on pushes and PRs to main (and on the
   schedule), not on branches. The full ctest was not rerun after the banner
   commit went onto the branch before the merge.
+
+## 2026-11-04 — CC MATFOR: the W-on-the-pair identical-quark interference (on main)
+
+AK: isolate the MATFOR fix of 1b2d930 (branch `2026-10-disent-ccbb`, not to be
+merged for now) on a branch from main (2.2.0, without that branch's DISENT
+abort fix). The fix was found on 9 Oct while extending the NNLO 2+1 work
+(dis31's me31, MCFM crossed) to W exchange: for incoming partons the W cannot
+couple to (W⁻: d, s, ū, c̄), the four-quark final state d d ū (etc.) has two
+assignments with the W on the pair, and they interfere (identical quarks).
+DISENT's CC MATFOR (2.2.0) had the classes EXX (W on the incoming line in both
+amplitudes) and EXY (line × pair) but not this one (up to 10% of those small
+channels pointwise; NC MATFOR keeps the analogous term in E).
+
+- `derivations/o2/make_trees.py`: new class "yy" of `fourq_exch` (boson on
+  (p3,p4) in the direct and on (p2,p4) in the exchanged amplitude) → `FEYY3`
+  in `src/disent_o2_trees.f` (the other routines are unchanged).
+- MATFOR: + HF (CF − CA/2)(−EYY/16) with weights C2C(−I) (parity-even) and
+  −C3C(−I) (parity-odd), the CC couplings of the charge-conjugate parton:
+  exactly the partons whose conjugate the W hits, with the PV sign of a
+  quark/antiquark as for EXX.
+- The `src/` and `derivations/` changes are those of 1b2d930 verbatim (they
+  apply to main with line offsets only); the remaining difference of
+  `src/libdisent.f` to 1b2d930 is the abort fix alone.
+- Check (10 Oct, on that branch): dis31's harness_me31 with the B–B term kept
+  in me31: me31/MATFOR − 1 ≤ 6e-14 (e⁻), 2e-13 (e⁺), 8e-13 (ν), 4e-12 (ν̄),
+  50 points, all flavours; photon + Z unchanged (≤ 6e-13).
+- Full ctest before regenerating: 76/82. Exactly the six CC P2B NNLO
+  configurations failed, in their histogram files only (xsct files agree to
+  0.0e+00). Shifts ≤ 0.0065 of the bin errors (p2b_cc e⁺ largest,
+  p2b_nc_cc_includeZ 5e-5). Regenerated with `run_validation.py --generate`
+  for p2b_cc_Q_30_x_0.1_{,noscaleuncert_,positron_,neutrino_,
+  neutrino_positron_} and p2b_nc_cc_includeZ_Q_30_x_0.1_ (AK approved);
+  full ctest 82/82.
+
+### Why the checks of 26 and 29 Sep missed it (correction)
+
+- The 29 Sep pointwise entry says the Z/W ingredients of MATFOR agree point by
+  point with an independent implementation. That overstated it: the
+  identical-quark interference classes were only compared with DISENT's own
+  expressions, which were added to the other code because it lacks them (a
+  circular check), and the class list (EXX, EXY) was never enumerated against
+  all four attachments (xx, xy, yx, yy) and all incoming flavours. `num4q.py`
+  checked the existing classes, not completeness.
+- The O(αs²) comparisons with NNLOJET (CC e⁻, e⁺; χ² consistent) could not see
+  it: the term changes the integrated distributions of the validation runs by
+  5e-6 (e⁻) to 3e-5 (e⁺) of the total, O(1e-4) of the O(αs²) part, while the
+  NNLOJET comparison resolves 0.2–0.6% per bin. Its effect on CC P2B results
+  of 2.2.0 is therefore negligible, but it was a real omission.
+- The independent check now is dis31's me31 (MCFM crossed, full amplitude
+  without a class decomposition): equal to the fixed MATFOR to 1e-12.
