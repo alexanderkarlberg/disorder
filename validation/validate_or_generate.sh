@@ -14,7 +14,7 @@
 # cmake needs to find hoppet, lhapdf and fastjet. If they are not in
 # standard paths, pass the extra flags in EXTRA_CMAKEFLAGS, e.g.
 #   EXTRA_CMAKEFLAGS="-DHOPPET_CONFIG=/path/to/hoppet-config" ./validate_or_generate.sh validate
-CMAKEFLAGS="-DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis.f ${EXTRA_CMAKEFLAGS}"
+CMAKEFLAGS="-DNEEDS_FASTJET=ON -DANALYSIS=exclusive_lab_frame_analysis.f -DCOMPILE_TESTS=ON ${EXTRA_CMAKEFLAGS}"
 
 # Some colours for printout
 RED='\033[0;31m'

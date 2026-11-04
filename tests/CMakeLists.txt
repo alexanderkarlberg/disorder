@@ -1,6 +1,13 @@
 # Unit tests. Each is a small Fortran program linked against the
 # disorder physics code (disorder_core) and the no-op analysis; it
-# exits non-zero if any of its checks fail.
+# exits non-zero if any of its checks fail. They are only built and
+# registered unless -DCOMPILE_TESTS=OFF.
+if(COMPILE_TESTS)
+
+# The test programs are built without LTO, so that they link quickly.
+# This only affects this directory: disorder itself keeps -flto.
+string(REPLACE "-flto" "" CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
+
 add_library(disorder_test_support OBJECT
   test_utils.f90 ${PROJECT_SOURCE_DIR}/analysis/simple_analysis.f)
 target_include_directories(disorder_test_support PUBLIC ${disorder_INCLUDES})
@@ -85,6 +92,8 @@ foreach(case ${me_cases})
   add_test(NAME unit_subtraction_${name} COMMAND test_subtraction ${me_common} ${args})
   set_tests_properties(unit_subtraction_${name} PROPERTIES LABELS "unit")
 endforeach()
+
+endif() # COMPILE_TESTS
 
 # Combinations that disorder must refuse to run. The guards in
 # set_parameters use `stop`, which exits with status 0, so the tests
