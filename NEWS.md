@@ -1,6 +1,17 @@
 # disorder news
 
-Release notes for each version, newest first. The detailed list of changes since 1.0.0, with pointers into the code, is in [docs/release-notes.md](docs/release-notes.md).
+Release notes for each version, newest first.
+
+## v2.2.1 (2026-11-04)
+
+### Physics
+
+- **CC four-parton matrix element: a missing identical-quark term.**
+  DISENT's CC `MATFOR` (2.2.0) left out the interference of the two
+  assignments with the W on the q q̄ pair, which arises for incoming partons
+  the W cannot couple to (for W⁻: d, s, ū, c̄; e.g. d → d d ū). It is now
+  included. With `-p2b -CC` at O(αs²), distributions change at the per-mille
+  level of their O(αs²) 2+1 part; total cross sections and NC are unchanged.
 
 ## v2.2.0 (2026-09-30)
 
